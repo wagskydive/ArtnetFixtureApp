@@ -153,6 +153,7 @@ Validate system and prepare for production deployment.
 - [ ] Create developer guide and code comments
 - [x] Add EditMode unit tests for core DMX/ArtNet/output/UI script logic
 - [x] Add EditMode unit tests for media USB/StreamingAssets path resolution logic
+- [x] Configure Unity EditMode CI workflow (`.github/workflows/unity-editmode-tests.yml`) for licensed runner execution
 
 **Acceptance Criteria:**
 - Fixture passes all stress tests
