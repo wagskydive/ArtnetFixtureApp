@@ -151,6 +151,7 @@ Validate system and prepare for production deployment.
 - [ ] Verify pattern responsiveness and accuracy
 - [ ] Document DMX personality
 - [ ] Create developer guide and code comments
+- [x] Add EditMode unit tests for core DMX/ArtNet/output/UI script logic
 
 **Acceptance Criteria:**
 - Fixture passes all stress tests

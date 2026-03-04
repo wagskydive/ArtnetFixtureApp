@@ -10,6 +10,8 @@ public class UI_DmxSettings : MonoBehaviour
     private int currentDmxChannel = 1;
     private int currentDmxUniverse = 1;
 
+    internal IShaderGlobalIntSetter ShaderGlobalIntSetter = new UnityShaderGlobalIntSetter();
+
     public int CurrentDmxChannel
     {
         get => currentDmxChannel;
@@ -71,6 +73,19 @@ public class UI_DmxSettings : MonoBehaviour
 
     private void OnPatternTypeChanged()
     {
-        Shader.SetGlobalInt("_PatternType", currentPatternType);
+        ShaderGlobalIntSetter.SetGlobalInt("_PatternType", currentPatternType);
+    }
+}
+
+internal interface IShaderGlobalIntSetter
+{
+    void SetGlobalInt(string propertyName, int value);
+}
+
+internal class UnityShaderGlobalIntSetter : IShaderGlobalIntSetter
+{
+    public void SetGlobalInt(string propertyName, int value)
+    {
+        Shader.SetGlobalInt(propertyName, value);
     }
 }
