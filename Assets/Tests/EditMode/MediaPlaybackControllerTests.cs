@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using NUnit.Framework;
 using UnityEngine;
@@ -80,10 +81,73 @@ public class MediaPlaybackControllerTests
         Object.DestroyImmediate(receiverGo);
     }
 
+    [Test]
+    public void TryLoadSelectedMedia_PrioritizesUsbPath_WhenFileExistsInUsbAndStreamingAssets()
+    {
+        var controllerGo = new GameObject("controller");
+        var controller = controllerGo.AddComponent<MediaPlaybackController>();
+        var fakeBackend = new FakePlaybackBackend();
+
+        string uniqueFileName = $"usb-priority-{System.Guid.NewGuid():N}.mp4";
+        string usbRoot = Path.Combine(Path.GetTempPath(), "ArtnetFixtureTests", System.Guid.NewGuid().ToString("N"));
+        string usbPath = Path.Combine(usbRoot, uniqueFileName);
+        string streamingPath = Path.Combine(Application.streamingAssetsPath, uniqueFileName);
+
+        Directory.CreateDirectory(usbRoot);
+        Directory.CreateDirectory(Application.streamingAssetsPath);
+        File.WriteAllText(usbPath, "usb");
+        File.WriteAllText(streamingPath, "streaming");
+
+        SetPrivateField(controller, "mediaFiles", new List<string> { uniqueFileName });
+        SetPrivateField(controller, "usbMediaDirectory", usbRoot);
+        controller.PlaybackBackend = fakeBackend;
+
+        InvokePrivateMethod(controller, "TryLoadSelectedMedia", 0);
+
+        Assert.That(fakeBackend.LastUrl, Is.EqualTo(usbPath));
+
+        File.Delete(usbPath);
+        File.Delete(streamingPath);
+        Object.DestroyImmediate(controllerGo);
+    }
+
+    [Test]
+    public void TryLoadSelectedMedia_FallsBackToStreamingAssets_WhenUsbFileMissing()
+    {
+        var controllerGo = new GameObject("controller");
+        var controller = controllerGo.AddComponent<MediaPlaybackController>();
+        var fakeBackend = new FakePlaybackBackend();
+
+        string uniqueFileName = $"streaming-fallback-{System.Guid.NewGuid():N}.mp4";
+        string usbRoot = Path.Combine(Path.GetTempPath(), "ArtnetFixtureTests", System.Guid.NewGuid().ToString("N"));
+        string streamingPath = Path.Combine(Application.streamingAssetsPath, uniqueFileName);
+
+        Directory.CreateDirectory(usbRoot);
+        Directory.CreateDirectory(Application.streamingAssetsPath);
+        File.WriteAllText(streamingPath, "streaming");
+
+        SetPrivateField(controller, "mediaFiles", new List<string> { uniqueFileName });
+        SetPrivateField(controller, "usbMediaDirectory", usbRoot);
+        controller.PlaybackBackend = fakeBackend;
+
+        InvokePrivateMethod(controller, "TryLoadSelectedMedia", 0);
+
+        Assert.That(fakeBackend.LastUrl, Is.EqualTo(streamingPath));
+
+        File.Delete(streamingPath);
+        Object.DestroyImmediate(controllerGo);
+    }
+
     private static void SetPrivateField(object target, string fieldName, object value)
     {
         var field = target.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
         field.SetValue(target, value);
+    }
+
+    private static void InvokePrivateMethod(object target, string methodName, params object[] args)
+    {
+        var method = target.GetType().GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance);
+        method.Invoke(target, args);
     }
 
     private class FakePlaybackBackend : IVideoPlaybackBackend

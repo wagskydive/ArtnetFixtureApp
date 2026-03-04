@@ -7,12 +7,12 @@ T7.4 - Fix UI_DmxSettings compile error from invalid [Header] attribute usage
 - [ ] Tests Passed
 - [x] Documentation Written
 
-T7.5 - Next run: execute Unity compile/EditMode checks for UI_DmxSettings regression coverage
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+T7.5 - Execute Unity compile/EditMode checks for UI_DmxSettings regression coverage
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
 
 
 T1.3 - Implement zero-allocation DMX buffer (DmxBuffer.cs)
@@ -232,14 +232,21 @@ T8.1 - Implement Unity VideoPlayer scaffold and DMX media transport controls
 - [x] Documentation Written
 
 
-T8.2 - Next run: add USB/StreamingAssets integration tests for MediaPlaybackController
+T8.2 - Add USB/StreamingAssets integration tests for MediaPlaybackController
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+
+T8.3 - Wire MediaPlaybackController into scene and verify VideoPlayer bindings on HY300
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
 - [ ] Tests Passed
 - [ ] Documentation Written
 
-T8.3 - Next run: wire MediaPlaybackController into scene and verify VideoPlayer bindings on HY300
+T8.4 - Next run: execute Unity EditMode suite in CI to validate T8.2 media path tests
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
