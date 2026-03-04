@@ -1,5 +1,19 @@
 # Tickets
 
+T3.7 - Enforce memory budget constraints for media playback selection
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+
+T3.8 - Next run: execute Unity EditMode suite to validate media budget enforcement tests
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 T7.4 - Fix UI_DmxSettings compile error from invalid [Header] attribute usage
 - [x] Started
 - [x] Behavior Written
