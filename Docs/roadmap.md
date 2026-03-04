@@ -65,12 +65,12 @@ Implement low-GPU procedural patterns with DMX control.
 Enable video and image playback controlled by DMX.
 
 **Tasks:**
-- [ ] Integrate Unity VideoPlayer for MP4 (H.264, 720p)
-- [ ] Load media from USB / StreamingAssets
-- [ ] DMX channel mapping for:
+- [x] Integrate Unity VideoPlayer scaffold for MP4 (H.264, 720p)
+- [x] Load media from USB / StreamingAssets via prioritized file lookup
+- [x] DMX channel mapping for:
     - Media select
     - Play / Pause / Stop
-- [ ] Looping support
+- [x] Looping support
 - [ ] Memory budget enforcement (<50MB textures)
 - [ ] Optionally prepare for NAS streaming (HTTP, later phase)
 - [ ] Test with HY300 projector for performance and stability

@@ -136,41 +136,47 @@ T2.6 - Implement thermal management for high-load scenarios
 [ ] Tests Passed
 [x] Documentation Written
 T3.1 - Integrate VideoPlayer component
-[ ] Started
-[ ] Behavior Written
-[ ] Code Written
+[x] Started
+[x] Behavior Written
+[x] Code Written
 [ ] Tests Passed
-[ ] Documentation Written
+[x] Documentation Written
+
 T3.2 - Load media from USB storage
-[ ] Started
-[ ] Behavior Written
-[ ] Code Written
+[x] Started
+[x] Behavior Written
+[x] Code Written
 [ ] Tests Passed
-[ ] Documentation Written
+[x] Documentation Written
+
 T3.3 - Load media from StreamingAssets
-[ ] Started
-[ ] Behavior Written
-[ ] Code Written
+[x] Started
+[x] Behavior Written
+[x] Code Written
 [ ] Tests Passed
-[ ] Documentation Written
+[x] Documentation Written
+
 T3.4 - Implement DMX mapping for media selection
-[ ] Started
-[ ] Behavior Written
-[ ] Code Written
+[x] Started
+[x] Behavior Written
+[x] Code Written
 [ ] Tests Passed
-[ ] Documentation Written
+[x] Documentation Written
+
 T3.5 - Implement DMX mapping for play/pause controls
-[ ] Started
-[ ] Behavior Written
-[ ] Code Written
+[x] Started
+[x] Behavior Written
+[x] Code Written
 [ ] Tests Passed
-[ ] Documentation Written
+[x] Documentation Written
+
 T3.6 - Add looping support for media playback
-[ ] Started
-[ ] Behavior Written
-[ ] Code Written
+[x] Started
+[x] Behavior Written
+[x] Code Written
 [ ] Tests Passed
-[ ] Documentation Written
+[x] Documentation Written
+
 T3.7 - Enforce memory budget constraints
 [ ] Started
 [ ] Behavior Written
@@ -197,12 +203,12 @@ T7.1 - Add EditMode unit tests for DMX, ArtNet validation, output generators, an
 - [ ] Tests Passed
 - [x] Documentation Written
 
-T7.2 - Next run: integrate Unity Test Runner CI execution and coverage reporting
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+T7.2 - Integrate Unity Test Runner CI execution and coverage reporting
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
 
 T7.1a - Fix EditMode test assembly references and shader setter visibility for UI DMX settings tests
 - [x] Started
@@ -211,14 +217,29 @@ T7.1a - Fix EditMode test assembly references and shader setter visibility for U
 - [ ] Tests Passed
 - [x] Documentation Written
 
-T7.3 - Next run: execute Unity EditMode suite in CI or local Unity runner to validate assembly fixes
+T7.3 - Execute Unity EditMode suite in CI or local Unity runner to validate assembly fixes
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+
+T8.1 - Implement Unity VideoPlayer scaffold and DMX media transport controls
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+
+
+T8.2 - Next run: add USB/StreamingAssets integration tests for MediaPlaybackController
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
 - [ ] Tests Passed
 - [ ] Documentation Written
 
-T8.1 - Next run: implement Unity VideoPlayer scaffold and DMX media transport controls
+T8.3 - Next run: wire MediaPlaybackController into scene and verify VideoPlayer bindings on HY300
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
