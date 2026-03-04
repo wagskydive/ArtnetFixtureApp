@@ -1,5 +1,19 @@
 # Tickets
 
+T7.4 - Fix UI_DmxSettings compile error from invalid [Header] attribute usage
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+
+T7.5 - Next run: execute Unity compile/EditMode checks for UI_DmxSettings regression coverage
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 
 T1.3 - Implement zero-allocation DMX buffer (DmxBuffer.cs)
 [ ] Started
