@@ -10,7 +10,7 @@ public class UI_DmxSettings : MonoBehaviour
     private int currentDmxChannel = 1;
     private int currentDmxUniverse = 1;
 
-    internal IShaderGlobalIntSetter ShaderGlobalIntSetter = new UnityShaderGlobalIntSetter();
+    public IShaderGlobalIntSetter ShaderGlobalIntSetter { get; set; } = new UnityShaderGlobalIntSetter();
 
     public int CurrentDmxChannel
     {
@@ -77,12 +77,12 @@ public class UI_DmxSettings : MonoBehaviour
     }
 }
 
-internal interface IShaderGlobalIntSetter
+public interface IShaderGlobalIntSetter
 {
     void SetGlobalInt(string propertyName, int value);
 }
 
-internal class UnityShaderGlobalIntSetter : IShaderGlobalIntSetter
+public class UnityShaderGlobalIntSetter : IShaderGlobalIntSetter
 {
     public void SetGlobalInt(string propertyName, int value)
     {

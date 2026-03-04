@@ -2,6 +2,7 @@
   "name": "ArtnetFixtureApp.EditModeTests",
   "rootNamespace": "",
   "references": [
+    "Assembly-CSharp",
     "UnityEngine.TestRunner",
     "UnityEditor.TestRunner"
   ],
