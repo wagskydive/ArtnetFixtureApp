@@ -189,3 +189,17 @@ T7.2 - Next run: integrate Unity Test Runner CI execution and coverage reporting
 - [ ] Code Written
 - [ ] Tests Passed
 - [ ] Documentation Written
+
+T7.1a - Fix EditMode test assembly references and shader setter visibility for UI DMX settings tests
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+
+T7.3 - Next run: execute Unity EditMode suite in CI or local Unity runner to validate assembly fixes
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
