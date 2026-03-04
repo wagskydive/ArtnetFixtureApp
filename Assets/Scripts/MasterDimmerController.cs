@@ -2,12 +2,17 @@ using UnityEngine;
 
 public class MasterDimmerController : MonoBehaviour
 {
-    [SerializeField] private DmxBuffer dmxBuffer;
+    [SerializeField] private ArtNetReceiver artNetReceiver;
+
+    public float CurrentMasterNormalized { get; private set; } = 1f;
 
     void Update()
     {
-        // Simple dimmer control using channel 1 (brightness)
-        float brightness = Mathf.PingPong(Time.time * 0.5f, 1.0f);
-        
+        if (artNetReceiver == null || artNetReceiver.DmxBuffer == null)
+        {
+            return;
+        }
+
+        CurrentMasterNormalized = artNetReceiver.DmxBuffer.GetChannel1Based(1) / 255f;
     }
 }

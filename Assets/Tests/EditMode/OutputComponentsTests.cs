@@ -80,6 +80,33 @@ public class OutputComponentsTests
         Object.DestroyImmediate(go);
     }
 
+    [Test]
+    public void ProjectorLightOutput_Update_ReducesIntensityAtSustainedHighLoad()
+    {
+        var receiverGo = new GameObject("receiver");
+        var receiver = receiverGo.AddComponent<ArtNetReceiver>();
+        receiver.DmxBuffer = new DmxBuffer();
+        receiver.DmxBuffer.WriteFrame(new byte[] { 255, 255, 255, 255 }, 4);
+        receiver.DmxBuffer.SwapIfNewFrame();
+
+        var outputGo = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        var output = outputGo.AddComponent<ProjectorLightOutput>();
+
+        SetPrivateField(output, "artNetReceiver", receiver);
+        SetPrivateField(output, "outputRenderer", outputGo.GetComponent<Renderer>());
+        SetPrivateField(output, "thermalRampPerSecond", 30f);
+        SetPrivateField(output, "thermalMinimumScale", 0.8f);
+
+        outputGo.SendMessage("Awake");
+        outputGo.SendMessage("Update");
+
+        var material = outputGo.GetComponent<Renderer>().material;
+        Assert.That(material.GetFloat("_Intensity"), Is.EqualTo(0.8f).Within(0.001f));
+
+        Object.DestroyImmediate(receiverGo);
+        Object.DestroyImmediate(outputGo);
+    }
+
     private static void SetPrivateField(object target, string fieldName, object value)
     {
         var field = target.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);

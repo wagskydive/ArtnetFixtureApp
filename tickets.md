@@ -28,11 +28,11 @@ T1.4 - Implement ArtNet Receiver scaffold (ArtNetReceiver.cs)
 [ ] Tests Passed
 [ ] Documentation Written
 T1.5 - Map DMX channels 1–4 → Master Dimmer
-[ ] Started
-[ ] Behavior Written
-[ ] Code Written
+[x] Started
+[x] Behavior Written
+[x] Code Written
 [ ] Tests Passed
-[ ] Documentation Written
+[x] Documentation Written
 T1.6 - Render full-screen quad (1280x720 resolution)
 [ ] Started
 [ ] Behavior Written
@@ -40,11 +40,11 @@ T1.6 - Render full-screen quad (1280x720 resolution)
 [ ] Tests Passed
 [ ] Documentation Written
 T1.7 - Enforce fixed frame rate (30 FPS) and disable VSync
-[ ] Started
-[ ] Behavior Written
-[ ] Code Written
+[x] Started
+[x] Behavior Written
+[x] Code Written
 [ ] Tests Passed
-[ ] Documentation Written
+[x] Documentation Written
 T1.8 - Test stability on HY300 hardware platform
 [ ] Started
 [ ] Behavior Written
@@ -130,11 +130,11 @@ T2.5 - Profile and test performance on target hardware
 [ ] Tests Passed
 [ ] Documentation Written
 T2.6 - Implement thermal management for high-load scenarios
-[ ] Started
-[ ] Behavior Written
-[ ] Code Written
+[x] Started
+[x] Behavior Written
+[x] Code Written
 [ ] Tests Passed
-[ ] Documentation Written
+[x] Documentation Written
 T3.1 - Integrate VideoPlayer component
 [ ] Started
 [ ] Behavior Written
@@ -212,6 +212,13 @@ T7.1a - Fix EditMode test assembly references and shader setter visibility for U
 - [x] Documentation Written
 
 T7.3 - Next run: execute Unity EditMode suite in CI or local Unity runner to validate assembly fixes
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T8.1 - Next run: implement Unity VideoPlayer scaffold and DMX media transport controls
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written

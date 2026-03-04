@@ -18,7 +18,7 @@ Establish the basic fixture pipeline: ArtNet → DMX → RGB output.
 - [x] Implement ArtNet Receiver scaffold (`ArtNetReceiver.cs`)
 - [x] Map DMX channels 1–4 → Master Dimmer + RGB
 - [ ] Render full-screen quad to 1280x720 RenderTexture
-- [ ] Enforce fixed frame rate (30 FPS) and disable VSync
+- [x] Enforce fixed frame rate (30 FPS) and disable VSync
 - [ ] Test stability on HY300
 
 **Acceptance Criteria:**
@@ -50,7 +50,7 @@ Implement low-GPU procedural patterns with DMX control.
     - Strobe
 - [x] Optimize shader for Mali/low-end GPUs
 - [ ] Profile and test performance on HY300
-- [ ] Implement pattern intensity scaling for thermal protection
+- [x] Implement pattern intensity scaling for thermal protection
 
 **Acceptance Criteria:**
 - All patterns render smoothly at 30 FPS
