@@ -138,6 +138,51 @@ public class MediaPlaybackControllerTests
         Object.DestroyImmediate(controllerGo);
     }
 
+    [Test]
+    public void IsMediaWithinBudget_ReturnsFalse_WhenFileExceedsBudget()
+    {
+        var controllerGo = new GameObject("controller");
+        var controller = controllerGo.AddComponent<MediaPlaybackController>();
+
+        string mediaPath = Path.Combine(Path.GetTempPath(), $"too-large-{System.Guid.NewGuid():N}.mp4");
+        File.WriteAllBytes(mediaPath, new byte[2048]);
+        SetPrivateField(controller, "maxMediaFileSizeMb", 0);
+
+        bool withinBudget = controller.IsMediaWithinBudget(mediaPath);
+
+        Assert.That(withinBudget, Is.False);
+
+        File.Delete(mediaPath);
+        Object.DestroyImmediate(controllerGo);
+    }
+
+    [Test]
+    public void TryLoadSelectedMedia_DoesNotLoad_WhenMediaExceedsBudget()
+    {
+        var controllerGo = new GameObject("controller");
+        var controller = controllerGo.AddComponent<MediaPlaybackController>();
+        var fakeBackend = new FakePlaybackBackend();
+
+        string uniqueFileName = $"over-budget-{System.Guid.NewGuid():N}.mp4";
+        string usbRoot = Path.Combine(Path.GetTempPath(), "ArtnetFixtureTests", System.Guid.NewGuid().ToString("N"));
+        string usbPath = Path.Combine(usbRoot, uniqueFileName);
+
+        Directory.CreateDirectory(usbRoot);
+        File.WriteAllBytes(usbPath, new byte[2048]);
+
+        SetPrivateField(controller, "mediaFiles", new List<string> { uniqueFileName });
+        SetPrivateField(controller, "usbMediaDirectory", usbRoot);
+        SetPrivateField(controller, "maxMediaFileSizeMb", 0);
+        controller.PlaybackBackend = fakeBackend;
+
+        InvokePrivateMethod(controller, "TryLoadSelectedMedia", 0);
+
+        Assert.That(fakeBackend.LastUrl, Is.Null);
+
+        File.Delete(usbPath);
+        Object.DestroyImmediate(controllerGo);
+    }
+
     private static void SetPrivateField(object target, string fieldName, object value)
     {
         var field = target.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);

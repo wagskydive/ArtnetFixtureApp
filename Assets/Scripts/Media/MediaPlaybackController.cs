@@ -10,6 +10,7 @@ public class MediaPlaybackController : MonoBehaviour
     [SerializeField] private VideoPlayer videoPlayer;
     [SerializeField] private int dmxStartChannel = 9;
     [SerializeField] private string usbMediaDirectory = "/storage/emulated/0/ArtnetFixture/media";
+    [SerializeField] [Min(1)] private int maxMediaFileSizeMb = 50;
     [SerializeField] private List<string> mediaFiles = new List<string>();
 
     private IVideoPlaybackBackend _playbackBackend;
@@ -92,18 +93,44 @@ public class MediaPlaybackController : MonoBehaviour
 
         if (File.Exists(usbPath))
         {
-            _playbackBackend.SetUrl(usbPath);
+            if (IsMediaWithinBudget(usbPath))
+            {
+                _playbackBackend.SetUrl(usbPath);
+            }
+
             return;
         }
 
         string streamingPath = Path.Combine(Application.streamingAssetsPath, fileName);
         if (File.Exists(streamingPath))
         {
-            _playbackBackend.SetUrl(streamingPath);
+            if (IsMediaWithinBudget(streamingPath))
+            {
+                _playbackBackend.SetUrl(streamingPath);
+            }
+
             return;
         }
 
         Debug.LogWarning($"Media file not found in USB or StreamingAssets: {fileName}");
+    }
+
+    public bool IsMediaWithinBudget(string mediaPath)
+    {
+        if (string.IsNullOrWhiteSpace(mediaPath) || !File.Exists(mediaPath))
+        {
+            return false;
+        }
+
+        var fileInfo = new FileInfo(mediaPath);
+        long maxBytes = (long)maxMediaFileSizeMb * 1024L * 1024L;
+        if (fileInfo.Length <= maxBytes)
+        {
+            return true;
+        }
+
+        Debug.LogWarning($"Media file exceeds configured budget ({maxMediaFileSizeMb} MB): {mediaPath}");
+        return false;
     }
 
     private static TransportCommand ResolveTransport(byte dmxValue)

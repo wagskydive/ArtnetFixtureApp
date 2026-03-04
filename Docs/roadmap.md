@@ -71,7 +71,7 @@ Enable video and image playback controlled by DMX.
     - Media select
     - Play / Pause / Stop
 - [x] Looping support
-- [ ] Memory budget enforcement (<50MB textures)
+- [x] Memory budget enforcement (<50MB textures)
 - [ ] Optionally prepare for NAS streaming (HTTP, later phase)
 - [ ] Test with HY300 projector for performance and stability
 
