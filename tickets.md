@@ -175,3 +175,17 @@ T2.5a - Run on-device profiling pass on HY300 for branchless shader variant
 [ ] Code Written
 [ ] Tests Passed
 [ ] Documentation Written
+
+T7.1 - Add EditMode unit tests for DMX, ArtNet validation, output generators, and UI DMX settings
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+
+T7.2 - Next run: integrate Unity Test Runner CI execution and coverage reporting
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
