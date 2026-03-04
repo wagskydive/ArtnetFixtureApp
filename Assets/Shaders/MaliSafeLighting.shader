@@ -51,44 +51,35 @@ Shader "Custom/MaliSafeLighting"
 
             fixed4 frag (v2f i) : SV_Target
             {
+                float safeSize = max(_Size, 0.01);
                 float time = _Time.y * _Speed;
                 float2 centeredUv = (i.uv - 0.5) * 2.0;
                 float radialDistance = length(centeredUv);
 
-                float3 patternColor = _Color.rgb;
-                float brightness = 1.0;
+                // Build branchless pattern masks to avoid divergent control flow on mobile GPUs.
+                float pattern = (float)_PatternType;
+                float solidMask = 1.0 - step(0.5, abs(pattern - 0.0));
+                float linearMask = 1.0 - step(0.5, abs(pattern - 1.0));
+                float radialMask = 1.0 - step(0.5, abs(pattern - 2.0));
+                float pulseMask = 1.0 - step(0.5, abs(pattern - 3.0));
+                float barsMask = 1.0 - step(0.5, abs(pattern - 4.0));
+                float beamMask = 1.0 - step(0.5, abs(pattern - 5.0));
 
-                // 0 - Solid color
-                if (_PatternType == 1)
-                {
-                    // 1 - Linear gradient
-                    float gradient = saturate((i.uv.x - 0.5) * _Size + 0.5);
-                    brightness = gradient;
-                }
-                else if (_PatternType == 2)
-                {
-                    // 2 - Radial gradient
-                    brightness = saturate(1.0 - radialDistance * _Size);
-                }
-                else if (_PatternType == 3)
-                {
-                    // 3 - Pulse
-                    brightness = 0.5 + 0.5 * sin(time);
-                }
-                else if (_PatternType == 4)
-                {
-                    // 4 - Moving bars
-                    float bars = frac(i.uv.x * max(_Size, 0.01) * 8.0 + time);
-                    brightness = step(0.5, bars);
-                }
-                else if (_PatternType == 5)
-                {
-                    // 5 - Soft edge beam
-                    float beam = 1.0 - abs(centeredUv.x) * _Size;
-                    brightness = smoothstep(0.0, 1.0, beam);
-                }
+                float linearBrightness = saturate((i.uv.x - 0.5) * safeSize + 0.5);
+                float radialBrightness = saturate(1.0 - radialDistance * safeSize);
+                float pulseBrightness = 0.5 + 0.5 * sin(time);
+                float barsBrightness = step(0.5, frac(i.uv.x * safeSize * 8.0 + time));
+                float beamBrightness = smoothstep(0.0, 1.0, 1.0 - abs(centeredUv.x) * safeSize);
 
-                return fixed4(patternColor * brightness * _Intensity * _StrobeGate, 1);
+                float brightness =
+                    solidMask +
+                    (linearMask * linearBrightness) +
+                    (radialMask * radialBrightness) +
+                    (pulseMask * pulseBrightness) +
+                    (barsMask * barsBrightness) +
+                    (beamMask * beamBrightness);
+
+                return fixed4(_Color.rgb * brightness * _Intensity * _StrobeGate, 1);
             }
             ENDCG
         }

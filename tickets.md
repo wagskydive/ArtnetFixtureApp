@@ -104,11 +104,11 @@ T2.3d - Strobe mapping (DMX channel 8)
 [ ] Tests Passed
 [x] Documentation Written
 T2.4 - Optimize shader for Mali/low-end GPUs
-[ ] Started
-[ ] Behavior Written
-[ ] Code Written
+[x] Started
+[x] Behavior Written
+[x] Code Written
 [ ] Tests Passed
-[ ] Documentation Written
+[x] Documentation Written
 T2.5 - Profile and test performance on target hardware
 [ ] Started
 [ ] Behavior Written
@@ -164,6 +164,12 @@ T3.7 - Enforce memory budget constraints
 [ ] Tests Passed
 [ ] Documentation Written
 T2.4a - Profile shader instruction count and simplify heavy branches on HY300
+[ ] Started
+[ ] Behavior Written
+[ ] Code Written
+[ ] Tests Passed
+[ ] Documentation Written
+T2.5a - Run on-device profiling pass on HY300 for branchless shader variant
 [ ] Started
 [ ] Behavior Written
 [ ] Code Written

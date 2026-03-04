@@ -48,7 +48,7 @@ Implement low-GPU procedural patterns with DMX control.
     - Speed
     - Size
     - Strobe
-- [ ] Optimize shader for Mali/low-end GPUs
+- [x] Optimize shader for Mali/low-end GPUs
 - [ ] Profile and test performance on HY300
 - [ ] Implement pattern intensity scaling for thermal protection
 
