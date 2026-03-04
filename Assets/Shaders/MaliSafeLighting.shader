@@ -7,6 +7,7 @@ Shader "Custom/MaliSafeLighting"
         _PatternType ("Pattern Type", Int) = 0
         _Speed ("Speed", Float) = 1
         _Size ("Size", Float) = 1
+        _StrobeGate ("Strobe Gate", Range(0,1)) = 1
     }
 
     SubShader
@@ -38,6 +39,7 @@ Shader "Custom/MaliSafeLighting"
             int _PatternType;
             float _Speed;
             float _Size;
+            float _StrobeGate;
 
             v2f vert (appdata v)
             {
@@ -49,26 +51,46 @@ Shader "Custom/MaliSafeLighting"
 
             fixed4 frag (v2f i) : SV_Target
             {
+                float time = _Time.y * _Speed;
+                float2 centeredUv = (i.uv - 0.5) * 2.0;
+                float radialDistance = length(centeredUv);
+
+                float3 patternColor = _Color.rgb;
                 float brightness = 1.0;
 
-                if (_PatternType == 1) // Pulse pattern
+                // 0 - Solid color
+                if (_PatternType == 1)
                 {
-                    brightness = abs(sin(_Time.y * _Speed));
+                    // 1 - Linear gradient
+                    float gradient = saturate((i.uv.x - 0.5) * _Size + 0.5);
+                    brightness = gradient;
                 }
-                else if (_PatternType == 2) // Color shift
+                else if (_PatternType == 2)
                 {
-                    float t = _Time.y * _Speed;
-                    float r = 0.5f + 0.5f * sin(t);
-                    float g = 0.5f + 0.5f * cos(t);
-                    float b = 0.5f;
-                    // Apply to color channel
-                    brightness = 1.0;
-                    // ... additional pattern logic
+                    // 2 - Radial gradient
+                    brightness = saturate(1.0 - radialDistance * _Size);
                 }
-                return fixed4(_Color * brightness * _Intensity, 1);
+                else if (_PatternType == 3)
+                {
+                    // 3 - Pulse
+                    brightness = 0.5 + 0.5 * sin(time);
+                }
+                else if (_PatternType == 4)
+                {
+                    // 4 - Moving bars
+                    float bars = frac(i.uv.x * max(_Size, 0.01) * 8.0 + time);
+                    brightness = step(0.5, bars);
+                }
+                else if (_PatternType == 5)
+                {
+                    // 5 - Soft edge beam
+                    float beam = 1.0 - abs(centeredUv.x) * _Size;
+                    brightness = smoothstep(0.0, 1.0, beam);
+                }
+
+                return fixed4(patternColor * brightness * _Intensity * _StrobeGate, 1);
             }
             ENDCG
         }
     }
 }
-

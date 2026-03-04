@@ -2,18 +2,34 @@ using UnityEngine;
 
 public class ProjectorLightOutput : MonoBehaviour
 {
-    [SerializeField] private DmxBuffer dmxBuffer; // Reference to DmxBuffer
+    [SerializeField] private ArtNetReceiver artNetReceiver;
+    [SerializeField] private Renderer outputRenderer;
+
+    private Material _outputMaterial;
+
+    private void Awake()
+    {
+        if (outputRenderer != null)
+        {
+            _outputMaterial = outputRenderer.material;
+        }
+    }
 
     void Update()
     {
-        // Get RGB values from DMX channels (2 = Red, 3 = Green, 4 = Blue)
-        byte r = dmxBuffer.GetChannel(2);
-        byte g = dmxBuffer.GetChannel(3);
-        byte b = dmxBuffer.GetChannel(4);
+        if (artNetReceiver == null || artNetReceiver.DmxBuffer == null || _outputMaterial == null)
+        {
+            return;
+        }
 
-        // Apply to a shader (e.g., a simple unlit shader)
-        Shader.SetGlobalFloat("_ColorR", r);
-        Shader.SetGlobalFloat("_ColorG", g);
-        Shader.SetGlobalFloat("_ColorB", b);
+        DmxBuffer dmxBuffer = artNetReceiver.DmxBuffer;
+
+        float dimmer = dmxBuffer.GetChannel1Based(1) / 255f;
+        float r = dmxBuffer.GetChannel1Based(2) / 255f;
+        float g = dmxBuffer.GetChannel1Based(3) / 255f;
+        float b = dmxBuffer.GetChannel1Based(4) / 255f;
+
+        _outputMaterial.SetColor("_Color", new Color(r, g, b, 1f));
+        _outputMaterial.SetFloat("_Intensity", dimmer);
     }
 }

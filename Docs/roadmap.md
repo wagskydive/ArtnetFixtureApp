@@ -14,9 +14,9 @@ Establish the basic fixture pipeline: ArtNet → DMX → RGB output.
 **Tasks:**
 - [ ] Setup Unity project (Built-in RP, ARM64, IL2CPP, High Stripping)
 - [ ] Configure Android build settings (API 29+, 30 FPS, 720p internal resolution)
-- [ ] Implement zero-allocation DMX buffer (`DmxBuffer.cs`)
-- [ ] Implement ArtNet Receiver scaffold (`ArtNetReceiver.cs`)
-- [ ] Map DMX channels 1–4 → Master Dimmer + RGB
+- [x] Implement zero-allocation DMX buffer (`DmxBuffer.cs`)
+- [x] Implement ArtNet Receiver scaffold (`ArtNetReceiver.cs`)
+- [x] Map DMX channels 1–4 → Master Dimmer + RGB
 - [ ] Render full-screen quad to 1280x720 RenderTexture
 - [ ] Enforce fixed frame rate (30 FPS) and disable VSync
 - [ ] Test stability on HY300
@@ -35,15 +35,15 @@ Establish the basic fixture pipeline: ArtNet → DMX → RGB output.
 Implement low-GPU procedural patterns with DMX control.
 
 **Tasks:**
-- [ ] Create unified shader (`MaliSafeLighting.shader`) with pattern selection
-- [ ] Implement safe patterns:
+- [x] Create unified shader (`MaliSafeLighting.shader`) with pattern selection
+- [x] Implement safe patterns:
     - Solid color
     - Linear gradient
     - Radial gradient
     - Pulse
     - Moving bars
     - Soft edge beam
-- [ ] Map DMX channels 5–8 to:
+- [x] Map DMX channels 5–8 to:
     - Pattern select
     - Speed
     - Size

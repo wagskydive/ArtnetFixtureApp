@@ -71,7 +71,6 @@ public class UI_DmxSettings : MonoBehaviour
 
     private void OnPatternTypeChanged()
     {
-        Shader.SetInteger("_PatternType", currentPatternType);
+        Shader.SetGlobalInt("_PatternType", currentPatternType);
     }
 }
-
