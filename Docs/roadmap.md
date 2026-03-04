@@ -152,6 +152,7 @@ Validate system and prepare for production deployment.
 - [ ] Document DMX personality
 - [ ] Create developer guide and code comments
 - [x] Add EditMode unit tests for core DMX/ArtNet/output/UI script logic
+- [x] Add EditMode unit tests for media USB/StreamingAssets path resolution logic
 
 **Acceptance Criteria:**
 - Fixture passes all stress tests
