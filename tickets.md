@@ -8,11 +8,12 @@ T3.7 - Enforce memory budget constraints for media playback selection
 - [x] Documentation Written
 
 T3.8 - Next run: execute Unity EditMode suite to validate media budget enforcement tests
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Blocked locally: Unity Editor/.NET CLI are unavailable in this container, so EditMode tests must run in CI.
 
 T7.4 - Fix UI_DmxSettings compile error from invalid [Header] attribute usage
 - [x] Started
@@ -27,6 +28,22 @@ T7.5 - Execute Unity compile/EditMode checks for UI_DmxSettings regression cover
 - [x] Code Written
 - [ ] Tests Passed
 - [x] Documentation Written
+  - Blocked locally: no Unity runtime is installed in this environment; CI workflow is present at `.github/workflows/unity-editmode-tests.yml`.
+
+T8.4 - Next run: execute Unity EditMode suite in CI to validate T8.2 media path tests
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - CI runner is configured; pending execution in a licensed Unity CI environment.
+
+T8.5 - Next run: capture Unity EditMode CI run artifacts and close lingering test-validation tickets
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
 
 
 T1.3 - Implement zero-allocation DMX buffer (DmxBuffer.cs)
@@ -254,13 +271,6 @@ T8.2 - Add USB/StreamingAssets integration tests for MediaPlaybackController
 - [x] Documentation Written
 
 T8.3 - Wire MediaPlaybackController into scene and verify VideoPlayer bindings on HY300
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
-
-T8.4 - Next run: execute Unity EditMode suite in CI to validate T8.2 media path tests
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
