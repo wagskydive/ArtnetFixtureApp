@@ -8,6 +8,7 @@ using UnityEngine;
 
 public class ArtNetReceiver : MonoBehaviour
 {
+    [Range(0, 15)]
     public int Universe = 0;
     public DmxBuffer DmxBuffer;
 
@@ -19,7 +20,17 @@ public class ArtNetReceiver : MonoBehaviour
 
     void Start()
     {
-        DmxBuffer = new DmxBuffer();
+        if (Universe < 0 || Universe > 15)
+        {
+            Debug.LogWarning($"Universe {Universe} is invalid. Clamping to 0-15.");
+            Universe = Mathf.Clamp(Universe, 0, 15);
+        }
+
+        if (DmxBuffer == null)
+        {
+            DmxBuffer = new DmxBuffer();
+        }
+
         StartReceiver();
     }
 
@@ -79,7 +90,7 @@ public class ArtNetReceiver : MonoBehaviour
                     if (length > 512) length = 512;
 
                     Buffer.BlockCopy(data, 18, _packetBuffer, 0, length);
-                    DmxBuffer.WriteFrame(_packetBuffer);
+                    DmxBuffer.WriteFrame(_packetBuffer, length);
                 }
             }
             catch (Exception)
@@ -106,5 +117,4 @@ public class ArtNetReceiver : MonoBehaviour
                data[9] == 0x50; // OpCode low/high for ArtDMX
     }
 }
-
 

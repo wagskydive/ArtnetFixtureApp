@@ -38,71 +38,71 @@ T1.8 - Test stability on HY300 hardware platform
 [ ] Tests Passed
 [ ] Documentation Written
 T2.1 - Create unified shader (MaliSafeLighting.shader)
-[ ] Started
-[ ] Behavior Written
-[ ] Code Written
+[x] Started
+[x] Behavior Written
+[x] Code Written
 [ ] Tests Passed
-[ ] Documentation Written
+[x] Documentation Written
 T2.2a - Solid color pattern implementation
-[ ] Started
-[ ] Behavior Written
-[ ] Code Written
+[x] Started
+[x] Behavior Written
+[x] Code Written
 [ ] Tests Passed
-[ ] Documentation Written
+[x] Documentation Written
 T2.2b - Linear gradient pattern implementation
-[ ] Started
-[ ] Behavior Written
-[ ] Code Written
+[x] Started
+[x] Behavior Written
+[x] Code Written
 [ ] Tests Passed
-[ ] Documentation Written
+[x] Documentation Written
 T2.2c - Radial gradient pattern implementation
-[ ] Started
-[ ] Behavior Written
-[ ] Code Written
+[x] Started
+[x] Behavior Written
+[x] Code Written
 [ ] Tests Passed
-[ ] Documentation Written
+[x] Documentation Written
 T2.2d - Pulse pattern implementation
-[ ] Started
-[ ] Behavior Written
-[ ] Code Written
+[x] Started
+[x] Behavior Written
+[x] Code Written
 [ ] Tests Passed
-[ ] Documentation Written
+[x] Documentation Written
 T2.2e - Moving bars pattern implementation
-[ ] Started
-[ ] Behavior Written
-[ ] Code Written
+[x] Started
+[x] Behavior Written
+[x] Code Written
 [ ] Tests Passed
-[ ] Documentation Written
+[x] Documentation Written
 T2.2f - Soft edge beam pattern implementation
-[ ] Started
-[ ] Behavior Written
-[ ] Code Written
+[x] Started
+[x] Behavior Written
+[x] Code Written
 [ ] Tests Passed
-[ ] Documentation Written
+[x] Documentation Written
 T2.3a - Pattern select mapping (DMX channel 5)
-[ ] Started
-[ ] Behavior Written
-[ ] Code Written
+[x] Started
+[x] Behavior Written
+[x] Code Written
 [ ] Tests Passed
-[ ] Documentation Written
+[x] Documentation Written
 T2.3b - Speed mapping (DMX channel 6)
-[ ] Started
-[ ] Behavior Written
-[ ] Code Written
+[x] Started
+[x] Behavior Written
+[x] Code Written
 [ ] Tests Passed
-[ ] Documentation Written
+[x] Documentation Written
 T2.3c - Size mapping (DMX channel 7)
-[ ] Started
-[ ] Behavior Written
-[ ] Code Written
+[x] Started
+[x] Behavior Written
+[x] Code Written
 [ ] Tests Passed
-[ ] Documentation Written
+[x] Documentation Written
 T2.3d - Strobe mapping (DMX channel 8)
-[ ] Started
-[ ] Behavior Written
-[ ] Code Written
+[x] Started
+[x] Behavior Written
+[x] Code Written
 [ ] Tests Passed
-[ ] Documentation Written
+[x] Documentation Written
 T2.4 - Optimize shader for Mali/low-end GPUs
 [ ] Started
 [ ] Behavior Written
@@ -158,6 +158,12 @@ T3.6 - Add looping support for media playback
 [ ] Tests Passed
 [ ] Documentation Written
 T3.7 - Enforce memory budget constraints
+[ ] Started
+[ ] Behavior Written
+[ ] Code Written
+[ ] Tests Passed
+[ ] Documentation Written
+T2.4a - Profile shader instruction count and simplify heavy branches on HY300
 [ ] Started
 [ ] Behavior Written
 [ ] Code Written

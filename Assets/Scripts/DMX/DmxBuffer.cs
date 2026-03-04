@@ -10,11 +10,12 @@ public class DmxBuffer
     private readonly object _lock = new object();
     private bool _hasNewFrame = false;
 
-    public void WriteFrame(byte[] source)
+    public void WriteFrame(byte[] source, int length)
     {
         lock (_lock)
         {
-            Buffer.BlockCopy(source, 0, _backBuffer, 0, 512);
+            int copyLength = Math.Min(Math.Min(length, source.Length), 512);
+            Buffer.BlockCopy(source, 0, _backBuffer, 0, copyLength);
             _hasNewFrame = true;
         }
     }
@@ -30,9 +31,12 @@ public class DmxBuffer
         }
     }
 
-    public byte GetChannel(int index)
+    public byte GetChannel1Based(int channel)
     {
-        return _frontBuffer[index];
+        int clampedIndex = channel - 1;
+        if (clampedIndex < 0) clampedIndex = 0;
+        if (clampedIndex > 511) clampedIndex = 511;
+        return _frontBuffer[clampedIndex];
     }
 
     public byte[] GetRawBuffer()
@@ -40,4 +44,3 @@ public class DmxBuffer
         return _frontBuffer;
     }
 }
-
