@@ -63,7 +63,6 @@ public class UI_DmxSettings : MonoBehaviour
         }
     }
 
-    [Header("Pattern Controls")]
     public enum PatternType
     {
         Static,
