@@ -1,0 +1,1 @@
+C:\UnityWork\ArtnetFixtureApp\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\build\intermediates\cxx\RelWithDebInfo\16336l3a\obj\armeabi-v7a

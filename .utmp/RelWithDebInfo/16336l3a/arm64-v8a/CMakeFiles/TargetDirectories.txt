@@ -1,0 +1,8 @@
+C:/UnityWork/ArtnetFixtureApp/.utmp/RelWithDebInfo/16336l3a/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/UnityWork/ArtnetFixtureApp/.utmp/RelWithDebInfo/16336l3a/arm64-v8a/CMakeFiles/rebuild_cache.dir
+C:/UnityWork/ArtnetFixtureApp/.utmp/RelWithDebInfo/16336l3a/arm64-v8a/GameActivity/CMakeFiles/game.dir
+C:/UnityWork/ArtnetFixtureApp/.utmp/RelWithDebInfo/16336l3a/arm64-v8a/GameActivity/CMakeFiles/edit_cache.dir
+C:/UnityWork/ArtnetFixtureApp/.utmp/RelWithDebInfo/16336l3a/arm64-v8a/GameActivity/CMakeFiles/rebuild_cache.dir
+C:/UnityWork/ArtnetFixtureApp/.utmp/RelWithDebInfo/16336l3a/arm64-v8a/FramePacing/CMakeFiles/swappywrapper.dir
+C:/UnityWork/ArtnetFixtureApp/.utmp/RelWithDebInfo/16336l3a/arm64-v8a/FramePacing/CMakeFiles/edit_cache.dir
+C:/UnityWork/ArtnetFixtureApp/.utmp/RelWithDebInfo/16336l3a/arm64-v8a/FramePacing/CMakeFiles/rebuild_cache.dir
