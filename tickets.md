@@ -1,11 +1,12 @@
 # Tickets
 
 T9.9 Solve this compile error: Assets\Scripts\UI\UI_DpadNavigationController.cs(76,18): error CS1061: 'Selectable' does not contain a definition for 'OnSubmit' and no accessible extension method 'OnSubmit' accepting a first argument of type 'Selectable' could be found (are you missing a using directive or an assembly reference?)
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Replaced the invalid direct `Selectable.OnSubmit` call with `ExecuteEvents.Execute<ISubmitHandler>` in `UI_DpadNavigationController.SubmitCurrentSelection`, preserving D-pad submit behavior without relying on protected API access.
 
 T9.8 - Create a Selectable object to make the UI_DpadNavigationController work correctly
 - [x] Started
@@ -41,6 +42,13 @@ T9.7 - Make the UI working with a Android TV remote controller D-Pad
   - Added `UI_DpadNavigationController` plus EditMode coverage in `UI_DpadNavigationControllerTests` to support D-pad traversal and submit behavior.
 
 T9.9 - Next run: execute Unity EditMode suite to validate T9.8 selectable + D-pad navigation updates on a licensed Unity runner
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T9.10 - Next run: execute Unity EditMode suite to validate T9.9 compile-fix behavior on a licensed Unity runner
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
