@@ -114,6 +114,7 @@ Add basic projection mapping for fixture output.
 - [ ] Implement vertex shader for keystone correction
 - [ ] Save/load preset mapping
 - [x] DMX channel control for keystone X/Y
+- [x] Add multi-mesh fixture manager with persisted object count (1-16) and automatic 16-channel DMX address stepping per spawned mesh
 - [ ] Test on HY300 and record frame rate impact
 
 **Acceptance Criteria:**

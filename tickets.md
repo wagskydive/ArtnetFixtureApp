@@ -1,6 +1,16 @@
 # Tickets
 
 T10.14 - Create a system to add more meshes that are each listening to their own 16 DMX channels for colors, effects and corner pins. Make a script to extend the UI to add more objects. The UI will work the same as the ui for the starting DMX channel and Universe. The amount of Meshes should be saved in user prefs and is recalled when the app starts. There is a minimum amount of 1 and a maximum of 16 objects. The start DMX channel is only set as it is now and the next object will listen to the the next free channel. So the second object will automatically listen to channel 17 as its starting channel and the third object listens to 33 etc.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Added `UI_FixtureMeshManager` to grow/shrink fixture mesh instances with 1-16 bounds, persist fixture count in PlayerPrefs, and auto-assign each fixture's start address in 16-channel blocks.
+  - Added clone-safe Art-Net receiver option so spawned fixtures share the DMX buffer without binding additional UDP listeners.
+  - Added EditMode coverage for fixture-count clamping, persisted count restore, DMX channel stepping (1/17/33...), and spawned receiver networking behavior.
+
+T10.15 - Next run: wire `UI_FixtureMeshManager` buttons/text + fixture template references in `MainScene` and run Unity EditMode tests on a licensed runner
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
