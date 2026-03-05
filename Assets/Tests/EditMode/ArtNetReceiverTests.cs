@@ -80,6 +80,18 @@ public class ArtNetReceiverTests
     }
 
     [Test]
+    public void DefaultUniverse_IsZeroBasedUniverseOneForUserFacingSelection()
+    {
+        var go = new GameObject("receiver");
+        var receiver = go.AddComponent<ArtNetReceiver>();
+
+        Assert.That(receiver.Universe, Is.EqualTo(0));
+        Assert.That(receiver.GetUniverseForUserInput(), Is.EqualTo(1));
+
+        Object.DestroyImmediate(go);
+    }
+
+    [Test]
     public void SetUniverseFromUserInput_ConvertsToZeroBasedUniverse()
     {
         var go = new GameObject("receiver");
