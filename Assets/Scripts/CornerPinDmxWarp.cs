@@ -7,7 +7,7 @@ public class CornerPinDmxWarp : MonoBehaviour
     [SerializeField] [Range(0.01f, 10f)] private float maxOffset = 0.5f;
 
     private Mesh _runtimeMesh;
-    private readonly Vector3[] _baseVertices = new Vector3[4];
+    private readonly Vector3[] _expandedVertices = new Vector3[4];
     private readonly Vector3[] _warpedVertices = new Vector3[4];
     private Vector3[] _meshVertices;
 
@@ -43,19 +43,17 @@ public class CornerPinDmxWarp : MonoBehaviour
             int xChannel = Mathf.Clamp(artNetReceiver.StartChannel + 8 + (corner * 2), 1, 512);
             int yChannel = Mathf.Clamp(artNetReceiver.StartChannel + 8 + (corner * 2) + 1, 1, 512);
 
-            float offsetX = DmxToOffset(dmx[xChannel - 1]);
-            float offsetY = DmxToOffset(dmx[yChannel - 1]);
+            float xLerp = dmx[xChannel - 1] / 255f;
+            float yLerp = dmx[yChannel - 1] / 255f;
 
-            Vector3 baseVertex = _baseVertices[corner];
-            _warpedVertices[corner] = new Vector3(baseVertex.x + offsetX, baseVertex.y + offsetY, baseVertex.z);
+            Vector3 expandedVertex = _expandedVertices[corner];
+            _warpedVertices[corner] = new Vector3(
+                Mathf.Lerp(0f, expandedVertex.x, xLerp),
+                Mathf.Lerp(0f, expandedVertex.y, yLerp),
+                expandedVertex.z);
         }
 
         ApplyVertices();
-    }
-
-    private float DmxToOffset(byte value)
-    {
-        return ((value / 255f) * 2f - 1f) * maxOffset;
     }
 
     private void CacheBaseVertices(Vector3[] meshVertices)
@@ -63,8 +61,12 @@ public class CornerPinDmxWarp : MonoBehaviour
         for (int i = 0; i < QuadCornerVertexIndices.Length; i++)
         {
             int vertexIndex = QuadCornerVertexIndices[i];
-            _baseVertices[i] = meshVertices[vertexIndex];
-            _warpedVertices[i] = meshVertices[vertexIndex];
+            Vector3 baseVertex = meshVertices[vertexIndex];
+            _expandedVertices[i] = new Vector3(
+                baseVertex.x + Mathf.Sign(baseVertex.x) * maxOffset,
+                baseVertex.y + Mathf.Sign(baseVertex.y) * maxOffset,
+                baseVertex.z);
+            _warpedVertices[i] = baseVertex;
         }
     }
 
