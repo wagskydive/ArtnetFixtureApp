@@ -536,7 +536,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0713092f8cb004946a0fca6c7cd214ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ArtnetFixture.Core::ArtNetReceiver
-  Universe: 0
+  Universe: 1
 --- !u!114 &454082878
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,5 +1,11 @@
 # Tickets
 
+T9.3 - Add color changing ability to the system
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
 
 T9.1 - Create UI to simulate DMX data for use in the Editor
 - [x] Started

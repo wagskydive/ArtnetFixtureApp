@@ -85,4 +85,9 @@ public class UI_DmxEditorSimulator : MonoBehaviour
 
         return (byte)Mathf.RoundToInt(Mathf.Clamp01(slider.normalizedValue) * 255f);
     }
+
+    void Update()
+    {
+        PushFrameFromUi();
+    }
 }
