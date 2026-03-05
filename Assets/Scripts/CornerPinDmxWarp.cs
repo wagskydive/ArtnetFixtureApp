@@ -11,6 +11,10 @@ public class CornerPinDmxWarp : MonoBehaviour
     private Vector3[] _expandedCorners = new Vector3[4];
     private Vector3[] _warpedCorners = new Vector3[4];
     private Vector3[] _meshVertices;
+    private float _minX;
+    private float _maxX;
+    private float _minY;
+    private float _maxY;
 
     private int _gridResolution;
 
@@ -31,7 +35,7 @@ public class CornerPinDmxWarp : MonoBehaviour
         CacheExpandedCorners();
         for (int i = 0; i < _warpedCorners.Length; i++)
         {
-            _warpedCorners[i] = Vector3.zero;
+            _warpedCorners[i] = new Vector3(_minX, _minY, 0f);
         }
 
         ApplyWarpedGrid(updateMesh: false);
@@ -54,11 +58,10 @@ public class CornerPinDmxWarp : MonoBehaviour
             float xLerp = dmx[xChannel - 1] / 255f;
             float yLerp = dmx[yChannel - 1] / 255f;
 
-            Vector3 expandedCorner = _expandedCorners[corner];
             _warpedCorners[corner] = new Vector3(
-                Mathf.Lerp(0f, expandedCorner.x, xLerp),
-                Mathf.Lerp(0f, expandedCorner.y, yLerp),
-                expandedCorner.z);
+                Mathf.Lerp(_minX, _maxX, xLerp),
+                Mathf.Lerp(_minY, _maxY, yLerp),
+                0f);
         }
 
         ApplyWarpedGrid();
@@ -66,10 +69,15 @@ public class CornerPinDmxWarp : MonoBehaviour
 
     private void CacheExpandedCorners()
     {
-        _expandedCorners[0] = new Vector3(-0.5f - maxOffset, -0.5f - maxOffset, 0f); // BL
-        _expandedCorners[1] = new Vector3(-0.5f - maxOffset, 0.5f + maxOffset, 0f);  // TL
-        _expandedCorners[2] = new Vector3(0.5f + maxOffset, 0.5f + maxOffset, 0f);   // TR
-        _expandedCorners[3] = new Vector3(0.5f + maxOffset, -0.5f - maxOffset, 0f);  // BR
+        _minX = -0.5f - maxOffset;
+        _maxX = 0.5f + maxOffset;
+        _minY = -0.5f - maxOffset;
+        _maxY = 0.5f + maxOffset;
+
+        _expandedCorners[0] = new Vector3(_minX, _minY, 0f); // BL
+        _expandedCorners[1] = new Vector3(_minX, _maxY, 0f); // TL
+        _expandedCorners[2] = new Vector3(_maxX, _maxY, 0f); // TR
+        _expandedCorners[3] = new Vector3(_maxX, _minY, 0f); // BR
     }
 
     private void ApplyWarpedGrid()
