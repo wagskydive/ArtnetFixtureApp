@@ -34,6 +34,37 @@ public class OutputComponentsTests
         Object.DestroyImmediate(outputGo);
     }
 
+
+    [Test]
+    public void RgbDmxController_Update_AppliesColorAndIntensityFromDmx()
+    {
+        var receiverGo = new GameObject("receiver");
+        var receiver = receiverGo.AddComponent<ArtNetReceiver>();
+        receiver.DmxBuffer = new DmxBuffer();
+        receiver.DmxBuffer.WriteFrame(new byte[] { 200, 128, 64, 32 }, 4);
+        receiver.DmxBuffer.SwapIfNewFrame();
+
+        var outputGo = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        var controller = outputGo.AddComponent<RgbDmxController>();
+
+        SetPrivateField(controller, "artNetReceiver", receiver);
+        SetPrivateField(controller, "outputRenderer", outputGo.GetComponent<Renderer>());
+
+        outputGo.SendMessage("Awake");
+        outputGo.SendMessage("Update");
+
+        var material = outputGo.GetComponent<Renderer>().material;
+        Assert.That(material.GetFloat("_Intensity"), Is.EqualTo(200f / 255f).Within(0.001f));
+
+        var color = material.GetColor("_Color");
+        Assert.That(color.r, Is.EqualTo(128f / 255f).Within(0.001f));
+        Assert.That(color.g, Is.EqualTo(64f / 255f).Within(0.001f));
+        Assert.That(color.b, Is.EqualTo(32f / 255f).Within(0.001f));
+
+        Object.DestroyImmediate(receiverGo);
+        Object.DestroyImmediate(outputGo);
+    }
+
     [Test]
     public void PatternGenerator_Update_AppliesPatternControlsFromDmx()
     {

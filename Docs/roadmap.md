@@ -155,6 +155,7 @@ Validate system and prepare for production deployment.
 - [x] Add EditMode unit tests for media USB/StreamingAssets path resolution logic
 - [x] Configure Unity EditMode CI workflow (`.github/workflows/unity-editmode-tests.yml`) for licensed runner execution
 - [x] Add Editor DMX simulation UI workflow (`UI_DmxEditorSimulator.cs`) for in-Editor channel testing
+- [x] Add dedicated RGB + dimmer shader bridge component (`RgbDmxController.cs`) with EditMode coverage
 
 **Acceptance Criteria:**
 - Fixture passes all stress tests
