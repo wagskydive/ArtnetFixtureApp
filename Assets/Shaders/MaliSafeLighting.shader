@@ -15,11 +15,14 @@ Shader "Custom/MaliSafeLighting"
 
     SubShader
     {
-        Tags { "RenderType"="Opaque" }
+        Tags { "Queue"="Transparent" "RenderType"="Transparent" }
         LOD 100
 
         Pass
         {
+            Blend SrcAlpha OneMinusSrcAlpha
+            ZWrite Off
+
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
@@ -152,12 +155,18 @@ Shader "Custom/MaliSafeLighting"
                     (crossPulseMask * crossPulseBrightness);
 
                 float3 proceduralColor = _Color.rgb * brightness;
+                float proceduralAlpha = saturate(brightness);
+
                 float3 sampledMedia = tex2D(_MediaTex, i.uv).rgb;
                 float3 sampledFallback = tex2D(_FallbackTex, i.uv).rgb;
                 float3 mediaColor = lerp(sampledFallback, sampledMedia, saturate(_UseMediaTex));
-                float3 finalColor = lerp(proceduralColor, mediaColor, mediaMask);
+                float mediaAlpha = saturate(max(mediaColor.r, max(mediaColor.g, mediaColor.b)));
 
-                return fixed4(finalColor * _Intensity * _StrobeGate, 1);
+                float3 finalColor = lerp(proceduralColor, mediaColor, mediaMask);
+                float finalAlpha = lerp(proceduralAlpha, mediaAlpha, mediaMask);
+                float outputGate = _Intensity * _StrobeGate;
+
+                return fixed4(finalColor * outputGate, finalAlpha * outputGate);
             }
             ENDCG
         }

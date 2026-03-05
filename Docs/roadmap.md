@@ -55,6 +55,7 @@ Implement low-GPU procedural patterns with DMX control.
 - [x] Expand shader pattern library by 10 additional DMX-selectable low-cost procedural modes (vertical wave, ring bands, spiral, diamond grid, sparkle, pinwheel, sweep, ripple, plasma, cross pulse)
 - [x] Replace pattern slot 9 Voronoi cells with a DMX-size-controlled radial outline/glow mode
 - [x] Replace pattern slot 1 linear gradient with media texture playback plus editor-configurable fallback image
+- [x] Render pattern/media black levels as transparent output alpha for cleaner compositing
 
 **Acceptance Criteria:**
 - All patterns render smoothly at 30 FPS
