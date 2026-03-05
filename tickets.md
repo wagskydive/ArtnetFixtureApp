@@ -1,5 +1,12 @@
 # Tickets
 
+T10.23 - Modify MaliSafeLighting.shader so that the black parts of all the patterns are transparent
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 T10.21 - Replace the outline pattern in the MaliSafeLighting.shader with an outline of the actual mesh. Now it is a circle, but i want it to outline the quad mesh.
 - [x] Started
 - [x] Behavior Written
