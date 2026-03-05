@@ -1,6 +1,15 @@
 # Tickets
 
 T10.24 - Verify if the Universe selection logic works and fix it if it doesn't work
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Corrected `ArtNetReceiver` default universe to `0` (Art-Net universe 1 in UI terms) so first-run behavior matches the user-facing universe selector.
+  - Added EditMode coverage to verify the default universe maps to user-facing universe 1 while preserving 1-based UI <-> 0-based receiver conversion.
+
+T10.25 - Next run: execute Unity EditMode suite on a licensed runner to validate T10.24 universe default + mapping behavior end-to-end.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
