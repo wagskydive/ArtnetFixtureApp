@@ -2,6 +2,16 @@
 
 
 T10.8 - Rewrite the CornerPinDmxWarp to prevent a sharp crease. Make a subdivided mesh that can prevents the sharp crease. Make a variable to set the subdivision amount.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Rebuilt `CornerPinDmxWarp` to generate a runtime subdivided quad mesh controlled by a serialized `subdivisionAmount` setting.
+  - Applied bilinear interpolation across all subdivided vertices using the four DMX-driven corner targets to reduce visible center-diagonal creasing.
+  - Expanded EditMode coverage for mesh collapse-at-zero DMX, corner expansion-at-max DMX, and subdivision-driven mesh density.
+
+T10.9 - Next run: execute Unity EditMode suite to validate T10.8 subdivided CornerPin warp behavior on a licensed Unity runner
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written

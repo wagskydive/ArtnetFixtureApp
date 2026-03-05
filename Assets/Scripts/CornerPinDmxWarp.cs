@@ -5,28 +5,36 @@ public class CornerPinDmxWarp : MonoBehaviour
 {
     [SerializeField] private ArtNetReceiver artNetReceiver;
     [SerializeField] [Range(0.01f, 10f)] private float maxOffset = 0.5f;
+    [SerializeField] [Range(1, 64)] private int subdivisionAmount = 8;
 
     private Mesh _runtimeMesh;
-    private readonly Vector3[] _expandedVertices = new Vector3[4];
-    private readonly Vector3[] _warpedVertices = new Vector3[4];
+    private Vector3[] _expandedCorners = new Vector3[4];
+    private Vector3[] _warpedCorners = new Vector3[4];
     private Vector3[] _meshVertices;
 
-    private static readonly int[] QuadCornerVertexIndices = { 0, 2, 3, 1 }; // BL, TL, TR, BR
+    private int _gridResolution;
 
     private void Awake()
     {
         MeshFilter meshFilter = GetComponent<MeshFilter>();
-        if (meshFilter == null || meshFilter.sharedMesh == null)
+        if (meshFilter == null)
         {
             return;
         }
 
-        _runtimeMesh = Instantiate(meshFilter.sharedMesh);
+        _gridResolution = Mathf.Max(1, subdivisionAmount);
+        _runtimeMesh = CreateSubdividedQuad(_gridResolution);
         _runtimeMesh.MarkDynamic();
         meshFilter.mesh = _runtimeMesh;
 
         _meshVertices = _runtimeMesh.vertices;
-        CacheBaseVertices(_meshVertices);
+        CacheExpandedCorners();
+        for (int i = 0; i < _warpedCorners.Length; i++)
+        {
+            _warpedCorners[i] = Vector3.zero;
+        }
+
+        ApplyWarpedGrid(updateMesh: false);
     }
 
     private void Update()
@@ -46,38 +54,112 @@ public class CornerPinDmxWarp : MonoBehaviour
             float xLerp = dmx[xChannel - 1] / 255f;
             float yLerp = dmx[yChannel - 1] / 255f;
 
-            Vector3 expandedVertex = _expandedVertices[corner];
-            _warpedVertices[corner] = new Vector3(
-                Mathf.Lerp(0f, expandedVertex.x, xLerp),
-                Mathf.Lerp(0f, expandedVertex.y, yLerp),
-                expandedVertex.z);
+            Vector3 expandedCorner = _expandedCorners[corner];
+            _warpedCorners[corner] = new Vector3(
+                Mathf.Lerp(0f, expandedCorner.x, xLerp),
+                Mathf.Lerp(0f, expandedCorner.y, yLerp),
+                expandedCorner.z);
         }
 
-        ApplyVertices();
+        ApplyWarpedGrid();
     }
 
-    private void CacheBaseVertices(Vector3[] meshVertices)
+    private void CacheExpandedCorners()
     {
-        for (int i = 0; i < QuadCornerVertexIndices.Length; i++)
+        _expandedCorners[0] = new Vector3(-0.5f - maxOffset, -0.5f - maxOffset, 0f); // BL
+        _expandedCorners[1] = new Vector3(-0.5f - maxOffset, 0.5f + maxOffset, 0f);  // TL
+        _expandedCorners[2] = new Vector3(0.5f + maxOffset, 0.5f + maxOffset, 0f);   // TR
+        _expandedCorners[3] = new Vector3(0.5f + maxOffset, -0.5f - maxOffset, 0f);  // BR
+    }
+
+    private void ApplyWarpedGrid()
+    {
+        ApplyWarpedGrid(updateMesh: true);
+    }
+
+    private void ApplyWarpedGrid(bool updateMesh)
+    {
+        int rowLength = _gridResolution + 1;
+
+        for (int y = 0; y <= _gridResolution; y++)
         {
-            int vertexIndex = QuadCornerVertexIndices[i];
-            Vector3 baseVertex = meshVertices[vertexIndex];
-            _expandedVertices[i] = new Vector3(
-                baseVertex.x + Mathf.Sign(baseVertex.x) * maxOffset,
-                baseVertex.y + Mathf.Sign(baseVertex.y) * maxOffset,
-                baseVertex.z);
-            _warpedVertices[i] = baseVertex;
+            float v = y / (float)_gridResolution;
+            for (int x = 0; x <= _gridResolution; x++)
+            {
+                float u = x / (float)_gridResolution;
+                int index = y * rowLength + x;
+
+                Vector3 bottom = Vector3.Lerp(_warpedCorners[0], _warpedCorners[3], u);
+                Vector3 top = Vector3.Lerp(_warpedCorners[1], _warpedCorners[2], u);
+                _meshVertices[index] = Vector3.Lerp(bottom, top, v);
+            }
         }
-    }
 
-    private void ApplyVertices()
-    {
-        for (int i = 0; i < QuadCornerVertexIndices.Length; i++)
+        if (!updateMesh)
         {
-            _meshVertices[QuadCornerVertexIndices[i]] = _warpedVertices[i];
+            return;
         }
 
         _runtimeMesh.vertices = _meshVertices;
         _runtimeMesh.RecalculateBounds();
+    }
+
+    private static Mesh CreateSubdividedQuad(int subdivisions)
+    {
+        int rowLength = subdivisions + 1;
+        int vertexCount = rowLength * rowLength;
+        int quadCount = subdivisions * subdivisions;
+
+        var vertices = new Vector3[vertexCount];
+        var uvs = new Vector2[vertexCount];
+        var triangles = new int[quadCount * 6];
+
+        int vertexIndex = 0;
+        for (int y = 0; y <= subdivisions; y++)
+        {
+            float v = y / (float)subdivisions;
+            float posY = Mathf.Lerp(-0.5f, 0.5f, v);
+            for (int x = 0; x <= subdivisions; x++)
+            {
+                float u = x / (float)subdivisions;
+                float posX = Mathf.Lerp(-0.5f, 0.5f, u);
+
+                vertices[vertexIndex] = new Vector3(posX, posY, 0f);
+                uvs[vertexIndex] = new Vector2(u, v);
+                vertexIndex++;
+            }
+        }
+
+        int triIndex = 0;
+        for (int y = 0; y < subdivisions; y++)
+        {
+            for (int x = 0; x < subdivisions; x++)
+            {
+                int bottomLeft = y * rowLength + x;
+                int bottomRight = bottomLeft + 1;
+                int topLeft = bottomLeft + rowLength;
+                int topRight = topLeft + 1;
+
+                triangles[triIndex++] = bottomLeft;
+                triangles[triIndex++] = topLeft;
+                triangles[triIndex++] = topRight;
+
+                triangles[triIndex++] = bottomLeft;
+                triangles[triIndex++] = topRight;
+                triangles[triIndex++] = bottomRight;
+            }
+        }
+
+        var mesh = new Mesh
+        {
+            name = "CornerPinSubdividedQuad"
+        };
+
+        mesh.vertices = vertices;
+        mesh.uv = uvs;
+        mesh.triangles = triangles;
+        mesh.RecalculateNormals();
+        mesh.RecalculateBounds();
+        return mesh;
     }
 }
