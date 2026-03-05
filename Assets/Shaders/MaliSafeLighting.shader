@@ -100,10 +100,11 @@ Shader "Custom/MaliSafeLighting"
 
                 float diagonalWaveBrightness = 0.5 + 0.5 * sin(((i.uv.x + i.uv.y) * safeSize * 12.0) + time);
 
-                float outlineRadius = 0.45;
-                float outlineDistance = abs(radialDistance - outlineRadius);
-                float outlineBlur = lerp(0.02, 0.35, size01);
-                float outlineBrightness = 1.0 - smoothstep(0.0, outlineBlur, outlineDistance);
+                // Build an inward-facing glow from the actual quad border instead of a radial circle.
+                float edgeDistance = min(min(i.uv.x, 1.0 - i.uv.x), min(i.uv.y, 1.0 - i.uv.y));
+                float outlineCoreWidth = 0.02;
+                float outlineBlur = lerp(0.01, 0.35, size01);
+                float outlineBrightness = 1.0 - smoothstep(outlineCoreWidth, outlineCoreWidth + outlineBlur, edgeDistance);
 
                 float verticalWaveBrightness = 0.5 + 0.5 * sin(i.uv.x * safeSize * 18.0 + time);
 
