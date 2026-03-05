@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class PatternGenerator : MonoBehaviour
 {
+    private const int PatternCount = 10;
+
     [SerializeField] private ArtNetReceiver artNetReceiver;
     [SerializeField] private Renderer outputRenderer;
 
@@ -22,7 +24,8 @@ public class PatternGenerator : MonoBehaviour
             return;
         }
 
-        int patternType = Mathf.Clamp(artNetReceiver.GetFixtureChannelValue(5) / 43, 0, 5);
+        int dmxPatternValue = artNetReceiver.GetFixtureChannelValue(5);
+        int patternType = Mathf.Clamp(Mathf.FloorToInt((dmxPatternValue / 256f) * PatternCount), 0, PatternCount - 1);
         float speed = Mathf.Lerp(0.1f, 8f, artNetReceiver.GetFixtureChannelValue(6) / 255f);
         float size = Mathf.Lerp(0.5f, 8f, artNetReceiver.GetFixtureChannelValue(7) / 255f);
 
