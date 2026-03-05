@@ -5,7 +5,7 @@ using UnityEngine;
 public class CornerPinDmxWarpTests
 {
     [Test]
-    public void Update_AtZeroDmx_CollapsesCornersToCenter()
+    public void Update_AtZeroDmx_CollapsesEntireMeshToCenter()
     {
         var receiverGo = new GameObject("receiver");
         var receiver = receiverGo.AddComponent<ArtNetReceiver>();
@@ -20,20 +20,18 @@ public class CornerPinDmxWarpTests
 
         SetPrivateField(warp, "artNetReceiver", receiver);
         SetPrivateField(warp, "maxOffset", 0.5f);
+        SetPrivateField(warp, "subdivisionAmount", 4);
 
         quad.SendMessage("Awake");
         quad.SendMessage("Update");
 
         var vertices = quad.GetComponent<MeshFilter>().mesh.vertices;
 
-        Assert.That(vertices[0].x, Is.EqualTo(0f).Within(0.001f));
-        Assert.That(vertices[0].y, Is.EqualTo(0f).Within(0.001f));
-        Assert.That(vertices[1].x, Is.EqualTo(0f).Within(0.001f));
-        Assert.That(vertices[1].y, Is.EqualTo(0f).Within(0.001f));
-        Assert.That(vertices[2].x, Is.EqualTo(0f).Within(0.001f));
-        Assert.That(vertices[2].y, Is.EqualTo(0f).Within(0.001f));
-        Assert.That(vertices[3].x, Is.EqualTo(0f).Within(0.001f));
-        Assert.That(vertices[3].y, Is.EqualTo(0f).Within(0.001f));
+        foreach (var vertex in vertices)
+        {
+            Assert.That(vertex.x, Is.EqualTo(0f).Within(0.001f));
+            Assert.That(vertex.y, Is.EqualTo(0f).Within(0.001f));
+        }
 
         Object.DestroyImmediate(receiverGo);
         Object.DestroyImmediate(quad);
@@ -60,26 +58,44 @@ public class CornerPinDmxWarpTests
 
         SetPrivateField(warp, "artNetReceiver", receiver);
         SetPrivateField(warp, "maxOffset", 0.5f);
+        SetPrivateField(warp, "subdivisionAmount", 4);
 
         quad.SendMessage("Awake");
         quad.SendMessage("Update");
 
         var vertices = quad.GetComponent<MeshFilter>().mesh.vertices;
+        int rowLength = 5;
 
-        Assert.That(vertices[0].x, Is.EqualTo(-1f).Within(0.001f));
-        Assert.That(vertices[0].y, Is.EqualTo(-1f).Within(0.001f));
-
-        Assert.That(vertices[1].x, Is.EqualTo(1f).Within(0.001f));
-        Assert.That(vertices[1].y, Is.EqualTo(-1f).Within(0.001f));
-
-        Assert.That(vertices[2].x, Is.EqualTo(-1f).Within(0.001f));
-        Assert.That(vertices[2].y, Is.EqualTo(1f).Within(0.001f));
-
-        Assert.That(vertices[3].x, Is.EqualTo(1f).Within(0.001f));
-        Assert.That(vertices[3].y, Is.EqualTo(1f).Within(0.001f));
+        AssertCorner(vertices[0], -1f, -1f);
+        AssertCorner(vertices[rowLength * 4], -1f, 1f);
+        AssertCorner(vertices[(rowLength * 5) - 1], 1f, 1f);
+        AssertCorner(vertices[rowLength - 1], 1f, -1f);
 
         Object.DestroyImmediate(receiverGo);
         Object.DestroyImmediate(quad);
+    }
+
+    [Test]
+    public void Awake_UsesSubdivisionAmountToBuildGridMesh()
+    {
+        var quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        var warp = quad.AddComponent<CornerPinDmxWarp>();
+
+        SetPrivateField(warp, "subdivisionAmount", 6);
+
+        quad.SendMessage("Awake");
+
+        Mesh mesh = quad.GetComponent<MeshFilter>().mesh;
+        Assert.That(mesh.vertexCount, Is.EqualTo(49));
+        Assert.That(mesh.triangles.Length, Is.EqualTo(216));
+
+        Object.DestroyImmediate(quad);
+    }
+
+    private static void AssertCorner(Vector3 vertex, float expectedX, float expectedY)
+    {
+        Assert.That(vertex.x, Is.EqualTo(expectedX).Within(0.001f));
+        Assert.That(vertex.y, Is.EqualTo(expectedY).Within(0.001f));
     }
 
     private static void SetPrivateField(object target, string fieldName, object value)
