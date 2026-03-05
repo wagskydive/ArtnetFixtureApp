@@ -1,6 +1,6 @@
 # Tickets
 
-T9.3 - Add color changing ability to the system
+T9.3 - Add RGB and dimmer control. Create a RGB controller script that sets the color of the shader similar to how the PatternGenerator sets the patterns.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
