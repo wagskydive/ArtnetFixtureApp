@@ -1,6 +1,14 @@
 # Tickets
 
 
+T10.8 - Rewrite the CornerPinDmxWarp to prevent a sharp crease. Make a subdivided mesh that can prevents the sharp crease. Make a variable to set the subdivision amount.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+
 T10.6 - Make a script that can hide and show an object by clicking on the settings button of the remote-controller of AndroidTV
 - [x] Started
 - [x] Behavior Written
