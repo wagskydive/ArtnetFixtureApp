@@ -10,7 +10,13 @@ public class OutputComponentsTests
         var receiverGo = new GameObject("receiver");
         var receiver = receiverGo.AddComponent<ArtNetReceiver>();
         receiver.DmxBuffer = new DmxBuffer();
-        receiver.DmxBuffer.WriteFrame(new byte[] { 128, 255, 64, 32 }, 4);
+        receiver.StartChannel = 10;
+        var frame = new byte[16];
+        frame[9] = 128;
+        frame[10] = 255;
+        frame[11] = 64;
+        frame[12] = 32;
+        receiver.DmxBuffer.WriteFrame(frame, frame.Length);
         receiver.DmxBuffer.SwapIfNewFrame();
 
         var outputGo = GameObject.CreatePrimitive(PrimitiveType.Quad);
@@ -41,7 +47,13 @@ public class OutputComponentsTests
         var receiverGo = new GameObject("receiver");
         var receiver = receiverGo.AddComponent<ArtNetReceiver>();
         receiver.DmxBuffer = new DmxBuffer();
-        receiver.DmxBuffer.WriteFrame(new byte[] { 200, 128, 64, 32 }, 4);
+        receiver.StartChannel = 20;
+        var frame = new byte[32];
+        frame[19] = 200;
+        frame[20] = 128;
+        frame[21] = 64;
+        frame[22] = 32;
+        receiver.DmxBuffer.WriteFrame(frame, frame.Length);
         receiver.DmxBuffer.SwapIfNewFrame();
 
         var outputGo = GameObject.CreatePrimitive(PrimitiveType.Quad);
@@ -72,11 +84,12 @@ public class OutputComponentsTests
         var receiver = receiverGo.AddComponent<ArtNetReceiver>();
         receiver.DmxBuffer = new DmxBuffer();
 
-        var frame = new byte[8];
-        frame[4] = 215; // channel 5 => pattern 5
-        frame[5] = 127; // channel 6 => speed midpoint
-        frame[6] = 255; // channel 7 => max size
-        frame[7] = 0;   // channel 8 => strobe off, gate 1
+        receiver.StartChannel = 100;
+        var frame = new byte[128];
+        frame[104] = 215; // channel 5 => pattern 5
+        frame[105] = 127; // channel 6 => speed midpoint
+        frame[106] = 255; // channel 7 => max size
+        frame[107] = 0;   // channel 8 => strobe off, gate 1
         receiver.DmxBuffer.WriteFrame(frame, frame.Length);
         receiver.DmxBuffer.SwapIfNewFrame();
 
@@ -117,7 +130,13 @@ public class OutputComponentsTests
         var receiverGo = new GameObject("receiver");
         var receiver = receiverGo.AddComponent<ArtNetReceiver>();
         receiver.DmxBuffer = new DmxBuffer();
-        receiver.DmxBuffer.WriteFrame(new byte[] { 255, 255, 255, 255 }, 4);
+        receiver.StartChannel = 3;
+        var frame = new byte[16];
+        frame[2] = 255;
+        frame[3] = 255;
+        frame[4] = 255;
+        frame[5] = 255;
+        receiver.DmxBuffer.WriteFrame(frame, frame.Length);
         receiver.DmxBuffer.SwapIfNewFrame();
 
         var outputGo = GameObject.CreatePrimitive(PrimitiveType.Quad);

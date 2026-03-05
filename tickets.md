@@ -2,6 +2,16 @@
 
 
 T10.1 - Connect UI_DmxSettings to the artnet Receiver so that the correct DMX start channel and universe gets used.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Connected `UI_DmxSettings` to `ArtNetReceiver` so configured DMX start channel and universe are applied at runtime and persisted.
+  - Added `ArtNetReceiver` fixture-relative channel helpers and updated output/simulation components to honor the configured DMX start channel offset.
+  - Extended EditMode tests to verify start-channel offset behavior and UI-to-receiver synchronization.
+
+T10.2 - Next run: execute Unity EditMode suite to validate T10.1 DMX start-channel/universe integration on a licensed Unity runner
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written

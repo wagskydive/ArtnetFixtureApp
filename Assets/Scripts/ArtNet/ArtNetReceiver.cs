@@ -10,6 +10,8 @@ public class ArtNetReceiver : MonoBehaviour
 {
     [Range(0, 15)]
     public int Universe = 0;
+    [Range(1, 512)]
+    public int StartChannel = 1;
     public DmxBuffer DmxBuffer;
 
     private UdpClient _udpClient;
@@ -20,11 +22,8 @@ public class ArtNetReceiver : MonoBehaviour
 
     void Start()
     {
-        if (Universe < 0 || Universe > 15)
-        {
-            Debug.LogWarning($"Universe {Universe} is invalid. Clamping to 0-15.");
-            Universe = Mathf.Clamp(Universe, 0, 15);
-        }
+        Universe = ClampUniverse(Universe);
+        StartChannel = ClampStartChannel(StartChannel);
 
         if (DmxBuffer == null)
         {
@@ -32,6 +31,37 @@ public class ArtNetReceiver : MonoBehaviour
         }
 
         StartReceiver();
+    }
+
+    public void SetUniverseFromUserInput(int universe1Based)
+    {
+        Universe = ClampUniverse(universe1Based - 1);
+    }
+
+    public int GetUniverseForUserInput()
+    {
+        return Universe + 1;
+    }
+
+    public void SetStartChannelFromUserInput(int startChannel1Based)
+    {
+        StartChannel = ClampStartChannel(startChannel1Based);
+    }
+
+    public int GetFixtureChannelValue(int relativeChannel)
+    {
+        if (DmxBuffer == null)
+        {
+            return 0;
+        }
+
+        int absoluteChannel = StartChannel + relativeChannel - 1;
+        if (absoluteChannel < 1 || absoluteChannel > 512)
+        {
+            return 0;
+        }
+
+        return DmxBuffer.GetChannel1Based(absoluteChannel);
     }
 
     void OnDestroy()
@@ -116,5 +146,24 @@ public class ArtNetReceiver : MonoBehaviour
                data[8] == 0x00 &&
                data[9] == 0x50; // OpCode low/high for ArtDMX
     }
-}
 
+    private static int ClampUniverse(int universe0Based)
+    {
+        if (universe0Based < 0 || universe0Based > 15)
+        {
+            Debug.LogWarning($"Universe {universe0Based} is invalid. Clamping to 0-15.");
+        }
+
+        return Mathf.Clamp(universe0Based, 0, 15);
+    }
+
+    private static int ClampStartChannel(int startChannel1Based)
+    {
+        if (startChannel1Based < 1 || startChannel1Based > 512)
+        {
+            Debug.LogWarning($"Start channel {startChannel1Based} is invalid. Clamping to 1-512.");
+        }
+
+        return Mathf.Clamp(startChannel1Based, 1, 512);
+    }
+}

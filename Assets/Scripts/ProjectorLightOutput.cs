@@ -28,12 +28,11 @@ public class ProjectorLightOutput : MonoBehaviour
             return;
         }
 
-        DmxBuffer dmxBuffer = artNetReceiver.DmxBuffer;
 
-        float dimmer = dmxBuffer.GetChannel1Based(1) / 255f;
-        float r = dmxBuffer.GetChannel1Based(2) / 255f;
-        float g = dmxBuffer.GetChannel1Based(3) / 255f;
-        float b = dmxBuffer.GetChannel1Based(4) / 255f;
+        float dimmer = artNetReceiver.GetFixtureChannelValue(1) / 255f;
+        float r = artNetReceiver.GetFixtureChannelValue(2) / 255f;
+        float g = artNetReceiver.GetFixtureChannelValue(3) / 255f;
+        float b = artNetReceiver.GetFixtureChannelValue(4) / 255f;
 
         float thermalScale = enableThermalProtection
             ? ComputeThermalScale(dimmer, r, g, b)
