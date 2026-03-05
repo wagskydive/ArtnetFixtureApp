@@ -4,6 +4,14 @@ using UnityEngine.UI;
 
 public class UI_DmxSettingsTests
 {
+    [SetUp]
+    public void SetUp()
+    {
+        PlayerPrefs.DeleteKey("dmx.channel");
+        PlayerPrefs.DeleteKey("dmx.universe");
+        PlayerPrefs.DeleteKey("dmx.pattern");
+    }
+
     [Test]
     public void CurrentDmxChannel_UpdatesField_WhenInRange()
     {
@@ -84,6 +92,23 @@ public class UI_DmxSettingsTests
 
         Assert.That(fakeSetter.LastPropertyName, Is.EqualTo("_PatternType"));
         Assert.That(fakeSetter.LastValue, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void SaveAndLoadPreferences_RestoresValues()
+    {
+        var (settings, _, _) = CreateSettings();
+        settings.CurrentDmxChannel = 200;
+        settings.CurrentDmxUniverse = 12;
+        settings.CurrentPatternType = 2;
+        settings.SavePreferences();
+
+        var (reloadedSettings, _, _) = CreateSettings();
+        reloadedSettings.LoadPreferences();
+
+        Assert.That(reloadedSettings.CurrentDmxChannel, Is.EqualTo(200));
+        Assert.That(reloadedSettings.CurrentDmxUniverse, Is.EqualTo(12));
+        Assert.That(reloadedSettings.CurrentPatternType, Is.EqualTo(2));
     }
 
     private static (UI_DmxSettings settings, InputField channelField, InputField universeField) CreateSettings()

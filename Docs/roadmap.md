@@ -108,10 +108,10 @@ Ensure app reliability on low-end hardware.
 Add basic projection mapping for fixture output.
 
 **Tasks:**
-- [ ] Implement quad mesh warp with 4 corner offsets
+- [x] Implement quad mesh warp with 4 corner offsets
 - [ ] Implement vertex shader for keystone correction
 - [ ] Save/load preset mapping
-- [ ] DMX channel control for keystone X/Y
+- [x] DMX channel control for keystone X/Y
 - [ ] Test on HY300 and record frame rate impact
 
 **Acceptance Criteria:**
@@ -130,7 +130,7 @@ Enable persistent configuration and easy deployment.
 - [ ] Implement JSON config file load/save
 - [ ] Allow selection of DMX universe and start address
 - [ ] Implement mode selection (basic, standard, full)
-- [ ] Auto-load last configuration on boot
+- [x] Auto-load last configuration on boot
 - [ ] Provide hidden developer settings UI
 
 **Acceptance Criteria:**
