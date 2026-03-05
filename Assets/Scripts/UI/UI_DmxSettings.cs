@@ -7,6 +7,8 @@ public class UI_DmxSettings : MonoBehaviour
     private const string UniversePrefKey = "dmx.universe";
     private const string PatternPrefKey = "dmx.pattern";
 
+    [SerializeField] private Text channelValueText;
+    [SerializeField] private Text universeValueText;
     [SerializeField] private InputField channelInputField;
     [SerializeField] private InputField universeInputField;
     [SerializeField] private int currentPatternType = 0; // Pattern type selector (0=Static, 1=Pulse, 2=ColorShift)
@@ -25,10 +27,7 @@ public class UI_DmxSettings : MonoBehaviour
             if (value >= 1 && value <= 512)
             {
                 currentDmxChannel = value;
-                if (channelInputField != null)
-                {
-                    channelInputField.text = value.ToString();
-                }
+                UpdateChannelDisplay();
 
                 ApplySettingsToReceiver();
             }
@@ -43,10 +42,7 @@ public class UI_DmxSettings : MonoBehaviour
             if (value >= 1 && value <= 16)
             {
                 currentDmxUniverse = value;
-                if (universeInputField != null)
-                {
-                    universeInputField.text = value.ToString();
-                }
+                UpdateUniverseDisplay();
 
                 ApplySettingsToReceiver();
             }
@@ -83,22 +79,28 @@ public class UI_DmxSettings : MonoBehaviour
         }
     }
 
-    public void OnChannelValueChanged(string newText)
+    public void IncreaseChannel()
     {
-        if (int.TryParse(newText, out int input))
-        {
-            CurrentDmxChannel = input;
-            SavePreferences();
-        }
+        CurrentDmxChannel = Mathf.Min(512, CurrentDmxChannel + 1);
+        SavePreferences();
     }
 
-    public void OnUniverseValueChanged(string newText)
+    public void DecreaseChannel()
     {
-        if (int.TryParse(newText, out int input))
-        {
-            CurrentDmxUniverse = input;
-            SavePreferences();
-        }
+        CurrentDmxChannel = Mathf.Max(1, CurrentDmxChannel - 1);
+        SavePreferences();
+    }
+
+    public void IncreaseUniverse()
+    {
+        CurrentDmxUniverse = Mathf.Min(16, CurrentDmxUniverse + 1);
+        SavePreferences();
+    }
+
+    public void DecreaseUniverse()
+    {
+        CurrentDmxUniverse = Mathf.Max(1, CurrentDmxUniverse - 1);
+        SavePreferences();
     }
 
     public enum PatternType
@@ -133,6 +135,34 @@ public class UI_DmxSettings : MonoBehaviour
 
         artNetReceiver.SetStartChannelFromUserInput(CurrentDmxChannel);
         artNetReceiver.SetUniverseFromUserInput(CurrentDmxUniverse);
+    }
+
+    private void UpdateChannelDisplay()
+    {
+        if (channelValueText != null)
+        {
+            channelValueText.text = currentDmxChannel.ToString();
+        }
+
+        if (channelInputField != null)
+        {
+            channelInputField.text = currentDmxChannel.ToString();
+            channelInputField.interactable = false;
+        }
+    }
+
+    private void UpdateUniverseDisplay()
+    {
+        if (universeValueText != null)
+        {
+            universeValueText.text = currentDmxUniverse.ToString();
+        }
+
+        if (universeInputField != null)
+        {
+            universeInputField.text = currentDmxUniverse.ToString();
+            universeInputField.interactable = false;
+        }
     }
 
     private void OnPatternTypeChanged()

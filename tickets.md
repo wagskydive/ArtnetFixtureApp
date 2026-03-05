@@ -1,6 +1,15 @@
 # Tickets
 
 T10.3 - Change the UI_DmxSettings to use + and - buttons instead of input fields in order to only change the DMX start channel and Universe using plus and minus buttons.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Reworked `UI_DmxSettings` to use increment/decrement methods for channel/universe updates and removed direct text-entry handlers.
+  - Switched display bindings from `InputField` to read-only `Text` values and expanded EditMode coverage for +/- behavior, bounds clamping, and receiver synchronization.
+
+T10.4 - Next run: execute Unity EditMode suite to validate T10.3 plus/minus DMX settings UI behavior on a licensed Unity runner
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
