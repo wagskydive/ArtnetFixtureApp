@@ -13,6 +13,7 @@ public class UI_DmxSettings : MonoBehaviour
     [SerializeField] private InputField universeInputField;
     [SerializeField] private int currentPatternType = 0; // Pattern type selector (0=Static, 1=Pulse, 2=ColorShift)
     [SerializeField] private ArtNetReceiver artNetReceiver;
+    [SerializeField] private UI_FixtureMeshManager fixtureMeshManager;
 
     private int currentDmxChannel = 1;
     private int currentDmxUniverse = 1;
@@ -135,6 +136,11 @@ public class UI_DmxSettings : MonoBehaviour
 
         artNetReceiver.SetStartChannelFromUserInput(CurrentDmxChannel);
         artNetReceiver.SetUniverseFromUserInput(CurrentDmxUniverse);
+
+        if (fixtureMeshManager != null)
+        {
+            fixtureMeshManager.SyncFixtureAddresses();
+        }
     }
 
     private void UpdateChannelDisplay()

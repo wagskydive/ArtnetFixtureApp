@@ -13,6 +13,7 @@ public class ArtNetReceiver : MonoBehaviour
     [Range(1, 512)]
     public int StartChannel = 1;
     public DmxBuffer DmxBuffer;
+    public bool ReceiveNetworkData = true;
 
     private UdpClient _udpClient;
     private Thread _receiveThread;
@@ -30,7 +31,10 @@ public class ArtNetReceiver : MonoBehaviour
             DmxBuffer = new DmxBuffer();
         }
 
-        StartReceiver();
+        if (ReceiveNetworkData)
+        {
+            StartReceiver();
+        }
     }
 
     public void SetUniverseFromUserInput(int universe1Based)
@@ -66,11 +70,19 @@ public class ArtNetReceiver : MonoBehaviour
 
     void OnDestroy()
     {
-        StopReceiver();
+        if (ReceiveNetworkData)
+        {
+            StopReceiver();
+        }
     }
 
     void Update()
     {
+        if (DmxBuffer == null)
+        {
+            return;
+        }
+
         DmxBuffer.SwapIfNewFrame();
     }
 
