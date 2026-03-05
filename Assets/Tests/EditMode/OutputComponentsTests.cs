@@ -1,6 +1,7 @@
 using System.Reflection;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.Video;
 
 public class OutputComponentsTests
 {
@@ -107,6 +108,35 @@ public class OutputComponentsTests
         Assert.That(material.GetFloat("_StrobeGate"), Is.EqualTo(1f).Within(0.001f));
 
         Object.DestroyImmediate(receiverGo);
+        Object.DestroyImmediate(outputGo);
+    }
+
+
+    [Test]
+    public void PatternMediaTextureController_Update_UsesFallbackWhenVideoTextureUnavailable()
+    {
+        var outputGo = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        var videoGo = new GameObject("video-player");
+        var controller = outputGo.AddComponent<PatternMediaTextureController>();
+        var videoPlayer = videoGo.AddComponent<VideoPlayer>();
+
+        var fallbackTexture = new Texture2D(2, 2);
+        fallbackTexture.SetPixel(0, 0, Color.magenta);
+        fallbackTexture.Apply();
+
+        SetPrivateField(controller, "outputRenderer", outputGo.GetComponent<Renderer>());
+        SetPrivateField(controller, "videoPlayer", videoPlayer);
+        SetPrivateField(controller, "fallbackImage", fallbackTexture);
+
+        outputGo.SendMessage("Awake");
+        outputGo.SendMessage("Update");
+
+        var material = outputGo.GetComponent<Renderer>().material;
+        Assert.That(material.GetTexture("_FallbackTex"), Is.EqualTo(fallbackTexture));
+        Assert.That(material.GetFloat("_UseMediaTex"), Is.EqualTo(0f).Within(0.001f));
+
+        Object.DestroyImmediate(fallbackTexture);
+        Object.DestroyImmediate(videoGo);
         Object.DestroyImmediate(outputGo);
     }
 

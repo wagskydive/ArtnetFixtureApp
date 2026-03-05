@@ -1,13 +1,26 @@
 # Tickets
 
 T10.19 - Replace the gradient pattern in the MaliSafeLighting.shader with a video texture. The videos will be played from a usb drive. Create a fallback where we can input an image instead. The image will be the app logo and can be adewd in the Unity Editor.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Replaced pattern slot 1 with media-texture sampling in `MaliSafeLighting.shader`, with `_MediaTex` for active video frames and `_FallbackTex` for editor-assigned logo/image fallback.
+  - Added `PatternMediaTextureController` to push `VideoPlayer.texture` into shader property `_MediaTex` and automatically switch to fallback when no video frame is available.
+
 
 T10.18 - Replace the voronoi pattern in the MaliSafeLighting.shader with an outline shader where the size parameter adjusts the blur/fuzzyness/glow.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Replaced the former Voronoi-style pattern slot (index 9) with a radial outline/glow pattern where DMX size controls blur/fuzziness width.
+
+
+
+T10.20 - Next run: wire `PatternMediaTextureController` + fallback logo texture assignment in `MainScene` material setup and run Unity EditMode tests on a licensed runner for T10.18/T10.19
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
