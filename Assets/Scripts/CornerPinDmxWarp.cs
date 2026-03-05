@@ -4,8 +4,7 @@ using UnityEngine;
 public class CornerPinDmxWarp : MonoBehaviour
 {
     [SerializeField] private ArtNetReceiver artNetReceiver;
-    [SerializeField] [Range(1, 505)] private int startChannel = 9;
-    [SerializeField] [Range(0.01f, 2f)] private float maxOffset = 0.5f;
+    [SerializeField] [Range(0.01f, 10f)] private float maxOffset = 0.5f;
 
     private Mesh _runtimeMesh;
     private readonly Vector3[] _baseVertices = new Vector3[4];
@@ -41,8 +40,8 @@ public class CornerPinDmxWarp : MonoBehaviour
 
         for (int corner = 0; corner < 4; corner++)
         {
-            int xChannel = Mathf.Clamp(startChannel + (corner * 2), 1, 512);
-            int yChannel = Mathf.Clamp(startChannel + (corner * 2) + 1, 1, 512);
+            int xChannel = Mathf.Clamp(artNetReceiver.StartChannel + 8 + (corner * 2), 1, 512);
+            int yChannel = Mathf.Clamp(artNetReceiver.StartChannel + 8 + (corner * 2) + 1, 1, 512);
 
             float offsetX = DmxToOffset(dmx[xChannel - 1]);
             float offsetY = DmxToOffset(dmx[yChannel - 1]);
