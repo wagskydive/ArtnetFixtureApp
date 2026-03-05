@@ -1,5 +1,12 @@
 # Tickets
 
+T10.24 - Verify if the Universe selection logic works and fix it if it doesn't work
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 T10.23 - Modify MaliSafeLighting.shader so that the black parts of all the patterns are transparent
 - [x] Started
 - [x] Behavior Written
