@@ -22,3 +22,7 @@ MemoryCaptures/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Image Files
+*.png
+*.jpg
