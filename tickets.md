@@ -1,5 +1,13 @@
 # Tickets
 
+
+T10.1 - Connect UI_DmxSettings to the artnet Receiver so that the correct DMX start channel and universe gets used.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 T9.9 Solve this compile error: Assets\Scripts\UI\UI_DpadNavigationController.cs(76,18): error CS1061: 'Selectable' does not contain a definition for 'OnSubmit' and no accessible extension method 'OnSubmit' accepting a first argument of type 'Selectable' could be found (are you missing a using directive or an assembly reference?)
 - [x] Started
 - [x] Behavior Written
