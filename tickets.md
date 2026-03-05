@@ -1,6 +1,15 @@
 # Tickets
 
 T9.3 - Add RGB and dimmer control. Create a RGB controller script that sets the color of the shader similar to how the PatternGenerator sets the patterns.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Added `RgbDmxController` to map DMX channels 1-4 to shader `_Intensity` + `_Color`, and added EditMode coverage in `OutputComponentsTests`.
+  - Blocked locally: Unity EditMode runner is unavailable in this container for execution.
+
+T9.4 - Next run: execute Unity EditMode suite to validate RgbDmxController + output component coverage
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
