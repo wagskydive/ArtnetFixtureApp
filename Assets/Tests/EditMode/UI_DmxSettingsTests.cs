@@ -15,29 +15,29 @@ public class UI_DmxSettingsTests
     [Test]
     public void CurrentDmxChannel_UpdatesField_WhenInRange()
     {
-        var (settings, channelField, _, _) = CreateSettings();
+        var (settings, channelText, _, _) = CreateSettings();
 
         settings.CurrentDmxChannel = 120;
 
         Assert.That(settings.CurrentDmxChannel, Is.EqualTo(120));
-        Assert.That(channelField.text, Is.EqualTo("120"));
+        Assert.That(channelText.text, Is.EqualTo("120"));
     }
 
     [Test]
     public void CurrentDmxUniverse_UpdatesField_WhenInRange()
     {
-        var (settings, _, universeField, _) = CreateSettings();
+        var (settings, _, universeText, _) = CreateSettings();
 
         settings.CurrentDmxUniverse = 10;
 
         Assert.That(settings.CurrentDmxUniverse, Is.EqualTo(10));
-        Assert.That(universeField.text, Is.EqualTo("10"));
+        Assert.That(universeText.text, Is.EqualTo("10"));
     }
 
     [Test]
     public void CurrentValues_IgnoreOutOfRangeInputs()
     {
-        var (settings, channelField, universeField, _) = CreateSettings();
+        var (settings, channelText, universeText, _) = CreateSettings();
 
         settings.CurrentDmxChannel = 20;
         settings.CurrentDmxUniverse = 2;
@@ -47,28 +47,44 @@ public class UI_DmxSettingsTests
 
         Assert.That(settings.CurrentDmxChannel, Is.EqualTo(20));
         Assert.That(settings.CurrentDmxUniverse, Is.EqualTo(2));
-        Assert.That(channelField.text, Is.EqualTo("20"));
-        Assert.That(universeField.text, Is.EqualTo("2"));
+        Assert.That(channelText.text, Is.EqualTo("20"));
+        Assert.That(universeText.text, Is.EqualTo("2"));
     }
 
     [Test]
-    public void OnChannelValueChanged_ParsesValidInput()
+    public void IncreaseChannel_IncrementsValue()
     {
         var (settings, _, _, _) = CreateSettings();
 
-        settings.OnChannelValueChanged("256");
+        settings.CurrentDmxChannel = 255;
+        settings.IncreaseChannel();
 
         Assert.That(settings.CurrentDmxChannel, Is.EqualTo(256));
     }
 
     [Test]
-    public void OnUniverseValueChanged_ParsesValidInput()
+    public void IncreaseUniverse_IncrementsValue()
     {
         var (settings, _, _, _) = CreateSettings();
 
-        settings.OnUniverseValueChanged("16");
+        settings.CurrentDmxUniverse = 15;
+        settings.IncreaseUniverse();
 
         Assert.That(settings.CurrentDmxUniverse, Is.EqualTo(16));
+    }
+
+    [Test]
+    public void DecreaseMethods_DoNotGoBelowMinimum()
+    {
+        var (settings, _, _, _) = CreateSettings();
+
+        settings.CurrentDmxChannel = 1;
+        settings.CurrentDmxUniverse = 1;
+        settings.DecreaseChannel();
+        settings.DecreaseUniverse();
+
+        Assert.That(settings.CurrentDmxChannel, Is.EqualTo(1));
+        Assert.That(settings.CurrentDmxUniverse, Is.EqualTo(1));
     }
 
     [Test]
@@ -124,7 +140,7 @@ public class UI_DmxSettingsTests
         Assert.That(reloadedSettings.CurrentPatternType, Is.EqualTo(2));
     }
 
-    private static (UI_DmxSettings settings, InputField channelField, InputField universeField, ArtNetReceiver receiver) CreateSettings()
+    private static (UI_DmxSettings settings, Text channelText, Text universeText, ArtNetReceiver receiver) CreateSettings()
     {
         var root = new GameObject("ui-root");
         var settings = root.AddComponent<UI_DmxSettings>();
@@ -132,35 +148,26 @@ public class UI_DmxSettingsTests
 
         var channelGo = new GameObject("channel");
         var universeGo = new GameObject("universe");
-        var textGoA = new GameObject("textA");
-        var textGoB = new GameObject("textB");
 
         channelGo.AddComponent<RectTransform>();
         universeGo.AddComponent<RectTransform>();
-        textGoA.AddComponent<RectTransform>();
-        textGoB.AddComponent<RectTransform>();
 
-        var channelText = textGoA.AddComponent<Text>();
-        var universeText = textGoB.AddComponent<Text>();
-
-        var channelField = channelGo.AddComponent<InputField>();
-        var universeField = universeGo.AddComponent<InputField>();
-        channelField.textComponent = channelText;
-        universeField.textComponent = universeText;
+        var channelText = channelGo.AddComponent<Text>();
+        var universeText = universeGo.AddComponent<Text>();
 
         typeof(UI_DmxSettings)
-            .GetField("channelInputField", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            .SetValue(settings, channelField);
+            .GetField("channelValueText", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            .SetValue(settings, channelText);
 
         typeof(UI_DmxSettings)
-            .GetField("universeInputField", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            .SetValue(settings, universeField);
+            .GetField("universeValueText", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            .SetValue(settings, universeText);
 
         typeof(UI_DmxSettings)
             .GetField("artNetReceiver", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
             .SetValue(settings, receiver);
 
-        return (settings, channelField, universeField, receiver);
+        return (settings, channelText, universeText, receiver);
     }
 
     private class FakeShaderSetter : IShaderGlobalIntSetter

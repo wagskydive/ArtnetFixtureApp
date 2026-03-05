@@ -129,6 +129,7 @@ Enable persistent configuration and easy deployment.
 **Tasks:**
 - [ ] Implement JSON config file load/save
 - [x] Allow selection of DMX universe and start address
+- [x] Restrict DMX universe/start address adjustments to UI +/- button controls (no free-form numeric text input)
 - [ ] Implement mode selection (basic, standard, full)
 - [x] Auto-load last configuration on boot
 - [ ] Provide hidden developer settings UI
