@@ -66,14 +66,14 @@ public class UI_DpadNavigationController : MonoBehaviour
 
     public void SubmitCurrentSelection()
     {
-        if (!HasSelectables() || !IsSelectable(_currentIndex))
+        if (!HasSelectables() || !IsSelectable(_currentIndex) || EventSystem.current == null)
         {
             return;
         }
 
         Selectable selected = orderedSelectables[_currentIndex];
         var submitData = new BaseEventData(EventSystem.current);
-        selected.OnSubmit(submitData);
+        ExecuteEvents.Execute<ISubmitHandler>(selected.gameObject, submitData, ExecuteEvents.submitHandler);
     }
 
     private void SelectIndex(int index)
