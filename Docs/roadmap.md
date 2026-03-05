@@ -156,6 +156,7 @@ Validate system and prepare for production deployment.
 - [x] Configure Unity EditMode CI workflow (`.github/workflows/unity-editmode-tests.yml`) for licensed runner execution
 - [x] Add Editor DMX simulation UI workflow (`UI_DmxEditorSimulator.cs`) for in-Editor channel testing
 - [x] Add dedicated RGB + dimmer shader bridge component (`RgbDmxController.cs`) with EditMode coverage
+- [x] Add Android TV remote D-pad navigation flow (`UI_DpadNavigationController.cs`) with submit-capable selectable support (`UI_DpadSelectable.cs`)
 
 **Acceptance Criteria:**
 - Fixture passes all stress tests
