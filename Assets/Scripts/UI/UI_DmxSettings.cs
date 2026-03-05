@@ -10,6 +10,7 @@ public class UI_DmxSettings : MonoBehaviour
     [SerializeField] private InputField channelInputField;
     [SerializeField] private InputField universeInputField;
     [SerializeField] private int currentPatternType = 0; // Pattern type selector (0=Static, 1=Pulse, 2=ColorShift)
+    [SerializeField] private ArtNetReceiver artNetReceiver;
 
     private int currentDmxChannel = 1;
     private int currentDmxUniverse = 1;
@@ -28,6 +29,8 @@ public class UI_DmxSettings : MonoBehaviour
                 {
                     channelInputField.text = value.ToString();
                 }
+
+                ApplySettingsToReceiver();
             }
         }
     }
@@ -44,6 +47,8 @@ public class UI_DmxSettings : MonoBehaviour
                 {
                     universeInputField.text = value.ToString();
                 }
+
+                ApplySettingsToReceiver();
             }
         }
     }
@@ -62,6 +67,7 @@ public class UI_DmxSettings : MonoBehaviour
     private void Start()
     {
         LoadPreferences();
+        ApplySettingsToReceiver();
     }
 
     private void OnDisable()
@@ -115,6 +121,18 @@ public class UI_DmxSettings : MonoBehaviour
         CurrentDmxChannel = PlayerPrefs.GetInt(ChannelPrefKey, CurrentDmxChannel);
         CurrentDmxUniverse = PlayerPrefs.GetInt(UniversePrefKey, CurrentDmxUniverse);
         CurrentPatternType = PlayerPrefs.GetInt(PatternPrefKey, CurrentPatternType);
+        ApplySettingsToReceiver();
+    }
+
+    private void ApplySettingsToReceiver()
+    {
+        if (artNetReceiver == null)
+        {
+            return;
+        }
+
+        artNetReceiver.SetStartChannelFromUserInput(CurrentDmxChannel);
+        artNetReceiver.SetUniverseFromUserInput(CurrentDmxUniverse);
     }
 
     private void OnPatternTypeChanged()

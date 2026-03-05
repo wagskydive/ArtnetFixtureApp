@@ -15,7 +15,7 @@ public class UI_DmxSettingsTests
     [Test]
     public void CurrentDmxChannel_UpdatesField_WhenInRange()
     {
-        var (settings, channelField, _) = CreateSettings();
+        var (settings, channelField, _, _) = CreateSettings();
 
         settings.CurrentDmxChannel = 120;
 
@@ -26,7 +26,7 @@ public class UI_DmxSettingsTests
     [Test]
     public void CurrentDmxUniverse_UpdatesField_WhenInRange()
     {
-        var (settings, _, universeField) = CreateSettings();
+        var (settings, _, universeField, _) = CreateSettings();
 
         settings.CurrentDmxUniverse = 10;
 
@@ -37,7 +37,7 @@ public class UI_DmxSettingsTests
     [Test]
     public void CurrentValues_IgnoreOutOfRangeInputs()
     {
-        var (settings, channelField, universeField) = CreateSettings();
+        var (settings, channelField, universeField, _) = CreateSettings();
 
         settings.CurrentDmxChannel = 20;
         settings.CurrentDmxUniverse = 2;
@@ -54,7 +54,7 @@ public class UI_DmxSettingsTests
     [Test]
     public void OnChannelValueChanged_ParsesValidInput()
     {
-        var (settings, _, _) = CreateSettings();
+        var (settings, _, _, _) = CreateSettings();
 
         settings.OnChannelValueChanged("256");
 
@@ -64,7 +64,7 @@ public class UI_DmxSettingsTests
     [Test]
     public void OnUniverseValueChanged_ParsesValidInput()
     {
-        var (settings, _, _) = CreateSettings();
+        var (settings, _, _, _) = CreateSettings();
 
         settings.OnUniverseValueChanged("16");
 
@@ -74,7 +74,7 @@ public class UI_DmxSettingsTests
     [Test]
     public void PatternSetter_UpdatesGlobalShaderValue()
     {
-        var (settings, _, _) = CreateSettings();
+        var (settings, _, _, _) = CreateSettings();
 
         settings.CurrentPatternType = 2;
 
@@ -84,7 +84,7 @@ public class UI_DmxSettingsTests
     [Test]
     public void PatternSetter_UsesInjectedShaderSetter()
     {
-        var (settings, _, _) = CreateSettings();
+        var (settings, _, _, _) = CreateSettings();
         var fakeSetter = new FakeShaderSetter();
         settings.ShaderGlobalIntSetter = fakeSetter;
 
@@ -94,16 +94,29 @@ public class UI_DmxSettingsTests
         Assert.That(fakeSetter.LastValue, Is.EqualTo(1));
     }
 
+
+    [Test]
+    public void ChannelAndUniverse_ApplyToReceiverSettings()
+    {
+        var (settings, _, _, receiver) = CreateSettings();
+
+        settings.CurrentDmxChannel = 100;
+        settings.CurrentDmxUniverse = 8;
+
+        Assert.That(receiver.StartChannel, Is.EqualTo(100));
+        Assert.That(receiver.Universe, Is.EqualTo(7));
+    }
+
     [Test]
     public void SaveAndLoadPreferences_RestoresValues()
     {
-        var (settings, _, _) = CreateSettings();
+        var (settings, _, _, _) = CreateSettings();
         settings.CurrentDmxChannel = 200;
         settings.CurrentDmxUniverse = 12;
         settings.CurrentPatternType = 2;
         settings.SavePreferences();
 
-        var (reloadedSettings, _, _) = CreateSettings();
+        var (reloadedSettings, _, _, _) = CreateSettings();
         reloadedSettings.LoadPreferences();
 
         Assert.That(reloadedSettings.CurrentDmxChannel, Is.EqualTo(200));
@@ -111,10 +124,11 @@ public class UI_DmxSettingsTests
         Assert.That(reloadedSettings.CurrentPatternType, Is.EqualTo(2));
     }
 
-    private static (UI_DmxSettings settings, InputField channelField, InputField universeField) CreateSettings()
+    private static (UI_DmxSettings settings, InputField channelField, InputField universeField, ArtNetReceiver receiver) CreateSettings()
     {
         var root = new GameObject("ui-root");
         var settings = root.AddComponent<UI_DmxSettings>();
+        var receiver = root.AddComponent<ArtNetReceiver>();
 
         var channelGo = new GameObject("channel");
         var universeGo = new GameObject("universe");
@@ -142,7 +156,11 @@ public class UI_DmxSettingsTests
             .GetField("universeInputField", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
             .SetValue(settings, universeField);
 
-        return (settings, channelField, universeField);
+        typeof(UI_DmxSettings)
+            .GetField("artNetReceiver", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            .SetValue(settings, receiver);
+
+        return (settings, channelField, universeField, receiver);
     }
 
     private class FakeShaderSetter : IShaderGlobalIntSetter

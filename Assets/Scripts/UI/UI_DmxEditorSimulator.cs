@@ -30,16 +30,16 @@ public class UI_DmxEditorSimulator : MonoBehaviour
             artNetReceiver.DmxBuffer = new DmxBuffer();
         }
 
-        _simulatedFrame[0] = SliderToByte(masterDimmerSlider);
-        _simulatedFrame[1] = SliderToByte(redSlider);
-        _simulatedFrame[2] = SliderToByte(greenSlider);
-        _simulatedFrame[3] = SliderToByte(blueSlider);
-        _simulatedFrame[4] = SliderToByte(patternSlider);
-        _simulatedFrame[5] = SliderToByte(speedSlider);
-        _simulatedFrame[6] = SliderToByte(sizeSlider);
-        _simulatedFrame[7] = SliderToByte(strobeSlider);
+        WriteFixtureChannel(1, SliderToByte(masterDimmerSlider));
+        WriteFixtureChannel(2, SliderToByte(redSlider));
+        WriteFixtureChannel(3, SliderToByte(greenSlider));
+        WriteFixtureChannel(4, SliderToByte(blueSlider));
+        WriteFixtureChannel(5, SliderToByte(patternSlider));
+        WriteFixtureChannel(6, SliderToByte(speedSlider));
+        WriteFixtureChannel(7, SliderToByte(sizeSlider));
+        WriteFixtureChannel(8, SliderToByte(strobeSlider));
 
-        artNetReceiver.DmxBuffer.WriteFrame(_simulatedFrame, 8);
+        artNetReceiver.DmxBuffer.WriteFrame(_simulatedFrame, _simulatedFrame.Length);
         artNetReceiver.DmxBuffer.SwapIfNewFrame();
     }
 
@@ -55,15 +55,27 @@ public class UI_DmxEditorSimulator : MonoBehaviour
             return;
         }
 
-        _simulatedFrame[channel - 1] = (byte)Mathf.RoundToInt(Mathf.Clamp01(normalizedValue) * 255f);
+        WriteFixtureChannel(channel, (byte)Mathf.RoundToInt(Mathf.Clamp01(normalizedValue) * 255f));
 
         if (artNetReceiver.DmxBuffer == null)
         {
             artNetReceiver.DmxBuffer = new DmxBuffer();
         }
 
-        artNetReceiver.DmxBuffer.WriteFrame(_simulatedFrame, 8);
+        artNetReceiver.DmxBuffer.WriteFrame(_simulatedFrame, _simulatedFrame.Length);
         artNetReceiver.DmxBuffer.SwapIfNewFrame();
+    }
+
+
+    private void WriteFixtureChannel(int relativeChannel, byte value)
+    {
+        int absoluteChannel = artNetReceiver.StartChannel + relativeChannel - 1;
+        if (absoluteChannel < 1 || absoluteChannel > _simulatedFrame.Length)
+        {
+            return;
+        }
+
+        _simulatedFrame[absoluteChannel - 1] = value;
     }
 
     private bool CanSimulate()

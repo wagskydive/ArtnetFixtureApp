@@ -22,12 +22,10 @@ public class RgbDmxController : MonoBehaviour
             return;
         }
 
-        DmxBuffer dmxBuffer = artNetReceiver.DmxBuffer;
-
-        float dimmer = dmxBuffer.GetChannel1Based(1) / 255f;
-        float red = dmxBuffer.GetChannel1Based(2) / 255f;
-        float green = dmxBuffer.GetChannel1Based(3) / 255f;
-        float blue = dmxBuffer.GetChannel1Based(4) / 255f;
+        float dimmer = artNetReceiver.GetFixtureChannelValue(1) / 255f;
+        float red = artNetReceiver.GetFixtureChannelValue(2) / 255f;
+        float green = artNetReceiver.GetFixtureChannelValue(3) / 255f;
+        float blue = artNetReceiver.GetFixtureChannelValue(4) / 255f;
 
         _outputMaterial.SetColor("_Color", new Color(red, green, blue, 1f));
         _outputMaterial.SetFloat("_Intensity", dimmer);

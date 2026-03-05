@@ -61,4 +61,36 @@ public class ArtNetReceiverTests
 
         Object.DestroyImmediate(go);
     }
+    [Test]
+    public void GetFixtureChannelValue_UsesStartChannelOffset()
+    {
+        var go = new GameObject("receiver");
+        var receiver = go.AddComponent<ArtNetReceiver>();
+        receiver.DmxBuffer = new DmxBuffer();
+        receiver.StartChannel = 10;
+
+        var frame = new byte[16];
+        frame[9] = 123;
+        receiver.DmxBuffer.WriteFrame(frame, frame.Length);
+        receiver.DmxBuffer.SwapIfNewFrame();
+
+        Assert.That(receiver.GetFixtureChannelValue(1), Is.EqualTo(123));
+
+        Object.DestroyImmediate(go);
+    }
+
+    [Test]
+    public void SetUniverseFromUserInput_ConvertsToZeroBasedUniverse()
+    {
+        var go = new GameObject("receiver");
+        var receiver = go.AddComponent<ArtNetReceiver>();
+
+        receiver.SetUniverseFromUserInput(16);
+
+        Assert.That(receiver.Universe, Is.EqualTo(15));
+        Assert.That(receiver.GetUniverseForUserInput(), Is.EqualTo(16));
+
+        Object.DestroyImmediate(go);
+    }
+
 }

@@ -13,6 +13,6 @@ public class MasterDimmerController : MonoBehaviour
             return;
         }
 
-        CurrentMasterNormalized = artNetReceiver.DmxBuffer.GetChannel1Based(1) / 255f;
+        CurrentMasterNormalized = artNetReceiver.GetFixtureChannelValue(1) / 255f;
     }
 }
