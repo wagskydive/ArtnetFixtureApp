@@ -1,6 +1,16 @@
 # Tickets
 
 T10.10 - Add more patterns to the MaliSafeLighting.shader. At least a horizontal stripes pattern and a voronoi pattern and a couple more. Modify the PatternGenerator also so the new patterns can also be used through the DMX channel
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Extended `MaliSafeLighting.shader` with four new pattern modes: horizontal stripes, checkerboard, diagonal wave, and a lightweight Voronoi-style cell pattern.
+  - Updated `PatternGenerator` DMX pattern mapping so channel 5 now spans ten pattern slots (0-9) across the full DMX byte range.
+  - Refreshed `OutputComponentsTests` pattern assertion to validate max-DMX selection reaches the new highest pattern index.
+
+T10.11 - Next run: execute Unity EditMode suite to validate T10.10 expanded pattern shader + DMX mapping behavior on a licensed Unity runner
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written

@@ -86,7 +86,7 @@ public class OutputComponentsTests
 
         receiver.StartChannel = 100;
         var frame = new byte[128];
-        frame[104] = 215; // channel 5 => pattern 5
+        frame[104] = 255; // channel 5 => highest pattern slot
         frame[105] = 127; // channel 6 => speed midpoint
         frame[106] = 255; // channel 7 => max size
         frame[107] = 0;   // channel 8 => strobe off, gate 1
@@ -102,7 +102,7 @@ public class OutputComponentsTests
         outputGo.SendMessage("Update");
 
         var material = outputGo.GetComponent<Renderer>().material;
-        Assert.That(material.GetInt("_PatternType"), Is.EqualTo(5));
+        Assert.That(material.GetInt("_PatternType"), Is.EqualTo(9));
         Assert.That(material.GetFloat("_Size"), Is.EqualTo(8f).Within(0.001f));
         Assert.That(material.GetFloat("_StrobeGate"), Is.EqualTo(1f).Within(0.001f));
 

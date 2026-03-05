@@ -51,6 +51,7 @@ Implement low-GPU procedural patterns with DMX control.
 - [x] Optimize shader for Mali/low-end GPUs
 - [ ] Profile and test performance on HY300
 - [x] Implement pattern intensity scaling for thermal protection
+- [x] Add extended shader pattern library (horizontal stripes, checkerboard, diagonal wave, Voronoi-style cells) with DMX pattern-slot mapping updates
 
 **Acceptance Criteria:**
 - All patterns render smoothly at 30 FPS
