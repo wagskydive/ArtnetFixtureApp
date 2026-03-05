@@ -9,7 +9,7 @@ using UnityEngine;
 public class ArtNetReceiver : MonoBehaviour
 {
     [Range(0, 15)]
-    public int Universe = 0;
+    public int Universe = 1;
     [Range(1, 512)]
     public int StartChannel = 1;
     public DmxBuffer DmxBuffer;

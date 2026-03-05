@@ -1296,7 +1296,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &454082877
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1310,6 +1310,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ArtnetFixture.Core::ArtNetReceiver
   Universe: 1
+  StartChannel: 1
 --- !u!114 &454082878
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3690,6 +3691,7 @@ MonoBehaviour:
   channelInputField: {fileID: 396933167}
   universeInputField: {fileID: 2078553014}
   currentPatternType: 0
+  artNetReceiver: {fileID: 454082877}
 --- !u!4 &1756910866
 Transform:
   m_ObjectHideFlags: 0
@@ -3868,6 +3870,7 @@ GameObject:
   - component: {fileID: 1807836856}
   - component: {fileID: 1807836855}
   - component: {fileID: 1807836854}
+  - component: {fileID: 1807836857}
   m_Layer: 5
   m_Name: SettingsPanel
   m_TagString: Untagged
@@ -3962,6 +3965,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1807836852}
   m_CullTransparentMesh: 1
+--- !u!114 &1807836857
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1807836852}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91af9ca52ebc43a480541487e819b79f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArtnetFixture.Core::UI_DpadNavigationController
+  orderedSelectables:
+  - {fileID: 396933167}
+  - {fileID: 2078553014}
+  horizontalWrap: 0
 --- !u!1 &1810613168
 GameObject:
   m_ObjectHideFlags: 0

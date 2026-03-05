@@ -1,5 +1,11 @@
 # Tickets
 
+T10.3 - Change the UI_DmxSettings to use + and - buttons instead of input fields in order to only change the DMX start channel and Universe using plus and minus buttons.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
 
 T10.1 - Connect UI_DmxSettings to the artnet Receiver so that the correct DMX start channel and universe gets used.
 - [x] Started

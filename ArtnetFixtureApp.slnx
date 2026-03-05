@@ -1,8 +1,8 @@
 ﻿<Solution>
   <Project Path="Unity.Timeline.csproj" />
   <Project Path="Unity.PlasticSCM.Editor.csproj" />
-  <Project Path="Unity.InputSystem.csproj" />
   <Project Path="ArtnetFixtureApp.EditModeTests.csproj" />
+  <Project Path="Unity.InputSystem.csproj" />
   <Project Path="Unity.VisualScripting.Flow.csproj" />
   <Project Path="Unity.Timeline.Editor.csproj" />
   <Project Path="Unity.VisualScripting.Core.Editor.csproj" />
