@@ -1,5 +1,20 @@
 # Tickets
 
+
+T10.6 - Make a script that can hide and show an object by clicking on the settings button of the remote-controller of AndroidTV
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T10.5 - Modify CornerPinDmxWarp so that the mesh mesh is warped from the middle of the original object when all the DMX channels are at 0. and when they are at 255, the corners are in the farthes corners of the screen.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 T10.3 - Change the UI_DmxSettings to use + and - buttons instead of input fields in order to only change the DMX start channel and Universe using plus and minus buttons.
 - [x] Started
 - [x] Behavior Written
