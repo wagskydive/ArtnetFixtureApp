@@ -1,5 +1,11 @@
 # Tickets
 
+T10.10 - Add more patterns to the MaliSafeLighting.shader. At least a horizontal stripes pattern and a voronoi pattern and a couple more. Modify the PatternGenerator also so the new patterns can also be used through the DMX channel
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
 
 T10.8 - Rewrite the CornerPinDmxWarp to prevent a sharp crease. Make a subdivided mesh that can prevents the sharp crease. Make a variable to set the subdivision amount.
 - [x] Started
