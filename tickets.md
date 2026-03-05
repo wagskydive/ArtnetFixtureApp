@@ -2,13 +2,24 @@
 
 
 T10.6 - Make a script that can hide and show an object by clicking on the settings button of the remote-controller of AndroidTV
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Added `UI_SettingsPanelToggle` to toggle a target object when the Android TV settings key (`KeyCode.Menu`) is pressed.
+  - Added EditMode coverage for hide/show toggle behavior.
 
 T10.5 - Modify CornerPinDmxWarp so that the mesh mesh is warped from the middle of the original object when all the DMX channels are at 0. and when they are at 255, the corners are in the farthes corners of the screen.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Updated `CornerPinDmxWarp` so DMX 0 collapses each corner to the mesh center and DMX 255 expands each corner toward screen-extents using per-axis interpolation.
+  - Replaced existing corner warp assertions with new EditMode tests for center-collapse and max-expansion behavior.
+
+T10.7 - Next run: execute Unity EditMode suite to validate T10.5 and T10.6 behavior on a licensed Unity runner
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written

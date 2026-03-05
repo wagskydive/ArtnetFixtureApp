@@ -123,6 +123,8 @@ Add basic projection mapping for fixture output.
 
 ## Phase 6 – Configuration & Management (2 Weeks)
 
+_Progress note: hidden settings panel visibility can now be toggled from Android TV settings key input._
+
 ### Goal:
 Enable persistent configuration and easy deployment.
 
@@ -132,7 +134,7 @@ Enable persistent configuration and easy deployment.
 - [x] Restrict DMX universe/start address adjustments to UI +/- button controls (no free-form numeric text input)
 - [ ] Implement mode selection (basic, standard, full)
 - [x] Auto-load last configuration on boot
-- [ ] Provide hidden developer settings UI
+- [x] Provide hidden developer settings UI
 
 **Acceptance Criteria:**
 - App starts with last config automatically
