@@ -68,6 +68,16 @@ Shader "Custom/MaliSafeLighting"
                 float checkerMask = 1.0 - step(0.5, abs(pattern - 7.0));
                 float diagonalWaveMask = 1.0 - step(0.5, abs(pattern - 8.0));
                 float voronoiMask = 1.0 - step(0.5, abs(pattern - 9.0));
+                float verticalWaveMask = 1.0 - step(0.5, abs(pattern - 10.0));
+                float ringBandsMask = 1.0 - step(0.5, abs(pattern - 11.0));
+                float spiralMask = 1.0 - step(0.5, abs(pattern - 12.0));
+                float diamondGridMask = 1.0 - step(0.5, abs(pattern - 13.0));
+                float sparkleMask = 1.0 - step(0.5, abs(pattern - 14.0));
+                float pinwheelMask = 1.0 - step(0.5, abs(pattern - 15.0));
+                float sweepMask = 1.0 - step(0.5, abs(pattern - 16.0));
+                float rippleMask = 1.0 - step(0.5, abs(pattern - 17.0));
+                float plasmaMask = 1.0 - step(0.5, abs(pattern - 18.0));
+                float crossPulseMask = 1.0 - step(0.5, abs(pattern - 19.0));
 
                 float linearBrightness = saturate((i.uv.x - 0.5) * safeSize + 0.5);
                 float radialBrightness = saturate(1.0 - radialDistance * safeSize);
@@ -94,6 +104,30 @@ Shader "Custom/MaliSafeLighting"
                 float voronoiDistance = length(voronoiFrac - jitter);
                 float voronoiBrightness = smoothstep(0.55, 0.05, voronoiDistance);
 
+                float verticalWaveBrightness = 0.5 + 0.5 * sin(i.uv.x * safeSize * 18.0 + time);
+
+                float ringBandsBrightness = 0.5 + 0.5 * sin((radialDistance * safeSize * 22.0) - time * 1.5);
+
+                float spiralAngle = atan2(centeredUv.y, centeredUv.x);
+                float spiralBrightness = 0.5 + 0.5 * sin((spiralAngle * (safeSize * 4.0)) + (radialDistance * 16.0) - time * 2.0);
+
+                float diamondPattern = abs(centeredUv.x) + abs(centeredUv.y);
+                float diamondGridBrightness = step(0.5, frac((diamondPattern * safeSize * 6.0) + time * 0.25));
+
+                float sparkleHash = frac(sin(dot(i.uv * (safeSize * 64.0 + 8.0), float2(12.9898, 78.233)) + time * 0.5) * 43758.5453);
+                float sparkleBrightness = step(0.93, sparkleHash);
+
+                float pinwheelBrightness = step(0.5, frac((spiralAngle / 6.2831853) * safeSize * 16.0 + time * 0.5));
+
+                float sweepBrightness = smoothstep(0.0, 0.35, 1.0 - abs(i.uv.y - frac(time * 0.2)) * safeSize * 2.0);
+
+                float rippleBrightness = 0.5 + 0.5 * sin((radialDistance * safeSize * 36.0) - time * 3.0);
+
+                float plasmaBrightness = 0.5 + 0.25 * sin((i.uv.x * safeSize * 10.0) + time) + 0.25 * cos((i.uv.y * safeSize * 13.0) - time * 1.3);
+
+                float crossPulse = min(abs(centeredUv.x), abs(centeredUv.y));
+                float crossPulseBrightness = smoothstep(0.35, 0.0, crossPulse * safeSize + 0.2 * sin(time * 2.0));
+
                 float brightness =
                     solidMask +
                     (linearMask * linearBrightness) +
@@ -104,7 +138,17 @@ Shader "Custom/MaliSafeLighting"
                     (horizontalStripesMask * horizontalStripesBrightness) +
                     (checkerMask * checkerBrightness) +
                     (diagonalWaveMask * diagonalWaveBrightness) +
-                    (voronoiMask * voronoiBrightness);
+                    (voronoiMask * voronoiBrightness) +
+                    (verticalWaveMask * verticalWaveBrightness) +
+                    (ringBandsMask * ringBandsBrightness) +
+                    (spiralMask * spiralBrightness) +
+                    (diamondGridMask * diamondGridBrightness) +
+                    (sparkleMask * sparkleBrightness) +
+                    (pinwheelMask * pinwheelBrightness) +
+                    (sweepMask * sweepBrightness) +
+                    (rippleMask * rippleBrightness) +
+                    (plasmaMask * plasmaBrightness) +
+                    (crossPulseMask * crossPulseBrightness);
 
                 return fixed4(_Color.rgb * brightness * _Intensity * _StrobeGate, 1);
             }

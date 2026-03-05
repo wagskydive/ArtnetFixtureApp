@@ -1,6 +1,16 @@
 # Tickets
 
 T10.12 - Add 10 more patterns to the MaliSafeLighting.shader. Modify the PatternGenerator also so the new patterns can also be used through the DMX channel.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Added ten new low-cost pattern modes to `MaliSafeLighting.shader` (indices 10-19): vertical wave, ring bands, spiral, diamond grid, sparkle, pinwheel, sweep, ripple, plasma, and cross pulse.
+  - Expanded `PatternGenerator` DMX mapping to 20 total pattern slots while preserving existing channel 5 behavior.
+  - Updated EditMode assertion coverage so max DMX pattern input resolves to the new highest pattern index.
+
+T10.13 - Next run: execute Unity EditMode suite to validate T10.12 expanded 20-pattern shader + DMX mapping behavior on a licensed Unity runner
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written

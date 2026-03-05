@@ -102,7 +102,7 @@ public class OutputComponentsTests
         outputGo.SendMessage("Update");
 
         var material = outputGo.GetComponent<Renderer>().material;
-        Assert.That(material.GetInt("_PatternType"), Is.EqualTo(9));
+        Assert.That(material.GetInt("_PatternType"), Is.EqualTo(19));
         Assert.That(material.GetFloat("_Size"), Is.EqualTo(8f).Within(0.001f));
         Assert.That(material.GetFloat("_StrobeGate"), Is.EqualTo(1f).Within(0.001f));
 

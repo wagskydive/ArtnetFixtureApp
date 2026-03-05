@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class PatternGenerator : MonoBehaviour
 {
-    private const int PatternCount = 10;
+    private const int PatternCount = 20;
 
     [SerializeField] private ArtNetReceiver artNetReceiver;
     [SerializeField] private Renderer outputRenderer;
