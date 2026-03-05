@@ -1,5 +1,12 @@
 # Tickets
 
+T10.14 - Create a system to add more meshes that are each listening to their own 16 DMX channels for colors, effects and corner pins. Make a script to extend the UI to add more objects. The UI will work the same as the ui for the starting DMX channel and Universe. The amount of Meshes should be saved in user prefs and is recalled when the app starts. There is a minimum amount of 1 and a maximum of 16 objects. The start DMX channel is only set as it is now and the next object will listen to the the next free channel. So the second object will automatically listen to channel 17 as its starting channel and the third object listens to 33 etc.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 T10.12 - Add 10 more patterns to the MaliSafeLighting.shader. Modify the PatternGenerator also so the new patterns can also be used through the DMX channel.
 - [x] Started
 - [x] Behavior Written
