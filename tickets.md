@@ -1,6 +1,14 @@
 # Tickets
 
 T10.21 - Replace the outline pattern in the MaliSafeLighting.shader with an outline of the actual mesh. Now it is a circle, but i want it to outline the quad mesh.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Updated pattern slot 9 in `MaliSafeLighting.shader` to derive outline/glow from quad edge distance (`uv` border) instead of radial distance so the effect follows mesh bounds.
+
+T10.22 - Next run: execute Unity EditMode tests (licensed runner) and capture visual verification of quad-edge outline behavior on device.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
