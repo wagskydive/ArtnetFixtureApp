@@ -1,7 +1,15 @@
 # Tickets
 
 
-T9.1 - Create Ui to simulate DXM data for use in the Editor
+T9.1 - Create UI to simulate DMX data for use in the Editor
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Added `UI_DmxEditorSimulator` and EditMode test coverage; Unity EditMode runner is unavailable in this container for execution.
+
+T9.2 - Next run: execute Unity EditMode suite to validate editor DMX simulator behavior
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
