@@ -21,7 +21,7 @@ public class UI_FixtureMeshManagerTests
         var receivers = Object.FindObjectsByType<ArtNetReceiver>(FindObjectsSortMode.None);
         Assert.That(receivers.Length, Is.EqualTo(3));
 
-        AssertReceiverHasChannel(receivers, template, 1);
+        AssertReceiverHasChannel(receivers, "FixtureTemplate_1", 1);
         AssertReceiverHasChannel(receivers, "FixtureTemplate_2", 17);
         AssertReceiverHasChannel(receivers, "FixtureTemplate_3", 33);
 

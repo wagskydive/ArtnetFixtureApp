@@ -1,5 +1,12 @@
 # Tickets
 
+T10.16 - Modify the CornerPinDmxWarp class so that each corner can reach anywhere on the screen. Currently the corner positions are calculated from the middle, but that gives a problem when a mesh needs to be projected in such a way that for example the upper right corner has to be positioned left of the midpoint. So the solution is to calculate each corner from the lower left corner when the dmx channel is at 0 and when the DMX channel is at 255, the position is at the top or right edge.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 T10.14 - Create a system to add more meshes that are each listening to their own 16 DMX channels for colors, effects and corner pins. Make a script to extend the UI to add more objects. The UI will work the same as the ui for the starting DMX channel and Universe. The amount of Meshes should be saved in user prefs and is recalled when the app starts. There is a minimum amount of 1 and a maximum of 16 objects. The start DMX channel is only set as it is now and the next object will listen to the the next free channel. So the second object will automatically listen to channel 17 as its starting channel and the third object listens to 33 etc.
 - [x] Started
 - [x] Behavior Written
