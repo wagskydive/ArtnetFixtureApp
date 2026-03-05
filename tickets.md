@@ -1,5 +1,19 @@
 # Tickets
 
+T10.19 - Replace the gradient pattern in the MaliSafeLighting.shader with a video texture. The videos will be played from a usb drive. Create a fallback where we can input an image instead. The image will be the app logo and can be adewd in the Unity Editor.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T10.18 - Replace the voronoi pattern in the MaliSafeLighting.shader with an outline shader where the size parameter adjusts the blur/fuzzyness/glow.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 T10.16 - Modify the CornerPinDmxWarp class so that each corner can reach anywhere on the screen. Currently the corner positions are calculated from the middle, but that gives a problem when a mesh needs to be projected in such a way that for example the upper right corner has to be positioned left of the midpoint. So the solution is to calculate each corner from the lower left corner when the dmx channel is at 0 and when the DMX channel is at 255, the position is at the top or right edge.
 - [x] Started
 - [x] Behavior Written
