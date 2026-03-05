@@ -2,20 +2,30 @@
 
 
 T9.5 - Create a script that adjusts a quad mesh to use as a corner pin object. The script needs to be able to dynamically change the position of the vertices using artnet input. For each corner we use 2 DMX channels that set the X and Y positions of the corners of the quad.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Added `CornerPinDmxWarp` with DMX channel pair mapping (X/Y per corner) and EditMode coverage in `CornerPinDmxWarpTests`.
   
 T9.6 - Create a system to save the settings in user preferences so those settings are recalled when the app gets started again.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Added PlayerPrefs save/load lifecycle handling in `UI_DmxSettings` with regression coverage in `UI_DmxSettingsTests`.
   
 T9.7 - Make the UI working with a Android TV remote controller D-Pad
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Added `UI_DpadNavigationController` plus EditMode coverage in `UI_DpadNavigationControllerTests` to support D-pad traversal and submit behavior.
+
+T9.8 - Next run: execute Unity EditMode suite to validate T9.5/T9.6/T9.7 changes on a licensed Unity runner
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
