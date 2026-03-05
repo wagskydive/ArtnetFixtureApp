@@ -1,5 +1,11 @@
 # Tickets
 
+T9.8 - Create a Selectable object to make the UI_DpadNavigationController work correctly
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
 
 T9.5 - Create a script that adjusts a quad mesh to use as a corner pin object. The script needs to be able to dynamically change the position of the vertices using artnet input. For each corner we use 2 DMX channels that set the X and Y positions of the corners of the quad.
 - [x] Started
