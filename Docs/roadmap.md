@@ -52,6 +52,7 @@ Implement low-GPU procedural patterns with DMX control.
 - [ ] Profile and test performance on HY300
 - [x] Implement pattern intensity scaling for thermal protection
 - [x] Add extended shader pattern library (horizontal stripes, checkerboard, diagonal wave, Voronoi-style cells) with DMX pattern-slot mapping updates
+- [x] Expand shader pattern library by 10 additional DMX-selectable low-cost procedural modes (vertical wave, ring bands, spiral, diamond grid, sparkle, pinwheel, sweep, ripple, plasma, cross pulse)
 
 **Acceptance Criteria:**
 - All patterns render smoothly at 30 FPS
