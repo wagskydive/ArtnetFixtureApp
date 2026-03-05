@@ -5,7 +5,7 @@ using UnityEngine;
 public class CornerPinDmxWarpTests
 {
     [Test]
-    public void Update_AtZeroDmx_CollapsesEntireMeshToCenter()
+    public void Update_AtZeroDmx_CollapsesEntireMeshToLowerLeftCorner()
     {
         var receiverGo = new GameObject("receiver");
         var receiver = receiverGo.AddComponent<ArtNetReceiver>();
@@ -29,8 +29,8 @@ public class CornerPinDmxWarpTests
 
         foreach (var vertex in vertices)
         {
-            Assert.That(vertex.x, Is.EqualTo(0f).Within(0.001f));
-            Assert.That(vertex.y, Is.EqualTo(0f).Within(0.001f));
+            Assert.That(vertex.x, Is.EqualTo(-1f).Within(0.001f));
+            Assert.That(vertex.y, Is.EqualTo(-1f).Within(0.001f));
         }
 
         Object.DestroyImmediate(receiverGo);
@@ -89,6 +89,41 @@ public class CornerPinDmxWarpTests
         Assert.That(mesh.vertexCount, Is.EqualTo(49));
         Assert.That(mesh.triangles.Length, Is.EqualTo(216));
 
+        Object.DestroyImmediate(quad);
+    }
+
+    [Test]
+    public void Update_AllowsAnyCornerToCrossScreenMidpoint()
+    {
+        var receiverGo = new GameObject("receiver");
+        var receiver = receiverGo.AddComponent<ArtNetReceiver>();
+        receiver.DmxBuffer = new DmxBuffer();
+
+        var frame = new byte[512];
+        frame[12] = 64;  // top-right x near left side
+        frame[13] = 255; // top-right y at top edge
+
+        receiver.DmxBuffer.WriteFrame(frame, frame.Length);
+        receiver.DmxBuffer.SwapIfNewFrame();
+
+        var quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        var warp = quad.AddComponent<CornerPinDmxWarp>();
+
+        SetPrivateField(warp, "artNetReceiver", receiver);
+        SetPrivateField(warp, "maxOffset", 0.5f);
+        SetPrivateField(warp, "subdivisionAmount", 4);
+
+        quad.SendMessage("Awake");
+        quad.SendMessage("Update");
+
+        var vertices = quad.GetComponent<MeshFilter>().mesh.vertices;
+        int rowLength = 5;
+        Vector3 topRightVertex = vertices[(rowLength * 5) - 1];
+
+        Assert.That(topRightVertex.x, Is.LessThan(0f));
+        Assert.That(topRightVertex.y, Is.EqualTo(1f).Within(0.001f));
+
+        Object.DestroyImmediate(receiverGo);
         Object.DestroyImmediate(quad);
     }
 

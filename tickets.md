@@ -1,6 +1,15 @@
 # Tickets
 
 T10.16 - Modify the CornerPinDmxWarp class so that each corner can reach anywhere on the screen. Currently the corner positions are calculated from the middle, but that gives a problem when a mesh needs to be projected in such a way that for example the upper right corner has to be positioned left of the midpoint. So the solution is to calculate each corner from the lower left corner when the dmx channel is at 0 and when the DMX channel is at 255, the position is at the top or right edge.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Updated `CornerPinDmxWarp` so every corner now maps both X/Y DMX values from the same lower-left origin to full screen extents, allowing any corner to move across either half of the screen.
+  - Expanded `CornerPinDmxWarpTests` with assertions for lower-left collapse at DMX 0 and midpoint-crossing behavior for the top-right corner.
+
+T10.17 - Next run: execute Unity EditMode suite on a licensed runner to validate T10.16 corner-origin remap behavior end-to-end
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
