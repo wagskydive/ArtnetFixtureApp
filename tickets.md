@@ -1,11 +1,13 @@
 # Tickets
 
 T9.8 - Create a Selectable object to make the UI_DpadNavigationController work correctly
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Added `UI_DpadSelectable` (a submit-capable `Selectable`) and hardened `UI_DpadNavigationController` so D-pad traversal skips null/non-interactable entries while preserving wrap behavior.
+  - Expanded `UI_DpadNavigationControllerTests` to cover first-valid selection and submit event invocation through `UI_DpadSelectable`.
 
 T9.5 - Create a script that adjusts a quad mesh to use as a corner pin object. The script needs to be able to dynamically change the position of the vertices using artnet input. For each corner we use 2 DMX channels that set the X and Y positions of the corners of the quad.
 - [x] Started
@@ -31,7 +33,7 @@ T9.7 - Make the UI working with a Android TV remote controller D-Pad
 - [x] Documentation Written
   - Added `UI_DpadNavigationController` plus EditMode coverage in `UI_DpadNavigationControllerTests` to support D-pad traversal and submit behavior.
 
-T9.8 - Next run: execute Unity EditMode suite to validate T9.5/T9.6/T9.7 changes on a licensed Unity runner
+T9.9 - Next run: execute Unity EditMode suite to validate T9.8 selectable + D-pad navigation updates on a licensed Unity runner
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written

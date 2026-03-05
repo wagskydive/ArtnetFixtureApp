@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -28,6 +29,64 @@ public class UI_DpadNavigationControllerTests
         controller.Move(-1);
 
         Assert.That(EventSystem.current.currentSelectedGameObject, Is.EqualTo(buttonC.gameObject));
+
+        Object.DestroyImmediate(root);
+        Object.DestroyImmediate(eventSystemGo);
+    }
+
+    [Test]
+    public void OnEnable_SelectsFirstInteractableItem_WhenArrayStartsWithNullOrDisabled()
+    {
+        var eventSystemGo = new GameObject("event-system");
+        eventSystemGo.AddComponent<EventSystem>();
+        eventSystemGo.AddComponent<StandaloneInputModule>();
+
+        var root = new GameObject("root");
+        var disabledButton = CreateButton("disabled");
+        disabledButton.interactable = false;
+        var validButton = CreateButton("valid");
+
+        disabledButton.transform.SetParent(root.transform);
+        validButton.transform.SetParent(root.transform);
+
+        var controller = root.AddComponent<UI_DpadNavigationController>();
+        SetPrivateArray(controller, null, disabledButton, validButton);
+
+        root.SendMessage("OnEnable");
+
+        Assert.That(EventSystem.current.currentSelectedGameObject, Is.EqualTo(validButton.gameObject));
+
+        Object.DestroyImmediate(root);
+        Object.DestroyImmediate(eventSystemGo);
+    }
+
+    [Test]
+    public void SubmitCurrentSelection_InvokesUI_DpadSelectableSubmitEvent()
+    {
+        var eventSystemGo = new GameObject("event-system");
+        eventSystemGo.AddComponent<EventSystem>();
+        eventSystemGo.AddComponent<StandaloneInputModule>();
+
+        var root = new GameObject("root");
+        var submitGo = new GameObject("submit-item");
+        submitGo.AddComponent<RectTransform>();
+        var submitSelectable = submitGo.AddComponent<UI_DpadSelectable>();
+        submitGo.transform.SetParent(root.transform);
+
+        bool invoked = false;
+        var eventField = typeof(UI_DpadSelectable)
+            .GetField("onSubmit", BindingFlags.NonPublic | BindingFlags.Instance);
+        var submitEvent = new UnityEngine.Events.UnityEvent();
+        submitEvent.AddListener(() => invoked = true);
+        eventField.SetValue(submitSelectable, submitEvent);
+
+        var controller = root.AddComponent<UI_DpadNavigationController>();
+        SetPrivateArray(controller, submitSelectable);
+
+        root.SendMessage("OnEnable");
+        controller.SubmitCurrentSelection();
+
+        Assert.That(invoked, Is.True);
 
         Object.DestroyImmediate(root);
         Object.DestroyImmediate(eventSystemGo);

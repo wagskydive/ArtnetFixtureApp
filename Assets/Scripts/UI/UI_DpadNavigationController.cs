@@ -12,7 +12,7 @@ public class UI_DpadNavigationController : MonoBehaviour
     private void OnEnable()
     {
         ConfigureNavigation();
-        SelectIndex(0);
+        SelectFirstValid();
     }
 
     private void Update()
@@ -47,26 +47,38 @@ public class UI_DpadNavigationController : MonoBehaviour
 
     public void Move(int delta)
     {
-        int count = orderedSelectables.Length;
-        _currentIndex = (_currentIndex + delta + count) % count;
-        SelectIndex(_currentIndex);
-    }
-
-    public void SubmitCurrentSelection()
-    {
-        Selectable selected = orderedSelectables[_currentIndex];
-        if (selected == null)
+        if (!HasSelectables())
         {
             return;
         }
 
+        int count = orderedSelectables.Length;
+        for (int attempts = 0; attempts < count; attempts++)
+        {
+            _currentIndex = (_currentIndex + delta + count) % count;
+            if (IsSelectable(_currentIndex))
+            {
+                SelectIndex(_currentIndex);
+                return;
+            }
+        }
+    }
+
+    public void SubmitCurrentSelection()
+    {
+        if (!HasSelectables() || !IsSelectable(_currentIndex))
+        {
+            return;
+        }
+
+        Selectable selected = orderedSelectables[_currentIndex];
         var submitData = new BaseEventData(EventSystem.current);
         selected.OnSubmit(submitData);
     }
 
     private void SelectIndex(int index)
     {
-        if (orderedSelectables[index] == null)
+        if (!IsSelectable(index))
         {
             return;
         }
@@ -81,7 +93,7 @@ public class UI_DpadNavigationController : MonoBehaviour
 
     private void ConfigureNavigation()
     {
-        if (orderedSelectables == null)
+        if (!HasSelectables())
         {
             return;
         }
@@ -105,5 +117,35 @@ public class UI_DpadNavigationController : MonoBehaviour
             }
             current.navigation = navigation;
         }
+    }
+
+    private void SelectFirstValid()
+    {
+        if (!HasSelectables())
+        {
+            return;
+        }
+
+        for (int i = 0; i < orderedSelectables.Length; i++)
+        {
+            if (!IsSelectable(i))
+            {
+                continue;
+            }
+
+            SelectIndex(i);
+            return;
+        }
+    }
+
+    private bool HasSelectables()
+    {
+        return orderedSelectables != null && orderedSelectables.Length > 0;
+    }
+
+    private bool IsSelectable(int index)
+    {
+        Selectable selectable = orderedSelectables[index];
+        return selectable != null && selectable.IsInteractable() && selectable.gameObject.activeInHierarchy;
     }
 }
