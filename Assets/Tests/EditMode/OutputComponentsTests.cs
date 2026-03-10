@@ -157,7 +157,7 @@ public class OutputComponentsTests
     }
 
     [Test]
-    public void MovingHeadBeamController_Update_AppliesBeamPropertiesFromDmx()
+    public void MovingHeadBeamController_Update_AppliesMovingHeadPersonalityChannelsFromDmx()
     {
         var receiverGo = new GameObject("receiver");
         var receiver = receiverGo.AddComponent<ArtNetReceiver>();
@@ -165,11 +165,20 @@ public class OutputComponentsTests
         receiver.StartChannel = 1;
 
         var frame = new byte[32];
-        frame[4] = 255;   // channel 5 pan => +1 offset x
-        frame[6] = 0;     // channel 7 tilt => -1 offset y
-        frame[10] = 255;  // channel 11 parameter => max softness
-        frame[11] = 128;  // channel 12 iris/scale => midpoint radius
-        frame[12] = 127;  // channel 13 rotation => pi
+        frame[0] = 200;   // channel 1 master dimmer
+        frame[1] = 64;    // channel 2 red
+        frame[2] = 128;   // channel 3 green
+        frame[3] = 255;   // channel 4 blue
+        frame[4] = 255;   // channel 5 pan coarse
+        frame[5] = 255;   // channel 6 pan fine
+        frame[6] = 0;     // channel 7 tilt coarse
+        frame[7] = 0;     // channel 8 tilt fine
+        frame[8] = 255;   // channel 9 pattern select => slot 19
+        frame[9] = 128;   // channel 10 speed
+        frame[10] = 255;  // channel 11 parameter
+        frame[11] = 128;  // channel 12 iris/scale
+        frame[12] = 127;  // channel 13 rotation
+        frame[13] = 0;    // channel 14 strobe disabled => gate 1
         receiver.DmxBuffer.WriteFrame(frame, frame.Length);
         receiver.DmxBuffer.SwapIfNewFrame();
 
@@ -183,6 +192,17 @@ public class OutputComponentsTests
         outputGo.SendMessage("Update");
 
         var material = outputGo.GetComponent<Renderer>().material;
+        Assert.That(material.GetFloat("_Intensity"), Is.EqualTo(200f / 255f).Within(0.001f));
+        var color = material.GetColor("_BaseColor");
+        Assert.That(color.r, Is.EqualTo(64f / 255f).Within(0.001f));
+        Assert.That(color.g, Is.EqualTo(128f / 255f).Within(0.001f));
+        Assert.That(color.b, Is.EqualTo(1f).Within(0.001f));
+
+        Assert.That(material.GetInt("_PatternType"), Is.EqualTo(19));
+        Assert.That(material.GetFloat("_Speed"), Is.EqualTo(Mathf.Lerp(0.1f, 8f, 128f / 255f)).Within(0.001f));
+        Assert.That(material.GetFloat("_Size"), Is.EqualTo(8f).Within(0.001f));
+        Assert.That(material.GetFloat("_StrobeGate"), Is.EqualTo(1f).Within(0.001f));
+
         Assert.That(material.GetFloat("_BeamOffsetX"), Is.EqualTo(1f).Within(0.001f));
         Assert.That(material.GetFloat("_BeamOffsetY"), Is.EqualTo(-1f).Within(0.001f));
         Assert.That(material.GetFloat("_BeamSoftness"), Is.EqualTo(0.5f).Within(0.001f));
