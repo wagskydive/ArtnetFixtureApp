@@ -159,16 +159,13 @@ public class UI_DmxSettings : MonoBehaviour
 
     private void UpdateUniverseDisplay()
     {
+        int universeDisplay = currentDmxUniverse-1;
         if (universeValueText != null)
         {
-            universeValueText.text = currentDmxUniverse.ToString();
+            
+            universeValueText.text = universeDisplay.ToString();
         }
 
-        if (universeInputField != null)
-        {
-            universeInputField.text = currentDmxUniverse.ToString();
-            universeInputField.interactable = false;
-        }
     }
 
     private void OnPatternTypeChanged()

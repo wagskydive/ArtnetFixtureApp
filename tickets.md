@@ -739,7 +739,14 @@ T8.9b - Add pattern, speed, parameter, iris/scale, rotate, and strobe mappings f
 - [x] Documentation Written
   - Implemented moving-head pattern/speed/parameter/iris/rotate/strobe channel mapping and expanded EditMode coverage for personality parsing + controller application.
 
-T8.10- Modify the MaliSafeMovingHead.shader so that the rotation parameter only rotates the beam and not the whole shader. The X and Y offset directions now change with rotation. The behavior should be that the X and Y directions always relate to the screen X and Y coordinates and the rotation rotates the pattern inside the beam
+T8.10 - Modify the MaliSafeMovingHead.shader so that the rotation parameter only rotates the beam and not the whole shader. The X and Y offset directions now change with rotation. The behavior should be that the X and Y directions always relate to the screen X and Y coordinates and the rotation rotates the pattern inside the beam
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T8.11 - Modify the MaliSafeMovingHead.shader so that the parameter that scales the pattern doesn't affect the beam size. Currently the sizing of the pattern influences also the total size, but the mask size should bne independent of the pattern scale.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
