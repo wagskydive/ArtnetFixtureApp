@@ -581,7 +581,14 @@ T8.6 - Create Moving Head mode shader foundation with Mali-safe circular beam ma
 - [ ] Tests Passed
 - [ ] Documentation Written
 
-T8.6a - Define BDD behavior for beam mask/iris response (Given DMX iris input, When value changes, Then beam radius scales without allocations)
+T8.6a - Add patterns and functionalities to the Moving Head mode shader that function similar to the MaliSafeLighting.shader. 
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T8.6b - Define BDD behavior for beam mask/iris response (Given DMX iris input, When value changes, Then beam radius scales without allocations)
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
