@@ -230,9 +230,15 @@ public class UI_FixtureModeSelector : MonoBehaviour
             return;
         }
 
-        if (currentMode != FixtureMode.Standard)
+        if (currentMode == FixtureMode.Standard)
         {
-            fixtureMeshManager.RebuildFixtures(1);
+            fixtureMeshManager.RestoreSavedFixtureCount();
+            return;
+        }
+
+        if (fixtureMeshManager.FixtureCount != 1)
+        {
+            fixtureMeshManager.RebuildFixtures(1, savePreference: false);
         }
     }
 

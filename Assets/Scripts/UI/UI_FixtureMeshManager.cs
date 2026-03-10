@@ -38,6 +38,11 @@ public class UI_FixtureMeshManager : MonoBehaviour
 
     public void RebuildFixtures(int targetCount)
     {
+        RebuildFixtures(targetCount, savePreference: true);
+    }
+
+    public void RebuildFixtures(int targetCount, bool savePreference)
+    {
         int clampedCount = Mathf.Clamp(targetCount, minimumFixtures, maximumFixtures);
 
         if (fixtureTemplate == null)
@@ -59,7 +64,21 @@ public class UI_FixtureMeshManager : MonoBehaviour
         }
 
         SyncFixtureAddresses();
-        SaveFixtureCountPreference(clampedCount);
+        if (savePreference)
+        {
+            SaveFixtureCountPreference(clampedCount);
+        }
+        else
+        {
+            UpdateFixtureCountDisplay(clampedCount);
+        }
+    }
+
+    public void RestoreSavedFixtureCount()
+    {
+        int defaultCount = Mathf.Clamp(minimumFixtures, 1, maximumFixtures);
+        int savedCount = PlayerPrefs.GetInt(FixtureCountPrefKey, defaultCount);
+        RebuildFixtures(savedCount, savePreference: false);
     }
 
     public void SyncFixtureAddresses()

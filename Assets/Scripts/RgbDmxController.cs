@@ -6,18 +6,16 @@ public class RgbDmxController : MonoBehaviour
     [SerializeField] private Renderer outputRenderer;
 
     private Material _outputMaterial;
+    private Material _activeSharedMaterial;
 
     private void Awake()
     {
-        if (outputRenderer != null)
-        {
-            _outputMaterial = outputRenderer.material;
-        }
+        ResolveOutputMaterial();
     }
 
     private void Update()
     {
-        if (artNetReceiver == null || artNetReceiver.DmxBuffer == null || _outputMaterial == null)
+        if (artNetReceiver == null || artNetReceiver.DmxBuffer == null || !ResolveOutputMaterial())
         {
             return;
         }
@@ -30,4 +28,20 @@ public class RgbDmxController : MonoBehaviour
         _outputMaterial.SetColor("_Color", new Color(red, green, blue, 1f));
         _outputMaterial.SetFloat("_Intensity", dimmer);
     }
+    private bool ResolveOutputMaterial()
+    {
+        if (outputRenderer == null || outputRenderer.sharedMaterial == null)
+        {
+            return false;
+        }
+
+        if (_outputMaterial == null || _activeSharedMaterial != outputRenderer.sharedMaterial)
+        {
+            _activeSharedMaterial = outputRenderer.sharedMaterial;
+            _outputMaterial = outputRenderer.material;
+        }
+
+        return _outputMaterial != null;
+    }
+
 }

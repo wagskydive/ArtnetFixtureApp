@@ -11,19 +11,17 @@ public class ProjectorLightOutput : MonoBehaviour
     [SerializeField] [Range(0f, 1f)] private float highLoadThreshold = 0.9f;
 
     private Material _outputMaterial;
+    private Material _activeSharedMaterial;
     private float _thermalScale = 1f;
 
     private void Awake()
     {
-        if (outputRenderer != null)
-        {
-            _outputMaterial = outputRenderer.material;
-        }
+        ResolveOutputMaterial();
     }
 
     void Update()
     {
-        if (artNetReceiver == null || artNetReceiver.DmxBuffer == null || _outputMaterial == null)
+        if (artNetReceiver == null || artNetReceiver.DmxBuffer == null || !ResolveOutputMaterial())
         {
             return;
         }
@@ -41,6 +39,22 @@ public class ProjectorLightOutput : MonoBehaviour
 
         _outputMaterial.SetColor("_Color", new Color(r, g, b, 1f));
         _outputMaterial.SetFloat("_Intensity", dimmer * thermalScale);
+    }
+
+    private bool ResolveOutputMaterial()
+    {
+        if (outputRenderer == null || outputRenderer.sharedMaterial == null)
+        {
+            return false;
+        }
+
+        if (_outputMaterial == null || _activeSharedMaterial != outputRenderer.sharedMaterial)
+        {
+            _activeSharedMaterial = outputRenderer.sharedMaterial;
+            _outputMaterial = outputRenderer.material;
+        }
+
+        return _outputMaterial != null;
     }
 
     private float ComputeThermalScale(float dimmer, float r, float g, float b)

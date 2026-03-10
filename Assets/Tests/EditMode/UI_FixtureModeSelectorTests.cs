@@ -187,6 +187,45 @@ public class UI_FixtureModeSelectorTests
         DestroySelector(selector, standardMaterial, movingMaterial, pixelMaterial);
     }
 
+    [Test]
+    public void SwitchingBackToStandard_RestoresSavedFixtureCountPreference()
+    {
+        PlayerPrefs.SetInt("dmx.fixture.count", 5);
+
+        var managerGo = new GameObject("fixture-manager");
+        var manager = managerGo.AddComponent<UI_FixtureMeshManager>();
+        var template = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        template.name = "FixtureTemplate";
+        var receiver = template.AddComponent<ArtNetReceiver>();
+        receiver.ReceiveNetworkData = false;
+        receiver.DmxBuffer = new DmxBuffer();
+
+        typeof(UI_FixtureMeshManager)
+            .GetField("primaryReceiver", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            .SetValue(manager, receiver);
+        typeof(UI_FixtureMeshManager)
+            .GetField("fixtureTemplate", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            .SetValue(manager, template);
+
+        manager.SendMessage("Start");
+        Assert.That(manager.FixtureCount, Is.EqualTo(5));
+
+        var selector = CreateSelector(out _, out var standardMaterial, out var movingMaterial, out var pixelMaterial, out _, out _, out _, out _, out _);
+        typeof(UI_FixtureModeSelector)
+            .GetField("fixtureMeshManager", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            .SetValue(selector, manager);
+
+        selector.SetMode(UI_FixtureModeSelector.FixtureMode.MovingHead);
+        Assert.That(manager.FixtureCount, Is.EqualTo(1));
+
+        selector.SetMode(UI_FixtureModeSelector.FixtureMode.Standard);
+        Assert.That(manager.FixtureCount, Is.EqualTo(5));
+
+        Object.DestroyImmediate(managerGo);
+        Object.DestroyImmediate(template);
+        DestroySelector(selector, standardMaterial, movingMaterial, pixelMaterial);
+    }
+
     private static UI_FixtureModeSelector CreateSelector(
         out Renderer renderer,
         out Material standardMaterial,

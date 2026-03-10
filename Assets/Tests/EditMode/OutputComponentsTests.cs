@@ -214,6 +214,48 @@ public class OutputComponentsTests
     }
 
     [Test]
+    public void ModeMaterialChange_ProjectorLightOutput_RebindsAndAppliesDmxToNewMaterial()
+    {
+        var receiverGo = new GameObject("receiver");
+        var receiver = receiverGo.AddComponent<ArtNetReceiver>();
+        receiver.DmxBuffer = new DmxBuffer();
+        receiver.StartChannel = 1;
+
+        var frame = new byte[8];
+        frame[0] = 255;
+        frame[1] = 255;
+        frame[2] = 0;
+        frame[3] = 0;
+        receiver.DmxBuffer.WriteFrame(frame, frame.Length);
+        receiver.DmxBuffer.SwapIfNewFrame();
+
+        var outputGo = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        var renderer = outputGo.GetComponent<Renderer>();
+        var initial = new Material(Shader.Find("Standard"));
+        var replacement = new Material(Shader.Find("Standard"));
+        renderer.sharedMaterial = initial;
+
+        var output = outputGo.AddComponent<ProjectorLightOutput>();
+        SetPrivateField(output, "artNetReceiver", receiver);
+        SetPrivateField(output, "outputRenderer", renderer);
+
+        outputGo.SendMessage("Awake");
+        renderer.sharedMaterial = replacement;
+        outputGo.SendMessage("Update");
+
+        Assert.That(replacement.GetFloat("_Intensity"), Is.EqualTo(1f).Within(0.001f));
+        var color = replacement.GetColor("_Color");
+        Assert.That(color.r, Is.EqualTo(1f).Within(0.001f));
+        Assert.That(color.g, Is.EqualTo(0f).Within(0.001f));
+        Assert.That(color.b, Is.EqualTo(0f).Within(0.001f));
+
+        Object.DestroyImmediate(initial);
+        Object.DestroyImmediate(replacement);
+        Object.DestroyImmediate(receiverGo);
+        Object.DestroyImmediate(outputGo);
+    }
+
+    [Test]
     public void ProjectorLightOutput_Update_ReducesIntensityAtSustainedHighLoad()
     {
         var receiverGo = new GameObject("receiver");
