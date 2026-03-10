@@ -682,3 +682,59 @@ T8.12 - Document Moving Head DMX personality and operator setup flow in project 
 - [ ] Code Written
 - [ ] Tests Passed
 - [ ] Documentation Written
+
+T9.1 - Create a Mali-safe Pixel Mapping shader with configurable row/column grid quantization
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T9.2 - Extend settings UI with Pixel Mapping mode selection alongside existing fixture modes
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T9.3 - Add Pixel Wall size controls (Rows/Columns) with validation and clamp range of 1-32
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T9.4 - Persist Pixel Mapping mode + wall size preferences in PlayerPrefs and restore on startup
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T9.5 - Implement Pixel Mapping DMX personality (Master Dimmer, Strobe, Corner Pin XY, per-pixel RGB stream)
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T9.6 - Add EditMode tests for Pixel Mapping mode switch, grid-size persistence, and DMX channel parsing
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T9.7 - Next run: execute HY300 stress/performance validation for Pixel Mapping mode at 32x32 and mixed DMX traffic
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T9.8 - Document Pixel Mapping setup, DMX addressing scheme, and operational limits in project docs
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
