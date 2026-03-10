@@ -463,6 +463,14 @@ T2.6 - Implement thermal management for high-load scenarios
 [x] Code Written
 [ ] Tests Passed
 [x] Documentation Written
+
+T2.7 - Create a SurfaceProjectionDmxPersonality Mode that is used for the original MaliSafeLighting.shader and uses the original dmx channels for corner pinning per fixture. The original DMX mapping uses channels 9-16 for corner pinning. The CornerPinDmxWarp.cs now listens for the channels 3-11 for the PixelMapping mode. The system needs to be able to be used for both modes. Change that file accordingly or create a seperate file per mode.
+[ ] Started
+[ ] Behavior Written
+[ ] Code Written
+[ ] Tests Passed
+[ ] Documentation Written
+
 T3.1 - Integrate VideoPlayer component
 [x] Started
 [x] Behavior Written
