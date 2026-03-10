@@ -1,5 +1,19 @@
 # Tickets
 
+T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T11.2 - Modify the UI_FixtureModeSelector.cs so that the grid size for the pixel mapping mode only shows when the Pixel Mapping mode is selected and make it work with increment and decrement buttons for X size and Y size in increments of 8 pixels and a maximum of 32 pixels on both dimensions.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 T10.24 - Verify if the Universe selection logic works and fix it if it doesn't work
 - [x] Started
 - [x] Behavior Written
