@@ -573,3 +573,73 @@ T8.3 - Wire MediaPlaybackController into scene and verify VideoPlayer bindings o
 - [ ] Code Written
 - [ ] Tests Passed
 - [ ] Documentation Written
+
+T8.6 - Create Moving Head mode shader foundation with Mali-safe circular beam mask control
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T8.6a - Define BDD behavior for beam mask/iris response (Given DMX iris input, When value changes, Then beam radius scales without allocations)
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T8.7 - Add settings-menu mode selector to switch between existing fixture mode and Moving Head mode
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T8.8 - Persist selected fixture mode in PlayerPrefs and auto-restore on app startup
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T8.9 - Implement Moving Head DMX personality mapping (1-14) and runtime channel parser
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T8.9a - Add pan/tilt coarse+fine mapping with normalized output suitable for beam direction controls
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T8.9b - Add pattern, speed, parameter, iris/scale, rotate, and strobe mappings for Moving Head mode
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T8.10 - Create EditMode tests for Moving Head mode switching, DMX mapping accuracy, and prefs restore
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T8.11 - Run HY300 validation pass for Moving Head mode (stability, FPS, thermal, DMX response)
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T8.12 - Document Moving Head DMX personality and operator setup flow in project docs
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
