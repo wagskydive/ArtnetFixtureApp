@@ -40,6 +40,13 @@ T99.5 - Make the Fixture amount a saved user pref, so that when the fixture amou
 - [x] Documentation Written
   - Added non-destructive fixture rebuild APIs so non-Standard modes force one fixture without overwriting saved preference; returning to Standard restores the previously saved fixture amount and updates UI text accordingly.
 
+T99.6 - Fix the DMX channel assignments for all the modes. Currently the DMX values of the standard mode are still the same for each mode. Find out why this still doesn't work as required and fix it. Create new systems if that is needed to make it work. Refactor the code to make it more logical.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode
 - [x] Started
 - [x] Behavior Written
