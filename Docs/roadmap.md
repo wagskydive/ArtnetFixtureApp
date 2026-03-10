@@ -139,6 +139,7 @@ Enable persistent configuration and easy deployment.
 - [ ] Implement JSON config file load/save
 - [x] Allow selection of DMX universe and start address
 - [x] Restrict DMX universe/start address adjustments to UI +/- button controls (no free-form numeric text input)
+- [x] Align universe UI as 1-based while preserving 0-based internal ArtNet receiver storage
 - [ ] Implement mode selection (basic, standard, full)
 - [x] Auto-load last configuration on boot
 - [x] Provide hidden developer settings UI
@@ -210,6 +211,7 @@ Add a new mode that makes the app function like a pixel wall.
 - [x] Save the selected setting in user-prefs
 - [x] Add new DMX channel mapping: 1-Master Dimmer, 2-Strobe, 3-10 corner pinning X and Y, 11-? RGB values for each pixel
 - [x] Add dual corner-pin personalities so Standard/Surface Projection mode uses channels 9-16 while Pixel Mapping mode keeps channels 3-10
+- [x] Keep fixture amount controls visible only for Standard mode and force single fixture instance for Moving Head + Pixel Mapping modes
 
 
 **Acceptance Criteria:**

@@ -10,12 +10,13 @@ public class UI_FixtureModeSelectorTests
         PlayerPrefs.DeleteKey("dmx.fixture.mode");
         PlayerPrefs.DeleteKey("dmx.pixel.rows");
         PlayerPrefs.DeleteKey("dmx.pixel.columns");
+        PlayerPrefs.DeleteKey("dmx.fixture.count");
     }
 
     [Test]
     public void SetMode_SwitchesMaterialToMovingHead()
     {
-        var selector = CreateSelector(out var renderer, out var standardMaterial, out var movingMaterial, out var pixelMaterial, out _, out _, out _, out _);
+        var selector = CreateSelector(out var renderer, out var standardMaterial, out var movingMaterial, out var pixelMaterial, out _, out _, out _, out _, out _);
 
         selector.SetMode(UI_FixtureModeSelector.FixtureMode.MovingHead);
 
@@ -28,7 +29,7 @@ public class UI_FixtureModeSelectorTests
     [Test]
     public void SetMode_SwitchesMaterialToPixelMapping()
     {
-        var selector = CreateSelector(out var renderer, out var standardMaterial, out var movingMaterial, out var pixelMaterial, out _, out _, out _, out _);
+        var selector = CreateSelector(out var renderer, out var standardMaterial, out var movingMaterial, out var pixelMaterial, out _, out _, out _, out _, out _);
 
         selector.SetMode(UI_FixtureModeSelector.FixtureMode.PixelMapping);
 
@@ -41,7 +42,7 @@ public class UI_FixtureModeSelectorTests
     [Test]
     public void IncreaseAndDecreaseMode_CyclesAcrossModes()
     {
-        var selector = CreateSelector(out _, out var standardMaterial, out var movingMaterial, out var pixelMaterial, out var modeText, out _, out _, out _);
+        var selector = CreateSelector(out _, out var standardMaterial, out var movingMaterial, out var pixelMaterial, out var modeText, out _, out _, out _, out _);
         selector.SendMessage("Start");
 
         selector.DecreaseMode();
@@ -58,13 +59,13 @@ public class UI_FixtureModeSelectorTests
     [Test]
     public void SaveAndLoadPreferences_RestoresSelectedModeAndGridSize()
     {
-        var selector = CreateSelector(out _, out var standardMaterial, out var movingMaterial, out var pixelMaterial, out _, out _, out _, out _);
+        var selector = CreateSelector(out _, out var standardMaterial, out var movingMaterial, out var pixelMaterial, out _, out _, out _, out _, out _);
         selector.SetMode(UI_FixtureModeSelector.FixtureMode.PixelMapping);
         selector.CurrentPixelRows = 24;
         selector.CurrentPixelColumns = 32;
         selector.SavePreferences();
 
-        var reloaded = CreateSelector(out _, out var standardReloadMaterial, out var movingReloadMaterial, out var pixelReloadMaterial, out var modeText, out var pixelGridContainer, out var rowsText, out var columnsText);
+        var reloaded = CreateSelector(out _, out var standardReloadMaterial, out var movingReloadMaterial, out var pixelReloadMaterial, out var modeText, out var pixelGridContainer, out var rowsText, out var columnsText, out _);
         reloaded.LoadPreferences();
         reloaded.SendMessage("Start");
 
@@ -83,7 +84,7 @@ public class UI_FixtureModeSelectorTests
     [Test]
     public void PixelGridSize_UsesEightStepAndClampsBetweenEightAndThirtyTwo()
     {
-        var selector = CreateSelector(out var renderer, out var standardMaterial, out var movingMaterial, out var pixelMaterial, out _, out _, out var rowsText, out var columnsText);
+        var selector = CreateSelector(out var renderer, out var standardMaterial, out var movingMaterial, out var pixelMaterial, out _, out _, out var rowsText, out var columnsText, out _);
         selector.SendMessage("Start");
         selector.SetMode(UI_FixtureModeSelector.FixtureMode.PixelMapping);
 
@@ -111,7 +112,7 @@ public class UI_FixtureModeSelectorTests
     [Test]
     public void PixelGridControls_AreVisibleOnlyInPixelMappingMode()
     {
-        var selector = CreateSelector(out _, out var standardMaterial, out var movingMaterial, out var pixelMaterial, out _, out var pixelGridContainer, out _, out _);
+        var selector = CreateSelector(out _, out var standardMaterial, out var movingMaterial, out var pixelMaterial, out _, out var pixelGridContainer, out _, out _, out _);
         selector.SendMessage("Start");
 
         Assert.That(pixelGridContainer.activeSelf, Is.False);
@@ -128,6 +129,64 @@ public class UI_FixtureModeSelectorTests
         DestroySelector(selector, standardMaterial, movingMaterial, pixelMaterial);
     }
 
+    [Test]
+    public void FixtureCountControls_AreVisibleOnlyInStandardMode()
+    {
+        var selector = CreateSelector(out _, out var standardMaterial, out var movingMaterial, out var pixelMaterial, out _, out _, out _, out _, out var fixtureCountContainer);
+        selector.SendMessage("Start");
+
+        Assert.That(fixtureCountContainer.activeSelf, Is.True);
+
+        selector.SetMode(UI_FixtureModeSelector.FixtureMode.MovingHead);
+        Assert.That(fixtureCountContainer.activeSelf, Is.False);
+
+        selector.SetMode(UI_FixtureModeSelector.FixtureMode.PixelMapping);
+        Assert.That(fixtureCountContainer.activeSelf, Is.False);
+
+        selector.SetMode(UI_FixtureModeSelector.FixtureMode.Standard);
+        Assert.That(fixtureCountContainer.activeSelf, Is.True);
+
+        DestroySelector(selector, standardMaterial, movingMaterial, pixelMaterial);
+    }
+
+    [Test]
+    public void NonStandardModes_ForceSingleFixtureInstance()
+    {
+        var managerGo = new GameObject("fixture-manager");
+        var manager = managerGo.AddComponent<UI_FixtureMeshManager>();
+        var template = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        template.name = "FixtureTemplate";
+        var receiver = template.AddComponent<ArtNetReceiver>();
+        receiver.ReceiveNetworkData = false;
+        receiver.DmxBuffer = new DmxBuffer();
+
+        typeof(UI_FixtureMeshManager)
+            .GetField("primaryReceiver", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            .SetValue(manager, receiver);
+        typeof(UI_FixtureMeshManager)
+            .GetField("fixtureTemplate", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            .SetValue(manager, template);
+
+        manager.RebuildFixtures(4);
+        Assert.That(manager.FixtureCount, Is.EqualTo(4));
+
+        var selector = CreateSelector(out _, out var standardMaterial, out var movingMaterial, out var pixelMaterial, out _, out _, out _, out _, out _);
+        typeof(UI_FixtureModeSelector)
+            .GetField("fixtureMeshManager", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            .SetValue(selector, manager);
+
+        selector.SetMode(UI_FixtureModeSelector.FixtureMode.MovingHead);
+        Assert.That(manager.FixtureCount, Is.EqualTo(1));
+
+        manager.RebuildFixtures(3);
+        selector.SetMode(UI_FixtureModeSelector.FixtureMode.PixelMapping);
+        Assert.That(manager.FixtureCount, Is.EqualTo(1));
+
+        Object.DestroyImmediate(managerGo);
+        Object.DestroyImmediate(template);
+        DestroySelector(selector, standardMaterial, movingMaterial, pixelMaterial);
+    }
+
     private static UI_FixtureModeSelector CreateSelector(
         out Renderer renderer,
         out Material standardMaterial,
@@ -136,7 +195,8 @@ public class UI_FixtureModeSelectorTests
         out Text modeValueText,
         out GameObject pixelGridControlsContainer,
         out Text pixelRowsValue,
-        out Text pixelColumnsValue)
+        out Text pixelColumnsValue,
+        out GameObject fixtureCountControlsContainer)
     {
         var root = new GameObject("mode-root");
         renderer = root.AddComponent<MeshRenderer>();
@@ -152,6 +212,7 @@ public class UI_FixtureModeSelectorTests
         modeValueText = modeTextGo.AddComponent<Text>();
 
         pixelGridControlsContainer = new GameObject("pixel-grid-controls");
+        fixtureCountControlsContainer = new GameObject("fixture-count-controls");
 
         var rowsTextGo = new GameObject("rows-text");
         pixelRowsValue = rowsTextGo.AddComponent<Text>();
@@ -190,6 +251,10 @@ public class UI_FixtureModeSelectorTests
         typeof(UI_FixtureModeSelector)
             .GetField("pixelColumnsValueText", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
             .SetValue(selector, pixelColumnsValue);
+
+        typeof(UI_FixtureModeSelector)
+            .GetField("fixtureCountControlsContainer", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            .SetValue(selector, fixtureCountControlsContainer);
 
         return selector;
     }

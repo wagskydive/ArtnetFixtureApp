@@ -40,7 +40,7 @@ public class UI_DmxSettings : MonoBehaviour
         get => currentDmxUniverse;
         set
         {
-            if (value >= 0 && value <= 15)
+            if (value >= 1 && value <= 16)
             {
                 currentDmxUniverse = value;
                 UpdateUniverseDisplay();
@@ -94,13 +94,13 @@ public class UI_DmxSettings : MonoBehaviour
 
     public void IncreaseUniverse()
     {
-        CurrentDmxUniverse = Mathf.Min(15, CurrentDmxUniverse + 1);
+        CurrentDmxUniverse = Mathf.Min(16, CurrentDmxUniverse + 1);
         SavePreferences();
     }
 
     public void DecreaseUniverse()
     {
-        CurrentDmxUniverse = Mathf.Max(0, CurrentDmxUniverse - 1);
+        CurrentDmxUniverse = Mathf.Max(1, CurrentDmxUniverse - 1);
         SavePreferences();
     }
 
@@ -161,12 +161,12 @@ public class UI_DmxSettings : MonoBehaviour
     {
         if (universeValueText != null)
         {
-            universeValueText.text = (currentDmxUniverse-1).ToString();
+            universeValueText.text = currentDmxUniverse.ToString();
         }
 
         if (universeInputField != null)
         {
-            universeInputField.text = (currentDmxUniverse-1).ToString();
+            universeInputField.text = currentDmxUniverse.ToString();
             universeInputField.interactable = false;
         }
     }

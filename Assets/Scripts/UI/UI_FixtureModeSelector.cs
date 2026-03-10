@@ -26,6 +26,8 @@ public class UI_FixtureModeSelector : MonoBehaviour
     [SerializeField] private GameObject pixelGridControlsContainer;
     [SerializeField] private Text pixelRowsValueText;
     [SerializeField] private Text pixelColumnsValueText;
+    [SerializeField] private UI_FixtureMeshManager fixtureMeshManager;
+    [SerializeField] private GameObject fixtureCountControlsContainer;
     [SerializeField] private FixtureMode currentMode = FixtureMode.Standard;
     [SerializeField] private int currentPixelRows = 8;
     [SerializeField] private int currentPixelColumns = 8;
@@ -70,6 +72,7 @@ public class UI_FixtureModeSelector : MonoBehaviour
     private void Start()
     {
         LoadPreferences();
+        EnforceFixtureCountForMode();
         ApplyModeMaterials();
         ApplyPixelGridSettings();
         SyncUiState();
@@ -96,6 +99,7 @@ public class UI_FixtureModeSelector : MonoBehaviour
         }
 
         currentMode = mode;
+        EnforceFixtureCountForMode();
         ApplyModeMaterials();
         ApplyPixelGridSettings();
         SyncUiState();
@@ -188,6 +192,11 @@ public class UI_FixtureModeSelector : MonoBehaviour
             pixelGridControlsContainer.SetActive(currentMode == FixtureMode.PixelMapping);
         }
 
+        if (fixtureCountControlsContainer != null)
+        {
+            fixtureCountControlsContainer.SetActive(currentMode == FixtureMode.Standard);
+        }
+
         if (pixelRowsValueText != null)
         {
             pixelRowsValueText.text = currentPixelRows.ToString();
@@ -212,6 +221,19 @@ public class UI_FixtureModeSelector : MonoBehaviour
         }
 
         return "Standard";
+    }
+
+    private void EnforceFixtureCountForMode()
+    {
+        if (fixtureMeshManager == null)
+        {
+            return;
+        }
+
+        if (currentMode != FixtureMode.Standard)
+        {
+            fixtureMeshManager.RebuildFixtures(1);
+        }
     }
 
     private void ApplyPixelGridSettings()
