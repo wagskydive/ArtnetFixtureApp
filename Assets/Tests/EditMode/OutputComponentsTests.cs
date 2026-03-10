@@ -146,12 +146,51 @@ public class OutputComponentsTests
         var go = new GameObject("missing-deps");
         var generator = go.AddComponent<PatternGenerator>();
         var output = go.AddComponent<ProjectorLightOutput>();
+        var movingHead = go.AddComponent<MovingHeadBeamController>();
 
         Assert.DoesNotThrow(() => go.SendMessage("Update", SendMessageOptions.DontRequireReceiver));
         Assert.DoesNotThrow(() => generator.SendMessage("Update"));
         Assert.DoesNotThrow(() => output.SendMessage("Update"));
+        Assert.DoesNotThrow(() => movingHead.SendMessage("Update"));
 
         Object.DestroyImmediate(go);
+    }
+
+    [Test]
+    public void MovingHeadBeamController_Update_AppliesBeamPropertiesFromDmx()
+    {
+        var receiverGo = new GameObject("receiver");
+        var receiver = receiverGo.AddComponent<ArtNetReceiver>();
+        receiver.DmxBuffer = new DmxBuffer();
+        receiver.StartChannel = 1;
+
+        var frame = new byte[32];
+        frame[4] = 255;   // channel 5 pan => +1 offset x
+        frame[6] = 0;     // channel 7 tilt => -1 offset y
+        frame[10] = 255;  // channel 11 parameter => max softness
+        frame[11] = 128;  // channel 12 iris/scale => midpoint radius
+        frame[12] = 127;  // channel 13 rotation => pi
+        receiver.DmxBuffer.WriteFrame(frame, frame.Length);
+        receiver.DmxBuffer.SwapIfNewFrame();
+
+        var outputGo = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        var controller = outputGo.AddComponent<MovingHeadBeamController>();
+
+        SetPrivateField(controller, "artNetReceiver", receiver);
+        SetPrivateField(controller, "outputRenderer", outputGo.GetComponent<Renderer>());
+
+        outputGo.SendMessage("Awake");
+        outputGo.SendMessage("Update");
+
+        var material = outputGo.GetComponent<Renderer>().material;
+        Assert.That(material.GetFloat("_BeamOffsetX"), Is.EqualTo(1f).Within(0.001f));
+        Assert.That(material.GetFloat("_BeamOffsetY"), Is.EqualTo(-1f).Within(0.001f));
+        Assert.That(material.GetFloat("_BeamSoftness"), Is.EqualTo(0.5f).Within(0.001f));
+        Assert.That(material.GetFloat("_BeamRadius"), Is.EqualTo(0.527f).Within(0.01f));
+        Assert.That(material.GetFloat("_BeamRotation"), Is.EqualTo(Mathf.PI).Within(0.05f));
+
+        Object.DestroyImmediate(receiverGo);
+        Object.DestroyImmediate(outputGo);
     }
 
     [Test]
