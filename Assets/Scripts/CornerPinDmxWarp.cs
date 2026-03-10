@@ -58,11 +58,7 @@ public class CornerPinDmxWarp : MonoBehaviour
 
     bool fullScreen;
 
-    void SetFullScreen()
-    {
 
-        fullScreen = true;
-    }
 
     private void Update()
     {
@@ -81,8 +77,10 @@ public class CornerPinDmxWarp : MonoBehaviour
                 _warpedCorners[3] = new Vector3(_maxX, _minY, 0);
 
 
-                SetFullScreen();
+                
                 ApplyWarpedGrid();
+                fullScreen = true;
+                
             }
             return;
         }
