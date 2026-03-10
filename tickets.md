@@ -24,6 +24,20 @@ T99.3 - Find out why the app doesn't show anything anymore since the implementat
 - [x] Documentation Written
   - Resolved no-output regression by correcting universe persistence/display alignment between `UI_DmxSettings` and `ArtNetReceiver` (1-based UI, 0-based receiver).
 
+T99.4 - Find out why the app doesn't show anything anymore since the implementation of the Movinghead and PixelMapping Modes. Artnet Data is being sent, so that can not be the issue. The resolve in ticket 9.3 did not fix it. 
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T99.5 - Make the Fixture amount a saved user pref, so that when the fixture amount is bigger than 1 and the mode is changed from standard mode to another mode and changed back after that, the original amount is retreived and displayed
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode
 - [x] Started
 - [x] Behavior Written
