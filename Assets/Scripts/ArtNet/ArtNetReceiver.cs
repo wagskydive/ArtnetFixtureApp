@@ -39,12 +39,12 @@ public class ArtNetReceiver : MonoBehaviour
 
     public void SetUniverseFromUserInput(int universe1Based)
     {
-        Universe = ClampUniverse(universe1Based);
+        Universe = ClampUniverse(universe1Based - 1);
     }
 
     public int GetUniverseForUserInput()
     {
-        return Universe;
+        return Universe + 1;
     }
 
     public void SetStartChannelFromUserInput(int startChannel1Based)

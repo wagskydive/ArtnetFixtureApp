@@ -1,25 +1,28 @@
 # Tickets
 
 T99.1 - Find and fix the bug in which the Fixture Amount button that increases the fixture amount in the UI_FixureMeshManager.cs also increments the Universe on the ArtNetReveiver.cs script
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Fixed ArtNet 1-based UI universe conversion so fixture cloning/address sync no longer drifts universes when fixture count changes.
 
 T99.2 - Fix the Ui so that only the Standard/Surface mode shows the Fixture Amount UI panel and also make sure that the other modes only use 1 fixture instance.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Added mode-aware fixture count UI visibility and forced single-instance behavior for Moving Head and Pixel Mapping modes.
   
 T99.3 - Find out why the app doesn't show anything anymore since the implementation of the Movinghead and PixelMapping Modes. Artnet Data is being sent, soa that can not be the issue
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Resolved no-output regression by correcting universe persistence/display alignment between `UI_DmxSettings` and `ArtNetReceiver` (1-based UI, 0-based receiver).
 
 T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode
 - [x] Started
@@ -806,6 +809,14 @@ T9.7 - Next run: execute HY300 stress/performance validation for Pixel Mapping m
 - [ ] Documentation Written
 
 T9.8 - Document Pixel Mapping setup, DMX addressing scheme, and operational limits in project docs
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+
+T99.4 - Next run: execute Unity EditMode suite on a licensed runner to validate T99.1-T99.3 end-to-end in-engine.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
