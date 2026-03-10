@@ -6,6 +6,7 @@ public class CornerPinDmxWarp : MonoBehaviour
     [SerializeField] private ArtNetReceiver artNetReceiver;
     [SerializeField] [Range(0.01f, 10f)] private float maxOffset = 0.5f;
     [SerializeField] [Range(1, 64)] private int subdivisionAmount = 8;
+    [SerializeField] private UI_FixtureModeSelector fixtureModeSelector;
 
     private Mesh _runtimeMesh;
     private Vector3[] _expandedCorners = new Vector3[4];
@@ -50,10 +51,12 @@ public class CornerPinDmxWarp : MonoBehaviour
 
         byte[] dmx = artNetReceiver.DmxBuffer.GetRawBuffer();
 
+        int cornerStartChannel = ResolveCornerPinStartChannel();
+
         for (int corner = 0; corner < 4; corner++)
         {
-            int xChannel = Mathf.Clamp(artNetReceiver.StartChannel + 2 + (corner * 2), 1, 512);
-            int yChannel = Mathf.Clamp(artNetReceiver.StartChannel + 2 + (corner * 2) + 1, 1, 512);
+            int xChannel = Mathf.Clamp(artNetReceiver.StartChannel + cornerStartChannel - 1 + (corner * 2), 1, 512);
+            int yChannel = Mathf.Clamp(xChannel + 1, 1, 512);
 
             float xLerp = dmx[xChannel - 1] / 255f;
             float yLerp = dmx[yChannel - 1] / 255f;
@@ -65,6 +68,17 @@ public class CornerPinDmxWarp : MonoBehaviour
         }
 
         ApplyWarpedGrid();
+    }
+
+
+    private int ResolveCornerPinStartChannel()
+    {
+        if (fixtureModeSelector != null && fixtureModeSelector.CurrentMode == UI_FixtureModeSelector.FixtureMode.PixelMapping)
+        {
+            return PixelMappingDmxPersonality.CornerPinStartChannel;
+        }
+
+        return SurfaceProjectionDmxPersonality.CornerPinStartChannel;
     }
 
     private void CacheExpandedCorners()

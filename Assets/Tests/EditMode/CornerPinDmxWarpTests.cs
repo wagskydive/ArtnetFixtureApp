@@ -45,7 +45,7 @@ public class CornerPinDmxWarpTests
         receiver.DmxBuffer = new DmxBuffer();
 
         var frame = new byte[512];
-        for (int channel = 2; channel <= 9; channel++)
+        for (int channel = 8; channel <= 15; channel++)
         {
             frame[channel] = 255;
         }
@@ -100,8 +100,8 @@ public class CornerPinDmxWarpTests
         receiver.DmxBuffer = new DmxBuffer();
 
         var frame = new byte[512];
-        frame[6] = 64;  // top-right x near left side
-        frame[7] = 255; // top-right y at top edge
+        frame[12] = 64;  // top-right x near left side (channel 13)
+        frame[13] = 255; // top-right y at top edge (channel 14)
 
         receiver.DmxBuffer.WriteFrame(frame, frame.Length);
         receiver.DmxBuffer.SwapIfNewFrame();
@@ -123,6 +123,51 @@ public class CornerPinDmxWarpTests
         Assert.That(topRightVertex.x, Is.LessThan(0f));
         Assert.That(topRightVertex.y, Is.EqualTo(1f).Within(0.001f));
 
+        Object.DestroyImmediate(receiverGo);
+        Object.DestroyImmediate(quad);
+    }
+
+
+    [Test]
+    public void Update_InPixelMappingMode_ReadsCornerPinsFromChannelsThreeToTen()
+    {
+        var receiverGo = new GameObject("receiver");
+        var receiver = receiverGo.AddComponent<ArtNetReceiver>();
+        receiver.DmxBuffer = new DmxBuffer();
+
+        var frame = new byte[512];
+        for (int channel = 2; channel <= 9; channel++)
+        {
+            frame[channel] = 255;
+        }
+
+        receiver.DmxBuffer.WriteFrame(frame, frame.Length);
+        receiver.DmxBuffer.SwapIfNewFrame();
+
+        var selectorGo = new GameObject("selector");
+        var selector = selectorGo.AddComponent<UI_FixtureModeSelector>();
+        selector.SetMode(UI_FixtureModeSelector.FixtureMode.PixelMapping);
+
+        var quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        var warp = quad.AddComponent<CornerPinDmxWarp>();
+
+        SetPrivateField(warp, "artNetReceiver", receiver);
+        SetPrivateField(warp, "fixtureModeSelector", selector);
+        SetPrivateField(warp, "maxOffset", 0.5f);
+        SetPrivateField(warp, "subdivisionAmount", 4);
+
+        quad.SendMessage("Awake");
+        quad.SendMessage("Update");
+
+        var vertices = quad.GetComponent<MeshFilter>().mesh.vertices;
+        int rowLength = 5;
+
+        AssertCorner(vertices[0], -1f, -1f);
+        AssertCorner(vertices[rowLength * 4], -1f, 1f);
+        AssertCorner(vertices[(rowLength * 5) - 1], 1f, 1f);
+        AssertCorner(vertices[rowLength - 1], 1f, -1f);
+
+        Object.DestroyImmediate(selectorGo);
         Object.DestroyImmediate(receiverGo);
         Object.DestroyImmediate(quad);
     }
