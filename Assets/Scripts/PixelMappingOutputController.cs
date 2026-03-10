@@ -9,6 +9,7 @@ public class PixelMappingOutputController : MonoBehaviour
     [SerializeField] private int fallbackColumns = 8;
 
     private Material _outputMaterial;
+    private Material _activeSharedMaterial;
     private Texture2D _pixelDataTexture;
     private Color32[] _pixelBuffer;
     private int _lastRows;
@@ -35,7 +36,7 @@ public class PixelMappingOutputController : MonoBehaviour
 
     private void Update()
     {
-        if (artNetReceiver == null || artNetReceiver.DmxBuffer == null || _outputMaterial == null)
+        if (artNetReceiver == null || artNetReceiver.DmxBuffer == null || !ResolveOutputMaterial())
         {
             return;
         }
@@ -84,4 +85,20 @@ public class PixelMappingOutputController : MonoBehaviour
 
         _pixelBuffer = new Color32[rows * columns];
     }
+    private bool ResolveOutputMaterial()
+    {
+        if (outputRenderer == null || outputRenderer.sharedMaterial == null)
+        {
+            return false;
+        }
+
+        if (_outputMaterial == null || _activeSharedMaterial != outputRenderer.sharedMaterial)
+        {
+            _activeSharedMaterial = outputRenderer.sharedMaterial;
+            _outputMaterial = outputRenderer.material;
+        }
+
+        return _outputMaterial != null;
+    }
+
 }

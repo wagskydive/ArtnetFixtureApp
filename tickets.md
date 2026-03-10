@@ -25,18 +25,20 @@ T99.3 - Find out why the app doesn't show anything anymore since the implementat
   - Resolved no-output regression by correcting universe persistence/display alignment between `UI_DmxSettings` and `ArtNetReceiver` (1-based UI, 0-based receiver).
 
 T99.4 - Find out why the app doesn't show anything anymore since the implementation of the Movinghead and PixelMapping Modes. Artnet Data is being sent, so that can not be the issue. The resolve in ticket 9.3 did not fix it. 
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Investigated multiple no-output hypotheses and implemented/validated a robust fix: output controllers now rebind material instances when mode changes swap renderer shared materials at runtime, preventing stale material writes after switching between Standard/Moving Head/Pixel Mapping.
 
 T99.5 - Make the Fixture amount a saved user pref, so that when the fixture amount is bigger than 1 and the mode is changed from standard mode to another mode and changed back after that, the original amount is retreived and displayed
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Added non-destructive fixture rebuild APIs so non-Standard modes force one fixture without overwriting saved preference; returning to Standard restores the previously saved fixture amount and updates UI text accordingly.
 
 T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode
 - [x] Started
@@ -831,6 +833,13 @@ T9.8 - Document Pixel Mapping setup, DMX addressing scheme, and operational limi
 
 
 T99.4 - Next run: execute Unity EditMode suite on a licensed runner to validate T99.1-T99.3 end-to-end in-engine.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T99.6 - Next run: execute Unity EditMode suite on a licensed runner to validate T99.4/T99.5 runtime mode-switch material rebinding and fixture-count restoration end-to-end.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written

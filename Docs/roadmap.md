@@ -212,6 +212,8 @@ Add a new mode that makes the app function like a pixel wall.
 - [x] Add new DMX channel mapping: 1-Master Dimmer, 2-Strobe, 3-10 corner pinning X and Y, 11-? RGB values for each pixel
 - [x] Add dual corner-pin personalities so Standard/Surface Projection mode uses channels 9-16 while Pixel Mapping mode keeps channels 3-10
 - [x] Keep fixture amount controls visible only for Standard mode and force single fixture instance for Moving Head + Pixel Mapping modes
+- [x] Fix runtime no-output regression after mode switches by rebinding output controllers to newly assigned renderer materials
+- [x] Persist and restore Standard-mode fixture amount when switching away to non-Standard modes and back
 
 
 **Acceptance Criteria:**
