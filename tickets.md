@@ -575,13 +575,22 @@ T8.3 - Wire MediaPlaybackController into scene and verify VideoPlayer bindings o
 - [ ] Documentation Written
 
 T8.6 - Create Moving Head mode shader foundation with Mali-safe circular beam mask control
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Added `MaliSafeMovingHead.shader` as a dedicated Moving Head foundation shader with a script-adjustable circular beam mask (`_BeamRadius`, `_BeamSoftness`, `_BeamOffsetX`, `_BeamOffsetY`, `_BeamRotation`) and transparent compositing for haze-friendly beam rendering.
 
 T8.6a - Add patterns and functionalities to the Moving Head mode shader that function similar to the MaliSafeLighting.shader. 
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Added 20 DMX-addressable pattern slots in `MaliSafeMovingHead.shader` using Mali-safe branchless masks and low-cost math patterns aligned with the existing fixture shader behavior.
+
+T8.6c - Next run: wire `MaliSafeMovingHead.shader` into mode-selection runtime scripts/material assignment and add EditMode coverage for moving-head beam parameter property writes.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
