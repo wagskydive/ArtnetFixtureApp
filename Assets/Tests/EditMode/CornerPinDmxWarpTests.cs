@@ -45,7 +45,7 @@ public class CornerPinDmxWarpTests
         receiver.DmxBuffer = new DmxBuffer();
 
         var frame = new byte[512];
-        for (int channel = 8; channel <= 15; channel++)
+        for (int channel = 2; channel <= 9; channel++)
         {
             frame[channel] = 255;
         }
@@ -100,8 +100,8 @@ public class CornerPinDmxWarpTests
         receiver.DmxBuffer = new DmxBuffer();
 
         var frame = new byte[512];
-        frame[12] = 64;  // top-right x near left side
-        frame[13] = 255; // top-right y at top edge
+        frame[6] = 64;  // top-right x near left side
+        frame[7] = 255; // top-right y at top edge
 
         receiver.DmxBuffer.WriteFrame(frame, frame.Length);
         receiver.DmxBuffer.SwapIfNewFrame();

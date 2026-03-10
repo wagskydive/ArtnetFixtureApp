@@ -206,7 +206,7 @@ Add a new mode that makes the app function like a pixel wall.
 - [x] Add a setting to the settings menu to select the mode
 - [x] Add a setting to the menu to adjust the pixel wall size. Rows and Columns amount. Restricted to maximum 32x32
 - [x] Save the selected setting in user-prefs
-- [ ] Add new DMX channel mapping: 1-Master Dimmer, 2-Strobe, 3-10 corner pinning X and Y, 11-? RGB values for each pixel
+- [x] Add new DMX channel mapping: 1-Master Dimmer, 2-Strobe, 3-10 corner pinning X and Y, 11-? RGB values for each pixel
 
 
 **Acceptance Criteria:**

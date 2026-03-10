@@ -719,11 +719,14 @@ T9.4 - Persist Pixel Mapping mode + wall size preferences in PlayerPrefs and res
   - Added EditMode tests to cover Pixel Mapping mode switching, row/column clamp behavior, and persisted preference restore.
 
 T9.5 - Implement Pixel Mapping DMX personality (Master Dimmer, Strobe, Corner Pin XY, per-pixel RGB stream)
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Added `PixelMappingDmxPersonality` DMX parser with fixed channel definitions for master dimmer (ch1), strobe (ch2), corner-pin block start (ch3), and per-pixel RGB stream start (ch11).
+  - Added `PixelMappingOutputController` to drive `_Intensity`, `_StrobeGate`, and a point-filtered `_PixelDataTex` from DMX RGB triplets aligned to the configured pixel wall rows/columns.
+  - Updated `CornerPinDmxWarp` to consume Pixel Mapping corner channels 3-10 (X/Y for 4 corners) instead of the previous offset block.
 
 T9.6 - Add EditMode tests for Pixel Mapping mode switch, grid-size persistence, and DMX channel parsing
 - [ ] Started

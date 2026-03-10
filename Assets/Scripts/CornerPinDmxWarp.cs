@@ -52,8 +52,8 @@ public class CornerPinDmxWarp : MonoBehaviour
 
         for (int corner = 0; corner < 4; corner++)
         {
-            int xChannel = Mathf.Clamp(artNetReceiver.StartChannel + 8 + (corner * 2), 1, 512);
-            int yChannel = Mathf.Clamp(artNetReceiver.StartChannel + 8 + (corner * 2) + 1, 1, 512);
+            int xChannel = Mathf.Clamp(artNetReceiver.StartChannel + 2 + (corner * 2), 1, 512);
+            int yChannel = Mathf.Clamp(artNetReceiver.StartChannel + 2 + (corner * 2) + 1, 1, 512);
 
             float xLerp = dmx[xChannel - 1] / 255f;
             float yLerp = dmx[yChannel - 1] / 255f;
