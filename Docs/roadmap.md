@@ -202,7 +202,7 @@ Add a new mode that makes the app function like a pixel wall.
 **Tasks:**
 
 
-- [ ] Create a new Mali-safe shader to function as a pixel wall. Include adjustable grid size for the amount of pixels the shader has, using rows and columns of pixels.
+- [x] Create a new Mali-safe shader to function as a pixel wall. Include adjustable grid size for the amount of pixels the shader has, using rows and columns of pixels.
 - [ ] Add a setting to the settings menu to select the mode
 - [ ] Add a setting to the menu to adjust the pixel wall size. Rows and Columns amount. Restricted to maximum 32x32
 - [ ] Save the selected setting in user-prefs

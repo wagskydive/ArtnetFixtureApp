@@ -684,11 +684,13 @@ T8.12 - Document Moving Head DMX personality and operator setup flow in project 
 - [ ] Documentation Written
 
 T9.1 - Create a Mali-safe Pixel Mapping shader with configurable row/column grid quantization
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Added `Assets/Shaders/MaliSafePixelMapping.shader` with deterministic UV quantization driven by configurable `_Rows` and `_Columns` (1-32) to render a pixel-wall grid safely on Mali-class hardware.
+  - Added optional `_PixelDataTex` sampling at quantized cell centers so future DMX pixel streams can drive per-cell RGB without changing shader structure.
 
 T9.2 - Extend settings UI with Pixel Mapping mode selection alongside existing fixture modes
 - [ ] Started
