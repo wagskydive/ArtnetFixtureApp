@@ -34,6 +34,21 @@ public class MediaPlaybackController : MonoBehaviour
 
     private void Awake()
     {
+        if (artNetReceiver == null)
+        {
+            artNetReceiver = FindFirstObjectByType<ArtNetReceiver>();
+        }
+
+        if (videoPlayer == null)
+        {
+            videoPlayer = GetComponent<VideoPlayer>();
+        }
+
+        if (videoPlayer == null)
+        {
+            videoPlayer = gameObject.AddComponent<VideoPlayer>();
+        }
+
         if (_playbackBackend == null && videoPlayer != null)
         {
             _playbackBackend = new UnityVideoPlaybackBackend(videoPlayer);
