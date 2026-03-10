@@ -10,8 +10,8 @@ public class UI_FixtureMeshManager : MonoBehaviour
     [SerializeField] private GameObject fixtureTemplate;
     [SerializeField] private Transform fixturesParent;
     [SerializeField] private Text fixtureCountValueText;
-    [SerializeField] [Range(1, 16)] private int minimumFixtures = 1;
-    [SerializeField] [Range(1, 16)] private int maximumFixtures = 16;
+    [SerializeField][Range(1, 16)] private int minimumFixtures = 1;
+    [SerializeField][Range(1, 16)] private int maximumFixtures = 16;
 
     private readonly List<GameObject> _spawnedFixtures = new List<GameObject>(16);
 
@@ -19,11 +19,16 @@ public class UI_FixtureMeshManager : MonoBehaviour
 
     private void Start()
     {
-        int defaultCount = Mathf.Clamp(minimumFixtures, 1, maximumFixtures);
-        int savedCount = PlayerPrefs.GetInt(FixtureCountPrefKey, defaultCount);
-        int targetCount = Mathf.Clamp(savedCount, minimumFixtures, maximumFixtures);
+        RebuildFixtures(1, false);
+        if (DmxModeManager.Instance.CurrentMode == DmxModeManager.FixtureMode.Standard)
+        {
+            int defaultCount = Mathf.Clamp(minimumFixtures, 1, maximumFixtures);
+            int savedCount = PlayerPrefs.GetInt(FixtureCountPrefKey, defaultCount);
+            int targetCount = Mathf.Clamp(savedCount, minimumFixtures, maximumFixtures);
 
-        RebuildFixtures(targetCount);
+            RebuildFixtures(targetCount);
+        }
+
     }
 
     public void IncreaseFixtureCount()

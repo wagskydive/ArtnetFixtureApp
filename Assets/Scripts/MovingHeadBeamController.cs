@@ -8,14 +8,30 @@ public class MovingHeadBeamController : MonoBehaviour
     private Material _outputMaterial;
     private Material _activeSharedMaterial;
 
+    bool isInMode;
+
     private void Awake()
     {
         ResolveOutputMaterial();
+
     }
+    private void Start()
+    {
+        DmxModeManager.OnModeChanged += HandleModeChange;
+        isInMode = DmxModeManager.Instance.CurrentMode == DmxModeManager.FixtureMode.MovingHead;
+    
+    }
+
+    void HandleModeChange(DmxModeManager.FixtureMode mode)
+    {
+        isInMode = mode == DmxModeManager.FixtureMode.MovingHead;
+
+    }
+
 
     private void Update()
     {
-        if (artNetReceiver == null || artNetReceiver.DmxBuffer == null || !ResolveOutputMaterial())
+        if (artNetReceiver == null || artNetReceiver.DmxBuffer == null || !ResolveOutputMaterial() || !isInMode)
         {
             return;
         }

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class PatternGenerator : MonoBehaviour
+public class SurfacePatternGenerator : MonoBehaviour
 {
     private const int PatternCount = 20;
 
@@ -10,14 +10,29 @@ public class PatternGenerator : MonoBehaviour
     private Material _outputMaterial;
     private Material _activeSharedMaterial;
 
+    bool isInMode;
+
     private void Awake()
     {
         ResolveOutputMaterial();
     }
 
+    private void Start()
+    {
+        DmxModeManager.OnModeChanged += HandleModeChange;
+        isInMode = DmxModeManager.Instance.CurrentMode == DmxModeManager.FixtureMode.Standard;
+
+    }
+
+    void HandleModeChange(DmxModeManager.FixtureMode mode)
+    {
+        isInMode = mode == DmxModeManager.FixtureMode.Standard;
+
+    }
+
     void Update()
     {
-        if (artNetReceiver == null || artNetReceiver.DmxBuffer == null || !ResolveOutputMaterial())
+        if (artNetReceiver == null || artNetReceiver.DmxBuffer == null || !ResolveOutputMaterial() || !isInMode)
         {
             return;
         }

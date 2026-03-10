@@ -5,10 +5,10 @@ public class ProjectorLightOutput : MonoBehaviour
     [SerializeField] private ArtNetReceiver artNetReceiver;
     [SerializeField] private Renderer outputRenderer;
     [SerializeField] private bool enableThermalProtection = true;
-    [SerializeField] [Range(0f, 1f)] private float thermalMinimumScale = 0.55f;
-    [SerializeField] [Range(0.001f, 0.1f)] private float thermalRampPerSecond = 0.02f;
-    [SerializeField] [Range(0.001f, 2f)] private float thermalRecoveryPerSecond = 0.15f;
-    [SerializeField] [Range(0f, 1f)] private float highLoadThreshold = 0.9f;
+    [SerializeField][Range(0f, 1f)] private float thermalMinimumScale = 0.55f;
+    [SerializeField][Range(0.001f, 0.1f)] private float thermalRampPerSecond = 0.02f;
+    [SerializeField][Range(0.001f, 2f)] private float thermalRecoveryPerSecond = 0.15f;
+    [SerializeField][Range(0f, 1f)] private float highLoadThreshold = 0.9f;
 
     private Material _outputMaterial;
     private Material _activeSharedMaterial;
@@ -17,11 +17,28 @@ public class ProjectorLightOutput : MonoBehaviour
     private void Awake()
     {
         ResolveOutputMaterial();
+        
+
     }
+
+    private void Start()
+    {
+        DmxModeManager.OnModeChanged += HandleModeChange;
+        isInMode = DmxModeManager.Instance.CurrentMode == DmxModeManager.FixtureMode.Standard;
+ 
+    }
+
+    void HandleModeChange(DmxModeManager.FixtureMode mode)
+    {
+        isInMode = mode == DmxModeManager.FixtureMode.Standard;
+        
+    }
+
+    bool isInMode;
 
     void Update()
     {
-        if (artNetReceiver == null || artNetReceiver.DmxBuffer == null || !ResolveOutputMaterial())
+        if (artNetReceiver == null || artNetReceiver.DmxBuffer == null || !ResolveOutputMaterial() || !isInMode)
         {
             return;
         }

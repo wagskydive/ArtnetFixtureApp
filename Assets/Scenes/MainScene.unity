@@ -2175,6 +2175,8 @@ GameObject:
   - component: {fileID: 454082884}
   - component: {fileID: 454082877}
   - component: {fileID: 454082887}
+  - component: {fileID: 454082889}
+  - component: {fileID: 454082888}
   m_Layer: 0
   m_Name: FixtureEffect
   m_TagString: Untagged
@@ -2317,7 +2319,7 @@ MonoBehaviour:
   artNetReceiver: {fileID: 454082877}
   maxOffset: 10
   subdivisionAmount: 16
-  fixtureModeSelector: {fileID: 1756910869}
+  dmxModeManager: {fileID: 1959274207}
 --- !u!33 &454082886
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -2345,6 +2347,37 @@ MonoBehaviour:
   maxMediaFileSizeMb: 50
   mediaFiles:
   - demo.mp4
+--- !u!114 &454082888
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 454082876}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f4b45a40a2948669f489f4738a03bb7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArtnetFixture.Core::PixelMappingOutputController
+  artNetReceiver: {fileID: 454082877}
+  outputRenderer: {fileID: 454082881}
+  fixtureModeSelector: {fileID: 1756910869}
+  fallbackRows: 8
+  fallbackColumns: 8
+--- !u!114 &454082889
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 454082876}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7157fe5734544cc7935eda97944ebd35, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArtnetFixture.Core::MovingHeadBeamController
+  artNetReceiver: {fileID: 454082877}
+  outputRenderer: {fileID: 454082881}
 --- !u!1 &532011799
 GameObject:
   m_ObjectHideFlags: 0
@@ -7022,17 +7055,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 083705225f5e4d9fb3309d6ac70a609d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ArtnetFixture.Core::UI_FixtureModeSelector
-  targetRenderer: {fileID: 454082881}
-  standardModeMaterial: {fileID: 2100000, guid: 31ab56d83b3521647880df0019e3f662, type: 2}
-  movingHeadModeMaterial: {fileID: 2100000, guid: d7bc2702078f88a4b87bacecc298c610, type: 2}
-  pixelMappingModeMaterial: {fileID: 2100000, guid: f3b390c8831e19f43af282f03b29e466, type: 2}
   modeValueText: {fileID: 875489358}
   pixelGridControlsContainer: {fileID: 2010723719}
   pixelRowsValueText: {fileID: 1778798032}
   pixelColumnsValueText: {fileID: 1822335022}
   fixtureMeshManager: {fileID: 1756910868}
   fixtureCountControlsContainer: {fileID: 1471253830}
-  currentMode: 0
+  dmxModeManager: {fileID: 1959274207}
   currentPixelRows: 8
   currentPixelColumns: 8
 --- !u!1 &1757005266
@@ -8479,6 +8508,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1959274206}
+  - component: {fileID: 1959274207}
   m_Layer: 0
   m_Name: FixturesParent
   m_TagString: Untagged
@@ -8502,6 +8532,22 @@ Transform:
   - {fileID: 454082883}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1959274207
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1959274205}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f7dbdb465180b349a4cd8f943bb8744, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArtnetFixture.Core::DmxModeManager
+  targetRenderer: {fileID: 454082881}
+  standardModeMaterial: {fileID: 2100000, guid: 31ab56d83b3521647880df0019e3f662, type: 2}
+  movingHeadModeMaterial: {fileID: 2100000, guid: d7bc2702078f88a4b87bacecc298c610, type: 2}
+  pixelMappingModeMaterial: {fileID: 2100000, guid: f3b390c8831e19f43af282f03b29e466, type: 2}
 --- !u!1 &1987641149
 GameObject:
   m_ObjectHideFlags: 0

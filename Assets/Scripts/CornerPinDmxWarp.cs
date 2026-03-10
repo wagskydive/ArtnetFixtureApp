@@ -4,9 +4,9 @@ using UnityEngine;
 public class CornerPinDmxWarp : MonoBehaviour
 {
     [SerializeField] private ArtNetReceiver artNetReceiver;
-    [SerializeField] [Range(0.01f, 10f)] private float maxOffset = 0.5f;
-    [SerializeField] [Range(1, 64)] private int subdivisionAmount = 8;
-    [SerializeField] private UI_FixtureModeSelector fixtureModeSelector;
+    [SerializeField][Range(0.01f, 10f)] private float maxOffset = 0.5f;
+    [SerializeField][Range(1, 64)] private int subdivisionAmount = 8;
+    [SerializeField] private DmxModeManager dmxModeManager;
 
     private Mesh _runtimeMesh;
     private Vector3[] _expandedCorners = new Vector3[4];
@@ -18,6 +18,8 @@ public class CornerPinDmxWarp : MonoBehaviour
     private float _maxY;
 
     private int _gridResolution;
+
+    bool isInMode;
 
     private void Awake()
     {
@@ -42,11 +44,54 @@ public class CornerPinDmxWarp : MonoBehaviour
         ApplyWarpedGrid(updateMesh: false);
     }
 
+    private void Start()
+    {
+        DmxModeManager.OnModeChanged += HandleModeChange;
+        isInMode = DmxModeManager.Instance.CurrentMode == DmxModeManager.FixtureMode.PixelMapping || DmxModeManager.Instance.CurrentMode == DmxModeManager.FixtureMode.Standard;
+    }
+
+    void HandleModeChange(DmxModeManager.FixtureMode mode)
+    {
+        isInMode = DmxModeManager.Instance.CurrentMode == DmxModeManager.FixtureMode.PixelMapping || DmxModeManager.Instance.CurrentMode == DmxModeManager.FixtureMode.Standard;
+
+    }
+
+    bool fullScreen;
+
+    void SetFullScreen()
+    {
+
+        fullScreen = true;
+    }
+
     private void Update()
     {
         if (artNetReceiver == null || artNetReceiver.DmxBuffer == null || _runtimeMesh == null)
         {
             return;
+        }
+        if (!isInMode)
+        {
+            if (!fullScreen)
+            {
+
+                _warpedCorners[0] = new Vector3(_minX, _minY, 0);
+                _warpedCorners[1] = new Vector3(_minX, _maxY, 0);
+                _warpedCorners[2] = new Vector3(_maxX, _maxY, 0);
+                _warpedCorners[3] = new Vector3(_maxX, _minY, 0);
+
+
+                SetFullScreen();
+                ApplyWarpedGrid();
+            }
+            return;
+        }
+        else
+        {
+            if (fullScreen)
+            {
+                fullScreen = false;
+            }
         }
 
         byte[] dmx = artNetReceiver.DmxBuffer.GetRawBuffer();
@@ -73,7 +118,7 @@ public class CornerPinDmxWarp : MonoBehaviour
 
     private int ResolveCornerPinStartChannel()
     {
-        if (fixtureModeSelector != null && fixtureModeSelector.CurrentMode == UI_FixtureModeSelector.FixtureMode.PixelMapping)
+        if (dmxModeManager != null && dmxModeManager.CurrentMode == DmxModeManager.FixtureMode.PixelMapping)
         {
             return PixelMappingDmxPersonality.CornerPinStartChannel;
         }

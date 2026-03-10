@@ -40,12 +40,7 @@ T99.5 - Make the Fixture amount a saved user pref, so that when the fixture amou
 - [x] Documentation Written
   - Added non-destructive fixture rebuild APIs so non-Standard modes force one fixture without overwriting saved preference; returning to Standard restores the previously saved fixture amount and updates UI text accordingly.
 
-T99.6 - Fix the DMX channel assignments for all the modes. Currently the DMX values of the standard mode are still the same for each mode. Find out why this still doesn't work as required and fix it. Create new systems if that is needed to make it work. Refactor the code to make it more logical.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+
 
 T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode
 - [x] Started
@@ -744,33 +739,14 @@ T8.9b - Add pattern, speed, parameter, iris/scale, rotate, and strobe mappings f
 - [x] Documentation Written
   - Implemented moving-head pattern/speed/parameter/iris/rotate/strobe channel mapping and expanded EditMode coverage for personality parsing + controller application.
 
-T8.9c - Next run: execute Unity EditMode suite on a licensed runner to validate moving-head 14-channel personality mapping end-to-end.
+T8.10- Modify the MaliSafeMovingHead.shader so that the X and Y offsets also change the midpoint of each pattern. And make the rotation parameter rotate around the middle of the mask without affecting the direction of the X and Y offsets. In other words the result must make the rotation only rotate the beam and not the whole shader.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
 - [ ] Tests Passed
 - [ ] Documentation Written
 
-T8.10 - Create EditMode tests for Moving Head mode switching, DMX mapping accuracy, and prefs restore
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
 
-T8.11 - Run HY300 validation pass for Moving Head mode (stability, FPS, thermal, DMX response)
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
-
-T8.12 - Document Moving Head DMX personality and operator setup flow in project docs
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
 
 T9.1 - Create a Mali-safe Pixel Mapping shader with configurable row/column grid quantization
 - [x] Started
@@ -839,16 +815,4 @@ T9.8 - Document Pixel Mapping setup, DMX addressing scheme, and operational limi
 - [ ] Documentation Written
 
 
-T99.4 - Next run: execute Unity EditMode suite on a licensed runner to validate T99.1-T99.3 end-to-end in-engine.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
 
-T99.6 - Next run: execute Unity EditMode suite on a licensed runner to validate T99.4/T99.5 runtime mode-switch material rebinding and fixture-count restoration end-to-end.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written

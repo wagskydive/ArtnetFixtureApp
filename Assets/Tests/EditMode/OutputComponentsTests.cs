@@ -79,7 +79,7 @@ public class OutputComponentsTests
     }
 
     [Test]
-    public void PatternGenerator_Update_AppliesPatternControlsFromDmx()
+    public void SurfacePatternGenerator_Update_AppliesPatternControlsFromDmx()
     {
         var receiverGo = new GameObject("receiver");
         var receiver = receiverGo.AddComponent<ArtNetReceiver>();
@@ -95,7 +95,7 @@ public class OutputComponentsTests
         receiver.DmxBuffer.SwapIfNewFrame();
 
         var outputGo = GameObject.CreatePrimitive(PrimitiveType.Quad);
-        var generator = outputGo.AddComponent<PatternGenerator>();
+        var generator = outputGo.AddComponent<SurfacePatternGenerator>();
         SetPrivateField(generator, "artNetReceiver", receiver);
         SetPrivateField(generator, "outputRenderer", outputGo.GetComponent<Renderer>());
 
@@ -144,7 +144,7 @@ public class OutputComponentsTests
     public void Update_DoesNothingWhenDependenciesAreMissing()
     {
         var go = new GameObject("missing-deps");
-        var generator = go.AddComponent<PatternGenerator>();
+        var generator = go.AddComponent<SurfacePatternGenerator>();
         var output = go.AddComponent<ProjectorLightOutput>();
         var movingHead = go.AddComponent<MovingHeadBeamController>();
 

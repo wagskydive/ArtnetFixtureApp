@@ -15,6 +15,8 @@ public class PixelMappingOutputController : MonoBehaviour
     private int _lastRows;
     private int _lastColumns;
 
+    bool isInMode;
+
     private void Awake()
     {
         if (outputRenderer != null)
@@ -23,6 +25,11 @@ public class PixelMappingOutputController : MonoBehaviour
         }
 
         EnsureTexture();
+    }
+    private void Start()
+    {
+        DmxModeManager.OnModeChanged += HandleModeChange;
+        isInMode = DmxModeManager.Instance.CurrentMode == DmxModeManager.FixtureMode.PixelMapping;
     }
 
     private void OnDestroy()
@@ -34,9 +41,16 @@ public class PixelMappingOutputController : MonoBehaviour
         }
     }
 
+    void HandleModeChange(DmxModeManager.FixtureMode mode)
+    {
+        isInMode = mode == DmxModeManager.FixtureMode.PixelMapping;
+
+    }
+
+
     private void Update()
     {
-        if (artNetReceiver == null || artNetReceiver.DmxBuffer == null || !ResolveOutputMaterial())
+        if (artNetReceiver == null || artNetReceiver.DmxBuffer == null || !ResolveOutputMaterial() || !isInMode)
         {
             return;
         }

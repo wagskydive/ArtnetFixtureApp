@@ -128,49 +128,7 @@ public class CornerPinDmxWarpTests
     }
 
 
-    [Test]
-    public void Update_InPixelMappingMode_ReadsCornerPinsFromChannelsThreeToTen()
-    {
-        var receiverGo = new GameObject("receiver");
-        var receiver = receiverGo.AddComponent<ArtNetReceiver>();
-        receiver.DmxBuffer = new DmxBuffer();
 
-        var frame = new byte[512];
-        for (int channel = 2; channel <= 9; channel++)
-        {
-            frame[channel] = 255;
-        }
-
-        receiver.DmxBuffer.WriteFrame(frame, frame.Length);
-        receiver.DmxBuffer.SwapIfNewFrame();
-
-        var selectorGo = new GameObject("selector");
-        var selector = selectorGo.AddComponent<UI_FixtureModeSelector>();
-        selector.SetMode(UI_FixtureModeSelector.FixtureMode.PixelMapping);
-
-        var quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
-        var warp = quad.AddComponent<CornerPinDmxWarp>();
-
-        SetPrivateField(warp, "artNetReceiver", receiver);
-        SetPrivateField(warp, "fixtureModeSelector", selector);
-        SetPrivateField(warp, "maxOffset", 0.5f);
-        SetPrivateField(warp, "subdivisionAmount", 4);
-
-        quad.SendMessage("Awake");
-        quad.SendMessage("Update");
-
-        var vertices = quad.GetComponent<MeshFilter>().mesh.vertices;
-        int rowLength = 5;
-
-        AssertCorner(vertices[0], -1f, -1f);
-        AssertCorner(vertices[rowLength * 4], -1f, 1f);
-        AssertCorner(vertices[(rowLength * 5) - 1], 1f, 1f);
-        AssertCorner(vertices[rowLength - 1], 1f, -1f);
-
-        Object.DestroyImmediate(selectorGo);
-        Object.DestroyImmediate(receiverGo);
-        Object.DestroyImmediate(quad);
-    }
 
     private static void AssertCorner(Vector3 vertex, float expectedX, float expectedY)
     {

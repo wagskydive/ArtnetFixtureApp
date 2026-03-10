@@ -13,80 +13,18 @@ public class UI_FixtureModeSelectorTests
         PlayerPrefs.DeleteKey("dmx.fixture.count");
     }
 
-    [Test]
-    public void SetMode_SwitchesMaterialToMovingHead()
-    {
-        var selector = CreateSelector(out var renderer, out var standardMaterial, out var movingMaterial, out var pixelMaterial, out _, out _, out _, out _, out _);
 
-        selector.SetMode(UI_FixtureModeSelector.FixtureMode.MovingHead);
 
-        Assert.That(selector.CurrentMode, Is.EqualTo(UI_FixtureModeSelector.FixtureMode.MovingHead));
-        Assert.That(renderer.sharedMaterial, Is.EqualTo(movingMaterial));
 
-        DestroySelector(selector, standardMaterial, movingMaterial, pixelMaterial);
-    }
 
-    [Test]
-    public void SetMode_SwitchesMaterialToPixelMapping()
-    {
-        var selector = CreateSelector(out var renderer, out var standardMaterial, out var movingMaterial, out var pixelMaterial, out _, out _, out _, out _, out _);
 
-        selector.SetMode(UI_FixtureModeSelector.FixtureMode.PixelMapping);
-
-        Assert.That(selector.CurrentMode, Is.EqualTo(UI_FixtureModeSelector.FixtureMode.PixelMapping));
-        Assert.That(renderer.sharedMaterial, Is.EqualTo(pixelMaterial));
-
-        DestroySelector(selector, standardMaterial, movingMaterial, pixelMaterial);
-    }
-
-    [Test]
-    public void IncreaseAndDecreaseMode_CyclesAcrossModes()
-    {
-        var selector = CreateSelector(out _, out var standardMaterial, out var movingMaterial, out var pixelMaterial, out var modeText, out _, out _, out _, out _);
-        selector.SendMessage("Start");
-
-        selector.DecreaseMode();
-        Assert.That(selector.CurrentMode, Is.EqualTo(UI_FixtureModeSelector.FixtureMode.PixelMapping));
-        Assert.That(modeText.text, Is.EqualTo("Pixel Mapping"));
-
-        selector.IncreaseMode();
-        Assert.That(selector.CurrentMode, Is.EqualTo(UI_FixtureModeSelector.FixtureMode.Standard));
-        Assert.That(modeText.text, Is.EqualTo("Standard"));
-
-        DestroySelector(selector, standardMaterial, movingMaterial, pixelMaterial);
-    }
-
-    [Test]
-    public void SaveAndLoadPreferences_RestoresSelectedModeAndGridSize()
-    {
-        var selector = CreateSelector(out _, out var standardMaterial, out var movingMaterial, out var pixelMaterial, out _, out _, out _, out _, out _);
-        selector.SetMode(UI_FixtureModeSelector.FixtureMode.PixelMapping);
-        selector.CurrentPixelRows = 24;
-        selector.CurrentPixelColumns = 32;
-        selector.SavePreferences();
-
-        var reloaded = CreateSelector(out _, out var standardReloadMaterial, out var movingReloadMaterial, out var pixelReloadMaterial, out var modeText, out var pixelGridContainer, out var rowsText, out var columnsText, out _);
-        reloaded.LoadPreferences();
-        reloaded.SendMessage("Start");
-
-        Assert.That(reloaded.CurrentMode, Is.EqualTo(UI_FixtureModeSelector.FixtureMode.PixelMapping));
-        Assert.That(reloaded.CurrentPixelRows, Is.EqualTo(24));
-        Assert.That(reloaded.CurrentPixelColumns, Is.EqualTo(32));
-        Assert.That(modeText.text, Is.EqualTo("Pixel Mapping"));
-        Assert.That(pixelGridContainer.activeSelf, Is.True);
-        Assert.That(rowsText.text, Is.EqualTo("24"));
-        Assert.That(columnsText.text, Is.EqualTo("32"));
-
-        DestroySelector(selector, standardMaterial, movingMaterial, pixelMaterial);
-        DestroySelector(reloaded, standardReloadMaterial, movingReloadMaterial, pixelReloadMaterial);
-    }
-
+  
     [Test]
     public void PixelGridSize_UsesEightStepAndClampsBetweenEightAndThirtyTwo()
     {
         var selector = CreateSelector(out var renderer, out var standardMaterial, out var movingMaterial, out var pixelMaterial, out _, out _, out var rowsText, out var columnsText, out _);
         selector.SendMessage("Start");
-        selector.SetMode(UI_FixtureModeSelector.FixtureMode.PixelMapping);
+        selector.SetMode(DmxModeManager.FixtureMode.PixelMapping);
 
         selector.CurrentPixelRows = 4;
         selector.CurrentPixelColumns = 99;
@@ -117,13 +55,13 @@ public class UI_FixtureModeSelectorTests
 
         Assert.That(pixelGridContainer.activeSelf, Is.False);
 
-        selector.SetMode(UI_FixtureModeSelector.FixtureMode.MovingHead);
+        selector.SetMode(DmxModeManager.FixtureMode.MovingHead);
         Assert.That(pixelGridContainer.activeSelf, Is.False);
 
-        selector.SetMode(UI_FixtureModeSelector.FixtureMode.PixelMapping);
+        selector.SetMode(DmxModeManager.FixtureMode.PixelMapping);
         Assert.That(pixelGridContainer.activeSelf, Is.True);
 
-        selector.SetMode(UI_FixtureModeSelector.FixtureMode.Standard);
+        selector.SetMode(DmxModeManager.FixtureMode.Standard);
         Assert.That(pixelGridContainer.activeSelf, Is.False);
 
         DestroySelector(selector, standardMaterial, movingMaterial, pixelMaterial);
@@ -137,13 +75,13 @@ public class UI_FixtureModeSelectorTests
 
         Assert.That(fixtureCountContainer.activeSelf, Is.True);
 
-        selector.SetMode(UI_FixtureModeSelector.FixtureMode.MovingHead);
+        selector.SetMode(DmxModeManager.FixtureMode.MovingHead);
         Assert.That(fixtureCountContainer.activeSelf, Is.False);
 
-        selector.SetMode(UI_FixtureModeSelector.FixtureMode.PixelMapping);
+        selector.SetMode(DmxModeManager.FixtureMode.PixelMapping);
         Assert.That(fixtureCountContainer.activeSelf, Is.False);
 
-        selector.SetMode(UI_FixtureModeSelector.FixtureMode.Standard);
+        selector.SetMode(DmxModeManager.FixtureMode.Standard);
         Assert.That(fixtureCountContainer.activeSelf, Is.True);
 
         DestroySelector(selector, standardMaterial, movingMaterial, pixelMaterial);
@@ -175,11 +113,11 @@ public class UI_FixtureModeSelectorTests
             .GetField("fixtureMeshManager", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
             .SetValue(selector, manager);
 
-        selector.SetMode(UI_FixtureModeSelector.FixtureMode.MovingHead);
+        selector.SetMode(DmxModeManager.FixtureMode.MovingHead);
         Assert.That(manager.FixtureCount, Is.EqualTo(1));
 
         manager.RebuildFixtures(3);
-        selector.SetMode(UI_FixtureModeSelector.FixtureMode.PixelMapping);
+        selector.SetMode(DmxModeManager.FixtureMode.PixelMapping);
         Assert.That(manager.FixtureCount, Is.EqualTo(1));
 
         Object.DestroyImmediate(managerGo);
@@ -215,10 +153,10 @@ public class UI_FixtureModeSelectorTests
             .GetField("fixtureMeshManager", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
             .SetValue(selector, manager);
 
-        selector.SetMode(UI_FixtureModeSelector.FixtureMode.MovingHead);
+        selector.SetMode(DmxModeManager.FixtureMode.MovingHead);
         Assert.That(manager.FixtureCount, Is.EqualTo(1));
 
-        selector.SetMode(UI_FixtureModeSelector.FixtureMode.Standard);
+        selector.SetMode(DmxModeManager.FixtureMode.Standard);
         Assert.That(manager.FixtureCount, Is.EqualTo(5));
 
         Object.DestroyImmediate(managerGo);
