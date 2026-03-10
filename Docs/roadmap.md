@@ -182,8 +182,8 @@ Add a new mode that makes the app function like a Moving Head. The moving head i
 **Tasks:**
 
 - [x] Create a new Mali-safe shader to visualize patterns. Include a masking cicle that can be adjusted through script
-- [ ] Add a setting to the settings menu to select the mode
-- [ ] Save the selected setting in user-prefs
+- [x] Add a setting to the settings menu to select the mode
+- [x] Save the selected setting in user-prefs
 - [x] Add Moving Head pattern library parity in dedicated shader (`MaliSafeMovingHead.shader`) with branchless mask selection and circular beam masking controls
 - [ ] Add new DMX channel mapping: 1-Master Dimmer, 2-4 RGB, 5-pan, 6-pan fine,7-tilt, 8 tilt-fine, 9-pattern select, 10-pattern speed, 11-pattern parameter, 12-Iris/Scale, 13-Rotate, 14-strobe
 - [ ]  
@@ -222,6 +222,5 @@ Add a new mode that makes the app function like a pixel wall.
 - Prioritize **stability, low memory use, and predictable 30 FPS performance**.
 - Avoid any runtime memory allocations in Update/Render loops.
 - All features that risk performance (high-res video, multi-pass shaders) are optional and must be gated by mode selection.
-
 
 

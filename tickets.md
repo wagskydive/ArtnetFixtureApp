@@ -591,21 +591,32 @@ T8.6a - Add patterns and functionalities to the Moving Head mode shader that fun
   - Added 20 DMX-addressable pattern slots in `MaliSafeMovingHead.shader` using Mali-safe branchless masks and low-cost math patterns aligned with the existing fixture shader behavior.
 
 T8.6c - Next run: wire `MaliSafeMovingHead.shader` into mode-selection runtime scripts/material assignment and add EditMode coverage for moving-head beam parameter property writes.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Added `UI_FixtureModeSelector` to apply standard vs moving-head materials at runtime and integrated `MovingHeadBeamController` DMX channel mapping for `_BeamOffsetX/_BeamOffsetY/_BeamSoftness/_BeamRadius/_BeamRotation` property writes.
+  - Added EditMode coverage for moving-head beam property writes and missing-dependency safety.
 
 
 T8.7 - Add settings-menu mode selector to switch between existing fixture mode and Moving Head mode
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Added settings-ready `UI_FixtureModeSelector` API with dropdown integration (`SetModeFromDropdown`) to switch fixture rendering mode between Standard and Moving Head.
 
 T8.8 - Persist selected fixture mode in PlayerPrefs and auto-restore on app startup
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Added fixture mode preference persistence (`dmx.fixture.mode`) and startup restore flow in `UI_FixtureModeSelector`, with EditMode tests for save/load + dropdown synchronization.
+
+T8.13 - Next run: wire `UI_FixtureModeSelector` dropdown/material references in `MainScene` and validate runtime switching behavior on HY300.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
