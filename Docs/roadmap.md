@@ -185,7 +185,7 @@ Add a new mode that makes the app function like a Moving Head. The moving head i
 - [x] Add a setting to the settings menu to select the mode
 - [x] Save the selected setting in user-prefs
 - [x] Add Moving Head pattern library parity in dedicated shader (`MaliSafeMovingHead.shader`) with branchless mask selection and circular beam masking controls
-- [ ] Add new DMX channel mapping: 1-Master Dimmer, 2-4 RGB, 5-pan, 6-pan fine,7-tilt, 8 tilt-fine, 9-pattern select, 10-pattern speed, 11-pattern parameter, 12-Iris/Scale, 13-Rotate, 14-strobe
+- [x] Add new DMX channel mapping: 1-Master Dimmer, 2-4 RGB, 5-pan, 6-pan fine,7-tilt, 8 tilt-fine, 9-pattern select, 10-pattern speed, 11-pattern parameter, 12-Iris/Scale, 13-Rotate, 14-strobe
 - [ ]  
 
 **Acceptance Criteria:**

@@ -624,20 +624,30 @@ T8.13 - Next run: wire `UI_FixtureModeSelector` dropdown/material references in 
 - [ ] Documentation Written
 
 T8.9 - Implement Moving Head DMX personality mapping (1-14) and runtime channel parser
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Added `MovingHeadDmxPersonality` runtime parser for moving-head channels 1-14 and integrated it into `MovingHeadBeamController` material writes.
 
 T8.9a - Add pan/tilt coarse+fine mapping with normalized output suitable for beam direction controls
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Added 16-bit coarse+fine parsing for pan/tilt with normalized output (`0..1`) and mapped to beam offsets (`-1..1`).
 
 T8.9b - Add pattern, speed, parameter, iris/scale, rotate, and strobe mappings for Moving Head mode
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Implemented moving-head pattern/speed/parameter/iris/rotate/strobe channel mapping and expanded EditMode coverage for personality parsing + controller application.
+
+T8.9c - Next run: execute Unity EditMode suite on a licensed runner to validate moving-head 14-channel personality mapping end-to-end.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
