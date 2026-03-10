@@ -77,6 +77,7 @@ Enable video and image playback controlled by DMX.
     - Play / Pause / Stop
 - [x] Looping support
 - [x] Memory budget enforcement (<50MB textures)
+- [x] Wire `MediaPlaybackController` into `MainScene` with auto-binding fallback for `VideoPlayer`
 - [ ] Optionally prepare for NAS streaming (HTTP, later phase)
 - [ ] Test with HY300 projector for performance and stability
 

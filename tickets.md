@@ -568,6 +568,14 @@ T8.2 - Add USB/StreamingAssets integration tests for MediaPlaybackController
 - [x] Documentation Written
 
 T8.3 - Wire MediaPlaybackController into scene and verify VideoPlayer bindings on HY300
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Wired `MediaPlaybackController` onto `FixtureEffect` in `MainScene` with serialized `ArtNetReceiver` binding and default media list entry; added runtime fallback binding to auto-resolve/add `VideoPlayer` when missing.
+
+T8.3a - Next run: validate HY300 media playback binding on-device (USB + StreamingAssets, play/pause/stop, looping)
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written

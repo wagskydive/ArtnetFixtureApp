@@ -1750,6 +1750,7 @@ GameObject:
   - component: {fileID: 454082878}
   - component: {fileID: 454082884}
   - component: {fileID: 454082877}
+  - component: {fileID: 454082887}
   m_Layer: 0
   m_Name: FixtureEffect
   m_TagString: Untagged
@@ -1900,6 +1901,25 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 454082876}
   m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &454082887
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 454082876}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1c1f20b7f15411d8b53083812f0c8a4, type: 3}
+  m_Name: ""
+  m_EditorClassIdentifier: ArtnetFixture.Core::MediaPlaybackController
+  artNetReceiver: {fileID: 454082877}
+  videoPlayer: {fileID: 0}
+  dmxStartChannel: 9
+  usbMediaDirectory: /storage/emulated/0/ArtnetFixture/media
+  maxMediaFileSizeMb: 50
+  mediaFiles:
+  - demo.mp4
 --- !u!1 &532011799
 GameObject:
   m_ObjectHideFlags: 0
