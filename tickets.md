@@ -597,12 +597,6 @@ T8.6c - Next run: wire `MaliSafeMovingHead.shader` into mode-selection runtime s
 - [ ] Tests Passed
 - [ ] Documentation Written
 
-T8.6b - Define BDD behavior for beam mask/iris response (Given DMX iris input, When value changes, Then beam radius scales without allocations)
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
 
 T8.7 - Add settings-menu mode selector to switch between existing fixture mode and Moving Head mode
 - [ ] Started
