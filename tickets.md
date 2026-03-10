@@ -693,25 +693,30 @@ T9.1 - Create a Mali-safe Pixel Mapping shader with configurable row/column grid
   - Added optional `_PixelDataTex` sampling at quantized cell centers so future DMX pixel streams can drive per-cell RGB without changing shader structure.
 
 T9.2 - Extend settings UI with Pixel Mapping mode selection alongside existing fixture modes
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Extended `UI_FixtureModeSelector` with a third `PixelMapping` mode option, dropdown handling for three modes, and pixel-mapping material assignment on the target renderer.
 
 T9.3 - Add Pixel Wall size controls (Rows/Columns) with validation and clamp range of 1-32
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Added row/column increment/decrement controls in `UI_FixtureModeSelector` with enforced clamping between 1 and 32 and live UI label synchronization.
+  - Wired row/column values into `_Rows` and `_Columns` shader properties for the pixel-mapping material and active renderer material.
 
 T9.4 - Persist Pixel Mapping mode + wall size preferences in PlayerPrefs and restore on startup
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Persisted fixture mode plus pixel grid rows/columns via `PlayerPrefs` keys (`dmx.fixture.mode`, `dmx.pixel.rows`, `dmx.pixel.columns`) and restore/clamp them during startup.
+  - Added EditMode tests to cover Pixel Mapping mode switching, row/column clamp behavior, and persisted preference restore.
 
 T9.5 - Implement Pixel Mapping DMX personality (Master Dimmer, Strobe, Corner Pin XY, per-pixel RGB stream)
 - [ ] Started
