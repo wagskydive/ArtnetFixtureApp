@@ -29,10 +29,11 @@ public class ProjectorLightOutput : MonoBehaviour
         }
 
 
-        float dimmer = artNetReceiver.GetFixtureChannelValue(1) / 255f;
-        float r = artNetReceiver.GetFixtureChannelValue(2) / 255f;
-        float g = artNetReceiver.GetFixtureChannelValue(3) / 255f;
-        float b = artNetReceiver.GetFixtureChannelValue(4) / 255f;
+        float dimmer = SurfaceProjectionDmxPersonality.ParseMasterDimmer(artNetReceiver);
+        Color color = SurfaceProjectionDmxPersonality.ParseColor(artNetReceiver);
+        float r = color.r;
+        float g = color.g;
+        float b = color.b;
 
         float thermalScale = enableThermalProtection
             ? ComputeThermalScale(dimmer, r, g, b)

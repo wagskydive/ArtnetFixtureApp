@@ -465,6 +465,16 @@ T2.6 - Implement thermal management for high-load scenarios
 [x] Documentation Written
 
 T2.7 - Create a SurfaceProjectionDmxPersonality Mode that is used for the original MaliSafeLighting.shader and uses the original dmx channels for corner pinning per fixture. The original DMX mapping uses channels 9-16 for corner pinning. The CornerPinDmxWarp.cs now listens for the channels 3-11 for the PixelMapping mode. The system needs to be able to be used for both modes. Change that file accordingly or create a seperate file per mode.
+[x] Started
+[x] Behavior Written
+[x] Code Written
+[ ] Tests Passed
+[x] Documentation Written
+  - Added `SurfaceProjectionDmxPersonality` for the standard fixture channel contract (including corner pin start channel 9).
+  - Updated `CornerPinDmxWarp` to switch corner-pin channel block by fixture mode: Standard/MovingHead uses 9-16 and PixelMapping uses 3-10.
+  - Extended `CornerPinDmxWarpTests` to validate both mode mappings.
+
+T2.8 - Next run: execute Unity EditMode suite on a licensed Unity runner to validate T2.7 dual-personality corner-pin mapping end-to-end.
 [ ] Started
 [ ] Behavior Written
 [ ] Code Written
