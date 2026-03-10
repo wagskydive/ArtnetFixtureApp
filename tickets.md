@@ -1,13 +1,23 @@
 # Tickets
 
 T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Replaced dropdown-driven mode selection with text-based mode display and added `IncreaseMode`/`DecreaseMode` public button handlers that cycle through Standard, Moving Head, and Pixel Mapping modes.
 
 T11.2 - Modify the UI_FixtureModeSelector.cs so that the grid size for the pixel mapping mode only shows when the Pixel Mapping mode is selected and make it work with increment and decrement buttons for X size and Y size in increments of 8 pixels and a maximum of 32 pixels on both dimensions.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Added conditional visibility for the pixel-grid controls container so grid settings only show in Pixel Mapping mode.
+  - Updated pixel grid sizing logic to 8-pixel step increments with clamped bounds of 8..32 for rows and columns, compatible with +/- button workflows.
+
+T11.3 - Next run: execute Unity EditMode suite on a licensed runner to validate T11.1/T11.2 selector cycling and pixel-grid UI behavior in-engine.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written

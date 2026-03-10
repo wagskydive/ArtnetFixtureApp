@@ -3,8 +3,9 @@ using UnityEngine.UI;
 
 public class UI_FixtureModeSelector : MonoBehaviour
 {
-    private const int MinPixelWallSize = 1;
+    private const int MinPixelWallSize = 8;
     private const int MaxPixelWallSize = 32;
+    private const int PixelWallStepSize = 8;
 
     public enum FixtureMode
     {
@@ -21,7 +22,8 @@ public class UI_FixtureModeSelector : MonoBehaviour
     [SerializeField] private Material standardModeMaterial;
     [SerializeField] private Material movingHeadModeMaterial;
     [SerializeField] private Material pixelMappingModeMaterial;
-    [SerializeField] private Dropdown modeDropdown;
+    [SerializeField] private Text modeValueText;
+    [SerializeField] private GameObject pixelGridControlsContainer;
     [SerializeField] private Text pixelRowsValueText;
     [SerializeField] private Text pixelColumnsValueText;
     [SerializeField] private FixtureMode currentMode = FixtureMode.Standard;
@@ -42,7 +44,7 @@ public class UI_FixtureModeSelector : MonoBehaviour
 
             currentPixelRows = clamped;
             ApplyPixelGridSettings();
-            SyncPixelGridUi();
+            SyncUiState();
             SavePreferences();
         }
     }
@@ -60,7 +62,7 @@ public class UI_FixtureModeSelector : MonoBehaviour
 
             currentPixelColumns = clamped;
             ApplyPixelGridSettings();
-            SyncPixelGridUi();
+            SyncUiState();
             SavePreferences();
         }
     }
@@ -70,8 +72,7 @@ public class UI_FixtureModeSelector : MonoBehaviour
         LoadPreferences();
         ApplyModeMaterials();
         ApplyPixelGridSettings();
-        SyncDropdown();
-        SyncPixelGridUi();
+        SyncUiState();
     }
 
     private void OnDisable()
@@ -87,11 +88,6 @@ public class UI_FixtureModeSelector : MonoBehaviour
         }
     }
 
-    public void SetModeFromDropdown(int modeIndex)
-    {
-        SetMode((FixtureMode)Mathf.Clamp(modeIndex, 0, (int)FixtureMode.PixelMapping));
-    }
-
     public void SetMode(FixtureMode mode)
     {
         if (currentMode == mode)
@@ -102,28 +98,42 @@ public class UI_FixtureModeSelector : MonoBehaviour
         currentMode = mode;
         ApplyModeMaterials();
         ApplyPixelGridSettings();
-        SyncDropdown();
+        SyncUiState();
         SavePreferences();
+    }
+
+    public void IncreaseMode()
+    {
+        int modeCount = System.Enum.GetValues(typeof(FixtureMode)).Length;
+        int nextMode = ((int)currentMode + 1) % modeCount;
+        SetMode((FixtureMode)nextMode);
+    }
+
+    public void DecreaseMode()
+    {
+        int modeCount = System.Enum.GetValues(typeof(FixtureMode)).Length;
+        int previousMode = ((int)currentMode - 1 + modeCount) % modeCount;
+        SetMode((FixtureMode)previousMode);
     }
 
     public void IncreasePixelRows()
     {
-        CurrentPixelRows = currentPixelRows + 1;
+        CurrentPixelRows = currentPixelRows + PixelWallStepSize;
     }
 
     public void DecreasePixelRows()
     {
-        CurrentPixelRows = currentPixelRows - 1;
+        CurrentPixelRows = currentPixelRows - PixelWallStepSize;
     }
 
     public void IncreasePixelColumns()
     {
-        CurrentPixelColumns = currentPixelColumns + 1;
+        CurrentPixelColumns = currentPixelColumns + PixelWallStepSize;
     }
 
     public void DecreasePixelColumns()
     {
-        CurrentPixelColumns = currentPixelColumns - 1;
+        CurrentPixelColumns = currentPixelColumns - PixelWallStepSize;
     }
 
     public void SavePreferences()
@@ -166,18 +176,18 @@ public class UI_FixtureModeSelector : MonoBehaviour
         }
     }
 
-    private void SyncDropdown()
+    private void SyncUiState()
     {
-        if (modeDropdown == null)
+        if (modeValueText != null)
         {
-            return;
+            modeValueText.text = GetModeDisplayName(currentMode);
         }
 
-        modeDropdown.SetValueWithoutNotify((int)currentMode);
-    }
+        if (pixelGridControlsContainer != null)
+        {
+            pixelGridControlsContainer.SetActive(currentMode == FixtureMode.PixelMapping);
+        }
 
-    private void SyncPixelGridUi()
-    {
         if (pixelRowsValueText != null)
         {
             pixelRowsValueText.text = currentPixelRows.ToString();
@@ -187,6 +197,21 @@ public class UI_FixtureModeSelector : MonoBehaviour
         {
             pixelColumnsValueText.text = currentPixelColumns.ToString();
         }
+    }
+
+    private static string GetModeDisplayName(FixtureMode mode)
+    {
+        if (mode == FixtureMode.MovingHead)
+        {
+            return "Moving Head";
+        }
+
+        if (mode == FixtureMode.PixelMapping)
+        {
+            return "Pixel Mapping";
+        }
+
+        return "Standard";
     }
 
     private void ApplyPixelGridSettings()
