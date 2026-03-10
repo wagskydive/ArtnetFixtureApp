@@ -174,9 +174,53 @@ Validate system and prepare for production deployment.
 
 ---
 
+## Phase 8 – Add Moving Head mode
+
+### Goal:
+Add a new mode that makes the app function like a Moving Head. The moving head is used to see beams coming out of the projector using haze or smoke.
+
+**Tasks:**
+
+- [ ] Create a new Mali-safe shader to visualize patterns. Include a masking cicle that can be adjusted through script
+- [ ] Add a setting to the settings menu to select the mode
+- [ ] Save the selected setting in user-prefs
+- [ ] Add new DMX channel mapping: 1-Master Dimmer, 2-4 RGB, 5-pan, 6-pan fine,7-tilt, 8 tilt-fine, 9-pattern select, 10-pattern speed, 11-pattern parameter, 12-Iris/Scale, 13-Rotate, 14-strobe
+- [ ]  
+
+**Acceptance Criteria:**
+- Fixture passes all stress tests
+- Documentation complete for all modules
+- Ready for production build
+
+## Phase 9 – Add Pixel mappoing mode
+
+### Goal:
+Add a new mode that makes the app function like a pixel wall.
+
+**Tasks:**
+
+
+- [ ] Create a new Mali-safe shader to function as a pixel wall. 
+- [ ] Add a setting to the settings menu to select the mode
+- [ ] Add a setting to the menu to adjust the pixel wall size. Rows and Columns amount. Restricted to maximum 32x32
+- [ ] Save the selected setting in user-prefs
+- [ ] Add new DMX channel mapping: 1-Master Dimmer, 2-Strobe, 3-10 corner pinning X and Y, 11-? RGB values for each pixel
+
+
+**Acceptance Criteria:**
+- Fixture passes all stress tests
+- Documentation complete for all modules
+- Ready for production build
+
+
+
+
 ### Developer Notes
 
 - Treat this as a **deterministic embedded lighting fixture**.
 - Prioritize **stability, low memory use, and predictable 30 FPS performance**.
 - Avoid any runtime memory allocations in Update/Render loops.
 - All features that risk performance (high-res video, multi-pass shaders) are optional and must be gated by mode selection.
+
+
+
