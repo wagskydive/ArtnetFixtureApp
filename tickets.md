@@ -2,6 +2,18 @@
 
 
 T14.1 - Rework the ui system. The new ui system will be an html page. This page will be accessable as a settings menu in the app and also we be on a webserver that the app exposes on the local network. The new input system in unity will be used to navigate through the menu. The menu gets shows when the user presses the OK button and can be hidden again using the back button. The first version of the html page is in Assets/WebUI/webui.html. the settings need to be retreived from the player prefs and saved to player prefs again.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Added local HTTP settings endpoints (`/api/settings`) and PlayerPrefs bridge classes to load/save web UI settings and apply DMX/mode/fixture updates at runtime.
+  - Updated `UI_SettingsPanelToggle` to support Unity Input System show/hide actions (OK/back behavior) with keyboard/gamepad fallbacks.
+  - Updated `webui.html` to load persisted settings from API, save back through API, align universe input as 1-based UI, and add arrow-key focus navigation for remote-friendly control.
+  - Fixed request-loop instability by marshalling `/api/settings` PlayerPrefs + Unity object access back to Unity main thread from the web server worker thread, and improved exception diagnostics for startup/request failures.
+  - Updated fallback show/hide handling in `UI_SettingsPanelToggle` to use Input System devices directly so menu toggling still works when the legacy Input Manager is disabled.
+
+T14.2 - Next run: wire the in-app HTML rendering surface (WebView integration) so the same `Assets/WebUI/webui.html` menu can be displayed directly inside the Unity app panel while still available over local network.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written

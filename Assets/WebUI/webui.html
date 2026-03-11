@@ -138,7 +138,7 @@
                     <option value="pixel">Pixel Mapping</option>
                 </select>
 
-                <label>DMX Universe</label> <input id="dmxUniverse" type="number" min="0" max="15" tabindex="3">
+                <label>DMX Universe</label> <input id="dmxUniverse" type="number" min="1" max="16" tabindex="3">
 
                 <label>DMX Start Channel</label> <input id="startChannel" type="number" min="1" max="512" tabindex="4">
 
@@ -187,7 +187,7 @@
 
             <div class="section">
 
-                <label>Universe</label> <input id="testUniverse" type="number" min="0" max="15" value="0">
+                <label>Universe</label> <input id="testUniverse" type="number" min="1" max="16" value="1">
 
                 <label>Start Address</label> <input id="testAddress" type="number" min="1" max="512" value="1">
 
@@ -255,6 +255,33 @@
         }
 
         const faderContainer = document.getElementById("faderContainer")
+        const navigableElements = Array.from(document.querySelectorAll("input, select, button"))
+
+        function clampValue(value, min, max) {
+            return Math.min(max, Math.max(min, value))
+        }
+
+        async function loadSettings() {
+            try {
+                const response = await fetch("/api/settings")
+                if (!response.ok) {
+                    return
+                }
+
+                const settings = await response.json()
+                document.getElementById("deviceName").value = settings.deviceName || "ArtnetFixture"
+                document.getElementById("fixtureMode").value = settings.fixtureMode || "surface"
+                document.getElementById("dmxUniverse").value = clampValue(parseInt(settings.dmxUniverse) || 1, 1, 16)
+                document.getElementById("startChannel").value = clampValue(parseInt(settings.startChannel) || 1, 1, 512)
+                document.getElementById("fixtureAmount").value = clampValue(parseInt(settings.fixtureAmount) || 1, 1, 64)
+                document.getElementById("gridX").value = clampValue(parseInt(settings.gridX) || 8, 8, 32)
+                document.getElementById("gridY").value = clampValue(parseInt(settings.gridY) || 8, 8, 32)
+
+                modeSelect.dispatchEvent(new Event("change"))
+            } catch (e) {
+                console.log("Failed to load settings", e)
+            }
+        }
 
         function createFaders() {
 
@@ -330,7 +357,7 @@
 
         function sendArtNet() {
 
-            const universe = parseInt(document.getElementById("testUniverse").value) || 0
+            const universe = clampValue(parseInt(document.getElementById("testUniverse").value) || 1, 1, 16) - 1
             const values = getDMXValues()
 
             const packet = new Uint8Array(18 + 512)
@@ -404,6 +431,24 @@
             alert("Settings Saved")
 
         }
+
+        document.addEventListener("keydown", (event) => {
+            const activeIndex = navigableElements.indexOf(document.activeElement)
+
+            if (event.key === "ArrowDown" || event.key === "ArrowRight") {
+                event.preventDefault()
+                const next = navigableElements[(activeIndex + 1 + navigableElements.length) % navigableElements.length]
+                next.focus()
+            } else if (event.key === "ArrowUp" || event.key === "ArrowLeft") {
+                event.preventDefault()
+                const prev = navigableElements[(activeIndex - 1 + navigableElements.length) % navigableElements.length]
+                prev.focus()
+            } else if (event.key === "Escape") {
+                window.dispatchEvent(new CustomEvent("webui-back"))
+            }
+        })
+
+        loadSettings()
 
     </script>
 
