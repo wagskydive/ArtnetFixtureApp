@@ -64,6 +64,22 @@ T14.6 - I want the settings menu to be more responsive. So the settings should b
   - Removed the explicit save button flow from `webui.html` and added debounced auto-save handlers that POST `/api/settings` whenever any settings field changes.
   - Added an in-page save status message (`Saving…` / `Saved` / `Save failed`) and centralized UI rehydration from persisted API responses so clamped/sanitized PlayerPrefs values are reflected immediately.
 
+T14.7 - Fix a bug where the universe number is not saved in playerprefs when changed in the webui. Also check if any other settings are not being saved in playerprefs
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T14.8 - Modify the web ui and settings logic so that only the "standard/surface" mode shows the "Fixture Amount" part of the ui and wire up the logic for the other modes. The other modes only allow 1 fixture, so when another mode is selected, there should only be 1 instance of the fixture object. When the "Surface" mode is selected again, and an amount > 1 is in the playerprefs, the missing instances should again be created. This feature used to work before switching to the webui, but no longer works in the webui
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+
+
 
 T99.1 - Find and fix the bug in which the Fixture Amount button that increases the fixture amount in the UI_FixureMeshManager.cs also increments the Universe on the ArtNetReveiver.cs script
 - [x] Started
