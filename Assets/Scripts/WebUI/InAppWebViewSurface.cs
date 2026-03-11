@@ -4,6 +4,11 @@ public class InAppWebViewSurface : MonoBehaviour
 {
     [SerializeField] private LocalWebUiServer webUiServer;
     [SerializeField] private string pagePath = "/index.html?local=true&tv=true";
+    [SerializeField] private bool openExternalBrowserInEditor = true;
+
+#if UNITY_EDITOR
+    private bool _editorBrowserOpened;
+#endif
 
 #if UNITY_ANDROID && !UNITY_EDITOR
     private AndroidJavaObject _webView;
@@ -37,7 +42,7 @@ public class InAppWebViewSurface : MonoBehaviour
 #else
         if (visible)
         {
-            Debug.Log($"InAppWebViewSurface visible URL: {BuildWebUiUrl()}");
+            OpenEditorPreview();
         }
 #endif
     }
@@ -72,6 +77,11 @@ public class InAppWebViewSurface : MonoBehaviour
 
             _webView.Call("loadUrl", BuildWebUiUrl());
         }));
+#elif UNITY_EDITOR
+        if (openExternalBrowserInEditor)
+        {
+            OpenEditorPreview();
+        }
 #endif
     }
 
@@ -98,9 +108,29 @@ public class InAppWebViewSurface : MonoBehaviour
 #endif
     }
 
+    public string GetWebUiUrl()
+    {
+        return BuildWebUiUrl();
+    }
+
     private string BuildWebUiUrl()
     {
         int port = webUiServer != null ? webUiServer.Port : 8080;
         return $"http://127.0.0.1:{port}{pagePath}";
     }
+
+#if UNITY_EDITOR
+    private void OpenEditorPreview()
+    {
+        string url = BuildWebUiUrl();
+
+        if (!_editorBrowserOpened && openExternalBrowserInEditor)
+        {
+            Application.OpenURL(url);
+            _editorBrowserOpened = true;
+        }
+
+        Debug.Log($"InAppWebViewSurface (Editor) preview URL: {url}");
+    }
+#endif
 }

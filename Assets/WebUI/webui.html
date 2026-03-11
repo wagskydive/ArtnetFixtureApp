@@ -146,7 +146,7 @@
 
             <div id="standardSection" class="section">
 
-                <label>Virtual Fixture Amount</label> <input id="fixtureAmount" type="number" min="1" max="64"
+                <label>Virtual Fixture Amount</label> <input id="fixtureAmount" type="number" min="1" max="16"
                     tabindex="5">
 
             </div>
@@ -273,7 +273,7 @@
                 document.getElementById("fixtureMode").value = settings.fixtureMode || "surface"
                 document.getElementById("dmxUniverse").value = clampValue(parseInt(settings.dmxUniverse) || 1, 1, 16)
                 document.getElementById("startChannel").value = clampValue(parseInt(settings.startChannel) || 1, 1, 512)
-                document.getElementById("fixtureAmount").value = clampValue(parseInt(settings.fixtureAmount) || 1, 1, 64)
+                document.getElementById("fixtureAmount").value = clampValue(parseInt(settings.fixtureAmount) || 1, 1, 16)
                 document.getElementById("gridX").value = clampValue(parseInt(settings.gridX) || 8, 8, 32)
                 document.getElementById("gridY").value = clampValue(parseInt(settings.gridY) || 8, 8, 32)
 
@@ -408,7 +408,7 @@
 
         }
 
-        document.getElementById("saveSettings").onclick = function () {
+        document.getElementById("saveSettings").onclick = async function () {
 
             const settings = {
 
@@ -422,13 +422,32 @@
 
             }
 
-            fetch("/api/settings", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(settings)
-            })
+            try {
+                const response = await fetch("/api/settings", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(settings)
+                })
 
-            alert("Settings Saved")
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`)
+                }
+
+                const persisted = await response.json()
+                document.getElementById("deviceName").value = persisted.deviceName || "ArtnetFixture"
+                document.getElementById("fixtureMode").value = persisted.fixtureMode || "surface"
+                document.getElementById("dmxUniverse").value = clampValue(parseInt(persisted.dmxUniverse) || 1, 1, 16)
+                document.getElementById("startChannel").value = clampValue(parseInt(persisted.startChannel) || 1, 1, 512)
+                document.getElementById("fixtureAmount").value = clampValue(parseInt(persisted.fixtureAmount) || 1, 1, 16)
+                document.getElementById("gridX").value = clampValue(parseInt(persisted.gridX) || 8, 8, 32)
+                document.getElementById("gridY").value = clampValue(parseInt(persisted.gridY) || 8, 8, 32)
+                modeSelect.dispatchEvent(new Event("change"))
+
+                alert("Settings Saved")
+            } catch (error) {
+                console.log("Failed to save settings", error)
+                alert("Saving settings failed")
+            }
 
         }
 

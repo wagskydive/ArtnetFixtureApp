@@ -37,13 +37,25 @@ T14.3 - Wire the in-app HTML rendering surface (WebView integration) so the same
   - Wired `UI_SettingsPanelToggle` visibility changes to show/hide the in-app WebView alongside the existing Unity panel lifecycle.
 
 T14.4 - Create functionallity to make the InAppWebViewSurface.cs also work in the Unity editor for debugging.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
-  
+- [x] Documentation Written
+  - Added Unity Editor debug preview support in `InAppWebViewSurface` with optional external-browser launch and explicit preview URL logging while preserving Android WebView behavior.
+  - Added `GetWebUiUrl()` helper so editor/debug tooling and tests can verify the exact in-app URL that should be loaded.
+
+
 T14.5 - Add saving to player prefs to the webui settings panel.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Hardened the settings save flow in `webui.html` by awaiting `/api/settings` POST responses and rehydrating sanitized persisted values returned by the PlayerPrefs-backed API before showing success.
+  - Aligned Web UI fixture amount input clamping (`1-16`) with PlayerPrefs/runtime limits to prevent mismatched values from being displayed after save/load cycles.
+
+T14.6 - Next run: execute Unity EditMode suite on a licensed runner to validate WebUI editor preview URL and PlayerPrefs save/load coverage end-to-end.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
