@@ -65,21 +65,34 @@ T14.6 - I want the settings menu to be more responsive. So the settings should b
   - Added an in-page save status message (`Saving…` / `Saved` / `Save failed`) and centralized UI rehydration from persisted API responses so clamped/sanitized PlayerPrefs values are reflected immediately.
 
 T14.7 - Fix a bug where the universe number is not saved in playerprefs when changed in the webui. Also check if any other settings are not being saved in playerprefs
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Fixed WebUI settings application flow so universe/start channel updates are now always applied to the primary `ArtNetReceiver` before fixture address sync, ensuring universe changes persist and propagate to spawned fixtures.
+  - Added explicit `UI_FixtureMeshManager.SetPrimaryReceiverAddressFromUserInput(...)` API to avoid address sync using stale primary receiver values after `/api/settings` save.
 
 T14.8 - Modify the web ui and settings logic so that only the "standard/surface" mode shows the "Fixture Amount" part of the ui and wire up the logic for the other modes. The other modes only allow 1 fixture, so when another mode is selected, there should only be 1 instance of the fixture object. When the "Surface" mode is selected again, and an amount > 1 is in the playerprefs, the missing instances should again be created. This feature used to work before switching to the webui, but no longer works in the webui
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Updated `webui.html` mode visibility logic so only Surface shows the fixture amount section, while Pixel-only controls are shown exclusively in Pixel Mapping mode.
+  - Updated `WebUiSettingsBridge.ApplySettings(...)` to force fixture count to `1` for non-Surface modes and to apply requested fixture amount only for Surface mode, restoring expected mode-dependent instance behavior when using WebUI.
+  - Added EditMode coverage for the WebUI bridge path to verify non-Surface mode enforces one fixture while still applying universe/start-channel settings.
+
+
+
+
+
+T14.9 - Add integration coverage for `/api/settings` request handling to validate persisted payload rehydration and mode-specific fixture count behavior through LocalWebUiServer.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
 - [ ] Tests Passed
 - [ ] Documentation Written
-
-
-
 
 T99.1 - Find and fix the bug in which the Fixture Amount button that increases the fixture amount in the UI_FixureMeshManager.cs also increments the Universe on the ArtNetReveiver.cs script
 - [x] Started

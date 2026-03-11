@@ -32,16 +32,11 @@ public class WebUiSettingsBridge : MonoBehaviour
     public void ApplySettings(WebUiSettingsData raw)
     {
         WebUiSettingsData data = WebUiSettingsStore.Sanitize(raw);
-
-        if (artNetReceiver != null)
-        {
-            artNetReceiver.SetUniverseFromUserInput(data.dmxUniverse);
-            artNetReceiver.SetStartChannelFromUserInput(data.startChannel);
-        }
+        DmxModeManager.FixtureMode selectedMode = ToFixtureMode(data.fixtureMode);
 
         if (fixtureModeSelector != null)
         {
-            fixtureModeSelector.SetMode(ToFixtureMode(data.fixtureMode));
+            fixtureModeSelector.SetMode(selectedMode);
 
             if (fixtureModeSelector.CurrentPixelColumns != data.gridX)
             {
@@ -54,10 +49,20 @@ public class WebUiSettingsBridge : MonoBehaviour
             }
         }
 
+        int fixtureCount = selectedMode == DmxModeManager.FixtureMode.Standard ? data.fixtureAmount : 1;
+
         if (fixtureMeshManager != null)
         {
-            fixtureMeshManager.RebuildFixtures(data.fixtureAmount, savePreference: false);
+            fixtureMeshManager.RebuildFixtures(fixtureCount, savePreference: false);
+            fixtureMeshManager.SetPrimaryReceiverAddressFromUserInput(data.dmxUniverse, data.startChannel);
             fixtureMeshManager.SyncFixtureAddresses();
+            return;
+        }
+
+        if (artNetReceiver != null)
+        {
+            artNetReceiver.SetUniverseFromUserInput(data.dmxUniverse);
+            artNetReceiver.SetStartChannelFromUserInput(data.startChannel);
         }
     }
 

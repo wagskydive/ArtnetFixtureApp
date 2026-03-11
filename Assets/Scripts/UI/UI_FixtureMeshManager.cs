@@ -109,6 +109,17 @@ public class UI_FixtureMeshManager : MonoBehaviour
         }
     }
 
+    public void SetPrimaryReceiverAddressFromUserInput(int universe1Based, int startChannel1Based)
+    {
+        if (primaryReceiver == null)
+        {
+            return;
+        }
+
+        primaryReceiver.SetUniverseFromUserInput(universe1Based);
+        primaryReceiver.SetStartChannelFromUserInput(startChannel1Based);
+    }
+
     private void EnsureFixtureListContainsTemplate()
     {
         if (_spawnedFixtures.Count == 0)
