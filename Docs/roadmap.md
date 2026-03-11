@@ -131,6 +131,7 @@ Add basic projection mapping for fixture output.
 ## Phase 6 – Configuration & Management (2 Weeks)
 
 _Progress note: hidden settings panel visibility can now be toggled from Android TV settings key input._
+_Progress note: local web settings API endpoint and HTML settings page persistence bridge are now in place for PlayerPrefs-backed load/save._
 
 ### Goal:
 Enable persistent configuration and easy deployment.
