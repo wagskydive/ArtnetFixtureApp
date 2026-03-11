@@ -6,6 +6,7 @@ public class UI_SettingsPanelToggle : MonoBehaviour
     [SerializeField] private GameObject targetObject;
     [SerializeField] private InputActionReference showMenuAction;
     [SerializeField] private InputActionReference hideMenuAction;
+    [SerializeField] private InAppWebViewSurface inAppWebViewSurface;
     private void OnEnable()
     {
         EnableAction(showMenuAction, OnShowMenu);
@@ -59,6 +60,10 @@ public class UI_SettingsPanelToggle : MonoBehaviour
         }
 
         targetObject.SetActive(visible);
+        if (inAppWebViewSurface != null)
+        {
+            inAppWebViewSurface.SetVisible(visible);
+        }
     }
 
     private static bool WasFallbackShowPressed()

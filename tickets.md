@@ -19,14 +19,24 @@ Don't use this function in the constructor or field initializers, instead move i
 UnityEngine.Debug:LogWarning (object)
 LocalWebUiServer:ServerLoop () (at Assets/Scripts/WebUI/LocalWebUiServer.cs:124)
 System.Threading.ThreadHelper:ThreadStart ()
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Cached `webUiHtml` as UTF-8 bytes on Unity's main thread during `Awake` and served the cached payload from the HTTP worker thread to eliminate `get_bytes can only be called from the main thread` request failures.
 
 
 T14.3 - Wire the in-app HTML rendering surface (WebView integration) so the same `Assets/WebUI/webui.html` menu can be displayed directly inside the Unity app panel while still available over local network.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Added `InAppWebViewSurface` Android WebView integration that loads the local server URL (`127.0.0.1`) so the same `webui.html` runs in-app and via LAN browser.
+  - Wired `UI_SettingsPanelToggle` visibility changes to show/hide the in-app WebView alongside the existing Unity panel lifecycle.
+
+T14.4 - Next run: validate Android on-device WebView input/navigation behavior and confirm no focus conflicts with Unity Input System menu toggles
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
