@@ -43,6 +43,44 @@ public class WebUiSettingsTests
     }
 
     [Test]
+    public void ApplySettings_NonSurfaceModeForcesSingleFixtureAndStillAppliesUniverseAndStartChannel()
+    {
+        var template = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        template.name = "FixtureTemplate";
+        var primaryReceiver = template.AddComponent<ArtNetReceiver>();
+        primaryReceiver.ReceiveNetworkData = false;
+        primaryReceiver.DmxBuffer = new DmxBuffer();
+
+        var managerGo = new GameObject("fixture-manager");
+        var fixtureMeshManager = managerGo.AddComponent<UI_FixtureMeshManager>();
+        SetPrivateField(fixtureMeshManager, "primaryReceiver", primaryReceiver);
+        SetPrivateField(fixtureMeshManager, "fixtureTemplate", template);
+        fixtureMeshManager.RebuildFixtures(3);
+
+        var bridgeGo = new GameObject("bridge");
+        var bridge = bridgeGo.AddComponent<WebUiSettingsBridge>();
+        SetPrivateField(bridge, "fixtureMeshManager", fixtureMeshManager);
+
+        bridge.ApplySettings(new WebUiSettingsData
+        {
+            fixtureMode = "moving",
+            dmxUniverse = 9,
+            startChannel = 25,
+            fixtureAmount = 6,
+            gridX = 8,
+            gridY = 8
+        });
+
+        Assert.That(fixtureMeshManager.FixtureCount, Is.EqualTo(1));
+        Assert.That(primaryReceiver.GetUniverseForUserInput(), Is.EqualTo(9));
+        Assert.That(primaryReceiver.StartChannel, Is.EqualTo(25));
+
+        Object.DestroyImmediate(bridgeGo);
+        Object.DestroyImmediate(managerGo);
+        Object.DestroyImmediate(template);
+    }
+
+    [Test]
     public void InAppWebViewSurface_GetWebUiUrl_UsesServerPortAndConfiguredPagePath()
     {
         var serverGo = new GameObject("web-server");

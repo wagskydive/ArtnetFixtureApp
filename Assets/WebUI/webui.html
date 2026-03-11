@@ -238,11 +238,18 @@
 
         modeSelect.addEventListener("change", function () {
 
-            if (this.value === "pixel") {
-                pixelSection.classList.remove("hidden")
-                standardSection.classList.add("hidden")
-            } else {
+            const isSurface = this.value === "surface"
+            const isPixel = this.value === "pixel"
+
+            if (isSurface) {
                 standardSection.classList.remove("hidden")
+            } else {
+                standardSection.classList.add("hidden")
+            }
+
+            if (isPixel) {
+                pixelSection.classList.remove("hidden")
+            } else {
                 pixelSection.classList.add("hidden")
             }
 

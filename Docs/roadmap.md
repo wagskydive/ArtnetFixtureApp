@@ -136,6 +136,7 @@ _Progress note: web settings API handling now marshals Unity/PlayerPrefs operati
 _Progress note: in-app Android WebView surface now loads the same local `webui.html` UI (`127.0.0.1`) used by LAN clients, and menu show/hide toggles now synchronize WebView visibility._
 _Progress note: Unity Editor debugging now supports opening/logging the same local WebUI URL via `InAppWebViewSurface`, enabling quick iteration without Android deploys._
 _Progress note: WebUI settings now auto-save on every field change (debounced) and immediately persist to PlayerPrefs-backed `/api/settings` without a dedicated Save button._
+_Progress note: WebUI mode behavior is now aligned again so only Surface mode exposes fixture amount controls, non-Surface modes force a single fixture instance, and web-saved universe/start channel values now reapply correctly to spawned fixtures._
 
 ### Goal:
 Enable persistent configuration and easy deployment.
