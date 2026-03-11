@@ -84,7 +84,12 @@ T14.8 - Modify the web ui and settings logic so that only the "standard/surface"
   - Added EditMode coverage for the WebUI bridge path to verify non-Surface mode enforces one fixture while still applying universe/start-channel settings.
 
 
-
+T14.7a - The DMX Universe value and DMX Start Channel still don't persist on consecutive app starts. Other settings are retained, like fixture mode and fixture amount, but the Universe value and DMX channel are always 2 and 1 respectivly. Find out why and fix it.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
 
 
 T14.9 - Add integration coverage for `/api/settings` request handling to validate persisted payload rehydration and mode-specific fixture count behavior through LocalWebUiServer.
