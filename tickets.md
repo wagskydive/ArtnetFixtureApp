@@ -36,7 +36,14 @@ T14.3 - Wire the in-app HTML rendering surface (WebView integration) so the same
   - Added `InAppWebViewSurface` Android WebView integration that loads the local server URL (`127.0.0.1`) so the same `webui.html` runs in-app and via LAN browser.
   - Wired `UI_SettingsPanelToggle` visibility changes to show/hide the in-app WebView alongside the existing Unity panel lifecycle.
 
-T14.4 - Next run: validate Android on-device WebView input/navigation behavior and confirm no focus conflicts with Unity Input System menu toggles
+T14.4 - Create functionallity to make the InAppWebViewSurface.cs also work in the Unity editor for debugging.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+  
+T14.5 - Add saving to player prefs to the webui settings panel.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
