@@ -26,6 +26,14 @@ public class LocalWebUiServer : MonoBehaviour
     private HttpListener _listener;
     private Thread _serverThread;
     private volatile bool _isRunning;
+    private byte[] _cachedHtmlBytes;
+
+    public int Port => port;
+
+    private void Awake()
+    {
+        CacheHtmlPayload();
+    }
 
     private void Start()
     {
@@ -46,6 +54,12 @@ public class LocalWebUiServer : MonoBehaviour
     private void OnDestroy()
     {
         StopServer();
+    }
+
+    private void CacheHtmlPayload()
+    {
+        string html = webUiHtml != null ? webUiHtml.text : "<html><body>Missing webUiHtml reference.</body></html>";
+        _cachedHtmlBytes = Encoding.UTF8.GetBytes(html);
     }
 
     private void StartServer()
@@ -188,7 +202,6 @@ public class LocalWebUiServer : MonoBehaviour
             return "{}";
         }
 
-
         var invocation = new MainThreadInvocation
         {
             Action = action,
@@ -243,8 +256,7 @@ public class LocalWebUiServer : MonoBehaviour
 
     private void WriteHtml(HttpListenerResponse response)
     {
-        string html = webUiHtml != null ? webUiHtml.text : "<html><body>Missing webUiHtml reference.</body></html>";
-        WriteText(response, html, "text/html");
+        WritePayload(response, _cachedHtmlBytes ?? Array.Empty<byte>(), "text/html");
     }
 
     private static string ReadBody(HttpListenerRequest request)
@@ -263,6 +275,11 @@ public class LocalWebUiServer : MonoBehaviour
     private static void WriteText(HttpListenerResponse response, string content, string contentType)
     {
         byte[] payload = Encoding.UTF8.GetBytes(content);
+        WritePayload(response, payload, contentType);
+    }
+
+    private static void WritePayload(HttpListenerResponse response, byte[] payload, string contentType)
+    {
         response.ContentType = contentType;
         response.ContentEncoding = Encoding.UTF8;
         response.ContentLength64 = payload.Length;
