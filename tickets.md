@@ -1,5 +1,13 @@
 # Tickets
 
+
+T14.1 - Rework the ui system. The new ui system will be an html page. This page will be accessable as a settings menu in the app and also we be on a webserver that the app exposes on the local network. The new input system in unity will be used to navigate through the menu. The menu gets shows when the user presses the OK button and can be hidden again using the back button. The first version of the html page is in Assets/WebUI/webui.html. the settings need to be retreived from the player prefs and saved to player prefs again.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 T99.1 - Find and fix the bug in which the Fixture Amount button that increases the fixture amount in the UI_FixureMeshManager.cs also increments the Universe on the ArtNetReveiver.cs script
 - [x] Started
 - [x] Behavior Written
