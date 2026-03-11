@@ -160,33 +160,10 @@ public class LocalWebUiServer : MonoBehaviour
             return;
         }
 
-        if (path == "/api/settings" && context.Request.HttpMethod == "GET")
+        if (path == "/api/settings")
         {
-            string json = InvokeOnMainThread(() =>
-            {
-                return settingsBridge != null ? settingsBridge.GetSettingsJson() : WebUiSettingsStore.ToJson(WebUiSettingsStore.Load());
-            });
-            WriteJson(context.Response, json);
-            return;
-        }
-
-        if (path == "/api/settings" && context.Request.HttpMethod == "POST")
-        {
-            string requestBody = ReadBody(context.Request);
-            string json = InvokeOnMainThread(() =>
-            {
-                WebUiSettingsData settings = settingsBridge != null
-                    ? settingsBridge.SaveSettingsFromJson(requestBody)
-                    : WebUiSettingsStore.FromJson(requestBody);
-
-                if (settingsBridge == null)
-                {
-                    WebUiSettingsStore.Save(settings);
-                }
-
-                return WebUiSettingsStore.ToJson(settings);
-            });
-
+            string requestBody = context.Request.HttpMethod == "POST" ? ReadBody(context.Request) : null;
+            string json = HandleSettingsApiRequest(context.Request.HttpMethod, requestBody);
             WriteJson(context.Response, json);
             return;
         }
@@ -195,6 +172,40 @@ public class LocalWebUiServer : MonoBehaviour
         WriteText(context.Response, "Not found", "text/plain");
     }
 
+
+    internal string HandleSettingsApiRequest(string httpMethod, string requestBody)
+    {
+        return InvokeOnMainThread(() => ExecuteSettingsApiActionImmediately(httpMethod, requestBody));
+    }
+
+    internal string HandleSettingsApiRequestImmediately(string httpMethod, string requestBody)
+    {
+        return ExecuteSettingsApiActionImmediately(httpMethod, requestBody);
+    }
+
+    private string ExecuteSettingsApiActionImmediately(string httpMethod, string requestBody)
+    {
+        if (httpMethod == "GET")
+        {
+            return settingsBridge != null ? settingsBridge.GetSettingsJson() : WebUiSettingsStore.ToJson(WebUiSettingsStore.Load());
+        }
+
+        if (httpMethod == "POST")
+        {
+            WebUiSettingsData settings = settingsBridge != null
+                ? settingsBridge.SaveSettingsFromJson(requestBody)
+                : WebUiSettingsStore.FromJson(requestBody);
+
+            if (settingsBridge == null)
+            {
+                WebUiSettingsStore.Save(settings);
+            }
+
+            return WebUiSettingsStore.ToJson(settings);
+        }
+
+        return "{}";
+    }
     private string InvokeOnMainThread(Func<string> action)
     {
         if (action == null)

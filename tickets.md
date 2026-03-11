@@ -85,19 +85,23 @@ T14.8 - Modify the web ui and settings logic so that only the "standard/surface"
 
 
 T14.7a - The DMX Universe value and DMX Start Channel still don't persist on consecutive app starts. Other settings are retained, like fixture mode and fixture amount, but the Universe value and DMX channel are always 2 and 1 respectivly. Find out why and fix it.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - Fixed persistence drift by syncing `UI_DmxSettings` from the live `ArtNetReceiver` before writing PlayerPrefs, so externally-applied WebUI address changes are no longer overwritten with stale inspector defaults on disable/pause.
+  - Corrected universe label rendering to keep the WebUI/UIDMX address model consistently 1-based for user-visible values.
 
 
 T14.9 - Add integration coverage for `/api/settings` request handling to validate persisted payload rehydration and mode-specific fixture count behavior through LocalWebUiServer.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - Refactored `LocalWebUiServer` settings API handling behind reusable request handlers and added an immediate execution path for deterministic EditMode integration tests.
+  - Added EditMode coverage that exercises LocalWebUiServer `POST` + `GET` settings flow end-to-end, validating persisted payload rehydration and non-Surface fixture-count enforcement.
 
 T99.1 - Find and fix the bug in which the Fixture Amount button that increases the fixture amount in the UI_FixureMeshManager.cs also increments the Universe on the ArtNetReveiver.cs script
 - [x] Started

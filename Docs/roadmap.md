@@ -137,6 +137,7 @@ _Progress note: in-app Android WebView surface now loads the same local `webui.h
 _Progress note: Unity Editor debugging now supports opening/logging the same local WebUI URL via `InAppWebViewSurface`, enabling quick iteration without Android deploys._
 _Progress note: WebUI settings now auto-save on every field change (debounced) and immediately persist to PlayerPrefs-backed `/api/settings` without a dedicated Save button._
 _Progress note: WebUI mode behavior is now aligned again so only Surface mode exposes fixture amount controls, non-Surface modes force a single fixture instance, and web-saved universe/start channel values now reapply correctly to spawned fixtures._
+_Progress note: universe/start channel persistence now survives consecutive app restarts by preventing stale `UI_DmxSettings` writes from overwriting WebUI-applied receiver addresses during pause/disable saves._
 
 ### Goal:
 Enable persistent configuration and easy deployment.
