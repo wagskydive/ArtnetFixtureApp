@@ -13,12 +13,26 @@ T14.1 - Rework the ui system. The new ui system will be an html page. This page 
   - Fixed request-loop instability by marshalling `/api/settings` PlayerPrefs + Unity object access back to Unity main thread from the web server worker thread, and improved exception diagnostics for startup/request failures.
   - Updated fallback show/hide handling in `UI_SettingsPanelToggle` to use Input System devices directly so menu toggling still works when the legacy Input Manager is disabled.
 
-T14.2 - Next run: wire the in-app HTML rendering surface (WebView integration) so the same `Assets/WebUI/webui.html` menu can be displayed directly inside the Unity app panel while still available over local network.
+T14.2 - fix a bug that gives this error when trying to access the webui from a browser: LocalWebUiServer request loop hit an exception: get_bytes can only be called from the main thread.
+Constructors and field initializers will be executed from the loading thread when loading a scene.
+Don't use this function in the constructor or field initializers, instead move initialization code to the Awake or Start function.
+UnityEngine.Debug:LogWarning (object)
+LocalWebUiServer:ServerLoop () (at Assets/Scripts/WebUI/LocalWebUiServer.cs:124)
+System.Threading.ThreadHelper:ThreadStart ()
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
 - [ ] Tests Passed
 - [ ] Documentation Written
+
+
+T14.3 - Wire the in-app HTML rendering surface (WebView integration) so the same `Assets/WebUI/webui.html` menu can be displayed directly inside the Unity app panel while still available over local network.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 
 T99.1 - Find and fix the bug in which the Fixture Amount button that increases the fixture amount in the UI_FixureMeshManager.cs also increments the Universe on the ArtNetReveiver.cs script
 - [x] Started
