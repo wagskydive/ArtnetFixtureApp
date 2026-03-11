@@ -100,6 +100,13 @@
             font-size: 20px;
             line-height: 1.5;
         }
+
+        .status {
+            margin-top: 12px;
+            min-height: 1.25em;
+            font-size: 18px;
+            color: #7dd3fc;
+        }
     </style>
 
 </head>
@@ -161,8 +168,9 @@
 
             <div class="section">
 
-                <button id="saveSettings" tabindex="8">Save Settings</button> <button class="secondary">Restart
+                <button class="secondary" id="restartFixture" tabindex="8">Restart
                     Fixture</button>
+                <p id="settingsStatus" class="status" aria-live="polite"></p>
 
             </div>
 
@@ -255,10 +263,86 @@
         }
 
         const faderContainer = document.getElementById("faderContainer")
+        const settingsStatus = document.getElementById("settingsStatus")
+        const autoSaveElements = [
+            document.getElementById("deviceName"),
+            document.getElementById("fixtureMode"),
+            document.getElementById("dmxUniverse"),
+            document.getElementById("startChannel"),
+            document.getElementById("fixtureAmount"),
+            document.getElementById("gridX"),
+            document.getElementById("gridY")
+        ]
         const navigableElements = Array.from(document.querySelectorAll("input, select, button"))
+        let saveDebounceTimeout = null
+        let suppressAutoSave = false
 
         function clampValue(value, min, max) {
             return Math.min(max, Math.max(min, value))
+        }
+
+        function getCurrentSettings() {
+            return {
+                deviceName: document.getElementById("deviceName").value,
+                fixtureMode: document.getElementById("fixtureMode").value,
+                dmxUniverse: parseInt(document.getElementById("dmxUniverse").value),
+                startChannel: parseInt(document.getElementById("startChannel").value),
+                fixtureAmount: parseInt(document.getElementById("fixtureAmount").value),
+                gridX: parseInt(document.getElementById("gridX").value),
+                gridY: parseInt(document.getElementById("gridY").value)
+            }
+        }
+
+        function applySettingsToUi(settings) {
+            document.getElementById("deviceName").value = settings.deviceName || "ArtnetFixture"
+            document.getElementById("fixtureMode").value = settings.fixtureMode || "surface"
+            document.getElementById("dmxUniverse").value = clampValue(parseInt(settings.dmxUniverse) || 1, 1, 16)
+            document.getElementById("startChannel").value = clampValue(parseInt(settings.startChannel) || 1, 1, 512)
+            document.getElementById("fixtureAmount").value = clampValue(parseInt(settings.fixtureAmount) || 1, 1, 16)
+            document.getElementById("gridX").value = clampValue(parseInt(settings.gridX) || 8, 8, 32)
+            document.getElementById("gridY").value = clampValue(parseInt(settings.gridY) || 8, 8, 32)
+            modeSelect.dispatchEvent(new Event("change"))
+        }
+
+        async function saveSettings() {
+            const settings = getCurrentSettings()
+
+            try {
+                settingsStatus.textContent = "Saving…"
+                const response = await fetch("/api/settings", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(settings)
+                })
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`)
+                }
+
+                const persisted = await response.json()
+                suppressAutoSave = true
+                applySettingsToUi(persisted)
+                suppressAutoSave = false
+                settingsStatus.textContent = "Saved"
+            } catch (error) {
+                settingsStatus.textContent = "Save failed"
+                console.log("Failed to save settings", error)
+            }
+        }
+
+        function scheduleAutoSave() {
+            if (suppressAutoSave) {
+                return
+            }
+
+            if (saveDebounceTimeout !== null) {
+                clearTimeout(saveDebounceTimeout)
+            }
+
+            saveDebounceTimeout = setTimeout(() => {
+                saveDebounceTimeout = null
+                saveSettings()
+            }, 180)
         }
 
         async function loadSettings() {
@@ -269,15 +353,8 @@
                 }
 
                 const settings = await response.json()
-                document.getElementById("deviceName").value = settings.deviceName || "ArtnetFixture"
-                document.getElementById("fixtureMode").value = settings.fixtureMode || "surface"
-                document.getElementById("dmxUniverse").value = clampValue(parseInt(settings.dmxUniverse) || 1, 1, 16)
-                document.getElementById("startChannel").value = clampValue(parseInt(settings.startChannel) || 1, 1, 512)
-                document.getElementById("fixtureAmount").value = clampValue(parseInt(settings.fixtureAmount) || 1, 1, 16)
-                document.getElementById("gridX").value = clampValue(parseInt(settings.gridX) || 8, 8, 32)
-                document.getElementById("gridY").value = clampValue(parseInt(settings.gridY) || 8, 8, 32)
-
-                modeSelect.dispatchEvent(new Event("change"))
+                applySettingsToUi(settings)
+                settingsStatus.textContent = "Ready"
             } catch (e) {
                 console.log("Failed to load settings", e)
             }
@@ -408,48 +485,12 @@
 
         }
 
-        document.getElementById("saveSettings").onclick = async function () {
-
-            const settings = {
-
-                deviceName: document.getElementById("deviceName").value,
-                fixtureMode: document.getElementById("fixtureMode").value,
-                dmxUniverse: parseInt(document.getElementById("dmxUniverse").value),
-                startChannel: parseInt(document.getElementById("startChannel").value),
-                fixtureAmount: parseInt(document.getElementById("fixtureAmount").value),
-                gridX: parseInt(document.getElementById("gridX").value),
-                gridY: parseInt(document.getElementById("gridY").value)
-
+        autoSaveElements.forEach(element => {
+            element.addEventListener("change", scheduleAutoSave)
+            if (element.tagName.toLowerCase() === "input" && element.type !== "number") {
+                element.addEventListener("input", scheduleAutoSave)
             }
-
-            try {
-                const response = await fetch("/api/settings", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(settings)
-                })
-
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`)
-                }
-
-                const persisted = await response.json()
-                document.getElementById("deviceName").value = persisted.deviceName || "ArtnetFixture"
-                document.getElementById("fixtureMode").value = persisted.fixtureMode || "surface"
-                document.getElementById("dmxUniverse").value = clampValue(parseInt(persisted.dmxUniverse) || 1, 1, 16)
-                document.getElementById("startChannel").value = clampValue(parseInt(persisted.startChannel) || 1, 1, 512)
-                document.getElementById("fixtureAmount").value = clampValue(parseInt(persisted.fixtureAmount) || 1, 1, 16)
-                document.getElementById("gridX").value = clampValue(parseInt(persisted.gridX) || 8, 8, 32)
-                document.getElementById("gridY").value = clampValue(parseInt(persisted.gridY) || 8, 8, 32)
-                modeSelect.dispatchEvent(new Event("change"))
-
-                alert("Settings Saved")
-            } catch (error) {
-                console.log("Failed to save settings", error)
-                alert("Saving settings failed")
-            }
-
-        }
+        })
 
         document.addEventListener("keydown", (event) => {
             const activeIndex = navigableElements.indexOf(document.activeElement)

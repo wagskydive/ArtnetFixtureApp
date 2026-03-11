@@ -56,11 +56,13 @@ T14.5 - Add saving to player prefs to the webui settings panel.
   - Aligned Web UI fixture amount input clamping (`1-16`) with PlayerPrefs/runtime limits to prevent mismatched values from being displayed after save/load cycles.
 
 T14.6 - I want the settings menu to be more responsive. So the settings should be sent directly without the need for the "Save Settings" button. The settings should be saved intot the playerPrefs everytime any setting is changed.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Removed the explicit save button flow from `webui.html` and added debounced auto-save handlers that POST `/api/settings` whenever any settings field changes.
+  - Added an in-page save status message (`Saving…` / `Saved` / `Save failed`) and centralized UI rehydration from persisted API responses so clamped/sanitized PlayerPrefs values are reflected immediately.
 
 
 T99.1 - Find and fix the bug in which the Fixture Amount button that increases the fixture amount in the UI_FixureMeshManager.cs also increments the Universe on the ArtNetReveiver.cs script
