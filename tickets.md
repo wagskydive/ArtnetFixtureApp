@@ -55,7 +55,7 @@ T14.5 - Add saving to player prefs to the webui settings panel.
   - Hardened the settings save flow in `webui.html` by awaiting `/api/settings` POST responses and rehydrating sanitized persisted values returned by the PlayerPrefs-backed API before showing success.
   - Aligned Web UI fixture amount input clamping (`1-16`) with PlayerPrefs/runtime limits to prevent mismatched values from being displayed after save/load cycles.
 
-T14.6 - Next run: execute Unity EditMode suite on a licensed runner to validate WebUI editor preview URL and PlayerPrefs save/load coverage end-to-end.
+T14.6 - I want the settings menu to be more responsive. So the settings should be sent directly without the need for the "Save Settings" button. The settings should be saved intot the playerPrefs everytime any setting is changed.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
