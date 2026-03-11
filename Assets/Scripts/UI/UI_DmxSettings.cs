@@ -113,6 +113,7 @@ public class UI_DmxSettings : MonoBehaviour
 
     public void SavePreferences()
     {
+        SyncValuesFromReceiver();
         PlayerPrefs.SetInt(ChannelPrefKey, CurrentDmxChannel);
         PlayerPrefs.SetInt(UniversePrefKey, CurrentDmxUniverse);
         PlayerPrefs.SetInt(PatternPrefKey, CurrentPatternType);
@@ -159,13 +160,24 @@ public class UI_DmxSettings : MonoBehaviour
 
     private void UpdateUniverseDisplay()
     {
-        int universeDisplay = currentDmxUniverse-1;
         if (universeValueText != null)
         {
-            
-            universeValueText.text = universeDisplay.ToString();
+            universeValueText.text = currentDmxUniverse.ToString();
         }
 
+    }
+
+    private void SyncValuesFromReceiver()
+    {
+        if (artNetReceiver == null)
+        {
+            return;
+        }
+
+        currentDmxChannel = Mathf.Clamp(artNetReceiver.StartChannel, 1, 512);
+        currentDmxUniverse = Mathf.Clamp(artNetReceiver.GetUniverseForUserInput(), 1, 16);
+        UpdateChannelDisplay();
+        UpdateUniverseDisplay();
     }
 
     private void OnPatternTypeChanged()

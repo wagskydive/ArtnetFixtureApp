@@ -123,6 +123,23 @@ public class UI_DmxSettingsTests
         Assert.That(receiver.Universe, Is.EqualTo(7));
     }
 
+
+    [Test]
+    public void SavePreferences_UsesReceiverAddressValuesWhenTheyWereChangedExternally()
+    {
+        var (settings, _, _, receiver) = CreateSettings();
+
+        receiver.SetUniverseFromUserInput(11);
+        receiver.SetStartChannelFromUserInput(222);
+
+        settings.SavePreferences();
+
+        Assert.That(PlayerPrefs.GetInt("dmx.universe", -1), Is.EqualTo(11));
+        Assert.That(PlayerPrefs.GetInt("dmx.channel", -1), Is.EqualTo(222));
+        Assert.That(settings.CurrentDmxUniverse, Is.EqualTo(11));
+        Assert.That(settings.CurrentDmxChannel, Is.EqualTo(222));
+    }
+
     [Test]
     public void SaveAndLoadPreferences_RestoresValues()
     {
