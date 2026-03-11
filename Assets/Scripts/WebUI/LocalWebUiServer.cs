@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -7,9 +8,20 @@ using UnityEngine;
 
 public class LocalWebUiServer : MonoBehaviour
 {
+    private class MainThreadInvocation
+    {
+        public Func<string> Action;
+        public ManualResetEventSlim WaitHandle;
+        public string Result;
+        public Exception Exception;
+    }
+
     [SerializeField] private TextAsset webUiHtml;
     [SerializeField] private WebUiSettingsBridge settingsBridge;
     [SerializeField] private int port = 8080;
+
+    private readonly Queue<MainThreadInvocation> _mainThreadQueue = new Queue<MainThreadInvocation>(8);
+    private readonly object _queueLock = new object();
 
     private HttpListener _listener;
     private Thread _serverThread;
@@ -26,6 +38,11 @@ public class LocalWebUiServer : MonoBehaviour
         StartServer();
     }
 
+    private void Update()
+    {
+        ProcessMainThreadQueue();
+    }
+
     private void OnDestroy()
     {
         StopServer();
@@ -39,10 +56,21 @@ public class LocalWebUiServer : MonoBehaviour
         }
 
         _listener = new HttpListener();
-        _listener.Prefixes.Add($"http://*:{port}/");
-        _listener.Start();
-        _isRunning = true;
+        _listener.Prefixes.Add($"http://+:{port}/");
 
+        try
+        {
+            _listener.Start();
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"LocalWebUiServer failed to start on port {port}: {ex.Message}");
+            _listener.Close();
+            _listener = null;
+            return;
+        }
+
+        _isRunning = true;
         _serverThread = new Thread(ServerLoop)
         {
             IsBackground = true,
@@ -74,7 +102,7 @@ public class LocalWebUiServer : MonoBehaviour
 
         if (_serverThread != null && _serverThread.IsAlive)
         {
-            _serverThread.Join(200);
+            _serverThread.Join(300);
             _serverThread = null;
         }
     }
@@ -89,11 +117,11 @@ public class LocalWebUiServer : MonoBehaviour
                 context = _listener.GetContext();
                 HandleContext(context);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 if (_isRunning)
                 {
-                    Debug.LogWarning("LocalWebUiServer request loop hit an exception.");
+                    Debug.LogWarning($"LocalWebUiServer request loop hit an exception: {ex.Message}");
                 }
 
                 if (context != null)
@@ -106,7 +134,12 @@ public class LocalWebUiServer : MonoBehaviour
 
     private void HandleContext(HttpListenerContext context)
     {
-        string path = context.Request.Url.AbsolutePath;
+        if (context == null || context.Request == null || context.Response == null)
+        {
+            return;
+        }
+
+        string path = context.Request.Url != null ? context.Request.Url.AbsolutePath : "/";
         if (path == "/" || path == "/index.html")
         {
             WriteHtml(context.Response);
@@ -115,28 +148,97 @@ public class LocalWebUiServer : MonoBehaviour
 
         if (path == "/api/settings" && context.Request.HttpMethod == "GET")
         {
-            WriteJson(context.Response, settingsBridge != null ? settingsBridge.GetSettingsJson() : WebUiSettingsStore.ToJson(WebUiSettingsStore.Load()));
+            string json = InvokeOnMainThread(() =>
+            {
+                return settingsBridge != null ? settingsBridge.GetSettingsJson() : WebUiSettingsStore.ToJson(WebUiSettingsStore.Load());
+            });
+            WriteJson(context.Response, json);
             return;
         }
 
         if (path == "/api/settings" && context.Request.HttpMethod == "POST")
         {
             string requestBody = ReadBody(context.Request);
-            WebUiSettingsData settings = settingsBridge != null
-                ? settingsBridge.SaveSettingsFromJson(requestBody)
-                : WebUiSettingsStore.FromJson(requestBody);
-
-            if (settingsBridge == null)
+            string json = InvokeOnMainThread(() =>
             {
-                WebUiSettingsStore.Save(settings);
-            }
+                WebUiSettingsData settings = settingsBridge != null
+                    ? settingsBridge.SaveSettingsFromJson(requestBody)
+                    : WebUiSettingsStore.FromJson(requestBody);
 
-            WriteJson(context.Response, WebUiSettingsStore.ToJson(settings));
+                if (settingsBridge == null)
+                {
+                    WebUiSettingsStore.Save(settings);
+                }
+
+                return WebUiSettingsStore.ToJson(settings);
+            });
+
+            WriteJson(context.Response, json);
             return;
         }
 
         context.Response.StatusCode = 404;
         WriteText(context.Response, "Not found", "text/plain");
+    }
+
+    private string InvokeOnMainThread(Func<string> action)
+    {
+        if (action == null)
+        {
+            return "{}";
+        }
+
+
+        var invocation = new MainThreadInvocation
+        {
+            Action = action,
+            WaitHandle = new ManualResetEventSlim(false)
+        };
+
+        lock (_queueLock)
+        {
+            _mainThreadQueue.Enqueue(invocation);
+        }
+
+        invocation.WaitHandle.Wait();
+        invocation.WaitHandle.Dispose();
+
+        if (invocation.Exception != null)
+        {
+            throw invocation.Exception;
+        }
+
+        return invocation.Result;
+    }
+
+    private void ProcessMainThreadQueue()
+    {
+        while (true)
+        {
+            MainThreadInvocation invocation;
+            lock (_queueLock)
+            {
+                if (_mainThreadQueue.Count == 0)
+                {
+                    return;
+                }
+
+                invocation = _mainThreadQueue.Dequeue();
+            }
+
+            try
+            {
+                invocation.Result = invocation.Action != null ? invocation.Action() : "{}";
+            }
+            catch (Exception ex)
+            {
+                invocation.Exception = ex;
+            }
+            finally
+            {
+                invocation.WaitHandle.Set();
+            }
+        }
     }
 
     private void WriteHtml(HttpListenerResponse response)

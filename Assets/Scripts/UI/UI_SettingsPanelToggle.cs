@@ -6,9 +6,6 @@ public class UI_SettingsPanelToggle : MonoBehaviour
     [SerializeField] private GameObject targetObject;
     [SerializeField] private InputActionReference showMenuAction;
     [SerializeField] private InputActionReference hideMenuAction;
-    [SerializeField] private KeyCode fallbackShowKey = KeyCode.JoystickButton0;
-    [SerializeField] private KeyCode fallbackHideKey = KeyCode.Escape;
-
     private void OnEnable()
     {
         EnableAction(showMenuAction, OnShowMenu);
@@ -23,12 +20,12 @@ public class UI_SettingsPanelToggle : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(fallbackShowKey))
+        if (WasFallbackShowPressed())
         {
             ShowMenu();
         }
 
-        if (Input.GetKeyDown(fallbackHideKey))
+        if (WasFallbackHidePressed())
         {
             HideMenu();
         }
@@ -62,6 +59,31 @@ public class UI_SettingsPanelToggle : MonoBehaviour
         }
 
         targetObject.SetActive(visible);
+    }
+
+    private static bool WasFallbackShowPressed()
+    {
+#if ENABLE_LEGACY_INPUT_MANAGER
+        if (Input.GetKeyDown(KeyCode.JoystickButton0) || Input.GetKeyDown(KeyCode.Return))
+        {
+            return true;
+        }
+#endif
+        return (Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame)
+               || (Keyboard.current != null && Keyboard.current.enterKey.wasPressedThisFrame);
+    }
+
+    private static bool WasFallbackHidePressed()
+    {
+#if ENABLE_LEGACY_INPUT_MANAGER
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            return true;
+        }
+#endif
+        return (Gamepad.current != null && Gamepad.current.buttonEast.wasPressedThisFrame)
+               || (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+               || (Keyboard.current != null && Keyboard.current.backspaceKey.wasPressedThisFrame);
     }
 
     private void OnShowMenu(InputAction.CallbackContext _)

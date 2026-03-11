@@ -132,6 +132,7 @@ Add basic projection mapping for fixture output.
 
 _Progress note: hidden settings panel visibility can now be toggled from Android TV settings key input._
 _Progress note: local web settings API endpoint and HTML settings page persistence bridge are now in place for PlayerPrefs-backed load/save._
+_Progress note: web settings API handling now marshals Unity/PlayerPrefs operations to the main thread to avoid `LocalWebUiServer` request-loop exceptions._
 
 ### Goal:
 Enable persistent configuration and easy deployment.
