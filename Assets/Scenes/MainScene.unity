@@ -4460,6 +4460,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: ArtnetFixture.Core::InAppWebViewSurface
   webUiServer: {fileID: 990941376}
   pagePath: /index.html?local=true&tv=true
+  openExternalBrowserInEditor: 1
 --- !u!1 &1000605852
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,6 +1,13 @@
 # Tickets
 
 
+T15.1 - Refactor the code so that we have a SaveLoadSettings.cs class that handles all the saving and loading of the playerprefs. Any class that needs to handle saving ofr loding of playerprefs needs to use this class. This makes for cleaner code and makes it easier to debug.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 T14.1 - Rework the ui system. The new ui system will be an html page. This page will be accessable as a settings menu in the app and also we be on a webserver that the app exposes on the local network. The new input system in unity will be used to navigate through the menu. The menu gets shows when the user presses the OK button and can be hidden again using the back button. The first version of the html page is in Assets/WebUI/webui.html. the settings need to be retreived from the player prefs and saved to player prefs again.
 - [x] Started
 - [x] Behavior Written

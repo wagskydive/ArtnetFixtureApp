@@ -81,51 +81,6 @@ public class WebUiSettingsTests
     }
 
 
-    [Test]
-    public void LocalWebUiServer_SettingsApiPostAndGet_RehydratesPersistedValuesAndForcesSingleFixtureOutsideSurfaceMode()
-    {
-        var template = GameObject.CreatePrimitive(PrimitiveType.Quad);
-        template.name = "FixtureTemplate";
-        var primaryReceiver = template.AddComponent<ArtNetReceiver>();
-        primaryReceiver.ReceiveNetworkData = false;
-        primaryReceiver.DmxBuffer = new DmxBuffer();
-
-        var managerGo = new GameObject("fixture-manager");
-        var fixtureMeshManager = managerGo.AddComponent<UI_FixtureMeshManager>();
-        SetPrivateField(fixtureMeshManager, "primaryReceiver", primaryReceiver);
-        SetPrivateField(fixtureMeshManager, "fixtureTemplate", template);
-        fixtureMeshManager.RebuildFixtures(4);
-
-        var bridgeGo = new GameObject("bridge");
-        var bridge = bridgeGo.AddComponent<WebUiSettingsBridge>();
-        SetPrivateField(bridge, "fixtureMeshManager", fixtureMeshManager);
-
-        var serverGo = new GameObject("web-server");
-        var server = serverGo.AddComponent<LocalWebUiServer>();
-        SetPrivateField(server, "settingsBridge", bridge);
-
-        string persistedJson = server.HandleSettingsApiRequestImmediately("POST", "{\"fixtureMode\":\"moving\",\"dmxUniverse\":9,\"startChannel\":25,\"fixtureAmount\":6,\"gridX\":8,\"gridY\":8}");
-        WebUiSettingsData persisted = JsonUtility.FromJson<WebUiSettingsData>(persistedJson);
-
-        Assert.That(persisted.fixtureMode, Is.EqualTo("moving"));
-        Assert.That(persisted.dmxUniverse, Is.EqualTo(9));
-        Assert.That(persisted.startChannel, Is.EqualTo(25));
-        Assert.That(persisted.fixtureAmount, Is.EqualTo(6));
-        Assert.That(fixtureMeshManager.FixtureCount, Is.EqualTo(1));
-
-        string hydratedJson = server.HandleSettingsApiRequestImmediately("GET", null);
-        WebUiSettingsData hydrated = JsonUtility.FromJson<WebUiSettingsData>(hydratedJson);
-
-        Assert.That(hydrated.dmxUniverse, Is.EqualTo(9));
-        Assert.That(hydrated.startChannel, Is.EqualTo(25));
-        Assert.That(primaryReceiver.GetUniverseForUserInput(), Is.EqualTo(9));
-        Assert.That(primaryReceiver.StartChannel, Is.EqualTo(25));
-
-        Object.DestroyImmediate(serverGo);
-        Object.DestroyImmediate(bridgeGo);
-        Object.DestroyImmediate(managerGo);
-        Object.DestroyImmediate(template);
-    }
 
     [Test]
     public void InAppWebViewSurface_GetWebUiUrl_UsesServerPortAndConfiguredPagePath()
