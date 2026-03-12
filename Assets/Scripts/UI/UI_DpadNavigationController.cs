@@ -14,6 +14,7 @@ public class UI_DpadNavigationController : MonoBehaviour
     private readonly List<Selectable> _runtimeSelectables = new List<Selectable>();
     private int _currentIndex;
     private int _lastSubmitFrame = -1;
+    private bool _selectablesDirty = true;
 
     private void OnEnable()
     {
@@ -27,6 +28,16 @@ public class UI_DpadNavigationController : MonoBehaviour
     {
         DisableAction(navigateAction, OnNavigate);
         DisableAction(submitAction, OnSubmit);
+    }
+
+    private void LateUpdate()
+    {
+        EnsureSelectionIsValid();
+    }
+
+    private void OnTransformChildrenChanged()
+    {
+        _selectablesDirty = true;
     }
 
     public void HandleNavigationInput(Vector2 navigationInput)
@@ -132,6 +143,11 @@ public class UI_DpadNavigationController : MonoBehaviour
 
     private void RebuildSelectables()
     {
+        if (!_selectablesDirty && _runtimeSelectables.Count > 0)
+        {
+            return;
+        }
+
         _runtimeSelectables.Clear();
 
         if (orderedSelectables != null && orderedSelectables.Length > 0)
@@ -144,6 +160,7 @@ public class UI_DpadNavigationController : MonoBehaviour
                 }
             }
 
+            _selectablesDirty = false;
             return;
         }
 
@@ -157,6 +174,7 @@ public class UI_DpadNavigationController : MonoBehaviour
         }
 
         _runtimeSelectables.Sort(CompareByScreenPosition);
+        _selectablesDirty = false;
     }
 
     private int CompareByScreenPosition(Selectable left, Selectable right)
@@ -189,7 +207,9 @@ public class UI_DpadNavigationController : MonoBehaviour
 
         Vector2 origin = GetScreenPosition(_runtimeSelectables[originIndex]);
         int bestIndex = -1;
-        float bestScore = float.MaxValue;
+        float bestAxisDistance = float.MaxValue;
+        float bestCrossDistance = float.MaxValue;
+        float bestSquaredDistance = float.MaxValue;
 
         for (int i = 0; i < _runtimeSelectables.Count; i++)
         {
@@ -209,10 +229,16 @@ public class UI_DpadNavigationController : MonoBehaviour
                 continue;
             }
 
-            float score = delta.sqrMagnitude;
-            if (score < bestScore)
+            float axisDistance = Mathf.Abs(axisDelta);
+            float crossDistance = Mathf.Abs(useVertical ? delta.x : delta.y);
+            float squaredDistance = delta.sqrMagnitude;
+            if (axisDistance < bestAxisDistance - 0.01f ||
+                (Mathf.Abs(axisDistance - bestAxisDistance) <= 0.01f && crossDistance < bestCrossDistance - 0.01f) ||
+                (Mathf.Abs(axisDistance - bestAxisDistance) <= 0.01f && Mathf.Abs(crossDistance - bestCrossDistance) <= 0.01f && squaredDistance < bestSquaredDistance))
             {
-                bestScore = score;
+                bestAxisDistance = axisDistance;
+                bestCrossDistance = crossDistance;
+                bestSquaredDistance = squaredDistance;
                 bestIndex = i;
             }
         }
@@ -302,7 +328,27 @@ public class UI_DpadNavigationController : MonoBehaviour
 
     private void OnSubmit(InputAction.CallbackContext _)
     {
+        if (_.ReadValue<float>() <= 0.5f)
+        {
+            return;
+        }
+
         SubmitCurrentSelection();
+    }
+
+    private void EnsureSelectionIsValid()
+    {
+        RebuildSelectables();
+        if (!HasSelectables())
+        {
+            return;
+        }
+
+        int currentIndex = GetCurrentIndex();
+        if (!IsSelectable(currentIndex))
+        {
+            SelectFirstValid();
+        }
     }
 
     private static void EnableAction(InputActionReference actionReference, System.Action<InputAction.CallbackContext> callback)
