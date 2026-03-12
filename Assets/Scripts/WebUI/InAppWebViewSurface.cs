@@ -1,9 +1,11 @@
+using System;
 using UnityEngine;
 
 public class InAppWebViewSurface : MonoBehaviour
 {
     [SerializeField] private LocalWebUiServer webUiServer;
     [SerializeField] private string pagePath = "/index.html?local=true&tv=true";
+    [SerializeField] private bool useStreamingAssetsFileUrl = true;
     [SerializeField] private bool openExternalBrowserInEditor = true;
     [SerializeField] private bool transparentOverlay = true;
     [SerializeField] private Vector2 overlayPositionNormalized = Vector2.zero;
@@ -17,20 +19,42 @@ public class InAppWebViewSurface : MonoBehaviour
     private AndroidJavaObject _webView;
     private AndroidJavaObject _activity;
 #endif
-    
-    void Awake()
+
+    private void Awake()
     {
-        webUiServer.OnServerStarted += InitializeWebViewAfterServerStart;
+        if (webUiServer != null)
+        {
+            webUiServer.OnServerStarted += InitializeWebViewAfterServerStart;
+        }
+    }
+
+    private void Start()
+    {
+        if (useStreamingAssetsFileUrl)
+        {
+            InitializeWebView();
+            SetVisible(false);
+        }
     }
 
     private void InitializeWebViewAfterServerStart()
     {
+        if (useStreamingAssetsFileUrl)
+        {
+            return;
+        }
+
         InitializeWebView();
         SetVisible(false);
     }
 
     private void OnDestroy()
     {
+        if (webUiServer != null)
+        {
+            webUiServer.OnServerStarted -= InitializeWebViewAfterServerStart;
+        }
+
         DestroyWebView();
     }
 
@@ -80,6 +104,8 @@ public class InAppWebViewSurface : MonoBehaviour
             webSettings.Call("setJavaScriptEnabled", true);
             webSettings.Call("setDomStorageEnabled", true);
             webSettings.Call("setAllowFileAccess", true);
+            webSettings.Call("setAllowFileAccessFromFileURLs", true);
+            webSettings.Call("setAllowUniversalAccessFromFileURLs", true);
 
             if (transparentOverlay)
             {
@@ -100,36 +126,13 @@ public class InAppWebViewSurface : MonoBehaviour
                 _activity.Call("addContentView", _webView, layoutParams);
             }
 
-            LoadCachedHtmlIntoWebView();
+            _webView.Call("loadUrl", BuildWebUiUrl());
         }));
 #elif UNITY_EDITOR
         if (openExternalBrowserInEditor)
         {
             OpenEditorPreview();
         }
-#endif
-    }
-
-
-    private void LoadCachedHtmlIntoWebView()
-    {
-#if UNITY_ANDROID && !UNITY_EDITOR
-        byte[] cachedHtmlBytes = webUiServer != null ? webUiServer.GetCachedHtmlBytes() : null;
-        if (cachedHtmlBytes == null || cachedHtmlBytes.Length == 0)
-        {
-            _webView.Call("loadUrl", BuildWebUiUrl());
-            return;
-        }
-
-        string htmlContent = System.Text.Encoding.UTF8.GetString(cachedHtmlBytes);
-        _webView.Call(
-            "loadDataWithBaseURL",
-            "file:///android_asset/",
-            htmlContent,
-            "text/html",
-            "utf-8",
-            null
-        );
 #endif
     }
 
@@ -158,8 +161,45 @@ public class InAppWebViewSurface : MonoBehaviour
 
     private string BuildWebUiUrl()
     {
+        if (useStreamingAssetsFileUrl)
+        {
+            return BuildStreamingAssetsWebUiUrl();
+        }
+
+        return BuildLanWebUiUrl();
+    }
+
+    private string BuildLanWebUiUrl()
+    {
         int port = webUiServer != null ? webUiServer.Port : 8080;
         return $"http://127.0.0.1:{port}{pagePath}";
+    }
+
+    private string BuildStreamingAssetsWebUiUrl()
+    {
+        string normalizedPath = pagePath ?? "/index.html";
+        string query = string.Empty;
+
+        int queryIndex = normalizedPath.IndexOf('?');
+        if (queryIndex >= 0)
+        {
+            query = normalizedPath.Substring(queryIndex);
+            normalizedPath = normalizedPath.Substring(0, queryIndex);
+        }
+
+        string fileName = normalizedPath.TrimStart('/');
+        if (string.IsNullOrEmpty(fileName))
+        {
+            fileName = "index.html";
+        }
+
+        string basePath = Application.streamingAssetsPath;
+        if (!basePath.EndsWith("/", StringComparison.Ordinal))
+        {
+            basePath += "/";
+        }
+
+        return $"{basePath}{fileName}{query}";
     }
 
 #if UNITY_ANDROID && !UNITY_EDITOR

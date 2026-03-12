@@ -128,7 +128,25 @@ public class WebUiSettingsTests
     }
 
     [Test]
-    public void InAppWebViewSurface_GetWebUiUrl_UsesServerPortAndConfiguredPagePath()
+    public void InAppWebViewSurface_GetWebUiUrl_UsesStreamingAssetsFileUrlByDefault()
+    {
+        var surfaceGo = new GameObject("web-surface");
+        var surface = surfaceGo.AddComponent<InAppWebViewSurface>();
+        SetPrivateField(surface, "pagePath", "/index.html?local=true");
+
+        string expectedPrefix = Application.streamingAssetsPath;
+        if (!expectedPrefix.EndsWith("/"))
+        {
+            expectedPrefix += "/";
+        }
+
+        Assert.That(surface.GetWebUiUrl(), Is.EqualTo($"{expectedPrefix}index.html?local=true"));
+
+        Object.DestroyImmediate(surfaceGo);
+    }
+
+    [Test]
+    public void InAppWebViewSurface_GetWebUiUrl_UsesServerPortWhenLanModeEnabled()
     {
         var serverGo = new GameObject("web-server");
         var server = serverGo.AddComponent<LocalWebUiServer>();
@@ -138,6 +156,7 @@ public class WebUiSettingsTests
         var surface = surfaceGo.AddComponent<InAppWebViewSurface>();
         SetPrivateField(surface, "webUiServer", server);
         SetPrivateField(surface, "pagePath", "/index.html?local=true");
+        SetPrivateField(surface, "useStreamingAssetsFileUrl", false);
 
         Assert.That(surface.GetWebUiUrl(), Is.EqualTo("http://127.0.0.1:9191/index.html?local=true"));
 

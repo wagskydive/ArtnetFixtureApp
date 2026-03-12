@@ -65,11 +65,15 @@ This bypasses all localhost/HTTP restrictions on cheap Android devices.
 
 
 T16.6 - Since the projector can’t reliably run HttpListener: Load your HTML directly from StreamingAssets using file:// URLs. Avoid the local HTTP server entirely. But still keep it working through LAN.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Updated `InAppWebViewSurface` to default to direct `StreamingAssets` `file://` loading for in-app Android WebView sessions, avoiding startup dependency on `HttpListener` for menu rendering on unstable projector firmware.
+  - Added explicit LAN fallback mode (`useStreamingAssetsFileUrl = false`) so WebView can still target `127.0.0.1` when LAN-server-backed workflows are required.
+  - Enabled Android WebView file-origin access flags (`setAllowFileAccessFromFileURLs`/`setAllowUniversalAccessFromFileURLs`) so local asset loading stays compatible with relative file-based resource usage.
+  - Added EditMode regression coverage for both URL strategies: default StreamingAssets file URL pathing and legacy LAN URL composition.
 
 
 T15.1 - Refactor the code so that we have a SaveLoadSettings.cs class that handles all the saving and loading of the playerprefs. Any class that needs to handle saving ofr loding of playerprefs needs to use this class. This makes for cleaner code and makes it easier to debug.
@@ -1031,7 +1035,7 @@ T9.8 - Document Pixel Mapping setup, DMX addressing scheme, and operational limi
 
 
 
-T16.6 - Next run: Validate Android-device behavior for in-app WebView API calls and all relative resource/script fetches when loaded via loadDataWithBaseURL.
+T16.7 - Next run: Validate Android-device behavior for in-app WebView API calls and all relative resource/script fetches when loaded via direct StreamingAssets file:// URLs.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
