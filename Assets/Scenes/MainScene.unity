@@ -4453,7 +4453,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 990941373}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a31c12f8be4e44d8ad4b9a2476734ff0, type: 3}
   m_Name: 
@@ -4461,6 +4461,9 @@ MonoBehaviour:
   webUiServer: {fileID: 990941376}
   pagePath: /index.html?local=true&tv=true
   openExternalBrowserInEditor: 0
+  transparentOverlay: 0
+  overlayPositionNormalized: {x: 0, y: 0}
+  overlaySizeNormalized: {x: 0.6, y: 0.6}
 --- !u!1 &1000605852
 GameObject:
   m_ObjectHideFlags: 0
@@ -7142,7 +7145,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: adf3f975ec8346d387f5f8e84049a9db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ArtnetFixture.Core::UI_SettingsPanelToggle
-  targetObject: {fileID: 990941373}
+  targetObject: {fileID: 1361578280}
   keepTargetObjectActiveWhenHidden: 1
   showMenuAction: {fileID: 392368643174621059, guid: 289c1b55c9541489481df5cc06664110, type: 3}
   hideMenuAction: {fileID: 7727032971491509709, guid: 289c1b55c9541489481df5cc06664110, type: 3}
