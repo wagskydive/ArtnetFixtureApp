@@ -82,6 +82,33 @@ public class WebUiSettingsTests
 
 
 
+
+    [Test]
+    public void LocalWebUiServer_SettingsApi_PostThenGet_RehydratesPersistedPlayerPrefsValues()
+    {
+        var serverGo = new GameObject("web-server");
+        var server = serverGo.AddComponent<LocalWebUiServer>();
+
+        const string postedJson = "{\"deviceName\":\"Desk Node\",\"fixtureMode\":\"surface\",\"dmxUniverse\":7,\"startChannel\":144,\"fixtureAmount\":3,\"gridX\":32,\"gridY\":24}";
+        string postResponse = server.HandleSettingsApiRequestImmediately("POST", postedJson);
+        WebUiSettingsData postData = WebUiSettingsStore.FromJson(postResponse);
+
+        Assert.That(postData.dmxUniverse, Is.EqualTo(7));
+        Assert.That(postData.startChannel, Is.EqualTo(144));
+        Assert.That(PlayerPrefs.GetInt("dmx.universe", -1), Is.EqualTo(7));
+        Assert.That(PlayerPrefs.GetInt("dmx.channel", -1), Is.EqualTo(144));
+
+        string getResponse = server.HandleSettingsApiRequestImmediately("GET", null);
+        WebUiSettingsData getData = WebUiSettingsStore.FromJson(getResponse);
+
+        Assert.That(getData.deviceName, Is.EqualTo("Desk Node"));
+        Assert.That(getData.fixtureMode, Is.EqualTo("surface"));
+        Assert.That(getData.dmxUniverse, Is.EqualTo(7));
+        Assert.That(getData.startChannel, Is.EqualTo(144));
+
+        Object.DestroyImmediate(serverGo);
+    }
+
     [Test]
     public void InAppWebViewSurface_GetWebUiUrl_UsesServerPortAndConfiguredPagePath()
     {

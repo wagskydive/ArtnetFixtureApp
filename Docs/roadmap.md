@@ -139,6 +139,7 @@ _Progress note: WebUI settings now auto-save on every field change (debounced) a
 _Progress note: WebUI mode behavior is now aligned again so only Surface mode exposes fixture amount controls, non-Surface modes force a single fixture instance, and web-saved universe/start channel values now reapply correctly to spawned fixtures._
 _Progress note: universe/start channel persistence now survives consecutive app restarts by preventing stale `UI_DmxSettings` writes from overwriting WebUI-applied receiver addresses during pause/disable saves._
 _Progress note: PlayerPrefs persistence now routes through a centralized `SaveLoadSettings` helper used by DMX UI, fixture mode/count, and WebUI settings stores for cleaner debugging and consistency._
+_Progress note: DMX universe/start-channel startup hydration now runs in `Awake` with guarded shutdown saves so early lifecycle events cannot overwrite persisted PlayerPrefs before load; LocalWebUiServer settings API tests now cover POST+GET rehydration of saved values._
 
 ### Goal:
 Enable persistent configuration and easy deployment.
