@@ -145,6 +145,7 @@ _Progress note: settings menu startup behavior is now fixed to always hidden on 
 _Progress note: in-app Android WebView overlay now supports transparent background plus normalized position/size controls so the WebUI can run as a resizable non-fullscreen overlay._
 _Progress note: LocalWebUiServer now caches `StreamingAssets/index.html` at startup (instead of TextAsset references), and Android in-app WebView now injects the cached HTML via `loadDataWithBaseURL` to bypass localhost HTTP restrictions on lower-end devices._
 _Progress note: in-app Android WebView now defaults to loading `StreamingAssets/index.html` via direct `file://` URL resolution (with optional LAN URL fallback mode), reducing dependence on projector-side `HttpListener` reliability while preserving LAN-backed access paths when needed._
+_Progress note: `LocalWebUiServer` now copies `StreamingAssets/index.html` into persistent storage at startup and serves LAN WebUI/static file requests from that persistent directory, restoring remote-device browser rendering reliability._
 
 ### Goal:
 Enable persistent configuration and easy deployment.

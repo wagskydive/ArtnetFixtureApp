@@ -101,6 +101,23 @@ public class WebUiSettingsTests
         Object.DestroyImmediate(serverGo);
     }
 
+
+    [Test]
+    public void LocalWebUiServer_CopiesHtmlToPersistentPathDuringAwake()
+    {
+        var serverGo = new GameObject("web-server");
+        var server = serverGo.AddComponent<LocalWebUiServer>();
+
+        string persistentPath = server.GetPersistentWebUiFilePath();
+        Assert.That(persistentPath, Is.Not.Null.And.Not.Empty);
+        Assert.That(System.IO.File.Exists(persistentPath), Is.True);
+
+        string html = System.IO.File.ReadAllText(persistentPath);
+        Assert.That(html, Does.Contain("Artnet Fixture Control"));
+
+        Object.DestroyImmediate(serverGo);
+    }
+
     [Test]
     public void LocalWebUiServer_SettingsApi_PostThenGet_RehydratesPersistedPlayerPrefsValues()
     {
