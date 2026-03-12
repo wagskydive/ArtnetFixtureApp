@@ -171,6 +171,16 @@ T99.6 -Fix the bug where the playerprefs are not correctly loaded when the app r
   - Added regression coverage for LocalWebUiServer `/api/settings` POST+GET flow to confirm WebUI writes persist to PlayerPrefs and GET rehydrates the same universe/start-channel values.
 
 T99.7 - Find and fix a bug where the settings menu webui over LAN on the android app only works when the settings menu is open in the app. The settings menu webui should always work over LAN, even when the app itself is running and is not in the menu itself. The in-app menu is also not shown inside the app, but that might require to write a webviewer, so that can be a new ticket.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Added a `keepTargetObjectActiveWhenHidden` mode to `UI_SettingsPanelToggle` so hide/show events can keep background systems active while still toggling menu visibility signals.
+  - Enabled this mode for the `HtmlUI` toggle in `MainScene` so closing the in-app menu no longer disables the `LocalWebUiServer` GameObject; LAN `/index.html` and `/api/settings` stay reachable while the app is out of menu view.
+  - Added EditMode coverage for hide behavior to verify default hide semantics still work and the new keep-active mode preserves GameObject activation.
+
+T99.8 - Next run: validate T99.7 behavior on Android/HY300 (menu hidden vs shown) and capture LAN browser + in-app WebView evidence.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
