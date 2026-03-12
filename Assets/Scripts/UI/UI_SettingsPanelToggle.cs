@@ -7,7 +7,6 @@ public class UI_SettingsPanelToggle : MonoBehaviour
     [SerializeField] private bool keepTargetObjectActiveWhenHidden;
     [SerializeField] private InputActionReference showMenuAction;
     [SerializeField] private InputActionReference hideMenuAction;
-    [SerializeField] private InAppWebViewSurface inAppWebViewSurface;
 
     private void Start()
     {
@@ -68,10 +67,6 @@ public class UI_SettingsPanelToggle : MonoBehaviour
 
         bool shouldTargetStayActive = keepTargetObjectActiveWhenHidden && !visible;
         targetObject.SetActive(visible || shouldTargetStayActive);
-        if (inAppWebViewSurface != null)
-        {
-            inAppWebViewSurface.SetVisible(visible);
-        }
     }
 
     private static bool WasFallbackShowPressed()

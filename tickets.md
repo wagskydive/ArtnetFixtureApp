@@ -1,6 +1,15 @@
 # Tickets
 
 T17.1 - Rework the ui idea. abandon the webview approach. The webui will only be used on external devices and the in-app ui will be unity ui. This ui still exists, But the UI_SettingsPanelToggle needs to be modified. and the InAppWebViewSurface is no longer needed. The UnityUi needs to use playerprefs and also the webui uses those, so settings nan be adjusted through both those ways. If a webui browser is open while settings are changed inside the app that should directly update the webui and alse vise versa.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Removed `InAppWebViewSurface` usage and scene wiring so in-app settings now rely purely on Unity UI while LAN WebUI remains served by `LocalWebUiServer`.
+  - Updated `webui.html` with periodic `/api/settings` refresh to keep external browser views synchronized with live PlayerPrefs changes coming from Unity UI or other clients.
+
+T17.2 - Next run: add EditMode coverage for cross-surface sync (Unity-side setting mutation reflected by LocalWebUiServer `/api/settings` polling consumers) and verify behavior on Android hardware.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
