@@ -18,6 +18,13 @@ T16.2 - Create a webviewer that can show the webui on android inside the app. It
 - [ ] Tests Passed
 - [ ] Documentation Written
 
+T16.3 - Make sure that the settings menu is never shown on startup. Remove the option to show it at startup. It will only be shown when the user wants to see it and never defaults to be shown at startup.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 T15.1 - Refactor the code so that we have a SaveLoadSettings.cs class that handles all the saving and loading of the playerprefs. Any class that needs to handle saving ofr loding of playerprefs needs to use this class. This makes for cleaner code and makes it easier to debug.
 - [x] Started
 - [x] Behavior Written
