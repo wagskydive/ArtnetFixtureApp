@@ -9,7 +9,7 @@ T17.1 - Rework the ui idea. abandon the webview approach. The webui will only be
   - Removed `InAppWebViewSurface` usage and scene wiring so in-app settings now rely purely on Unity UI while LAN WebUI remains served by `LocalWebUiServer`.
   - Updated `webui.html` with periodic `/api/settings` refresh to keep external browser views synchronized with live PlayerPrefs changes coming from Unity UI or other clients.
 
-T17.2 - Next run: add EditMode coverage for cross-surface sync (Unity-side setting mutation reflected by LocalWebUiServer `/api/settings` polling consumers) and verify behavior on Android hardware.
+T17.2 - Implement the new Unity Input System. The old input system was used before in UI_DpadNavigationController, but it needs the system needs to work with the new Unity Input System. So the navigation works with a TV-remote, but also with other input methods. Find out how and fix it.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written

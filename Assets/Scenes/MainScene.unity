@@ -7127,7 +7127,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ArtnetFixture.Core::UI_SettingsPanelToggle
   targetObject: {fileID: 1361578280}
-  keepTargetObjectActiveWhenHidden: 1
+  keepTargetObjectActiveWhenHidden: 0
   showMenuAction: {fileID: 392368643174621059, guid: 289c1b55c9541489481df5cc06664110, type: 3}
   hideMenuAction: {fileID: 7727032971491509709, guid: 289c1b55c9541489481df5cc06664110, type: 3}
 --- !u!1 &1757005266
