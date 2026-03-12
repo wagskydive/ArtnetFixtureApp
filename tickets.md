@@ -11,7 +11,7 @@ Currently on app start, the app is opening the settings menu, which gives a blac
   - Added explicit startup visibility control in `UI_SettingsPanelToggle` via `showMenuOnStart` (default false), so startup now keeps the settings menu hidden unless intentionally enabled.
   - Added EditMode coverage for startup menu visibility behavior (`showMenuOnStart` true/false) to prevent regressions where the app boots into the menu.
 
-T16.2 - Next run: verify in Android runtime that `InAppWebViewSurface` focus/input works reliably after first menu open and close cycle, and add PlayMode coverage for startup hidden-state behavior.
+T16.2 - Create a webviewer that can show the webui on android inside the app. It should be able to be an overlay with transparency and have an option to be resized in the editor so it is not only a fullscreen overlay
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
