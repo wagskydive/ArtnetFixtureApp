@@ -175,6 +175,12 @@ public class InAppWebViewSurface : MonoBehaviour
         return $"http://127.0.0.1:{port}{pagePath}";
     }
 
+    private string BuildLanApiBaseUrl()
+    {
+        int port = webUiServer != null ? webUiServer.Port : 8080;
+        return $"http://127.0.0.1:{port}";
+    }
+
     private string BuildStreamingAssetsWebUiUrl()
     {
         string normalizedPath = pagePath ?? "/index.html";
@@ -197,6 +203,16 @@ public class InAppWebViewSurface : MonoBehaviour
         if (!basePath.EndsWith("/", StringComparison.Ordinal))
         {
             basePath += "/";
+        }
+
+        string apiBaseQuery = $"apiBase={Uri.EscapeDataString(BuildLanApiBaseUrl())}";
+        if (string.IsNullOrEmpty(query))
+        {
+            query = $"?{apiBaseQuery}";
+        }
+        else if (!query.Contains("apiBase=", StringComparison.OrdinalIgnoreCase))
+        {
+            query = $"{query}&{apiBaseQuery}";
         }
 
         return $"{basePath}{fileName}{query}";

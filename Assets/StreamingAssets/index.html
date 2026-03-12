@@ -223,6 +223,15 @@
         const isLocal = params.get("local") === "true"
         const tvMode = params.get("tv") === "true"
         const companion = params.get("companion") === "true"
+        const apiBase = (params.get("apiBase") || "").trim()
+
+        function buildApiUrl(path) {
+            if (!apiBase) {
+                return path
+            }
+
+            return `${apiBase}${path}`
+        }
 
         const passwordEnabled = false
 
@@ -323,7 +332,7 @@
 
             try {
                 settingsStatus.textContent = "Saving…"
-                const response = await fetch("/api/settings", {
+                const response = await fetch(buildApiUrl("/api/settings"), {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(settings)
@@ -361,7 +370,7 @@
 
         async function loadSettings() {
             try {
-                const response = await fetch("/api/settings")
+                const response = await fetch(buildApiUrl("/api/settings"))
                 if (!response.ok) {
                     return
                 }
@@ -486,7 +495,7 @@
 
             if (companion) {
 
-                fetch("/api/sendArtNet", {
+                fetch(buildApiUrl("/api/sendArtNet"), {
                     method: "POST",
                     body: packet
                 })
