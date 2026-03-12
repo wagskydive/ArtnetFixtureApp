@@ -33,6 +33,17 @@ T17.3 - The legacy input path is not needed at all anymore. Currently the UI_Dpa
   - Expanded EditMode tests to cover auto-discovery navigation behavior and submit de-duplication.
 
 T17.4 - Next run: wire `UI_DpadNavigationController` to detect runtime layout changes (menu open/close, dynamic button visibility) without needing manual refresh, and add tests for directional ties in grid-like layouts. Also check why the button navigation is not working properly. Currently there are some buttons that are in a vertical layout group but the up and down navigation skips some buttons. These buttons are increment and decrement buttons for setting values and they also increment and decrement by more than 1. They should be all selectable and the submit button should only fire once and increment or decrement the value by 1.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Added runtime selectable invalidation/selection repair in `UI_DpadNavigationController` so menu child changes and active-state toggles are reflected without manual refresh.
+  - Updated directional candidate scoring to prioritize the nearest control in-axis and then in-lane, reducing skipped controls in vertical layout flows.
+  - Added submit-value gating on the Input System callback to ignore non-pressed submit phases and keep plus/minus actions single-step per press.
+  - Expanded EditMode tests with tie-breaking coverage and runtime-visibility-change coverage for discovered selectables.
+
+T17.5 - Next run: add an EditMode regression test that reproduces the exact vertical-layout increment/decrement button hierarchy from MainScene (including hidden/inactive transitions during menu open-close) and verify each press changes value by exactly ±1 for all DMX setting controls.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written

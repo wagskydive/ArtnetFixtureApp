@@ -140,6 +140,52 @@ public class UI_DpadNavigationControllerTests
         Object.DestroyImmediate(eventSystemGo);
     }
 
+    [Test]
+    public void HandleNavigationInput_PrefersSameColumn_WhenDirectionalCandidatesTieByDistance()
+    {
+        var eventSystemGo = CreateEventSystem();
+        var root = CreateRootWithCanvas();
+        var origin = CreateButton("origin", root.transform, new Vector2(0f, 100f));
+        var sameColumn = CreateButton("same-column", root.transform, new Vector2(0f, 0f));
+        CreateButton("off-column", root.transform, new Vector2(80f, 0f));
+
+        var controller = root.AddComponent<UI_DpadNavigationController>();
+
+        root.SendMessage("OnEnable");
+        EventSystem.current.SetSelectedGameObject(origin.gameObject);
+
+        controller.HandleNavigationInput(Vector2.down);
+
+        Assert.That(EventSystem.current.currentSelectedGameObject, Is.EqualTo(sameColumn.gameObject));
+
+        Object.DestroyImmediate(root);
+        Object.DestroyImmediate(eventSystemGo);
+    }
+
+    [Test]
+    public void HandleNavigationInput_RebuildsAfterRuntimeVisibilityChanges()
+    {
+        var eventSystemGo = CreateEventSystem();
+        var root = CreateRootWithCanvas();
+        var top = CreateButton("top", root.transform, new Vector2(0f, 100f));
+        var middle = CreateButton("middle", root.transform, new Vector2(0f, 0f));
+        var bottom = CreateButton("bottom", root.transform, new Vector2(0f, -100f));
+
+        var controller = root.AddComponent<UI_DpadNavigationController>();
+
+        root.SendMessage("OnEnable");
+        controller.HandleNavigationInput(Vector2.down);
+        Assert.That(EventSystem.current.currentSelectedGameObject, Is.EqualTo(middle.gameObject));
+
+        middle.gameObject.SetActive(false);
+        controller.HandleNavigationInput(Vector2.down);
+
+        Assert.That(EventSystem.current.currentSelectedGameObject, Is.EqualTo(bottom.gameObject));
+
+        Object.DestroyImmediate(root);
+        Object.DestroyImmediate(eventSystemGo);
+    }
+
     private static GameObject CreateEventSystem()
     {
         var eventSystemGo = new GameObject("event-system");
