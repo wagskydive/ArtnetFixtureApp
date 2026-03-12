@@ -4,8 +4,6 @@ using UnityEngine.UI;
 
 public class UI_FixtureMeshManager : MonoBehaviour
 {
-    private const string FixtureCountPrefKey = "dmx.fixture.count";
-
     [SerializeField] private ArtNetReceiver primaryReceiver;
     [SerializeField] private GameObject fixtureTemplate;
     [SerializeField] private Transform fixturesParent;
@@ -23,7 +21,7 @@ public class UI_FixtureMeshManager : MonoBehaviour
         if (DmxModeManager.Instance.CurrentMode == DmxModeManager.FixtureMode.Standard)
         {
             int defaultCount = Mathf.Clamp(minimumFixtures, 1, maximumFixtures);
-            int savedCount = PlayerPrefs.GetInt(FixtureCountPrefKey, defaultCount);
+            int savedCount = SaveLoadSettings.LoadInt(SaveLoadSettings.FixtureCountKey, defaultCount);
             int targetCount = Mathf.Clamp(savedCount, minimumFixtures, maximumFixtures);
 
             RebuildFixtures(targetCount);
@@ -82,7 +80,7 @@ public class UI_FixtureMeshManager : MonoBehaviour
     public void RestoreSavedFixtureCount()
     {
         int defaultCount = Mathf.Clamp(minimumFixtures, 1, maximumFixtures);
-        int savedCount = PlayerPrefs.GetInt(FixtureCountPrefKey, defaultCount);
+        int savedCount = SaveLoadSettings.LoadInt(SaveLoadSettings.FixtureCountKey, defaultCount);
         RebuildFixtures(savedCount, savePreference: false);
     }
 
@@ -160,8 +158,8 @@ public class UI_FixtureMeshManager : MonoBehaviour
 
     private void SaveFixtureCountPreference(int count)
     {
-        PlayerPrefs.SetInt(FixtureCountPrefKey, count);
-        PlayerPrefs.Save();
+        SaveLoadSettings.SaveInt(SaveLoadSettings.FixtureCountKey, count);
+        SaveLoadSettings.Save();
         UpdateFixtureCountDisplay(count);
     }
 

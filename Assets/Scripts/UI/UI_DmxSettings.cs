@@ -3,10 +3,6 @@ using UnityEngine.UI;
 
 public class UI_DmxSettings : MonoBehaviour
 {
-    private const string ChannelPrefKey = "dmx.channel";
-    private const string UniversePrefKey = "dmx.universe";
-    private const string PatternPrefKey = "dmx.pattern";
-
     [SerializeField] private Text channelValueText;
     [SerializeField] private Text universeValueText;
     [SerializeField] private InputField channelInputField;
@@ -114,17 +110,17 @@ public class UI_DmxSettings : MonoBehaviour
     public void SavePreferences()
     {
         SyncValuesFromReceiver();
-        PlayerPrefs.SetInt(ChannelPrefKey, CurrentDmxChannel);
-        PlayerPrefs.SetInt(UniversePrefKey, CurrentDmxUniverse);
-        PlayerPrefs.SetInt(PatternPrefKey, CurrentPatternType);
-        PlayerPrefs.Save();
+        SaveLoadSettings.SaveInt(SaveLoadSettings.DmxChannelKey, CurrentDmxChannel);
+        SaveLoadSettings.SaveInt(SaveLoadSettings.DmxUniverseKey, CurrentDmxUniverse);
+        SaveLoadSettings.SaveInt(SaveLoadSettings.DmxPatternKey, CurrentPatternType);
+        SaveLoadSettings.Save();
     }
 
     public void LoadPreferences()
     {
-        CurrentDmxChannel = PlayerPrefs.GetInt(ChannelPrefKey, CurrentDmxChannel);
-        CurrentDmxUniverse = PlayerPrefs.GetInt(UniversePrefKey, CurrentDmxUniverse);
-        CurrentPatternType = PlayerPrefs.GetInt(PatternPrefKey, CurrentPatternType);
+        CurrentDmxChannel = SaveLoadSettings.LoadInt(SaveLoadSettings.DmxChannelKey, CurrentDmxChannel);
+        CurrentDmxUniverse = SaveLoadSettings.LoadInt(SaveLoadSettings.DmxUniverseKey, CurrentDmxUniverse);
+        CurrentPatternType = SaveLoadSettings.LoadInt(SaveLoadSettings.DmxPatternKey, CurrentPatternType);
         ApplySettingsToReceiver();
     }
 

@@ -8,12 +8,6 @@ public class UI_FixtureModeSelector : MonoBehaviour
     private const int PixelWallStepSize = 8;
 
 
-
-    private const string FixtureModePrefKey = "dmx.fixture.mode";
-    private const string PixelRowsPrefKey = "dmx.pixel.rows";
-    private const string PixelColumnsPrefKey = "dmx.pixel.columns";
-
-
     [SerializeField] private Text modeValueText;
     [SerializeField] private GameObject pixelGridControlsContainer;
     [SerializeField] private Text pixelRowsValueText;
@@ -134,17 +128,17 @@ public class UI_FixtureModeSelector : MonoBehaviour
 
     public void SavePreferences()
     {
-        PlayerPrefs.SetInt(FixtureModePrefKey, (int)dmxModeManager.CurrentMode);
-        PlayerPrefs.SetInt(PixelRowsPrefKey, currentPixelRows);
-        PlayerPrefs.SetInt(PixelColumnsPrefKey, currentPixelColumns);
-        PlayerPrefs.Save();
+        SaveLoadSettings.SaveInt(SaveLoadSettings.FixtureModeKey, (int)dmxModeManager.CurrentMode);
+        SaveLoadSettings.SaveInt(SaveLoadSettings.PixelRowsKey, currentPixelRows);
+        SaveLoadSettings.SaveInt(SaveLoadSettings.PixelColumnsKey, currentPixelColumns);
+        SaveLoadSettings.Save();
     }
 
     public void LoadPreferences()
     {
-        dmxModeManager.SetFixtureMode((DmxModeManager.FixtureMode)Mathf.Clamp(PlayerPrefs.GetInt(FixtureModePrefKey, (int)DmxModeManager.FixtureMode.Standard), 0, (int)DmxModeManager.FixtureMode.PixelMapping));
-        currentPixelRows = Mathf.Clamp(PlayerPrefs.GetInt(PixelRowsPrefKey, currentPixelRows), MinPixelWallSize, MaxPixelWallSize);
-        currentPixelColumns = Mathf.Clamp(PlayerPrefs.GetInt(PixelColumnsPrefKey, currentPixelColumns), MinPixelWallSize, MaxPixelWallSize);
+        dmxModeManager.SetFixtureMode((DmxModeManager.FixtureMode)Mathf.Clamp(SaveLoadSettings.LoadInt(SaveLoadSettings.FixtureModeKey, (int)DmxModeManager.FixtureMode.Standard), 0, (int)DmxModeManager.FixtureMode.PixelMapping));
+        currentPixelRows = Mathf.Clamp(SaveLoadSettings.LoadInt(SaveLoadSettings.PixelRowsKey, currentPixelRows), MinPixelWallSize, MaxPixelWallSize);
+        currentPixelColumns = Mathf.Clamp(SaveLoadSettings.LoadInt(SaveLoadSettings.PixelColumnsKey, currentPixelColumns), MinPixelWallSize, MaxPixelWallSize);
     }
 
     private void SyncUiState()

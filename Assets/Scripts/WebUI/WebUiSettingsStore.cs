@@ -14,27 +14,19 @@ public class WebUiSettingsData
 
 public static class WebUiSettingsStore
 {
-    private const string DeviceNamePrefKey = "webui.device.name";
-    private const string FixtureModePrefKey = "dmx.fixture.mode";
-    private const string DmxUniversePrefKey = "dmx.universe";
-    private const string StartChannelPrefKey = "dmx.channel";
-    private const string FixtureCountPrefKey = "dmx.fixture.count";
-    private const string PixelRowsPrefKey = "dmx.pixel.rows";
-    private const string PixelColumnsPrefKey = "dmx.pixel.columns";
-
     public static WebUiSettingsData Load()
     {
-        int fixtureMode = Mathf.Clamp(PlayerPrefs.GetInt(FixtureModePrefKey, 0), 0, 2);
+        int fixtureMode = Mathf.Clamp(SaveLoadSettings.LoadInt(SaveLoadSettings.FixtureModeKey, 0), 0, 2);
 
         return new WebUiSettingsData
         {
-            deviceName = PlayerPrefs.GetString(DeviceNamePrefKey, "ArtnetFixture"),
+            deviceName = SaveLoadSettings.LoadString(SaveLoadSettings.WebUiDeviceNameKey, "ArtnetFixture"),
             fixtureMode = ToFixtureModeValue(fixtureMode),
-            dmxUniverse = Mathf.Clamp(PlayerPrefs.GetInt(DmxUniversePrefKey, 1), 1, 16),
-            startChannel = Mathf.Clamp(PlayerPrefs.GetInt(StartChannelPrefKey, 1), 1, 512),
-            fixtureAmount = Mathf.Clamp(PlayerPrefs.GetInt(FixtureCountPrefKey, 1), 1, 16),
-            gridX = ClampPixelDimension(PlayerPrefs.GetInt(PixelColumnsPrefKey, 8)),
-            gridY = ClampPixelDimension(PlayerPrefs.GetInt(PixelRowsPrefKey, 8))
+            dmxUniverse = Mathf.Clamp(SaveLoadSettings.LoadInt(SaveLoadSettings.DmxUniverseKey, 1), 1, 16),
+            startChannel = Mathf.Clamp(SaveLoadSettings.LoadInt(SaveLoadSettings.DmxChannelKey, 1), 1, 512),
+            fixtureAmount = Mathf.Clamp(SaveLoadSettings.LoadInt(SaveLoadSettings.FixtureCountKey, 1), 1, 16),
+            gridX = ClampPixelDimension(SaveLoadSettings.LoadInt(SaveLoadSettings.PixelColumnsKey, 8)),
+            gridY = ClampPixelDimension(SaveLoadSettings.LoadInt(SaveLoadSettings.PixelRowsKey, 8))
         };
     }
 
@@ -61,14 +53,14 @@ public static class WebUiSettingsStore
     {
         WebUiSettingsData data = Sanitize(raw);
 
-        PlayerPrefs.SetString(DeviceNamePrefKey, data.deviceName);
-        PlayerPrefs.SetInt(FixtureModePrefKey, ToFixtureModeIndex(data.fixtureMode));
-        PlayerPrefs.SetInt(DmxUniversePrefKey, data.dmxUniverse);
-        PlayerPrefs.SetInt(StartChannelPrefKey, data.startChannel);
-        PlayerPrefs.SetInt(FixtureCountPrefKey, data.fixtureAmount);
-        PlayerPrefs.SetInt(PixelColumnsPrefKey, data.gridX);
-        PlayerPrefs.SetInt(PixelRowsPrefKey, data.gridY);
-        PlayerPrefs.Save();
+        SaveLoadSettings.SaveString(SaveLoadSettings.WebUiDeviceNameKey, data.deviceName);
+        SaveLoadSettings.SaveInt(SaveLoadSettings.FixtureModeKey, ToFixtureModeIndex(data.fixtureMode));
+        SaveLoadSettings.SaveInt(SaveLoadSettings.DmxUniverseKey, data.dmxUniverse);
+        SaveLoadSettings.SaveInt(SaveLoadSettings.DmxChannelKey, data.startChannel);
+        SaveLoadSettings.SaveInt(SaveLoadSettings.FixtureCountKey, data.fixtureAmount);
+        SaveLoadSettings.SaveInt(SaveLoadSettings.PixelColumnsKey, data.gridX);
+        SaveLoadSettings.SaveInt(SaveLoadSettings.PixelRowsKey, data.gridY);
+        SaveLoadSettings.Save();
     }
 
     public static string ToJson(WebUiSettingsData data)
