@@ -63,6 +63,15 @@ This bypasses all localhost/HTTP restrictions on cheap Android devices.
   - Updated Android in-app WebView initialization to load cached HTML bytes through `loadDataWithBaseURL("file:///android_asset/", ...)`, with URL loading kept only as fallback when cached bytes are unavailable.
   - Reused `LocalWebUiServer` cached HTML payload to keep in-app and LAN-served content aligned.
 
+
+T16.6 - Since the projector can’t reliably run HttpListener: Load your HTML directly from StreamingAssets using file:// URLs. Avoid the local HTTP server entirely. But still keep it working through LAN.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+
 T15.1 - Refactor the code so that we have a SaveLoadSettings.cs class that handles all the saving and loading of the playerprefs. Any class that needs to handle saving ofr loding of playerprefs needs to use this class. This makes for cleaner code and makes it easier to debug.
 - [x] Started
 - [x] Behavior Written
@@ -72,13 +81,6 @@ T15.1 - Refactor the code so that we have a SaveLoadSettings.cs class that handl
   - Added `SaveLoadSettings` as a single PlayerPrefs gateway and centralized all DMX/mode/web settings keys in one shared class.
   - Refactored `WebUiSettingsStore`, `UI_DmxSettings`, `UI_FixtureMeshManager`, and `UI_FixtureModeSelector` so all runtime save/load operations route through `SaveLoadSettings`.
   - Verified no direct `PlayerPrefs` usage remains under `Assets/Scripts` besides `SaveLoadSettings`.
-
-T15.2 - Next run: add EditMode unit tests for SaveLoadSettings integration across DMX UI, fixture mode, and WebUI settings persistence paths.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
 
 
 

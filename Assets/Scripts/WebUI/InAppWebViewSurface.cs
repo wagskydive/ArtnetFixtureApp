@@ -87,7 +87,7 @@ public class InAppWebViewSurface : MonoBehaviour
             }
             else
             {
-                _webView.Call("setBackgroundColor", unchecked((int)0xFF000000));
+                _webView.Call("setBackgroundColor", unchecked((int)0xFFFFFFFF));
             }
 
             using (var colorDrawable = new AndroidJavaObject("android.graphics.drawable.ColorDrawable", transparentOverlay ? unchecked((int)0x00000000) : unchecked((int)0xFF000000)))
