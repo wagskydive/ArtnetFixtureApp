@@ -75,6 +75,14 @@ T16.6 - Since the projector can’t reliably run HttpListener: Load your HTML di
   - Enabled Android WebView file-origin access flags (`setAllowFileAccessFromFileURLs`/`setAllowUniversalAccessFromFileURLs`) so local asset loading stays compatible with relative file-based resource usage.
   - Added EditMode regression coverage for both URL strategies: default StreamingAssets file URL pathing and legacy LAN URL composition.
 
+T16.7 - Copy the HTML from StreamingAssets to persistent path at runtime and make the webui work over LAN work again. Currently the webserver doesn't work on another device. When trying to access it using the android devices ip and port it shows a white screen.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+
 
 T15.1 - Refactor the code so that we have a SaveLoadSettings.cs class that handles all the saving and loading of the playerprefs. Any class that needs to handle saving ofr loding of playerprefs needs to use this class. This makes for cleaner code and makes it easier to debug.
 - [x] Started
