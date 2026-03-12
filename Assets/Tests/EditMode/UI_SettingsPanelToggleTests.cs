@@ -78,7 +78,7 @@ public class UI_SettingsPanelToggleTests
     }
 
     [Test]
-    public void Start_ShowMenuOnStartFalse_HidesObject()
+    public void Start_AlwaysHidesMenuOnStartup()
     {
         var controllerGo = new GameObject("controller");
         var targetGo = new GameObject("target");
@@ -86,30 +86,10 @@ public class UI_SettingsPanelToggleTests
 
         var toggle = controllerGo.AddComponent<UI_SettingsPanelToggle>();
         SetPrivateField(toggle, "targetObject", targetGo);
-        SetPrivateField(toggle, "showMenuOnStart", false);
 
         InvokePrivateMethod(toggle, "Start");
 
         Assert.That(targetGo.activeSelf, Is.False);
-
-        Object.DestroyImmediate(controllerGo);
-        Object.DestroyImmediate(targetGo);
-    }
-
-    [Test]
-    public void Start_ShowMenuOnStartTrue_ShowsObject()
-    {
-        var controllerGo = new GameObject("controller");
-        var targetGo = new GameObject("target");
-        targetGo.SetActive(false);
-
-        var toggle = controllerGo.AddComponent<UI_SettingsPanelToggle>();
-        SetPrivateField(toggle, "targetObject", targetGo);
-        SetPrivateField(toggle, "showMenuOnStart", true);
-
-        InvokePrivateMethod(toggle, "Start");
-
-        Assert.That(targetGo.activeSelf, Is.True);
 
         Object.DestroyImmediate(controllerGo);
         Object.DestroyImmediate(targetGo);

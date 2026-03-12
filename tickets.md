@@ -12,13 +12,24 @@ Currently on app start, the app is opening the settings menu, which gives a blac
   - Added EditMode coverage for startup menu visibility behavior (`showMenuOnStart` true/false) to prevent regressions where the app boots into the menu.
 
 T16.2 - Create a webviewer that can show the webui on android inside the app. It should be able to be an overlay with transparency and have an option to be resized in the editor so it is not only a fullscreen overlay
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - Extended `InAppWebViewSurface` with configurable transparent overlay behavior and normalized overlay position/size controls so Android WebView can be shown as a non-fullscreen overlay.
+  - Added Android layout parameter generation that maps inspector overlay values into pixel margins/sizes at runtime, while preserving Editor URL-preview workflow.
 
 T16.3 - Make sure that the settings menu is never shown on startup. Remove the option to show it at startup. It will only be shown when the user wants to see it and never defaults to be shown at startup.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - Removed startup configurability from `UI_SettingsPanelToggle`; startup now always forces settings menu hidden.
+  - Updated EditMode tests to cover the new fixed startup-hidden behavior and removed obsolete configurable-startup expectations.
+
+T16.4 - Next run: add focused EditMode coverage for `InAppWebViewSurface` overlay clamping/layout calculations and validate transparency behavior on an Android device build.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
