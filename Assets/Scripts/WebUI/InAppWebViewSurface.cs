@@ -100,13 +100,36 @@ public class InAppWebViewSurface : MonoBehaviour
                 _activity.Call("addContentView", _webView, layoutParams);
             }
 
-            _webView.Call("loadUrl", BuildWebUiUrl());
+            LoadCachedHtmlIntoWebView();
         }));
 #elif UNITY_EDITOR
         if (openExternalBrowserInEditor)
         {
             OpenEditorPreview();
         }
+#endif
+    }
+
+
+    private void LoadCachedHtmlIntoWebView()
+    {
+#if UNITY_ANDROID && !UNITY_EDITOR
+        byte[] cachedHtmlBytes = webUiServer != null ? webUiServer.GetCachedHtmlBytes() : null;
+        if (cachedHtmlBytes == null || cachedHtmlBytes.Length == 0)
+        {
+            _webView.Call("loadUrl", BuildWebUiUrl());
+            return;
+        }
+
+        string htmlContent = System.Text.Encoding.UTF8.GetString(cachedHtmlBytes);
+        _webView.Call(
+            "loadDataWithBaseURL",
+            "file:///android_asset/",
+            htmlContent,
+            "text/html",
+            "utf-8",
+            null
+        );
 #endif
     }
 

@@ -84,6 +84,23 @@ public class WebUiSettingsTests
 
 
 
+
+    [Test]
+    public void LocalWebUiServer_CachesHtmlFromStreamingAssetsDuringAwake()
+    {
+        var serverGo = new GameObject("web-server");
+        var server = serverGo.AddComponent<LocalWebUiServer>();
+
+        byte[] cachedHtmlBytes = server.GetCachedHtmlBytes();
+        string html = System.Text.Encoding.UTF8.GetString(cachedHtmlBytes ?? new byte[0]);
+
+        Assert.That(cachedHtmlBytes, Is.Not.Null);
+        Assert.That(cachedHtmlBytes.Length, Is.GreaterThan(0));
+        Assert.That(html, Does.Contain("Artnet Fixture Control"));
+
+        Object.DestroyImmediate(serverGo);
+    }
+
     [Test]
     public void LocalWebUiServer_SettingsApi_PostThenGet_RehydratesPersistedPlayerPrefsValues()
     {

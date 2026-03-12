@@ -18,9 +18,9 @@ public class LocalWebUiServer : MonoBehaviour
         public Exception Exception;
     }
 
-    [SerializeField] private TextAsset webUiHtml;
     [SerializeField] private WebUiSettingsBridge settingsBridge;
     [SerializeField] private int port = 8080;
+    [SerializeField] private string webUiFileName = "index.html";
 
     private readonly Queue<MainThreadInvocation> _mainThreadQueue = new Queue<MainThreadInvocation>(8);
     private readonly object _queueLock = new object();
@@ -60,8 +60,55 @@ public class LocalWebUiServer : MonoBehaviour
 
     private void CacheHtmlPayload()
     {
-        string html = webUiHtml != null ? webUiHtml.text : "<html><body>Missing webUiHtml reference.</body></html>";
+        string html = LoadHtmlFromStreamingAssets();
         _cachedHtmlBytes = Encoding.UTF8.GetBytes(html);
+    }
+
+    public byte[] GetCachedHtmlBytes()
+    {
+        return _cachedHtmlBytes;
+    }
+
+    private string LoadHtmlFromStreamingAssets()
+    {
+        string fallbackHtml = "<html><body>Missing StreamingAssets/index.html content.</body></html>";
+
+        try
+        {
+#if UNITY_ANDROID && !UNITY_EDITOR
+            using (var unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+            {
+                AndroidJavaObject activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
+                AndroidJavaObject assetManager = activity.Call<AndroidJavaObject>("getAssets");
+
+                using (var inputStream = assetManager.Call<AndroidJavaObject>("open", webUiFileName))
+                {
+                    int available = inputStream.Call<int>("available");
+                    if (available <= 0)
+                    {
+                        return fallbackHtml;
+                    }
+
+                    byte[] bytes = new byte[available];
+                    inputStream.Call<int>("read", bytes);
+                    inputStream.Call("close");
+                    return Encoding.UTF8.GetString(bytes);
+                }
+            }
+#else
+            string htmlPath = Path.Combine(Application.streamingAssetsPath, webUiFileName);
+            if (File.Exists(htmlPath))
+            {
+                return File.ReadAllText(htmlPath, Encoding.UTF8);
+            }
+#endif
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"LocalWebUiServer failed to load StreamingAssets HTML: {ex.Message}");
+        }
+
+        return fallbackHtml;
     }
 
     private void StartServer()

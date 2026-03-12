@@ -32,11 +32,13 @@ T16.3 - Make sure that the settings menu is never shown on startup. Remove the o
 T16.4 - Fix LocalWebUiServer.cs: load HTML from StreamingAssets at runtime instead of a TextAsset 
 Remove the TextAsset webUiHtml field.
 Cache HTML in Awake() from StreamingAssets:
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - Removed `TextAsset webUiHtml` from `LocalWebUiServer` and now cache HTML in `Awake()` by loading `StreamingAssets/index.html` (with Android asset-manager + desktop file-path handling).
+  - Added EditMode coverage that validates cached HTML bytes are populated from StreamingAssets at startup.
 
 T16.5 - Update WebView inside the app. Use loadDataWithBaseURL instead of loadUrl:
 
@@ -53,11 +55,13 @@ _webView.Call(
 '''
 
 This bypasses all localhost/HTTP restrictions on cheap Android devices.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - Updated Android in-app WebView initialization to load cached HTML bytes through `loadDataWithBaseURL("file:///android_asset/", ...)`, with URL loading kept only as fallback when cached bytes are unavailable.
+  - Reused `LocalWebUiServer` cached HTML payload to keep in-app and LAN-served content aligned.
 
 T15.1 - Refactor the code so that we have a SaveLoadSettings.cs class that handles all the saving and loading of the playerprefs. Any class that needs to handle saving ofr loding of playerprefs needs to use this class. This makes for cleaner code and makes it easier to debug.
 - [x] Started
@@ -1023,3 +1027,11 @@ T9.8 - Document Pixel Mapping setup, DMX addressing scheme, and operational limi
 
 
 
+
+
+T16.6 - Next run: Validate Android-device behavior for in-app WebView API calls and all relative resource/script fetches when loaded via loadDataWithBaseURL.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
