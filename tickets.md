@@ -19,7 +19,9 @@ T17.2 - Implement the new Unity Input System. The old input system was used befo
   - Added directional-input handling that prioritizes vertical navigation and optionally allows horizontal traversal when `horizontalWrap` is enabled, so TV remote D-pad, keyboard, and gamepad flows behave consistently.
   - Expanded EditMode tests with explicit coverage for vector-based navigation behavior (vertical movement, horizontal ignored without wrap, horizontal movement with wrap).
 
-T17.3 - Next run: wire `navigateAction` and `submitAction` references in scene/prefabs and validate D-pad behavior on Android TV hardware with Unity Input System-only player settings.
+
+
+T17.3 - The legacy input path is not needed at all anymore. Currently the UI_DpadNavigationController still needs the Selectables[] to function, however it should work without those. The buttons need to be selectable through the new input system purely based on their position on screen. Currently there is also a bug when a button is pressed it gets pressed 3 times instead of once.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
