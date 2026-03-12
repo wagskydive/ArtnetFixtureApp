@@ -143,6 +143,7 @@ _Progress note: DMX universe/start-channel startup hydration now runs in `Awake`
 _Progress note: LAN WebUI availability is now decoupled from in-app menu visibility by keeping the `HtmlUI` host active when the menu is hidden, so `LocalWebUiServer` remains reachable even outside menu view._
 _Progress note: settings menu startup behavior is now fixed to always hidden on boot in `UI_SettingsPanelToggle`, removing the startup-show toggle and preventing black-screen menu overlays._
 _Progress note: in-app Android WebView overlay now supports transparent background plus normalized position/size controls so the WebUI can run as a resizable non-fullscreen overlay._
+_Progress note: LocalWebUiServer now caches `StreamingAssets/index.html` at startup (instead of TextAsset references), and Android in-app WebView now injects the cached HTML via `loadDataWithBaseURL` to bypass localhost HTTP restrictions on lower-end devices._
 
 ### Goal:
 Enable persistent configuration and easy deployment.
