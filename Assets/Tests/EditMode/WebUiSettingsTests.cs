@@ -157,7 +157,7 @@ public class WebUiSettingsTests
             expectedPrefix += "/";
         }
 
-        Assert.That(surface.GetWebUiUrl(), Is.EqualTo($"{expectedPrefix}index.html?local=true"));
+        Assert.That(surface.GetWebUiUrl(), Is.EqualTo($"{expectedPrefix}index.html?local=true&apiBase=http%3A%2F%2F127.0.0.1%3A8080"));
 
         Object.DestroyImmediate(surfaceGo);
     }

@@ -86,11 +86,14 @@ T16.7 - Copy the HTML from StreamingAssets to persistent path at runtime and mak
   - Added EditMode coverage to verify the persistent HTML copy is created during Awake and contains expected WebUI content.
 
 T16.8 - make the webview settings work on the android device within the app. Currently it tries to open a jar:file:///data/app/~~ url but gets and error: net::ERR_UNKOWN_URL_SCHEME
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - Updated `InAppWebViewSurface` to append an `apiBase` query parameter (pointing to `http://127.0.0.1:<port>`) when loading `StreamingAssets` pages, so WebView content loaded from Android `jar:file://` origins can call LAN API endpoints without relying on unsupported relative `file`/`jar` fetch routing.
+  - Updated `Assets/StreamingAssets/index.html` to resolve API requests through `buildApiUrl(...)`, honoring `apiBase` when present while preserving relative-path behavior for browser/LAN access.
+  - Updated EditMode URL expectation coverage for the StreamingAssets mode so regressions in `apiBase` URL composition are caught.
 
 
 T15.1 - Refactor the code so that we have a SaveLoadSettings.cs class that handles all the saving and loading of the playerprefs. Any class that needs to handle saving ofr loding of playerprefs needs to use this class. This makes for cleaner code and makes it easier to debug.
@@ -1052,7 +1055,7 @@ T9.8 - Document Pixel Mapping setup, DMX addressing scheme, and operational limi
 
 
 
-T16.8 - Next run: Validate Android LAN client behavior against `LocalWebUiServer` persistent WebUI copy serving, including `/api/settings` requests and any additional static assets referenced by the page.
+T16.9 - Next run: Validate Android LAN client behavior against `LocalWebUiServer` persistent WebUI copy serving, including `/api/settings` requests and any additional static assets referenced by the page.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
