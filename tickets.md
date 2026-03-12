@@ -161,6 +161,12 @@ T99.5 - Make the Fixture amount a saved user pref, so that when the fixture amou
   - Added non-destructive fixture rebuild APIs so non-Standard modes force one fixture without overwriting saved preference; returning to Standard restores the previously saved fixture amount and updates UI text accordingly.
 
 
+T99.6 -Fix the bug where the playerprefs are not correctly loaded when the app restarts. Currently when i run the app in the Unity Editor, the universe number always defaults to the number 2. Check if the app startup works correct and overrule playerprefs over any other input on startup and make sure that the webui also gets populated from the playerprefs and not somehow has some bug where it loads in reverse. Also verify that the settings are properly saved when they are changed in the webui. Refactor the code if that helps to find and fix the bug. Document all the steps that you take under this ticket.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
 
 T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode
 - [x] Started
