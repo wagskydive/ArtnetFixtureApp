@@ -8,6 +8,8 @@ using UnityEngine;
 
 public class LocalWebUiServer : MonoBehaviour
 {
+    public event Action OnServerStarted;
+
     private class MainThreadInvocation
     {
         public Func<string> Action;
@@ -93,6 +95,7 @@ public class LocalWebUiServer : MonoBehaviour
         _serverThread.Start();
 
         Debug.Log($"Local web UI server listening on port {port}");
+        OnServerStarted?.Invoke();
     }
 
     private void StopServer()

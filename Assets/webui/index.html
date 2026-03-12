@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Artnet Fixture Control</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #101010;
+            color: white;
+            margin: 0;
+            padding: 30px;
+            font-size: 24px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        .section {
+            background: #1c1c1c;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: 10px;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 6px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            height: 60px;
+            font-size: 24px;
+            background: #333;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            padding: 10px;
+        }
+
+        button {
+            height: 70px;
+            font-size: 26px;
+            padding: 0 30px;
+            border: none;
+            border-radius: 10px;
+            margin-top: 15px;
+            background: #00bcd4;
+            color: black;
+            cursor: pointer;
+        }
+
+        button.secondary {
+            background: #555;
+            color: white;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        input:focus,
+        select:focus,
+        button:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px #00c8ff;
+        }
+
+        .navbar {
+            margin-bottom: 20px;
+        }
+
+        .navbar button {
+            margin-right: 10px;
+        }
+
+        .fader {
+            margin-top: 10px;
+        }
+
+        .fader input[type=range] {
+            width: 100%;
+            height: 40px;
+        }
+
+        .instructions {
+            font-size: 20px;
+            line-height: 1.5;
+        }
+
+        .status {
+            margin-top: 12px;
+            min-height: 1.25em;
+            font-size: 18px;
+            color: #7dd3fc;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="navbar">
+            <button id="settingsTab">Settings</button>
+            <button id="dmxTab">DMX Test</button>
+        </div>
+
+        <h1>Virtual Fixture Control</h1>
+
+        <div id="loginSection" class="section hidden">
+
+            <h2>Login</h2>
+
+            <label>Password</label> <input type="password" id="passwordInput">
+
+            <button id="loginBtn">Login</button>
+
+        </div>
+
+        <div id="settingsPage">
+
+            <div class="section">
+
+                <label>Device Name</label> <input id="deviceName" tabindex="1">
+
+                <label>Fixture Mode</label> <select id="fixtureMode" tabindex="2">
+
+                    <option value="surface">Surface</option>
+                    <option value="moving">Moving Head</option>
+                    <option value="pixel">Pixel Mapping</option>
+                </select>
+
+                <label>DMX Universe</label> <input id="dmxUniverse" type="number" min="1" max="16" tabindex="3">
+
+                <label>DMX Start Channel</label> <input id="startChannel" type="number" min="1" max="512" tabindex="4">
+
+            </div>
+
+            <div id="standardSection" class="section">
+
+                <label>Virtual Fixture Amount</label> <input id="fixtureAmount" type="number" min="1" max="16"
+                    tabindex="5">
+
+            </div>
+
+            <div id="pixelSection" class="section hidden">
+
+                <label>Grid Size X</label> <input id="gridX" type="number" min="8" max="32" tabindex="6">
+
+                <label>Grid Size Y</label> <input id="gridY" type="number" min="8" max="32" tabindex="7">
+
+            </div>
+
+            <div class="section">
+
+                <button class="secondary" id="restartFixture" tabindex="8">Restart
+                    Fixture</button>
+                <p id="settingsStatus" class="status" aria-live="polite"></p>
+
+            </div>
+
+            <div class="section instructions">
+
+                <h2>DMX Info</h2>
+
+                <p>
+                    Universe and start channel define where this virtual fixture listens.
+                </p>
+
+                <p>
+                    Fixture modes determine channel mapping.
+                    Detailed mapping information can be displayed here.
+                </p>
+
+            </div>
+
+        </div>
+
+        <div id="dmxPage" class="hidden">
+
+            <div class="section">
+
+                <label>Universe</label> <input id="testUniverse" type="number" min="1" max="16" value="1">
+
+                <label>Start Address</label> <input id="testAddress" type="number" min="1" max="512" value="1">
+
+                <button id="sendDMX">Send DMX</button>
+
+            </div>
+
+            <div id="faderContainer" class="section"></div>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        const params = new URLSearchParams(window.location.search)
+
+        const isLocal = params.get("local") === "true"
+        const tvMode = params.get("tv") === "true"
+        const companion = params.get("companion") === "true"
+
+        const passwordEnabled = false
+
+        const loginSection = document.getElementById("loginSection")
+        const settingsPage = document.getElementById("settingsPage")
+
+        if (!isLocal && passwordEnabled) {
+            loginSection.classList.remove("hidden")
+            settingsPage.classList.add("hidden")
+        }
+
+        document.getElementById("loginBtn").onclick = function () {
+            settingsPage.classList.remove("hidden")
+            loginSection.classList.add("hidden")
+        }
+
+        const modeSelect = document.getElementById("fixtureMode")
+        const standardSection = document.getElementById("standardSection")
+        const pixelSection = document.getElementById("pixelSection")
+
+        modeSelect.addEventListener("change", function () {
+
+            const isSurface = this.value === "surface"
+            const isPixel = this.value === "pixel"
+
+            if (isSurface) {
+                standardSection.classList.remove("hidden")
+            } else {
+                standardSection.classList.add("hidden")
+            }
+
+            if (isPixel) {
+                pixelSection.classList.remove("hidden")
+            } else {
+                pixelSection.classList.add("hidden")
+            }
+
+        })
+
+        document.getElementById("settingsTab").onclick = function () {
+
+            document.getElementById("settingsPage").classList.remove("hidden")
+            document.getElementById("dmxPage").classList.add("hidden")
+
+        }
+
+        document.getElementById("dmxTab").onclick = function () {
+
+            document.getElementById("settingsPage").classList.add("hidden")
+            document.getElementById("dmxPage").classList.remove("hidden")
+
+        }
+
+        const faderContainer = document.getElementById("faderContainer")
+        const settingsStatus = document.getElementById("settingsStatus")
+        const autoSaveElements = [
+            document.getElementById("deviceName"),
+            document.getElementById("fixtureMode"),
+            document.getElementById("dmxUniverse"),
+            document.getElementById("startChannel"),
+            document.getElementById("fixtureAmount"),
+            document.getElementById("gridX"),
+            document.getElementById("gridY")
+        ]
+        const navigableElements = Array.from(document.querySelectorAll("input, select, button"))
+        let saveDebounceTimeout = null
+        let suppressAutoSave = false
+
+        function clampValue(value, min, max) {
+            return Math.min(max, Math.max(min, value))
+        }
+
+        function getCurrentSettings() {
+            return {
+                deviceName: document.getElementById("deviceName").value,
+                fixtureMode: document.getElementById("fixtureMode").value,
+                dmxUniverse: parseInt(document.getElementById("dmxUniverse").value),
+                startChannel: parseInt(document.getElementById("startChannel").value),
+                fixtureAmount: parseInt(document.getElementById("fixtureAmount").value),
+                gridX: parseInt(document.getElementById("gridX").value),
+                gridY: parseInt(document.getElementById("gridY").value)
+            }
+        }
+
+        function applySettingsToUi(settings) {
+            document.getElementById("deviceName").value = settings.deviceName || "ArtnetFixture"
+            document.getElementById("fixtureMode").value = settings.fixtureMode || "surface"
+            document.getElementById("dmxUniverse").value = clampValue(parseInt(settings.dmxUniverse) || 1, 1, 16)
+            document.getElementById("startChannel").value = clampValue(parseInt(settings.startChannel) || 1, 1, 512)
+            document.getElementById("fixtureAmount").value = clampValue(parseInt(settings.fixtureAmount) || 1, 1, 16)
+            document.getElementById("gridX").value = clampValue(parseInt(settings.gridX) || 8, 8, 32)
+            document.getElementById("gridY").value = clampValue(parseInt(settings.gridY) || 8, 8, 32)
+            modeSelect.dispatchEvent(new Event("change"))
+        }
+
+        async function saveSettings() {
+            const settings = getCurrentSettings()
+
+            try {
+                settingsStatus.textContent = "Saving…"
+                const response = await fetch("/api/settings", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(settings)
+                })
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`)
+                }
+
+                const persisted = await response.json()
+                suppressAutoSave = true
+                applySettingsToUi(persisted)
+                suppressAutoSave = false
+                settingsStatus.textContent = "Saved"
+            } catch (error) {
+                settingsStatus.textContent = "Save failed"
+                console.log("Failed to save settings", error)
+            }
+        }
+
+        function scheduleAutoSave() {
+            if (suppressAutoSave) {
+                return
+            }
+
+            if (saveDebounceTimeout !== null) {
+                clearTimeout(saveDebounceTimeout)
+            }
+
+            saveDebounceTimeout = setTimeout(() => {
+                saveDebounceTimeout = null
+                saveSettings()
+            }, 180)
+        }
+
+        async function loadSettings() {
+            try {
+                const response = await fetch("/api/settings")
+                if (!response.ok) {
+                    return
+                }
+
+                const settings = await response.json()
+                applySettingsToUi(settings)
+                settingsStatus.textContent = "Ready"
+            } catch (e) {
+                console.log("Failed to load settings", e)
+            }
+        }
+
+        function createFaders() {
+
+            for (let i = 0; i < 8; i++) {
+
+                let div = document.createElement("div")
+                div.className = "fader"
+
+                let label = document.createElement("label")
+                label.innerText = "Channel " + (i + 1)
+
+                if (companion) {
+
+                    let slider = document.createElement("input")
+                    slider.type = "range"
+                    slider.min = 0
+                    slider.max = 255
+                    slider.value = 0
+
+                    slider.oninput = function () {
+                        sendArtNet()
+                    }
+
+                    div.appendChild(label)
+                    div.appendChild(slider)
+
+                } else {
+
+                    let input = document.createElement("input")
+                    input.type = "number"
+                    input.min = 0
+                    input.max = 255
+                    input.value = 0
+
+                    input.onchange = function () {
+                        sendArtNet()
+                    }
+
+                    div.appendChild(label)
+                    div.appendChild(input)
+
+                }
+
+                faderContainer.appendChild(div)
+
+            }
+
+        }
+
+        createFaders()
+
+        function getDMXValues() {
+
+            let values = []
+
+            let inputs = faderContainer.querySelectorAll("input")
+
+            inputs.forEach(i => {
+
+                values.push(parseInt(i.value) || 0)
+
+            })
+
+            return values
+
+        }
+
+        document.getElementById("sendDMX").onclick = function () {
+
+            sendArtNet()
+
+        }
+
+        function sendArtNet() {
+
+            const universe = clampValue(parseInt(document.getElementById("testUniverse").value) || 1, 1, 16) - 1
+            const values = getDMXValues()
+
+            const packet = new Uint8Array(18 + 512)
+
+            const header = "Art-Net\0"
+
+            for (let i = 0; i < header.length; i++) {
+                packet[i] = header.charCodeAt(i)
+            }
+
+            packet[8] = 0x00
+            packet[9] = 0x50
+
+            packet[10] = 0x00
+            packet[11] = 0x0e
+
+            packet[12] = 0x00
+            packet[13] = 0x00
+
+            packet[14] = universe & 0xff
+            packet[15] = (universe >> 8) & 0xff
+
+            packet[16] = 2
+            packet[17] = 0
+
+            for (let i = 0; i < values.length; i++) {
+                packet[18 + i] = values[i]
+            }
+
+            sendPacket(packet)
+
+        }
+
+        function sendPacket(packet) {
+
+            if (companion) {
+
+                fetch("/api/sendArtNet", {
+                    method: "POST",
+                    body: packet
+                })
+
+            } else {
+
+                console.log("DMX values updated (local mode)")
+
+            }
+
+        }
+
+        autoSaveElements.forEach(element => {
+            element.addEventListener("change", scheduleAutoSave)
+            if (element.tagName.toLowerCase() === "input" && element.type !== "number") {
+                element.addEventListener("input", scheduleAutoSave)
+            }
+        })
+
+        document.addEventListener("keydown", (event) => {
+            const activeIndex = navigableElements.indexOf(document.activeElement)
+
+            if (event.key === "ArrowDown" || event.key === "ArrowRight") {
+                event.preventDefault()
+                const next = navigableElements[(activeIndex + 1 + navigableElements.length) % navigableElements.length]
+                next.focus()
+            } else if (event.key === "ArrowUp" || event.key === "ArrowLeft") {
+                event.preventDefault()
+                const prev = navigableElements[(activeIndex - 1 + navigableElements.length) % navigableElements.length]
+                prev.focus()
+            } else if (event.key === "Escape") {
+                window.dispatchEvent(new CustomEvent("webui-back"))
+            }
+        })
+
+        loadSettings()
+
+    </script>
+
+</body>
+
+</html>

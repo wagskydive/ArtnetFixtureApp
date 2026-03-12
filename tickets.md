@@ -29,7 +29,30 @@ T16.3 - Make sure that the settings menu is never shown on startup. Remove the o
   - Removed startup configurability from `UI_SettingsPanelToggle`; startup now always forces settings menu hidden.
   - Updated EditMode tests to cover the new fixed startup-hidden behavior and removed obsolete configurable-startup expectations.
 
-T16.4 - Next run: add focused EditMode coverage for `InAppWebViewSurface` overlay clamping/layout calculations and validate transparency behavior on an Android device build.
+T16.4 - Fix LocalWebUiServer.cs: load HTML from StreamingAssets at runtime instead of a TextAsset 
+Remove the TextAsset webUiHtml field.
+Cache HTML in Awake() from StreamingAssets:
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T16.5 - Update WebView inside the app. Use loadDataWithBaseURL instead of loadUrl:
+
+'''
+string htmlContent = System.Text.Encoding.UTF8.GetString(_cachedHtmlBytes);
+_webView.Call(
+    "loadDataWithBaseURL",
+    "file:///android_asset/",
+    htmlContent,
+    "text/html",
+    "utf-8",
+    null
+);
+'''
+
+This bypasses all localhost/HTTP restrictions on cheap Android devices.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written

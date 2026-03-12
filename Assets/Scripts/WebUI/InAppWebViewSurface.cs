@@ -17,8 +17,13 @@ public class InAppWebViewSurface : MonoBehaviour
     private AndroidJavaObject _webView;
     private AndroidJavaObject _activity;
 #endif
+    
+    void Awake()
+    {
+        webUiServer.OnServerStarted += InitializeWebViewAfterServerStart;
+    }
 
-    private void Start()
+    private void InitializeWebViewAfterServerStart()
     {
         InitializeWebView();
         SetVisible(false);
