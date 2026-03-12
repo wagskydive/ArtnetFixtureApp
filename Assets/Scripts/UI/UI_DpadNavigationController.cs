@@ -14,20 +14,25 @@ public class UI_DpadNavigationController : MonoBehaviour
     private readonly List<Selectable> _runtimeSelectables = new List<Selectable>();
     private int _currentIndex;
     private int _lastSubmitFrame = -1;
+    private bool _submitHeld;
     private bool _selectablesDirty = true;
 
     private void OnEnable()
     {
         RebuildSelectables();
         SelectFirstValid();
+        _submitHeld = false;
         EnableAction(navigateAction, OnNavigate);
         EnableAction(submitAction, OnSubmit);
+        EnableCanceledAction(submitAction, OnSubmitCanceled);
     }
 
     private void OnDisable()
     {
         DisableAction(navigateAction, OnNavigate);
         DisableAction(submitAction, OnSubmit);
+        DisableCanceledAction(submitAction, OnSubmitCanceled);
+        _submitHeld = false;
     }
 
     private void LateUpdate()
@@ -60,11 +65,61 @@ public class UI_DpadNavigationController : MonoBehaviour
             currentIndex = _currentIndex;
         }
 
-        int targetIndex = FindNearestIndexInDirection(currentIndex, navigationInput);
+        int targetIndex = FindSelectableNavigationTarget(currentIndex, navigationInput);
         if (targetIndex >= 0)
         {
             SelectIndex(targetIndex);
         }
+    }
+
+    private int FindSelectableNavigationTarget(int originIndex, Vector2 navigationInput)
+    {
+        int builtInTargetIndex = FindBuiltInSelectableTarget(originIndex, navigationInput);
+        if (builtInTargetIndex >= 0)
+        {
+            return builtInTargetIndex;
+        }
+
+        return FindNearestIndexInDirection(originIndex, navigationInput);
+    }
+
+    private int FindBuiltInSelectableTarget(int originIndex, Vector2 navigationInput)
+    {
+        if (!IsSelectable(originIndex))
+        {
+            return -1;
+        }
+
+        Selectable origin = _runtimeSelectables[originIndex];
+        if (origin == null)
+        {
+            return -1;
+        }
+
+        Selectable target = null;
+        if (Mathf.Abs(navigationInput.y) >= Mathf.Abs(navigationInput.x))
+        {
+            target = navigationInput.y > 0f ? origin.FindSelectableOnUp() : origin.FindSelectableOnDown();
+        }
+        else if (horizontalWrap)
+        {
+            target = navigationInput.x > 0f ? origin.FindSelectableOnRight() : origin.FindSelectableOnLeft();
+        }
+
+        if (target == null)
+        {
+            return -1;
+        }
+
+        for (int i = 0; i < _runtimeSelectables.Count; i++)
+        {
+            if (_runtimeSelectables[i] == target && IsSelectable(i))
+            {
+                return i;
+            }
+        }
+
+        return -1;
     }
 
     public void Move(int delta)
@@ -326,14 +381,26 @@ public class UI_DpadNavigationController : MonoBehaviour
         HandleNavigationInput(context.ReadValue<Vector2>());
     }
 
-    private void OnSubmit(InputAction.CallbackContext _)
+    private void OnSubmit(InputAction.CallbackContext context)
     {
-        if (_.ReadValue<float>() <= 0.5f)
+        if (context.ReadValue<float>() <= 0.5f)
         {
             return;
         }
 
+        if (_submitHeld)
+        {
+            return;
+        }
+
+        _submitHeld = true;
+
         SubmitCurrentSelection();
+    }
+
+    private void OnSubmitCanceled(InputAction.CallbackContext _)
+    {
+        _submitHeld = false;
     }
 
     private void EnsureSelectionIsValid()
@@ -371,5 +438,25 @@ public class UI_DpadNavigationController : MonoBehaviour
 
         actionReference.action.performed -= callback;
         actionReference.action.Disable();
+    }
+
+    private static void EnableCanceledAction(InputActionReference actionReference, System.Action<InputAction.CallbackContext> callback)
+    {
+        if (actionReference == null || actionReference.action == null)
+        {
+            return;
+        }
+
+        actionReference.action.canceled += callback;
+    }
+
+    private static void DisableCanceledAction(InputActionReference actionReference, System.Action<InputAction.CallbackContext> callback)
+    {
+        if (actionReference == null || actionReference.action == null)
+        {
+            return;
+        }
+
+        actionReference.action.canceled -= callback;
     }
 }

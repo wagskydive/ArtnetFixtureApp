@@ -162,6 +162,45 @@ public class UI_DpadNavigationControllerTests
         Object.DestroyImmediate(eventSystemGo);
     }
 
+
+    [Test]
+    public void HandleNavigationInput_PrefersUnitySelectableGraph_ForNestedParents()
+    {
+        var eventSystemGo = CreateEventSystem();
+        var root = CreateRootWithCanvas();
+
+        var groupA = new GameObject("group-a", typeof(RectTransform));
+        groupA.transform.SetParent(root.transform);
+        var groupB = new GameObject("group-b", typeof(RectTransform));
+        groupB.transform.SetParent(root.transform);
+
+        var aTop = CreateButton("a-top", groupA.transform, new Vector2(0f, 200f));
+        var aBottom = CreateButton("a-bottom", groupA.transform, new Vector2(0f, 120f));
+        var bTop = CreateButton("b-top", groupB.transform, new Vector2(0f, 0f));
+        var bBottom = CreateButton("b-bottom", groupB.transform, new Vector2(0f, -80f));
+
+        ConfigureVerticalNavigation(aTop, null, aBottom);
+        ConfigureVerticalNavigation(aBottom, aTop, bTop);
+        ConfigureVerticalNavigation(bTop, aBottom, bBottom);
+        ConfigureVerticalNavigation(bBottom, bTop, null);
+
+        var controller = root.AddComponent<UI_DpadNavigationController>();
+
+        root.SendMessage("OnEnable");
+        EventSystem.current.SetSelectedGameObject(aTop.gameObject);
+
+        controller.HandleNavigationInput(Vector2.down);
+        Assert.That(EventSystem.current.currentSelectedGameObject, Is.EqualTo(aBottom.gameObject));
+
+        controller.HandleNavigationInput(Vector2.down);
+        Assert.That(EventSystem.current.currentSelectedGameObject, Is.EqualTo(bTop.gameObject));
+
+        controller.HandleNavigationInput(Vector2.up);
+        Assert.That(EventSystem.current.currentSelectedGameObject, Is.EqualTo(aBottom.gameObject));
+
+        Object.DestroyImmediate(root);
+        Object.DestroyImmediate(eventSystemGo);
+    }
     [Test]
     public void HandleNavigationInput_RebuildsAfterRuntimeVisibilityChanges()
     {
@@ -209,6 +248,16 @@ public class UI_DpadNavigationControllerTests
         rect.anchoredPosition = position;
         rect.localPosition = new Vector3(position.x, position.y, 0f);
         return go.AddComponent<Button>();
+    }
+
+
+    private static void ConfigureVerticalNavigation(Selectable selectable, Selectable up, Selectable down)
+    {
+        var navigation = selectable.navigation;
+        navigation.mode = Navigation.Mode.Explicit;
+        navigation.selectOnUp = up;
+        navigation.selectOnDown = down;
+        selectable.navigation = navigation;
     }
 
     private static void SetPrivateArray(UI_DpadNavigationController controller, params Selectable[] values)

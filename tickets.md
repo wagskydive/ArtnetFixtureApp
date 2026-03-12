@@ -44,12 +44,21 @@ T17.4 - Next run: wire `UI_DpadNavigationController` to detect runtime layout ch
   - Expanded EditMode tests with tie-breaking coverage and runtime-visibility-change coverage for discovered selectables.
 
 T17.5 - The problem described in ticket 17.4 still persists. Currently the navigation breaks when a button is inside a parent object. The current behavior only selects the upper ui button inside a parent object when pressing the down key untill the lowest ui button on screen is reached. Then when the up key is pressed it selects only the lowest ui button inside each parent object. Also the submit button still increments or decrements by 2 instead of 1. So either there is still a double key press registered or there is another bug. Find it and fix it.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Updated `UI_DpadNavigationController` to prioritize Unity's built-in `Selectable` navigation graph (`FindSelectableOnUp/Down/Left/Right`) before fallback spatial sorting, fixing parent-group traversal where up/down previously preferred only top or bottom entries.
+  - Added submit-hold gating (`_submitHeld`) with Input System `canceled` reset handling so a held submit input is accepted once per press/release cycle instead of repeated performed callbacks.
+  - Expanded EditMode tests with nested-parent explicit navigation coverage to verify vertical traversal now moves through expected child buttons within grouped layouts.
+
+T17.6 - Next run: add PlayMode/input-driven coverage that reproduces long-press submit behavior from actual Input System bindings (button press/hold/release) and validate +/- controls only step by 1 on device builds.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
 - [ ] Tests Passed
 - [ ] Documentation Written
-
 
 T16.1 - The in-app menu is not shown inside the app, but that might require to write a webviewer or if it is aleady written it is a bug that needs to be fixed.
 Currently on app start, the app is opening the settings menu, which gives a black screen now and requires the user to press the back button. The app should not open the settings menu on app start. The required behavior is for the app to start running normally and only show the settings menu when the user opens it.
