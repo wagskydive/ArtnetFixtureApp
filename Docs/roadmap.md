@@ -141,6 +141,7 @@ _Progress note: universe/start channel persistence now survives consecutive app 
 _Progress note: PlayerPrefs persistence now routes through a centralized `SaveLoadSettings` helper used by DMX UI, fixture mode/count, and WebUI settings stores for cleaner debugging and consistency._
 _Progress note: DMX universe/start-channel startup hydration now runs in `Awake` with guarded shutdown saves so early lifecycle events cannot overwrite persisted PlayerPrefs before load; LocalWebUiServer settings API tests now cover POST+GET rehydration of saved values._
 _Progress note: LAN WebUI availability is now decoupled from in-app menu visibility by keeping the `HtmlUI` host active when the menu is hidden, so `LocalWebUiServer` remains reachable even outside menu view._
+_Progress note: settings menu startup behavior is now configurable in `UI_SettingsPanelToggle` and defaults to hidden on boot, preventing unwanted initial black-screen menu overlays until the user explicitly opens settings._
 
 ### Goal:
 Enable persistent configuration and easy deployment.

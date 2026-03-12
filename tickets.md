@@ -3,6 +3,15 @@
 
 T16.1 - The in-app menu is not shown inside the app, but that might require to write a webviewer or if it is aleady written it is a bug that needs to be fixed.
 Currently on app start, the app is opening the settings menu, which gives a black screen now and requires the user to press the back button. The app should not open the settings menu on app start. The required behavior is for the app to start running normally and only show the settings menu when the user opens it.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - Added explicit startup visibility control in `UI_SettingsPanelToggle` via `showMenuOnStart` (default false), so startup now keeps the settings menu hidden unless intentionally enabled.
+  - Added EditMode coverage for startup menu visibility behavior (`showMenuOnStart` true/false) to prevent regressions where the app boots into the menu.
+
+T16.2 - Next run: verify in Android runtime that `InAppWebViewSurface` focus/input works reliably after first menu open and close cycle, and add PlayMode coverage for startup hidden-state behavior.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
