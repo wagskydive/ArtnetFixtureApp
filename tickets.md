@@ -95,6 +95,12 @@ T16.8 - make the webview settings work on the android device within the app. Cur
   - Updated `Assets/StreamingAssets/index.html` to resolve API requests through `buildApiUrl(...)`, honoring `apiBase` when present while preserving relative-path behavior for browser/LAN access.
   - Updated EditMode URL expectation coverage for the StreamingAssets mode so regressions in `apiBase` URL composition are caught.
 
+T16.9 - the solution in tiocket 16.8 didn't solve the problem. The app still tries to opene a jar:file:/// url and the webui doesn't load over LAN. Try a new approach to load the webui. We can also use a Resource folder to load the html file instead of using StreamingAssets and not need to point to a jar:file:/// url at all. Find out why it doesn't work and fix it
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
 
 T15.1 - Refactor the code so that we have a SaveLoadSettings.cs class that handles all the saving and loading of the playerprefs. Any class that needs to handle saving ofr loding of playerprefs needs to use this class. This makes for cleaner code and makes it easier to debug.
 - [x] Started
