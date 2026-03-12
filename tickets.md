@@ -32,13 +32,47 @@ T17.3 - The legacy input path is not needed at all anymore. Currently the UI_Dpa
   - Added same-frame submit de-duplication to prevent repeated button activation from overlapping submit triggers.
   - Expanded EditMode tests to cover auto-discovery navigation behavior and submit de-duplication.
 
-T17.4 - Next run: wire `UI_DpadNavigationController` to detect runtime layout changes (menu open/close, dynamic button visibility) without needing manual refresh, and add tests for directional ties in grid-like layouts.
+T17.4 - Make the unity Ui update when the webui changes a setting. This can be done by making the SaveLoadSetting script fire an event when settings are saved and the webui updates using a callback
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+
+T17.5 - Make the Webui Name field react only after it is completely typed. Currently it doesn't make typeig a name easy because the player pref gets saved to quickly.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+  
+T17.6 - Add Fixture name and IP address in the Unity UI
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
 - [ ] Tests Passed
 - [ ] Documentation Written
 
+T17.7 - Make the webui mobile friendly. The scaling is not good on telephone
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T17.8 - Make the password function working
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T17.9 - Redesign the Unity UI to look more professional
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
 
 T16.1 - The in-app menu is not shown inside the app, but that might require to write a webviewer or if it is aleady written it is a bug that needs to be fixed.
 Currently on app start, the app is opening the settings menu, which gives a black screen now and requires the user to press the back button. The app should not open the settings menu on app start. The required behavior is for the app to start running normally and only show the settings menu when the user opens it.

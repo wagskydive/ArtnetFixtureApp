@@ -64,6 +64,7 @@ public class UI_DmxSettings : MonoBehaviour
     {
         LoadPreferences();
         ApplySettingsToReceiver();
+        SaveLoadSettings.OnSettingsSaved += LoadSettingsAndUpdateDisplay;
     }
 
     private void OnDisable()
@@ -134,7 +135,17 @@ public class UI_DmxSettings : MonoBehaviour
         SaveLoadSettings.Save();
     }
 
+    void LoadSettingsAndUpdateDisplay()
+    {
+        LoadPreferences(false);
+    }
+
     public void LoadPreferences()
+    {
+        LoadPreferences(true);
+    }
+
+    public void LoadPreferences(bool apply)
     {
         isLoadingPreferences = true;
         CurrentDmxChannel = SaveLoadSettings.LoadInt(SaveLoadSettings.DmxChannelKey, CurrentDmxChannel);
@@ -142,7 +153,11 @@ public class UI_DmxSettings : MonoBehaviour
         CurrentPatternType = SaveLoadSettings.LoadInt(SaveLoadSettings.DmxPatternKey, CurrentPatternType);
         isLoadingPreferences = false;
         hasLoadedPreferences = true;
-        ApplySettingsToReceiver();
+        if(apply)
+        {
+            ApplySettingsToReceiver();
+        }
+        
     }
 
     private void ApplySettingsToReceiver()

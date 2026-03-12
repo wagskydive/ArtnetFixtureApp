@@ -61,6 +61,7 @@ public class UI_FixtureModeSelector : MonoBehaviour
         
         ApplyPixelGridSettings();
         SyncUiState();
+        SaveLoadSettings.OnSettingsSaved += UpdateDisplayOnSettingsSave;
         dmxModeManager.ApplyModeMaterials();
     }
 
@@ -132,6 +133,12 @@ public class UI_FixtureModeSelector : MonoBehaviour
         SaveLoadSettings.SaveInt(SaveLoadSettings.PixelRowsKey, currentPixelRows);
         SaveLoadSettings.SaveInt(SaveLoadSettings.PixelColumnsKey, currentPixelColumns);
         SaveLoadSettings.Save();
+    }
+
+    public void UpdateDisplayOnSettingsSave()
+    {
+        LoadPreferences();
+        SyncUiState();
     }
 
     public void LoadPreferences()

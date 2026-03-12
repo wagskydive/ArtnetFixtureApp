@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 
 public static class SaveLoadSettings
 {
@@ -10,6 +11,8 @@ public static class SaveLoadSettings
     public const string PixelRowsKey = "dmx.pixel.rows";
     public const string PixelColumnsKey = "dmx.pixel.columns";
     public const string WebUiDeviceNameKey = "webui.device.name";
+
+    public static event Action OnSettingsSaved;
 
     public static int LoadInt(string key, int defaultValue)
     {
@@ -34,5 +37,6 @@ public static class SaveLoadSettings
     public static void Save()
     {
         PlayerPrefs.Save();
+        OnSettingsSaved?.Invoke();
     }
 }
