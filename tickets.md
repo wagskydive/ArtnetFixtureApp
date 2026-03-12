@@ -43,7 +43,7 @@ T17.4 - Next run: wire `UI_DpadNavigationController` to detect runtime layout ch
   - Added submit-value gating on the Input System callback to ignore non-pressed submit phases and keep plus/minus actions single-step per press.
   - Expanded EditMode tests with tie-breaking coverage and runtime-visibility-change coverage for discovered selectables.
 
-T17.5 - Next run: add an EditMode regression test that reproduces the exact vertical-layout increment/decrement button hierarchy from MainScene (including hidden/inactive transitions during menu open-close) and verify each press changes value by exactly ±1 for all DMX setting controls.
+T17.5 - The problem described in ticket 17.4 still persists. Currently the navigation breaks when a button is inside a parent object. The current behavior only selects the upper ui button inside a parent object when pressing the down key untill the lowest ui button on screen is reached. Then when the up key is pressed it selects only the lowest ui button inside each parent object. Also the submit button still increments or decrements by 2 instead of 1. So either there is still a double key press registered or there is another bug. Find it and fix it.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
