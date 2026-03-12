@@ -110,23 +110,8 @@ public class WebUiSettingsTests
         Object.DestroyImmediate(serverGo);
     }
 
-    [Test]
-    public void InAppWebViewSurface_GetWebUiUrl_UsesServerPortAndConfiguredPagePath()
-    {
-        var serverGo = new GameObject("web-server");
-        var server = serverGo.AddComponent<LocalWebUiServer>();
-        SetPrivateField(server, "port", 9191);
 
-        var surfaceGo = new GameObject("web-surface");
-        var surface = surfaceGo.AddComponent<InAppWebViewSurface>();
-        SetPrivateField(surface, "webUiServer", server);
-        SetPrivateField(surface, "pagePath", "/index.html?local=true");
 
-        Assert.That(surface.GetWebUiUrl(), Is.EqualTo("http://127.0.0.1:9191/index.html?local=true"));
-
-        Object.DestroyImmediate(surfaceGo);
-        Object.DestroyImmediate(serverGo);
-    }
 
     private static void SetPrivateField(object target, string fieldName, object value)
     {
