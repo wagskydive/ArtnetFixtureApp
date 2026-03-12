@@ -10,6 +10,16 @@ T17.1 - Rework the ui idea. abandon the webview approach. The webui will only be
   - Updated `webui.html` with periodic `/api/settings` refresh to keep external browser views synchronized with live PlayerPrefs changes coming from Unity UI or other clients.
 
 T17.2 - Implement the new Unity Input System. The old input system was used before in UI_DpadNavigationController, but it needs the system needs to work with the new Unity Input System. So the navigation works with a TV-remote, but also with other input methods. Find out how and fix it.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Migrated `UI_DpadNavigationController` to Unity Input System actions (`navigateAction` + `submitAction`) while preserving fallback support for keyboard/gamepad/legacy input paths.
+  - Added directional-input handling that prioritizes vertical navigation and optionally allows horizontal traversal when `horizontalWrap` is enabled, so TV remote D-pad, keyboard, and gamepad flows behave consistently.
+  - Expanded EditMode tests with explicit coverage for vector-based navigation behavior (vertical movement, horizontal ignored without wrap, horizontal movement with wrap).
+
+T17.3 - Next run: wire `navigateAction` and `submitAction` references in scene/prefabs and validate D-pad behavior on Android TV hardware with Unity Input System-only player settings.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
