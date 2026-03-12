@@ -7044,7 +7044,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1756910866}
   - component: {fileID: 1756910865}
-  - component: {fileID: 1756910867}
   - component: {fileID: 1756910868}
   - component: {fileID: 1756910869}
   - component: {fileID: 1756910870}
@@ -7092,23 +7091,6 @@ Transform:
   - {fileID: 990941374}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1756910867
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1756910864}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: adf3f975ec8346d387f5f8e84049a9db, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArtnetFixture.Core::UI_SettingsPanelToggle
-  targetObject: {fileID: 1361578280}
-  keepTargetObjectActiveWhenHidden: 0
-  showMenuAction: {fileID: 0}
-  hideMenuAction: {fileID: 0}
-  inAppWebViewSurface: {fileID: 0}
 --- !u!114 &1756910868
 MonoBehaviour:
   m_ObjectHideFlags: 0

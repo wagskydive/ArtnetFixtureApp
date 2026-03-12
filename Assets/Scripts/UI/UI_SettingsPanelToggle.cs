@@ -8,6 +8,12 @@ public class UI_SettingsPanelToggle : MonoBehaviour
     [SerializeField] private InputActionReference showMenuAction;
     [SerializeField] private InputActionReference hideMenuAction;
     [SerializeField] private InAppWebViewSurface inAppWebViewSurface;
+
+    private void Start()
+    {
+        SetVisibility(false);
+    }
+
     private void OnEnable()
     {
         EnableAction(showMenuAction, OnShowMenu);

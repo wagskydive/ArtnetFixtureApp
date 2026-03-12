@@ -1,6 +1,41 @@
 # Tickets
 
 
+T16.1 - The in-app menu is not shown inside the app, but that might require to write a webviewer or if it is aleady written it is a bug that needs to be fixed.
+Currently on app start, the app is opening the settings menu, which gives a black screen now and requires the user to press the back button. The app should not open the settings menu on app start. The required behavior is for the app to start running normally and only show the settings menu when the user opens it.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - Added explicit startup visibility control in `UI_SettingsPanelToggle` via `showMenuOnStart` (default false), so startup now keeps the settings menu hidden unless intentionally enabled.
+  - Added EditMode coverage for startup menu visibility behavior (`showMenuOnStart` true/false) to prevent regressions where the app boots into the menu.
+
+T16.2 - Create a webviewer that can show the webui on android inside the app. It should be able to be an overlay with transparency and have an option to be resized in the editor so it is not only a fullscreen overlay
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - Extended `InAppWebViewSurface` with configurable transparent overlay behavior and normalized overlay position/size controls so Android WebView can be shown as a non-fullscreen overlay.
+  - Added Android layout parameter generation that maps inspector overlay values into pixel margins/sizes at runtime, while preserving Editor URL-preview workflow.
+
+T16.3 - Make sure that the settings menu is never shown on startup. Remove the option to show it at startup. It will only be shown when the user wants to see it and never defaults to be shown at startup.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - Removed startup configurability from `UI_SettingsPanelToggle`; startup now always forces settings menu hidden.
+  - Updated EditMode tests to cover the new fixed startup-hidden behavior and removed obsolete configurable-startup expectations.
+
+T16.4 - Next run: add focused EditMode coverage for `InAppWebViewSurface` overlay clamping/layout calculations and validate transparency behavior on an Android device build.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 T15.1 - Refactor the code so that we have a SaveLoadSettings.cs class that handles all the saving and loading of the playerprefs. Any class that needs to handle saving ofr loding of playerprefs needs to use this class. This makes for cleaner code and makes it easier to debug.
 - [x] Started
 - [x] Behavior Written
@@ -17,6 +52,8 @@ T15.2 - Next run: add EditMode unit tests for SaveLoadSettings integration acros
 - [ ] Code Written
 - [ ] Tests Passed
 - [ ] Documentation Written
+
+
 
 T14.1 - Rework the ui system. The new ui system will be an html page. This page will be accessable as a settings menu in the app and also we be on a webserver that the app exposes on the local network. The new input system in unity will be used to navigate through the menu. The menu gets shows when the user presses the OK button and can be hidden again using the back button. The first version of the html page is in Assets/WebUI/webui.html. the settings need to be retreived from the player prefs and saved to player prefs again.
 - [x] Started
@@ -180,12 +217,7 @@ T99.7 - Find and fix a bug where the settings menu webui over LAN on the android
   - Enabled this mode for the `HtmlUI` toggle in `MainScene` so closing the in-app menu no longer disables the `LocalWebUiServer` GameObject; LAN `/index.html` and `/api/settings` stay reachable while the app is out of menu view.
   - Added EditMode coverage for hide behavior to verify default hide semantics still work and the new keep-active mode preserves GameObject activation.
 
-T99.8 - Next run: validate T99.7 behavior on Android/HY300 (menu hidden vs shown) and capture LAN browser + in-app WebView evidence.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+
 
 T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode
 - [x] Started
