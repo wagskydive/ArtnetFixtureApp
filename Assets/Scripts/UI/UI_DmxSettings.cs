@@ -13,6 +13,9 @@ public class UI_DmxSettings : MonoBehaviour
 
     private int currentDmxChannel = 1;
     private int currentDmxUniverse = 1;
+    private bool hasLoadedPreferences;
+    private bool isLoadingPreferences;
+    private bool isApplicationQuitting;
 
     public IShaderGlobalIntSetter ShaderGlobalIntSetter { get; set; } = new UnityShaderGlobalIntSetter();
 
@@ -57,7 +60,7 @@ public class UI_DmxSettings : MonoBehaviour
         }
     }
 
-    private void Start()
+    private void Awake()
     {
         LoadPreferences();
         ApplySettingsToReceiver();
@@ -65,6 +68,11 @@ public class UI_DmxSettings : MonoBehaviour
 
     private void OnDisable()
     {
+        if (!hasLoadedPreferences || isApplicationQuitting)
+        {
+            return;
+        }
+
         SavePreferences();
     }
 
@@ -74,6 +82,11 @@ public class UI_DmxSettings : MonoBehaviour
         {
             SavePreferences();
         }
+    }
+
+    private void OnApplicationQuit()
+    {
+        isApplicationQuitting = true;
     }
 
     public void IncreaseChannel()
@@ -109,6 +122,11 @@ public class UI_DmxSettings : MonoBehaviour
 
     public void SavePreferences()
     {
+        if (isLoadingPreferences)
+        {
+            return;
+        }
+
         SyncValuesFromReceiver();
         SaveLoadSettings.SaveInt(SaveLoadSettings.DmxChannelKey, CurrentDmxChannel);
         SaveLoadSettings.SaveInt(SaveLoadSettings.DmxUniverseKey, CurrentDmxUniverse);
@@ -118,9 +136,12 @@ public class UI_DmxSettings : MonoBehaviour
 
     public void LoadPreferences()
     {
+        isLoadingPreferences = true;
         CurrentDmxChannel = SaveLoadSettings.LoadInt(SaveLoadSettings.DmxChannelKey, CurrentDmxChannel);
         CurrentDmxUniverse = SaveLoadSettings.LoadInt(SaveLoadSettings.DmxUniverseKey, CurrentDmxUniverse);
         CurrentPatternType = SaveLoadSettings.LoadInt(SaveLoadSettings.DmxPatternKey, CurrentPatternType);
+        isLoadingPreferences = false;
+        hasLoadedPreferences = true;
         ApplySettingsToReceiver();
     }
 

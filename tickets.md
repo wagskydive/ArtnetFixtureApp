@@ -162,6 +162,15 @@ T99.5 - Make the Fixture amount a saved user pref, so that when the fixture amou
 
 
 T99.6 -Fix the bug where the playerprefs are not correctly loaded when the app restarts. Currently when i run the app in the Unity Editor, the universe number always defaults to the number 2. Check if the app startup works correct and overrule playerprefs over any other input on startup and make sure that the webui also gets populated from the playerprefs and not somehow has some bug where it loads in reverse. Also verify that the settings are properly saved when they are changed in the webui. Refactor the code if that helps to find and fix the bug. Document all the steps that you take under this ticket.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Moved DMX settings preference hydration to `Awake` and added startup/save guards so shutdown/disable writes cannot overwrite already-persisted universe/channel values before load completes.
+  - Added regression coverage for LocalWebUiServer `/api/settings` POST+GET flow to confirm WebUI writes persist to PlayerPrefs and GET rehydrates the same universe/start-channel values.
+
+T99.7 - Next run: execute Unity EditMode suite on a licensed runner to validate T99.6 startup-load ordering and WebUI settings API persistence behavior end-to-end.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
