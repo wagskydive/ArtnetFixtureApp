@@ -32,7 +32,7 @@ T17.3 - The legacy input path is not needed at all anymore. Currently the UI_Dpa
   - Added same-frame submit de-duplication to prevent repeated button activation from overlapping submit triggers.
   - Expanded EditMode tests to cover auto-discovery navigation behavior and submit de-duplication.
 
-T17.4 - Next run: wire `UI_DpadNavigationController` to detect runtime layout changes (menu open/close, dynamic button visibility) without needing manual refresh, and add tests for directional ties in grid-like layouts.
+T17.4 - Next run: wire `UI_DpadNavigationController` to detect runtime layout changes (menu open/close, dynamic button visibility) without needing manual refresh, and add tests for directional ties in grid-like layouts. Also check why the button navigation is not working properly. Currently there are some buttons that are in a vertical layout group but the up and down navigation skips some buttons. These buttons are increment and decrement buttons for setting values and they also increment and decrement by more than 1. They should be all selectable and the submit button should only fire once and increment or decrement the value by 1.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
