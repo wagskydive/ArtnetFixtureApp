@@ -22,6 +22,17 @@ T17.2 - Implement the new Unity Input System. The old input system was used befo
 
 
 T17.3 - The legacy input path is not needed at all anymore. Currently the UI_DpadNavigationController still needs the Selectables[] to function, however it should work without those. The buttons need to be selectable through the new input system purely based on their position on screen. Currently there is also a bug when a button is pressed it gets pressed 3 times instead of once.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - Removed all legacy/keyboard polling paths from `UI_DpadNavigationController` so menu navigation now runs only from Input System action callbacks.
+  - Added automatic selectable discovery when no inspector list is configured, sorting by on-screen position and navigating to nearest candidate in the requested direction.
+  - Added same-frame submit de-duplication to prevent repeated button activation from overlapping submit triggers.
+  - Expanded EditMode tests to cover auto-discovery navigation behavior and submit de-duplication.
+
+T17.4 - Next run: wire `UI_DpadNavigationController` to detect runtime layout changes (menu open/close, dynamic button visibility) without needing manual refresh, and add tests for directional ties in grid-like layouts.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
@@ -1025,6 +1036,5 @@ T9.8 - Document Pixel Mapping setup, DMX addressing scheme, and operational limi
 - [ ] Code Written
 - [ ] Tests Passed
 - [ ] Documentation Written
-
 
 

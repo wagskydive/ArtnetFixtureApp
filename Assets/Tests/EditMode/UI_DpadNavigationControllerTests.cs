@@ -9,18 +9,11 @@ public class UI_DpadNavigationControllerTests
     [Test]
     public void Move_WrapsSelectionAcrossConfiguredItems()
     {
-        var eventSystemGo = new GameObject("event-system");
-        eventSystemGo.AddComponent<EventSystem>();
-        eventSystemGo.AddComponent<StandaloneInputModule>();
-
-        var root = new GameObject("root");
-        var buttonA = CreateButton("a");
-        var buttonB = CreateButton("b");
-        var buttonC = CreateButton("c");
-
-        buttonA.transform.SetParent(root.transform);
-        buttonB.transform.SetParent(root.transform);
-        buttonC.transform.SetParent(root.transform);
+        var eventSystemGo = CreateEventSystem();
+        var root = CreateRootWithCanvas();
+        var buttonA = CreateButton("a", root.transform, new Vector2(0f, 100f));
+        var buttonB = CreateButton("b", root.transform, new Vector2(0f, 0f));
+        var buttonC = CreateButton("c", root.transform, new Vector2(0f, -100f));
 
         var controller = root.AddComponent<UI_DpadNavigationController>();
         SetPrivateArray(controller, buttonA, buttonB, buttonC);
@@ -37,17 +30,11 @@ public class UI_DpadNavigationControllerTests
     [Test]
     public void OnEnable_SelectsFirstInteractableItem_WhenArrayStartsWithNullOrDisabled()
     {
-        var eventSystemGo = new GameObject("event-system");
-        eventSystemGo.AddComponent<EventSystem>();
-        eventSystemGo.AddComponent<StandaloneInputModule>();
-
-        var root = new GameObject("root");
-        var disabledButton = CreateButton("disabled");
+        var eventSystemGo = CreateEventSystem();
+        var root = CreateRootWithCanvas();
+        var disabledButton = CreateButton("disabled", root.transform, new Vector2(0f, 100f));
         disabledButton.interactable = false;
-        var validButton = CreateButton("valid");
-
-        disabledButton.transform.SetParent(root.transform);
-        validButton.transform.SetParent(root.transform);
+        var validButton = CreateButton("valid", root.transform, new Vector2(0f, 0f));
 
         var controller = root.AddComponent<UI_DpadNavigationController>();
         SetPrivateArray(controller, null, disabledButton, validButton);
@@ -61,23 +48,19 @@ public class UI_DpadNavigationControllerTests
     }
 
     [Test]
-    public void SubmitCurrentSelection_InvokesUI_DpadSelectableSubmitEvent()
+    public void SubmitCurrentSelection_InvokesUI_DpadSelectableSubmitEvent_OncePerFrame()
     {
-        var eventSystemGo = new GameObject("event-system");
-        eventSystemGo.AddComponent<EventSystem>();
-        eventSystemGo.AddComponent<StandaloneInputModule>();
-
-        var root = new GameObject("root");
-        var submitGo = new GameObject("submit-item");
-        submitGo.AddComponent<RectTransform>();
-        var submitSelectable = submitGo.AddComponent<UI_DpadSelectable>();
+        var eventSystemGo = CreateEventSystem();
+        var root = CreateRootWithCanvas();
+        var submitGo = new GameObject("submit-item", typeof(RectTransform));
         submitGo.transform.SetParent(root.transform);
+        var submitSelectable = submitGo.AddComponent<UI_DpadSelectable>();
 
-        bool invoked = false;
+        int invokeCount = 0;
         var eventField = typeof(UI_DpadSelectable)
             .GetField("onSubmit", BindingFlags.NonPublic | BindingFlags.Instance);
         var submitEvent = new UnityEngine.Events.UnityEvent();
-        submitEvent.AddListener(() => invoked = true);
+        submitEvent.AddListener(() => invokeCount++);
         eventField.SetValue(submitSelectable, submitEvent);
 
         var controller = root.AddComponent<UI_DpadNavigationController>();
@@ -85,34 +68,33 @@ public class UI_DpadNavigationControllerTests
 
         root.SendMessage("OnEnable");
         controller.SubmitCurrentSelection();
+        controller.SubmitCurrentSelection();
 
-        Assert.That(invoked, Is.True);
+        Assert.That(invokeCount, Is.EqualTo(1));
 
         Object.DestroyImmediate(root);
         Object.DestroyImmediate(eventSystemGo);
     }
 
     [Test]
-    public void HandleNavigationInput_UsesVerticalAxisByDefault()
+    public void HandleNavigationInput_DiscoversSelectablesByScreenPosition_WhenArrayNotConfigured()
     {
-        var eventSystemGo = new GameObject("event-system");
-        eventSystemGo.AddComponent<EventSystem>();
-        eventSystemGo.AddComponent<StandaloneInputModule>();
-
-        var root = new GameObject("root");
-        var buttonA = CreateButton("a");
-        var buttonB = CreateButton("b");
-
-        buttonA.transform.SetParent(root.transform);
-        buttonB.transform.SetParent(root.transform);
+        var eventSystemGo = CreateEventSystem();
+        var root = CreateRootWithCanvas();
+        var top = CreateButton("top", root.transform, new Vector2(0f, 150f));
+        var middle = CreateButton("middle", root.transform, new Vector2(0f, 0f));
+        var bottom = CreateButton("bottom", root.transform, new Vector2(0f, -150f));
 
         var controller = root.AddComponent<UI_DpadNavigationController>();
-        SetPrivateArray(controller, buttonA, buttonB);
 
         root.SendMessage("OnEnable");
-        controller.HandleNavigationInput(Vector2.down);
+        Assert.That(EventSystem.current.currentSelectedGameObject, Is.EqualTo(top.gameObject));
 
-        Assert.That(EventSystem.current.currentSelectedGameObject, Is.EqualTo(buttonB.gameObject));
+        controller.HandleNavigationInput(Vector2.down);
+        Assert.That(EventSystem.current.currentSelectedGameObject, Is.EqualTo(middle.gameObject));
+
+        controller.HandleNavigationInput(Vector2.down);
+        Assert.That(EventSystem.current.currentSelectedGameObject, Is.EqualTo(bottom.gameObject));
 
         Object.DestroyImmediate(root);
         Object.DestroyImmediate(eventSystemGo);
@@ -121,19 +103,12 @@ public class UI_DpadNavigationControllerTests
     [Test]
     public void HandleNavigationInput_IgnoresHorizontalWhenWrapDisabled()
     {
-        var eventSystemGo = new GameObject("event-system");
-        eventSystemGo.AddComponent<EventSystem>();
-        eventSystemGo.AddComponent<StandaloneInputModule>();
-
-        var root = new GameObject("root");
-        var buttonA = CreateButton("a");
-        var buttonB = CreateButton("b");
-
-        buttonA.transform.SetParent(root.transform);
-        buttonB.transform.SetParent(root.transform);
+        var eventSystemGo = CreateEventSystem();
+        var root = CreateRootWithCanvas();
+        var buttonA = CreateButton("a", root.transform, new Vector2(0f, 0f));
+        CreateButton("b", root.transform, new Vector2(100f, 0f));
 
         var controller = root.AddComponent<UI_DpadNavigationController>();
-        SetPrivateArray(controller, buttonA, buttonB);
 
         root.SendMessage("OnEnable");
         controller.HandleNavigationInput(Vector2.right);
@@ -147,22 +122,16 @@ public class UI_DpadNavigationControllerTests
     [Test]
     public void HandleNavigationInput_UsesHorizontalWhenWrapEnabled()
     {
-        var eventSystemGo = new GameObject("event-system");
-        eventSystemGo.AddComponent<EventSystem>();
-        eventSystemGo.AddComponent<StandaloneInputModule>();
-
-        var root = new GameObject("root");
-        var buttonA = CreateButton("a");
-        var buttonB = CreateButton("b");
-
-        buttonA.transform.SetParent(root.transform);
-        buttonB.transform.SetParent(root.transform);
+        var eventSystemGo = CreateEventSystem();
+        var root = CreateRootWithCanvas();
+        var buttonA = CreateButton("a", root.transform, new Vector2(0f, 0f));
+        var buttonB = CreateButton("b", root.transform, new Vector2(100f, 0f));
 
         var controller = root.AddComponent<UI_DpadNavigationController>();
-        SetPrivateArray(controller, buttonA, buttonB);
         SetPrivateField(controller, "horizontalWrap", true);
 
         root.SendMessage("OnEnable");
+        EventSystem.current.SetSelectedGameObject(buttonA.gameObject);
         controller.HandleNavigationInput(Vector2.right);
 
         Assert.That(EventSystem.current.currentSelectedGameObject, Is.EqualTo(buttonB.gameObject));
@@ -171,10 +140,28 @@ public class UI_DpadNavigationControllerTests
         Object.DestroyImmediate(eventSystemGo);
     }
 
-    private static Button CreateButton(string name)
+    private static GameObject CreateEventSystem()
     {
-        var go = new GameObject(name);
-        go.AddComponent<RectTransform>();
+        var eventSystemGo = new GameObject("event-system");
+        eventSystemGo.AddComponent<EventSystem>();
+        eventSystemGo.AddComponent<StandaloneInputModule>();
+        return eventSystemGo;
+    }
+
+    private static GameObject CreateRootWithCanvas()
+    {
+        var root = new GameObject("root", typeof(RectTransform), typeof(Canvas));
+        root.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
+        return root;
+    }
+
+    private static Button CreateButton(string name, Transform parent, Vector2 position)
+    {
+        var go = new GameObject(name, typeof(RectTransform));
+        go.transform.SetParent(parent);
+        var rect = go.GetComponent<RectTransform>();
+        rect.anchoredPosition = position;
+        rect.localPosition = new Vector3(position.x, position.y, 0f);
         return go.AddComponent<Button>();
     }
 

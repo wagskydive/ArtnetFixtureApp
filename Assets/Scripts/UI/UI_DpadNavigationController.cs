@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -10,11 +11,13 @@ public class UI_DpadNavigationController : MonoBehaviour
     [SerializeField] private InputActionReference navigateAction;
     [SerializeField] private InputActionReference submitAction;
 
+    private readonly List<Selectable> _runtimeSelectables = new List<Selectable>();
     private int _currentIndex;
+    private int _lastSubmitFrame = -1;
 
     private void OnEnable()
     {
-        ConfigureNavigation();
+        RebuildSelectables();
         SelectFirstValid();
         EnableAction(navigateAction, OnNavigate);
         EnableAction(submitAction, OnSubmit);
@@ -26,25 +29,6 @@ public class UI_DpadNavigationController : MonoBehaviour
         DisableAction(submitAction, OnSubmit);
     }
 
-    private void Update()
-    {
-        if (orderedSelectables == null || orderedSelectables.Length == 0)
-        {
-            return;
-        }
-
-        if (WasFallbackSubmitPressed())
-        {
-            SubmitCurrentSelection();
-        }
-
-        Vector2 fallbackNavigation = ReadFallbackNavigation();
-        if (fallbackNavigation != Vector2.zero)
-        {
-            HandleNavigationInput(fallbackNavigation);
-        }
-    }
-
     public void HandleNavigationInput(Vector2 navigationInput)
     {
         if (navigationInput == Vector2.zero)
@@ -52,31 +36,35 @@ public class UI_DpadNavigationController : MonoBehaviour
             return;
         }
 
-        float horizontalMagnitude = Mathf.Abs(navigationInput.x);
-        float verticalMagnitude = Mathf.Abs(navigationInput.y);
-
-        if (verticalMagnitude >= horizontalMagnitude)
-        {
-            Move(navigationInput.y > 0f ? -1 : 1);
-            return;
-        }
-
-        if (!horizontalWrap)
-        {
-            return;
-        }
-
-        Move(navigationInput.x > 0f ? 1 : -1);
-    }
-
-    public void Move(int delta)
-    {
+        RebuildSelectables();
         if (!HasSelectables())
         {
             return;
         }
 
-        int count = orderedSelectables.Length;
+        int currentIndex = GetCurrentIndex();
+        if (!IsSelectable(currentIndex))
+        {
+            SelectFirstValid();
+            currentIndex = _currentIndex;
+        }
+
+        int targetIndex = FindNearestIndexInDirection(currentIndex, navigationInput);
+        if (targetIndex >= 0)
+        {
+            SelectIndex(targetIndex);
+        }
+    }
+
+    public void Move(int delta)
+    {
+        RebuildSelectables();
+        if (!HasSelectables())
+        {
+            return;
+        }
+
+        int count = _runtimeSelectables.Count;
         for (int attempts = 0; attempts < count; attempts++)
         {
             _currentIndex = (_currentIndex + delta + count) % count;
@@ -90,12 +78,20 @@ public class UI_DpadNavigationController : MonoBehaviour
 
     public void SubmitCurrentSelection()
     {
-        if (!HasSelectables() || !IsSelectable(_currentIndex) || EventSystem.current == null)
+        if (_lastSubmitFrame == Time.frameCount)
         {
             return;
         }
 
-        Selectable selected = orderedSelectables[_currentIndex];
+        RebuildSelectables();
+        int selectedIndex = GetCurrentIndex();
+        if (!HasSelectables() || !IsSelectable(selectedIndex) || EventSystem.current == null)
+        {
+            return;
+        }
+
+        _lastSubmitFrame = Time.frameCount;
+        Selectable selected = _runtimeSelectables[selectedIndex];
         var submitData = new BaseEventData(EventSystem.current);
         ExecuteEvents.Execute<ISubmitHandler>(selected.gameObject, submitData, ExecuteEvents.submitHandler);
     }
@@ -108,38 +104,10 @@ public class UI_DpadNavigationController : MonoBehaviour
         }
 
         _currentIndex = index;
-        orderedSelectables[index].Select();
+        _runtimeSelectables[index].Select();
         if (EventSystem.current != null)
         {
-            EventSystem.current.SetSelectedGameObject(orderedSelectables[index].gameObject);
-        }
-    }
-
-    private void ConfigureNavigation()
-    {
-        if (!HasSelectables())
-        {
-            return;
-        }
-
-        for (int i = 0; i < orderedSelectables.Length; i++)
-        {
-            Selectable current = orderedSelectables[i];
-            if (current == null)
-            {
-                continue;
-            }
-
-            Navigation navigation = current.navigation;
-            navigation.mode = Navigation.Mode.Explicit;
-            navigation.selectOnUp = orderedSelectables[(i - 1 + orderedSelectables.Length) % orderedSelectables.Length];
-            navigation.selectOnDown = orderedSelectables[(i + 1) % orderedSelectables.Length];
-            if (horizontalWrap)
-            {
-                navigation.selectOnLeft = navigation.selectOnUp;
-                navigation.selectOnRight = navigation.selectOnDown;
-            }
-            current.navigation = navigation;
+            EventSystem.current.SetSelectedGameObject(_runtimeSelectables[index].gameObject);
         }
     }
 
@@ -150,7 +118,7 @@ public class UI_DpadNavigationController : MonoBehaviour
             return;
         }
 
-        for (int i = 0; i < orderedSelectables.Length; i++)
+        for (int i = 0; i < _runtimeSelectables.Count; i++)
         {
             if (!IsSelectable(i))
             {
@@ -162,15 +130,169 @@ public class UI_DpadNavigationController : MonoBehaviour
         }
     }
 
+    private void RebuildSelectables()
+    {
+        _runtimeSelectables.Clear();
+
+        if (orderedSelectables != null && orderedSelectables.Length > 0)
+        {
+            for (int i = 0; i < orderedSelectables.Length; i++)
+            {
+                if (orderedSelectables[i] != null)
+                {
+                    _runtimeSelectables.Add(orderedSelectables[i]);
+                }
+            }
+
+            return;
+        }
+
+        Selectable[] discovered = GetComponentsInChildren<Selectable>(false);
+        for (int i = 0; i < discovered.Length; i++)
+        {
+            if (discovered[i] != null)
+            {
+                _runtimeSelectables.Add(discovered[i]);
+            }
+        }
+
+        _runtimeSelectables.Sort(CompareByScreenPosition);
+    }
+
+    private int CompareByScreenPosition(Selectable left, Selectable right)
+    {
+        Vector2 leftPosition = GetScreenPosition(left);
+        Vector2 rightPosition = GetScreenPosition(right);
+
+        const float epsilon = 1f;
+        if (Mathf.Abs(leftPosition.y - rightPosition.y) > epsilon)
+        {
+            return rightPosition.y.CompareTo(leftPosition.y);
+        }
+
+        return leftPosition.x.CompareTo(rightPosition.x);
+    }
+
+    private int FindNearestIndexInDirection(int originIndex, Vector2 navigationInput)
+    {
+        float horizontalMagnitude = Mathf.Abs(navigationInput.x);
+        float verticalMagnitude = Mathf.Abs(navigationInput.y);
+        bool useVertical = verticalMagnitude >= horizontalMagnitude;
+        Vector2 axisDirection = useVertical
+            ? new Vector2(0f, navigationInput.y > 0f ? 1f : -1f)
+            : new Vector2(navigationInput.x > 0f ? 1f : -1f, 0f);
+
+        if (!useVertical && !horizontalWrap)
+        {
+            return -1;
+        }
+
+        Vector2 origin = GetScreenPosition(_runtimeSelectables[originIndex]);
+        int bestIndex = -1;
+        float bestScore = float.MaxValue;
+
+        for (int i = 0; i < _runtimeSelectables.Count; i++)
+        {
+            if (i == originIndex || !IsSelectable(i))
+            {
+                continue;
+            }
+
+            Vector2 candidatePosition = GetScreenPosition(_runtimeSelectables[i]);
+            Vector2 delta = candidatePosition - origin;
+            float axisDelta = useVertical ? delta.y : delta.x;
+            if ((axisDirection.y > 0f && axisDelta <= 0f) ||
+                (axisDirection.y < 0f && axisDelta >= 0f) ||
+                (axisDirection.x > 0f && axisDelta <= 0f) ||
+                (axisDirection.x < 0f && axisDelta >= 0f))
+            {
+                continue;
+            }
+
+            float score = delta.sqrMagnitude;
+            if (score < bestScore)
+            {
+                bestScore = score;
+                bestIndex = i;
+            }
+        }
+
+        if (bestIndex >= 0)
+        {
+            return bestIndex;
+        }
+
+        if (!horizontalWrap || useVertical)
+        {
+            return -1;
+        }
+
+        // Wrap horizontally to the nearest item on the opposite side.
+        float wrapBest = float.MaxValue;
+        for (int i = 0; i < _runtimeSelectables.Count; i++)
+        {
+            if (i == originIndex || !IsSelectable(i))
+            {
+                continue;
+            }
+
+            Vector2 candidatePosition = GetScreenPosition(_runtimeSelectables[i]);
+            float score = Mathf.Abs(candidatePosition.y - origin.y);
+            if (score < wrapBest)
+            {
+                wrapBest = score;
+                bestIndex = i;
+            }
+        }
+
+        return bestIndex;
+    }
+
+    private int GetCurrentIndex()
+    {
+        if (EventSystem.current != null)
+        {
+            GameObject selectedObject = EventSystem.current.currentSelectedGameObject;
+            if (selectedObject != null)
+            {
+                for (int i = 0; i < _runtimeSelectables.Count; i++)
+                {
+                    if (_runtimeSelectables[i] != null && _runtimeSelectables[i].gameObject == selectedObject)
+                    {
+                        _currentIndex = i;
+                        return i;
+                    }
+                }
+            }
+        }
+
+        return _currentIndex;
+    }
+
     private bool HasSelectables()
     {
-        return orderedSelectables != null && orderedSelectables.Length > 0;
+        return _runtimeSelectables.Count > 0;
     }
 
     private bool IsSelectable(int index)
     {
-        Selectable selectable = orderedSelectables[index];
+        if (index < 0 || index >= _runtimeSelectables.Count)
+        {
+            return false;
+        }
+
+        Selectable selectable = _runtimeSelectables[index];
         return selectable != null && selectable.IsInteractable() && selectable.gameObject.activeInHierarchy;
+    }
+
+    private static Vector2 GetScreenPosition(Selectable selectable)
+    {
+        if (selectable == null)
+        {
+            return Vector2.zero;
+        }
+
+        return RectTransformUtility.WorldToScreenPoint(null, selectable.transform.position);
     }
 
     private void OnNavigate(InputAction.CallbackContext context)
@@ -203,89 +325,5 @@ public class UI_DpadNavigationController : MonoBehaviour
 
         actionReference.action.performed -= callback;
         actionReference.action.Disable();
-    }
-
-    private static Vector2 ReadFallbackNavigation()
-    {
-#if ENABLE_LEGACY_INPUT_MANAGER
-        if (Input.GetKeyDown(KeyCode.DownArrow))
-        {
-            return Vector2.down;
-        }
-
-        if (Input.GetKeyDown(KeyCode.UpArrow))
-        {
-            return Vector2.up;
-        }
-
-        if (Input.GetKeyDown(KeyCode.RightArrow))
-        {
-            return Vector2.right;
-        }
-
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
-        {
-            return Vector2.left;
-        }
-#endif
-        if (Keyboard.current != null)
-        {
-            if (Keyboard.current.downArrowKey.wasPressedThisFrame)
-            {
-                return Vector2.down;
-            }
-
-            if (Keyboard.current.upArrowKey.wasPressedThisFrame)
-            {
-                return Vector2.up;
-            }
-
-            if (Keyboard.current.rightArrowKey.wasPressedThisFrame)
-            {
-                return Vector2.right;
-            }
-
-            if (Keyboard.current.leftArrowKey.wasPressedThisFrame)
-            {
-                return Vector2.left;
-            }
-        }
-
-        if (Gamepad.current != null)
-        {
-            if (Gamepad.current.dpad.down.wasPressedThisFrame)
-            {
-                return Vector2.down;
-            }
-
-            if (Gamepad.current.dpad.up.wasPressedThisFrame)
-            {
-                return Vector2.up;
-            }
-
-            if (Gamepad.current.dpad.right.wasPressedThisFrame)
-            {
-                return Vector2.right;
-            }
-
-            if (Gamepad.current.dpad.left.wasPressedThisFrame)
-            {
-                return Vector2.left;
-            }
-        }
-
-        return Vector2.zero;
-    }
-
-    private static bool WasFallbackSubmitPressed()
-    {
-#if ENABLE_LEGACY_INPUT_MANAGER
-        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.JoystickButton0))
-        {
-            return true;
-        }
-#endif
-        return (Keyboard.current != null && (Keyboard.current.enterKey.wasPressedThisFrame || Keyboard.current.numpadEnterKey.wasPressedThisFrame))
-               || (Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame);
     }
 }
