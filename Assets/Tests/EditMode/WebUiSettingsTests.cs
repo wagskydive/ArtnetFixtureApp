@@ -84,6 +84,41 @@ public class WebUiSettingsTests
 
 
 
+
+    [Test]
+    public void LocalWebUiServer_CachesHtmlFromStreamingAssetsDuringAwake()
+    {
+        var serverGo = new GameObject("web-server");
+        var server = serverGo.AddComponent<LocalWebUiServer>();
+
+        byte[] cachedHtmlBytes = server.GetCachedHtmlBytes();
+        string html = System.Text.Encoding.UTF8.GetString(cachedHtmlBytes ?? new byte[0]);
+
+        Assert.That(cachedHtmlBytes, Is.Not.Null);
+        Assert.That(cachedHtmlBytes.Length, Is.GreaterThan(0));
+        Assert.That(html, Does.Contain("Artnet Fixture Control"));
+
+        Object.DestroyImmediate(serverGo);
+    }
+
+
+    [Test]
+    public void LocalWebUiServer_CopiesHtmlToPersistentPathDuringAwake()
+    {
+        var serverGo = new GameObject("web-server");
+        var server = serverGo.AddComponent<LocalWebUiServer>();
+
+        string persistentPath = server.GetPersistentWebUiFilePath();
+        Assert.That(persistentPath, Is.Not.Null.And.Not.Empty);
+        Assert.That(System.IO.File.Exists(persistentPath), Is.True);
+
+        string html = System.IO.File.ReadAllText(persistentPath);
+        Assert.That(html, Does.Contain("Artnet Fixture Control"));
+
+        Object.DestroyImmediate(serverGo);
+    }
+
+   
     [Test]
     public void LocalWebUiServer_SettingsApi_PostThenGet_RehydratesPersistedPlayerPrefsValues()
     {
@@ -111,7 +146,25 @@ public class WebUiSettingsTests
     }
 
     [Test]
-    public void InAppWebViewSurface_GetWebUiUrl_UsesServerPortAndConfiguredPagePath()
+    public void InAppWebViewSurface_GetWebUiUrl_UsesStreamingAssetsFileUrlByDefault()
+    {
+        var surfaceGo = new GameObject("web-surface");
+        var surface = surfaceGo.AddComponent<InAppWebViewSurface>();
+        SetPrivateField(surface, "pagePath", "/index.html?local=true");
+
+        string expectedPrefix = Application.streamingAssetsPath;
+        if (!expectedPrefix.EndsWith("/"))
+        {
+            expectedPrefix += "/";
+        }
+
+        Assert.That(surface.GetWebUiUrl(), Is.EqualTo($"{expectedPrefix}index.html?local=true&apiBase=http%3A%2F%2F127.0.0.1%3A8080"));
+
+        Object.DestroyImmediate(surfaceGo);
+    }
+
+    [Test]
+    public void InAppWebViewSurface_GetWebUiUrl_UsesServerPortWhenLanModeEnabled()
     {
         var serverGo = new GameObject("web-server");
         var server = serverGo.AddComponent<LocalWebUiServer>();
@@ -121,6 +174,7 @@ public class WebUiSettingsTests
         var surface = surfaceGo.AddComponent<InAppWebViewSurface>();
         SetPrivateField(surface, "webUiServer", server);
         SetPrivateField(surface, "pagePath", "/index.html?local=true");
+        SetPrivateField(surface, "useStreamingAssetsFileUrl", false);
 
         Assert.That(surface.GetWebUiUrl(), Is.EqualTo("http://127.0.0.1:9191/index.html?local=true"));
 

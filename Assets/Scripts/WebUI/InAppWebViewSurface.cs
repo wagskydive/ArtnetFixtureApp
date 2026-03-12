@@ -1,9 +1,11 @@
+using System;
 using UnityEngine;
 
 public class InAppWebViewSurface : MonoBehaviour
 {
     [SerializeField] private LocalWebUiServer webUiServer;
     [SerializeField] private string pagePath = "/index.html?local=true&tv=true";
+    [SerializeField] private bool useStreamingAssetsFileUrl = true;
     [SerializeField] private bool openExternalBrowserInEditor = true;
     [SerializeField] private bool transparentOverlay = true;
     [SerializeField] private Vector2 overlayPositionNormalized = Vector2.zero;
@@ -18,14 +20,41 @@ public class InAppWebViewSurface : MonoBehaviour
     private AndroidJavaObject _activity;
 #endif
 
+    private void Awake()
+    {
+        if (webUiServer != null)
+        {
+            webUiServer.OnServerStarted += InitializeWebViewAfterServerStart;
+        }
+    }
+
     private void Start()
     {
+        if (useStreamingAssetsFileUrl)
+        {
+            InitializeWebView();
+            SetVisible(false);
+        }
+    }
+
+    private void InitializeWebViewAfterServerStart()
+    {
+        if (useStreamingAssetsFileUrl)
+        {
+            return;
+        }
+
         InitializeWebView();
         SetVisible(false);
     }
 
     private void OnDestroy()
     {
+        if (webUiServer != null)
+        {
+            webUiServer.OnServerStarted -= InitializeWebViewAfterServerStart;
+        }
+
         DestroyWebView();
     }
 
@@ -75,6 +104,8 @@ public class InAppWebViewSurface : MonoBehaviour
             webSettings.Call("setJavaScriptEnabled", true);
             webSettings.Call("setDomStorageEnabled", true);
             webSettings.Call("setAllowFileAccess", true);
+            webSettings.Call("setAllowFileAccessFromFileURLs", true);
+            webSettings.Call("setAllowUniversalAccessFromFileURLs", true);
 
             if (transparentOverlay)
             {
@@ -82,7 +113,7 @@ public class InAppWebViewSurface : MonoBehaviour
             }
             else
             {
-                _webView.Call("setBackgroundColor", unchecked((int)0xFF000000));
+                _webView.Call("setBackgroundColor", unchecked((int)0xFFFFFFFF));
             }
 
             using (var colorDrawable = new AndroidJavaObject("android.graphics.drawable.ColorDrawable", transparentOverlay ? unchecked((int)0x00000000) : unchecked((int)0xFF000000)))
@@ -130,8 +161,61 @@ public class InAppWebViewSurface : MonoBehaviour
 
     private string BuildWebUiUrl()
     {
+        if (useStreamingAssetsFileUrl)
+        {
+            return BuildStreamingAssetsWebUiUrl();
+        }
+
+        return BuildLanWebUiUrl();
+    }
+
+    private string BuildLanWebUiUrl()
+    {
         int port = webUiServer != null ? webUiServer.Port : 8080;
         return $"http://127.0.0.1:{port}{pagePath}";
+    }
+
+    private string BuildLanApiBaseUrl()
+    {
+        int port = webUiServer != null ? webUiServer.Port : 8080;
+        return $"http://127.0.0.1:{port}";
+    }
+
+    private string BuildStreamingAssetsWebUiUrl()
+    {
+        string normalizedPath = pagePath ?? "/index.html";
+        string query = string.Empty;
+
+        int queryIndex = normalizedPath.IndexOf('?');
+        if (queryIndex >= 0)
+        {
+            query = normalizedPath.Substring(queryIndex);
+            normalizedPath = normalizedPath.Substring(0, queryIndex);
+        }
+
+        string fileName = normalizedPath.TrimStart('/');
+        if (string.IsNullOrEmpty(fileName))
+        {
+            fileName = "index.html";
+        }
+
+        string basePath = Application.streamingAssetsPath;
+        if (!basePath.EndsWith("/", StringComparison.Ordinal))
+        {
+            basePath += "/";
+        }
+
+        string apiBaseQuery = $"apiBase={Uri.EscapeDataString(BuildLanApiBaseUrl())}";
+        if (string.IsNullOrEmpty(query))
+        {
+            query = $"?{apiBaseQuery}";
+        }
+        else if (!query.Contains("apiBase=", StringComparison.OrdinalIgnoreCase))
+        {
+            query = $"{query}&{apiBaseQuery}";
+        }
+
+        return $"{basePath}{fileName}{query}";
     }
 
 #if UNITY_ANDROID && !UNITY_EDITOR

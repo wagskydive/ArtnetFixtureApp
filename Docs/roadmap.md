@@ -143,6 +143,10 @@ _Progress note: DMX universe/start-channel startup hydration now runs in `Awake`
 _Progress note: LAN WebUI availability is now decoupled from in-app menu visibility by keeping the `HtmlUI` host active when the menu is hidden, so `LocalWebUiServer` remains reachable even outside menu view._
 _Progress note: settings menu startup behavior is now fixed to always hidden on boot in `UI_SettingsPanelToggle`, removing the startup-show toggle and preventing black-screen menu overlays._
 _Progress note: in-app Android WebView overlay now supports transparent background plus normalized position/size controls so the WebUI can run as a resizable non-fullscreen overlay._
+_Progress note: LocalWebUiServer now caches `StreamingAssets/index.html` at startup (instead of TextAsset references), and Android in-app WebView now injects the cached HTML via `loadDataWithBaseURL` to bypass localhost HTTP restrictions on lower-end devices._
+_Progress note: in-app Android WebView now defaults to loading `StreamingAssets/index.html` via direct `file://` URL resolution (with optional LAN URL fallback mode), reducing dependence on projector-side `HttpListener` reliability while preserving LAN-backed access paths when needed._
+_Progress note: `LocalWebUiServer` now copies `StreamingAssets/index.html` into persistent storage at startup and serves LAN WebUI/static file requests from that persistent directory, restoring remote-device browser rendering reliability._
+_Progress note: `LocalWebUiServer` now also mirrors local `src`/`href` static assets referenced by the HTML into the persistent WebUI directory, improving LAN rendering parity when additional JS/CSS/image dependencies are present._
 
 ### Goal:
 Enable persistent configuration and easy deployment.
@@ -242,5 +246,4 @@ Add a new mode that makes the app function like a pixel wall.
 - Prioritize **stability, low memory use, and predictable 30 FPS performance**.
 - Avoid any runtime memory allocations in Update/Render loops.
 - All features that risk performance (high-res video, multi-pass shaders) are optional and must be gated by mode selection.
-
 

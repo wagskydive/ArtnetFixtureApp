@@ -2,12 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Text.RegularExpressions;
 using System.Text;
 using System.Threading;
 using UnityEngine;
 
 public class LocalWebUiServer : MonoBehaviour
 {
+    public event Action OnServerStarted;
+
     private class MainThreadInvocation
     {
         public Func<string> Action;
@@ -16,9 +19,10 @@ public class LocalWebUiServer : MonoBehaviour
         public Exception Exception;
     }
 
-    [SerializeField] private TextAsset webUiHtml;
     [SerializeField] private WebUiSettingsBridge settingsBridge;
     [SerializeField] private int port = 8080;
+    [SerializeField] private string webUiFileName = "index.html";
+    [SerializeField] private string persistentWebUiFolderName = "WebUi";
 
     private readonly Queue<MainThreadInvocation> _mainThreadQueue = new Queue<MainThreadInvocation>(8);
     private readonly object _queueLock = new object();
@@ -27,11 +31,13 @@ public class LocalWebUiServer : MonoBehaviour
     private Thread _serverThread;
     private volatile bool _isRunning;
     private byte[] _cachedHtmlBytes;
+    private string _persistentWebUiFilePath;
 
     public int Port => port;
 
     private void Awake()
     {
+        CopyWebUiFileToPersistentPath();
         CacheHtmlPayload();
     }
 
@@ -58,8 +64,193 @@ public class LocalWebUiServer : MonoBehaviour
 
     private void CacheHtmlPayload()
     {
-        string html = webUiHtml != null ? webUiHtml.text : "<html><body>Missing webUiHtml reference.</body></html>";
+        string html = LoadHtmlFromPersistentCopy();
         _cachedHtmlBytes = Encoding.UTF8.GetBytes(html);
+    }
+
+    public byte[] GetCachedHtmlBytes()
+    {
+        return _cachedHtmlBytes;
+    }
+
+    public string GetPersistentWebUiFilePath()
+    {
+        return _persistentWebUiFilePath;
+    }
+
+    private void CopyWebUiFileToPersistentPath()
+    {
+        try
+        {
+            string fileName = string.IsNullOrWhiteSpace(webUiFileName) ? "index.html" : webUiFileName;
+            string persistentDirectory = Path.Combine(Application.persistentDataPath, persistentWebUiFolderName);
+            Directory.CreateDirectory(persistentDirectory);
+
+            _persistentWebUiFilePath = Path.Combine(persistentDirectory, fileName);
+
+            byte[] htmlBytes = ReadStreamingAssetBytes(fileName);
+            if (htmlBytes == null || htmlBytes.Length == 0)
+            {
+                return;
+            }
+
+            File.WriteAllBytes(_persistentWebUiFilePath, htmlBytes);
+
+            string html = Encoding.UTF8.GetString(htmlBytes);
+            string baseDirectory = Path.GetDirectoryName(fileName)?.Replace('\\', '/');
+            foreach (string referencedAssetPath in GetReferencedLocalAssetPaths(html))
+            {
+                string normalizedAssetPath = referencedAssetPath.TrimStart('/');
+                if (!string.IsNullOrEmpty(baseDirectory))
+                {
+                    normalizedAssetPath = Path.Combine(baseDirectory, normalizedAssetPath).Replace('\\', '/');
+                }
+
+                byte[] assetBytes = ReadStreamingAssetBytes(normalizedAssetPath);
+                if (assetBytes == null || assetBytes.Length == 0)
+                {
+                    continue;
+                }
+
+                string targetPath = Path.Combine(persistentDirectory, normalizedAssetPath.Replace('/', Path.DirectorySeparatorChar));
+                string targetDirectory = Path.GetDirectoryName(targetPath);
+                if (!string.IsNullOrEmpty(targetDirectory))
+                {
+                    Directory.CreateDirectory(targetDirectory);
+                }
+
+                File.WriteAllBytes(targetPath, assetBytes);
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"LocalWebUiServer failed to copy WebUI HTML to persistent storage: {ex.Message}");
+        }
+    }
+
+    internal static List<string> GetReferencedLocalAssetPaths(string html)
+    {
+        var results = new List<string>(4);
+        if (string.IsNullOrEmpty(html))
+        {
+            return results;
+        }
+
+        MatchCollection matches = Regex.Matches(html, "(?:src|href)\\s*=\\s*[\"'](?<path>[^\"']+)[\"']", RegexOptions.IgnoreCase);
+        for (int i = 0; i < matches.Count; i++)
+        {
+            string rawPath = matches[i].Groups["path"].Value;
+            if (string.IsNullOrWhiteSpace(rawPath))
+            {
+                continue;
+            }
+
+            int queryIndex = rawPath.IndexOfAny(new[] { '?', '#' });
+            string sanitizedPath = queryIndex >= 0 ? rawPath.Substring(0, queryIndex) : rawPath;
+            if (string.IsNullOrWhiteSpace(sanitizedPath))
+            {
+                continue;
+            }
+
+            if (sanitizedPath.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
+                || sanitizedPath.StartsWith("https://", StringComparison.OrdinalIgnoreCase)
+                || sanitizedPath.StartsWith("data:", StringComparison.OrdinalIgnoreCase)
+                || sanitizedPath.StartsWith("javascript:", StringComparison.OrdinalIgnoreCase)
+                || sanitizedPath.StartsWith("mailto:", StringComparison.OrdinalIgnoreCase)
+                || sanitizedPath.StartsWith("//", StringComparison.OrdinalIgnoreCase)
+                || sanitizedPath.StartsWith("api/", StringComparison.OrdinalIgnoreCase)
+                || sanitizedPath.StartsWith("/api/", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            string normalizedPath = sanitizedPath.TrimStart('/').Replace('\\', '/');
+            if (string.IsNullOrWhiteSpace(normalizedPath))
+            {
+                continue;
+            }
+
+            if (!results.Contains(normalizedPath))
+            {
+                results.Add(normalizedPath);
+            }
+        }
+
+        return results;
+    }
+
+    private string LoadHtmlFromPersistentCopy()
+    {
+        string fallbackHtml = "<html><body>Missing StreamingAssets/index.html content.</body></html>";
+
+        try
+        {
+            if (!string.IsNullOrEmpty(_persistentWebUiFilePath) && File.Exists(_persistentWebUiFilePath))
+            {
+                return File.ReadAllText(_persistentWebUiFilePath, Encoding.UTF8);
+            }
+
+            byte[] bytes = ReadStreamingAssetBytes(webUiFileName);
+            if (bytes != null && bytes.Length > 0)
+            {
+                return Encoding.UTF8.GetString(bytes);
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"LocalWebUiServer failed to load persistent WebUI HTML: {ex.Message}");
+        }
+
+        return fallbackHtml;
+    }
+
+    private byte[] ReadStreamingAssetBytes(string fileName)
+    {
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            return null;
+        }
+
+        try
+        {
+#if UNITY_ANDROID && !UNITY_EDITOR
+            using (var unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+            {
+                AndroidJavaObject activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
+                AndroidJavaObject assetManager = activity.Call<AndroidJavaObject>("getAssets");
+
+                using (var inputStream = assetManager.Call<AndroidJavaObject>("open", fileName))
+                using (var outputStream = new AndroidJavaObject("java.io.ByteArrayOutputStream"))
+                {
+                    var buffer = new byte[4096];
+                    while (true)
+                    {
+                        int bytesRead = inputStream.Call<int>("read", buffer);
+                        if (bytesRead <= 0)
+                        {
+                            break;
+                        }
+
+                        outputStream.Call("write", buffer, 0, bytesRead);
+                    }
+
+                    return outputStream.Call<byte[]>("toByteArray");
+                }
+            }
+#else
+            string htmlPath = Path.Combine(Application.streamingAssetsPath, fileName);
+            if (File.Exists(htmlPath))
+            {
+                return File.ReadAllBytes(htmlPath);
+            }
+#endif
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"LocalWebUiServer failed to read StreamingAssets file '{fileName}': {ex.Message}");
+        }
+
+        return null;
     }
 
     private void StartServer()
@@ -93,6 +284,7 @@ public class LocalWebUiServer : MonoBehaviour
         _serverThread.Start();
 
         Debug.Log($"Local web UI server listening on port {port}");
+        OnServerStarted?.Invoke();
     }
 
     private void StopServer()
@@ -157,6 +349,11 @@ public class LocalWebUiServer : MonoBehaviour
         if (path == "/" || path == "/index.html")
         {
             WriteHtml(context.Response);
+            return;
+        }
+
+        if (TryWriteStaticFile(path, context.Response))
+        {
             return;
         }
 
@@ -268,6 +465,68 @@ public class LocalWebUiServer : MonoBehaviour
     private void WriteHtml(HttpListenerResponse response)
     {
         WritePayload(response, _cachedHtmlBytes ?? Array.Empty<byte>(), "text/html");
+    }
+
+    private bool TryWriteStaticFile(string path, HttpListenerResponse response)
+    {
+        if (string.IsNullOrEmpty(path) || path == "/")
+        {
+            return false;
+        }
+
+        string relativePath = path.TrimStart('/');
+        if (string.IsNullOrEmpty(relativePath))
+        {
+            return false;
+        }
+
+        string baseDirectory = !string.IsNullOrEmpty(_persistentWebUiFilePath)
+            ? Path.GetDirectoryName(_persistentWebUiFilePath)
+            : null;
+
+        if (string.IsNullOrEmpty(baseDirectory) || !Directory.Exists(baseDirectory))
+        {
+            return false;
+        }
+
+        string resolvedPath = Path.GetFullPath(Path.Combine(baseDirectory, relativePath));
+        string resolvedBaseDirectory = Path.GetFullPath(baseDirectory);
+        if (!resolvedPath.StartsWith(resolvedBaseDirectory, StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        if (!File.Exists(resolvedPath))
+        {
+            return false;
+        }
+
+        byte[] payload = File.ReadAllBytes(resolvedPath);
+        WritePayload(response, payload, GetMimeTypeFromPath(resolvedPath));
+        return true;
+    }
+
+    private static string GetMimeTypeFromPath(string filePath)
+    {
+        string extension = Path.GetExtension(filePath).ToLowerInvariant();
+        switch (extension)
+        {
+            case ".css":
+                return "text/css";
+            case ".js":
+                return "application/javascript";
+            case ".json":
+                return "application/json";
+            case ".png":
+                return "image/png";
+            case ".jpg":
+            case ".jpeg":
+                return "image/jpeg";
+            case ".svg":
+                return "image/svg+xml";
+            default:
+                return "application/octet-stream";
+        }
     }
 
     private static string ReadBody(HttpListenerRequest request)

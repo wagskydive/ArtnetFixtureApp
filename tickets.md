@@ -29,12 +29,81 @@ T16.3 - Make sure that the settings menu is never shown on startup. Remove the o
   - Removed startup configurability from `UI_SettingsPanelToggle`; startup now always forces settings menu hidden.
   - Updated EditMode tests to cover the new fixed startup-hidden behavior and removed obsolete configurable-startup expectations.
 
-T16.4 - Next run: add focused EditMode coverage for `InAppWebViewSurface` overlay clamping/layout calculations and validate transparency behavior on an Android device build.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+T16.4 - Fix LocalWebUiServer.cs: load HTML from StreamingAssets at runtime instead of a TextAsset 
+Remove the TextAsset webUiHtml field.
+Cache HTML in Awake() from StreamingAssets:
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - Removed `TextAsset webUiHtml` from `LocalWebUiServer` and now cache HTML in `Awake()` by loading `StreamingAssets/index.html` (with Android asset-manager + desktop file-path handling).
+  - Added EditMode coverage that validates cached HTML bytes are populated from StreamingAssets at startup.
+
+T16.5 - Update WebView inside the app. Use loadDataWithBaseURL instead of loadUrl:
+
+'''
+string htmlContent = System.Text.Encoding.UTF8.GetString(_cachedHtmlBytes);
+_webView.Call(
+    "loadDataWithBaseURL",
+    "file:///android_asset/",
+    htmlContent,
+    "text/html",
+    "utf-8",
+    null
+);
+'''
+
+This bypasses all localhost/HTTP restrictions on cheap Android devices.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - Updated Android in-app WebView initialization to load cached HTML bytes through `loadDataWithBaseURL("file:///android_asset/", ...)`, with URL loading kept only as fallback when cached bytes are unavailable.
+  - Reused `LocalWebUiServer` cached HTML payload to keep in-app and LAN-served content aligned.
+
+
+T16.6 - Since the projector can’t reliably run HttpListener: Load your HTML directly from StreamingAssets using file:// URLs. Avoid the local HTTP server entirely. But still keep it working through LAN.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Updated `InAppWebViewSurface` to default to direct `StreamingAssets` `file://` loading for in-app Android WebView sessions, avoiding startup dependency on `HttpListener` for menu rendering on unstable projector firmware.
+  - Added explicit LAN fallback mode (`useStreamingAssetsFileUrl = false`) so WebView can still target `127.0.0.1` when LAN-server-backed workflows are required.
+  - Enabled Android WebView file-origin access flags (`setAllowFileAccessFromFileURLs`/`setAllowUniversalAccessFromFileURLs`) so local asset loading stays compatible with relative file-based resource usage.
+  - Added EditMode regression coverage for both URL strategies: default StreamingAssets file URL pathing and legacy LAN URL composition.
+
+T16.7 - Copy the HTML from StreamingAssets to persistent path at runtime and make the webui work over LAN work again. Currently the webserver doesn't work on another device. When trying to access it using the android devices ip and port it shows a white screen.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - LocalWebUiServer now copies `StreamingAssets/index.html` into `Application.persistentDataPath/WebUi/index.html` during startup, then serves the cached/persistent copy for LAN clients.
+  - Added static-file serving support rooted in the persistent WebUI directory so LAN requests for non-API assets resolve instead of falling through to 404/white-screen behavior.
+  - Added EditMode coverage to verify the persistent HTML copy is created during Awake and contains expected WebUI content.
+
+T16.8 - make the webview settings work on the android device within the app. Currently it tries to open a jar:file:///data/app/~~ url but gets and error: net::ERR_UNKOWN_URL_SCHEME
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - Updated `InAppWebViewSurface` to append an `apiBase` query parameter (pointing to `http://127.0.0.1:<port>`) when loading `StreamingAssets` pages, so WebView content loaded from Android `jar:file://` origins can call LAN API endpoints without relying on unsupported relative `file`/`jar` fetch routing.
+  - Updated `Assets/StreamingAssets/index.html` to resolve API requests through `buildApiUrl(...)`, honoring `apiBase` when present while preserving relative-path behavior for browser/LAN access.
+  - Updated EditMode URL expectation coverage for the StreamingAssets mode so regressions in `apiBase` URL composition are caught.
+
+T16.9 - the solution in tiocket 16.8 didn't solve the problem. The app still tries to opene a jar:file:/// url and the webui doesn't load over LAN. Try a new approach to load the webui. We can also use a Resource folder to load the html file instead of using StreamingAssets and not need to point to a jar:file:/// url at all. Find out why it doesn't work and fix it
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Extended `LocalWebUiServer` persistent-copy startup flow to parse `src`/`href` references in the HTML and copy each local static asset from `StreamingAssets` into `Application.persistentDataPath/WebUi`, so LAN requests can resolve the full page dependency set instead of only `index.html`.
+  - Added `GetReferencedLocalAssetPaths(...)` filtering to ignore API/external/data URLs while keeping local JS/CSS/image assets, and used these resolved paths for persistent static-file mirroring.
+  - Added EditMode test coverage for local-asset reference extraction behavior (query/hash stripping, API/external exclusion).
 
 T15.1 - Refactor the code so that we have a SaveLoadSettings.cs class that handles all the saving and loading of the playerprefs. Any class that needs to handle saving ofr loding of playerprefs needs to use this class. This makes for cleaner code and makes it easier to debug.
 - [x] Started
@@ -45,13 +114,6 @@ T15.1 - Refactor the code so that we have a SaveLoadSettings.cs class that handl
   - Added `SaveLoadSettings` as a single PlayerPrefs gateway and centralized all DMX/mode/web settings keys in one shared class.
   - Refactored `WebUiSettingsStore`, `UI_DmxSettings`, `UI_FixtureMeshManager`, and `UI_FixtureModeSelector` so all runtime save/load operations route through `SaveLoadSettings`.
   - Verified no direct `PlayerPrefs` usage remains under `Assets/Scripts` besides `SaveLoadSettings`.
-
-T15.2 - Next run: add EditMode unit tests for SaveLoadSettings integration across DMX UI, fixture mode, and WebUI settings persistence paths.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
 
 
 
@@ -1000,3 +1062,13 @@ T9.8 - Document Pixel Mapping setup, DMX addressing scheme, and operational limi
 
 
 
+
+
+T16.9 - Next run: Validate Android LAN client behavior against `LocalWebUiServer` persistent WebUI copy serving, including `/api/settings` requests and any additional static assets referenced by the page.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Implemented automatic static-asset mirroring for HTML-referenced local files to support LAN loading parity with the in-app page source.
+  - Next run should execute on-device Android LAN smoke validation for `/index.html`, `/api/settings` GET/POST, and any referenced static resources under real projector networking conditions.
