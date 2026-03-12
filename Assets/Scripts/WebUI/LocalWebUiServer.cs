@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Text.RegularExpressions;
 using System.Text;
 using System.Threading;
 using UnityEngine;
@@ -94,11 +95,88 @@ public class LocalWebUiServer : MonoBehaviour
             }
 
             File.WriteAllBytes(_persistentWebUiFilePath, htmlBytes);
+
+            string html = Encoding.UTF8.GetString(htmlBytes);
+            string baseDirectory = Path.GetDirectoryName(fileName)?.Replace('\\', '/');
+            foreach (string referencedAssetPath in GetReferencedLocalAssetPaths(html))
+            {
+                string normalizedAssetPath = referencedAssetPath.TrimStart('/');
+                if (!string.IsNullOrEmpty(baseDirectory))
+                {
+                    normalizedAssetPath = Path.Combine(baseDirectory, normalizedAssetPath).Replace('\\', '/');
+                }
+
+                byte[] assetBytes = ReadStreamingAssetBytes(normalizedAssetPath);
+                if (assetBytes == null || assetBytes.Length == 0)
+                {
+                    continue;
+                }
+
+                string targetPath = Path.Combine(persistentDirectory, normalizedAssetPath.Replace('/', Path.DirectorySeparatorChar));
+                string targetDirectory = Path.GetDirectoryName(targetPath);
+                if (!string.IsNullOrEmpty(targetDirectory))
+                {
+                    Directory.CreateDirectory(targetDirectory);
+                }
+
+                File.WriteAllBytes(targetPath, assetBytes);
+            }
         }
         catch (Exception ex)
         {
             Debug.LogWarning($"LocalWebUiServer failed to copy WebUI HTML to persistent storage: {ex.Message}");
         }
+    }
+
+    internal static List<string> GetReferencedLocalAssetPaths(string html)
+    {
+        var results = new List<string>(4);
+        if (string.IsNullOrEmpty(html))
+        {
+            return results;
+        }
+
+        MatchCollection matches = Regex.Matches(html, "(?:src|href)\\s*=\\s*[\"'](?<path>[^\"']+)[\"']", RegexOptions.IgnoreCase);
+        for (int i = 0; i < matches.Count; i++)
+        {
+            string rawPath = matches[i].Groups["path"].Value;
+            if (string.IsNullOrWhiteSpace(rawPath))
+            {
+                continue;
+            }
+
+            int queryIndex = rawPath.IndexOfAny(new[] { '?', '#' });
+            string sanitizedPath = queryIndex >= 0 ? rawPath.Substring(0, queryIndex) : rawPath;
+            if (string.IsNullOrWhiteSpace(sanitizedPath))
+            {
+                continue;
+            }
+
+            if (sanitizedPath.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
+                || sanitizedPath.StartsWith("https://", StringComparison.OrdinalIgnoreCase)
+                || sanitizedPath.StartsWith("data:", StringComparison.OrdinalIgnoreCase)
+                || sanitizedPath.StartsWith("javascript:", StringComparison.OrdinalIgnoreCase)
+                || sanitizedPath.StartsWith("mailto:", StringComparison.OrdinalIgnoreCase)
+                || sanitizedPath.StartsWith("//", StringComparison.OrdinalIgnoreCase)
+                || sanitizedPath.StartsWith("api/", StringComparison.OrdinalIgnoreCase)
+                || sanitizedPath.StartsWith("/api/", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            string normalizedPath = sanitizedPath.TrimStart('/').Replace('\\', '/');
+            if (string.IsNullOrWhiteSpace(normalizedPath))
+            {
+                continue;
+            }
+
+            if (!results.Contains(normalizedPath))
+            {
+                results.Add(normalizedPath);
+            }
+        }
+
+        return results;
     }
 
     private string LoadHtmlFromPersistentCopy()

@@ -119,6 +119,26 @@ public class WebUiSettingsTests
     }
 
     [Test]
+    public void LocalWebUiServer_GetReferencedLocalAssetPaths_ExtractsOnlyLocalStaticAssets()
+    {
+        const string html = @"<html><head>
+<script src='app.js?v=1'></script>
+<link href='/styles/main.css#hash' rel='stylesheet'>
+<script src='https://cdn.example.com/remote.js'></script>
+<a href='/api/settings'>api</a>
+<img src='images/icon.png'>
+</head></html>";
+
+        var paths = LocalWebUiServer.GetReferencedLocalAssetPaths(html);
+
+        Assert.That(paths, Does.Contain("app.js"));
+        Assert.That(paths, Does.Contain("styles/main.css"));
+        Assert.That(paths, Does.Contain("images/icon.png"));
+        Assert.That(paths, Does.Not.Contain("api/settings"));
+        Assert.That(paths, Does.Not.Contain("https://cdn.example.com/remote.js"));
+    }
+
+    [Test]
     public void LocalWebUiServer_SettingsApi_PostThenGet_RehydratesPersistedPlayerPrefsValues()
     {
         var serverGo = new GameObject("web-server");
