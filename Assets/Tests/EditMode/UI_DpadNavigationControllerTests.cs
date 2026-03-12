@@ -76,6 +76,36 @@ public class UI_DpadNavigationControllerTests
         Object.DestroyImmediate(eventSystemGo);
     }
 
+
+    [Test]
+    public void SubmitCurrentSelection_DoesNotDoubleInvoke_WhenButtonAndUI_DpadSelectableShareObject()
+    {
+        var eventSystemGo = CreateEventSystem();
+        var root = CreateRootWithCanvas();
+        var go = new GameObject("hybrid-submit", typeof(RectTransform));
+        go.transform.SetParent(root.transform);
+        go.AddComponent<Button>();
+        var submitSelectable = go.AddComponent<UI_DpadSelectable>();
+
+        int invokeCount = 0;
+        var eventField = typeof(UI_DpadSelectable)
+            .GetField("onSubmit", BindingFlags.NonPublic | BindingFlags.Instance);
+        var submitEvent = new UnityEngine.Events.UnityEvent();
+        submitEvent.AddListener(() => invokeCount++);
+        eventField.SetValue(submitSelectable, submitEvent);
+
+        var controller = root.AddComponent<UI_DpadNavigationController>();
+        SetPrivateArray(controller, submitSelectable);
+
+        root.SendMessage("OnEnable");
+        controller.SubmitCurrentSelection();
+
+        Assert.That(invokeCount, Is.EqualTo(1));
+
+        Object.DestroyImmediate(root);
+        Object.DestroyImmediate(eventSystemGo);
+    }
+
     [Test]
     public void HandleNavigationInput_DiscoversSelectablesByScreenPosition_WhenArrayNotConfigured()
     {
@@ -162,6 +192,35 @@ public class UI_DpadNavigationControllerTests
         Object.DestroyImmediate(eventSystemGo);
     }
 
+
+
+    [Test]
+    public void HandleNavigationInput_PrioritizesTraversalWithinSameParentGroup()
+    {
+        var eventSystemGo = CreateEventSystem();
+        var root = CreateRootWithCanvas();
+
+        var groupA = new GameObject("group-a", typeof(RectTransform));
+        groupA.transform.SetParent(root.transform);
+        var groupB = new GameObject("group-b", typeof(RectTransform));
+        groupB.transform.SetParent(root.transform);
+
+        var aTop = CreateButton("a-top", groupA.transform, new Vector2(0f, 300f));
+        var aBottom = CreateButton("a-bottom", groupA.transform, new Vector2(0f, 100f));
+        CreateButton("b-top", groupB.transform, new Vector2(0f, 250f));
+
+        var controller = root.AddComponent<UI_DpadNavigationController>();
+
+        root.SendMessage("OnEnable");
+        EventSystem.current.SetSelectedGameObject(aTop.gameObject);
+
+        controller.HandleNavigationInput(Vector2.down);
+
+        Assert.That(EventSystem.current.currentSelectedGameObject, Is.EqualTo(aBottom.gameObject));
+
+        Object.DestroyImmediate(root);
+        Object.DestroyImmediate(eventSystemGo);
+    }
 
     [Test]
     public void HandleNavigationInput_PrefersUnitySelectableGraph_ForNestedParents()

@@ -54,13 +54,24 @@ T17.5 - The problem described in ticket 17.4 still persists. Currently the navig
   - Expanded EditMode tests with nested-parent explicit navigation coverage to verify vertical traversal now moves through expected child buttons within grouped layouts.
 
 T17.6 - The issue of incorrect increments and decrements in tickets 17.4 and 17.5 is still not solved. I verified using Debug.Log logs that the submit button doesn't get pressed more than once, but the increment and decrement amounts are still 2. Look into the code that is executed to find out why and fix the problem.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - Updated `UI_DpadNavigationController.SubmitCurrentSelection` to invoke only a single active `ISubmitHandler` on the selected control before falling back to event execution, preventing duplicate submit paths when a button object has multiple submit-capable components.
+  - Added EditMode coverage for the hybrid `Button` + `UI_DpadSelectable` case to validate one press produces one callback invocation.
 
 T17.7 - The issue of incorrect vertical traversal in tickets 17.4 and 17.5 is still not solved. I verified using Debug.Log logs that the navigate function doesn't get called more than once, but the traversal still works incorrect and doest traverse in child buttons within groups. A up or down key press still navigates directly to the next group and doesn't allow navigation within the layer group.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - Added parent-group-aware directional targeting in `UI_DpadNavigationController` so up/down navigation first traverses selectable siblings within the current group before jumping to the next group.
+  - Added EditMode coverage to verify down-navigation from the top child stays inside its current parent group when a same-axis candidate exists there.
+
+T17.8 - Next run: validate D-pad traversal and submit behavior on Android TV hardware/profile with Unity Input System action maps bound to the production remote, and tune group detection if any layout variants still skip intra-group controls.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
