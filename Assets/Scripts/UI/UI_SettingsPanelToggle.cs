@@ -5,14 +5,13 @@ public class UI_SettingsPanelToggle : MonoBehaviour
 {
     [SerializeField] private GameObject targetObject;
     [SerializeField] private bool keepTargetObjectActiveWhenHidden;
-    [SerializeField] private bool showMenuOnStart;
     [SerializeField] private InputActionReference showMenuAction;
     [SerializeField] private InputActionReference hideMenuAction;
     [SerializeField] private InAppWebViewSurface inAppWebViewSurface;
 
     private void Start()
     {
-        SetVisibility(showMenuOnStart);
+        SetVisibility(false);
     }
 
     private void OnEnable()
