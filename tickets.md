@@ -96,11 +96,14 @@ T16.8 - make the webview settings work on the android device within the app. Cur
   - Updated EditMode URL expectation coverage for the StreamingAssets mode so regressions in `apiBase` URL composition are caught.
 
 T16.9 - the solution in tiocket 16.8 didn't solve the problem. The app still tries to opene a jar:file:/// url and the webui doesn't load over LAN. Try a new approach to load the webui. We can also use a Resource folder to load the html file instead of using StreamingAssets and not need to point to a jar:file:/// url at all. Find out why it doesn't work and fix it
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Extended `LocalWebUiServer` persistent-copy startup flow to parse `src`/`href` references in the HTML and copy each local static asset from `StreamingAssets` into `Application.persistentDataPath/WebUi`, so LAN requests can resolve the full page dependency set instead of only `index.html`.
+  - Added `GetReferencedLocalAssetPaths(...)` filtering to ignore API/external/data URLs while keeping local JS/CSS/image assets, and used these resolved paths for persistent static-file mirroring.
+  - Added EditMode test coverage for local-asset reference extraction behavior (query/hash stripping, API/external exclusion).
 
 T15.1 - Refactor the code so that we have a SaveLoadSettings.cs class that handles all the saving and loading of the playerprefs. Any class that needs to handle saving ofr loding of playerprefs needs to use this class. This makes for cleaner code and makes it easier to debug.
 - [x] Started
@@ -1062,8 +1065,10 @@ T9.8 - Document Pixel Mapping setup, DMX addressing scheme, and operational limi
 
 
 T16.9 - Next run: Validate Android LAN client behavior against `LocalWebUiServer` persistent WebUI copy serving, including `/api/settings` requests and any additional static assets referenced by the page.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Implemented automatic static-asset mirroring for HTML-referenced local files to support LAN loading parity with the in-app page source.
+  - Next run should execute on-device Android LAN smoke validation for `/index.html`, `/api/settings` GET/POST, and any referenced static resources under real projector networking conditions.
