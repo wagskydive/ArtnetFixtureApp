@@ -170,7 +170,7 @@ T99.6 -Fix the bug where the playerprefs are not correctly loaded when the app r
   - Moved DMX settings preference hydration to `Awake` and added startup/save guards so shutdown/disable writes cannot overwrite already-persisted universe/channel values before load completes.
   - Added regression coverage for LocalWebUiServer `/api/settings` POST+GET flow to confirm WebUI writes persist to PlayerPrefs and GET rehydrates the same universe/start-channel values.
 
-T99.7 - Next run: execute Unity EditMode suite on a licensed runner to validate T99.6 startup-load ordering and WebUI settings API persistence behavior end-to-end.
+T99.7 - Find and fix a bug where the settings menu webui over LAN on the android app only works when the settings menu is open in the app. The settings menu webui should always work over LAN, even when the app itself is running and is not in the menu itself. The in-app menu is also not shown inside the app, but that might require to write a webviewer, so that can be a new ticket.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written

@@ -178,7 +178,7 @@ public class LocalWebUiServer : MonoBehaviour
         return InvokeOnMainThread(() => ExecuteSettingsApiActionImmediately(httpMethod, requestBody));
     }
 
-    internal string HandleSettingsApiRequestImmediately(string httpMethod, string requestBody)
+    public string HandleSettingsApiRequestImmediately(string httpMethod, string requestBody)
     {
         return ExecuteSettingsApiActionImmediately(httpMethod, requestBody);
     }
