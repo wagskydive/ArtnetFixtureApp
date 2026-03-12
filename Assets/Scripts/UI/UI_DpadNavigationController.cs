@@ -70,6 +70,7 @@ public class UI_DpadNavigationController : MonoBehaviour
         {
             SelectIndex(targetIndex);
         }
+        Debug.Log("Navigation Input: "+navigationInput);
     }
 
     private int FindSelectableNavigationTarget(int originIndex, Vector2 navigationInput)
@@ -160,6 +161,7 @@ public class UI_DpadNavigationController : MonoBehaviour
         Selectable selected = _runtimeSelectables[selectedIndex];
         var submitData = new BaseEventData(EventSystem.current);
         ExecuteEvents.Execute<ISubmitHandler>(selected.gameObject, submitData, ExecuteEvents.submitHandler);
+        Debug.Log("Submitted Current Selection "+_runtimeSelectables[selectedIndex]+" game object: "+selected.gameObject+" submit data: "+submitData+" submit handler "+ExecuteEvents.submitHandler);
     }
 
     private void SelectIndex(int index)

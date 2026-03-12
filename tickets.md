@@ -53,7 +53,14 @@ T17.5 - The problem described in ticket 17.4 still persists. Currently the navig
   - Added submit-hold gating (`_submitHeld`) with Input System `canceled` reset handling so a held submit input is accepted once per press/release cycle instead of repeated performed callbacks.
   - Expanded EditMode tests with nested-parent explicit navigation coverage to verify vertical traversal now moves through expected child buttons within grouped layouts.
 
-T17.6 - Next run: add PlayMode/input-driven coverage that reproduces long-press submit behavior from actual Input System bindings (button press/hold/release) and validate +/- controls only step by 1 on device builds.
+T17.6 - The issue of incorrect increments and decrements in tickets 17.4 and 17.5 is still not solved. I verified using Debug.Log logs that the submit button doesn't get pressed more than once, but the increment and decrement amounts are still 2. Look into the code that is executed to find out why and fix the problem.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T17.7 - The issue of incorrect vertical traversal in tickets 17.4 and 17.5 is still not solved. I verified using Debug.Log logs that the navigate function doesn't get called more than once, but the traversal still works incorrect and doest traverse in child buttons within groups. A up or down key press still navigates directly to the next group and doesn't allow navigation within the layer group.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
