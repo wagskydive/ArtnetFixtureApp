@@ -85,6 +85,12 @@ T16.7 - Copy the HTML from StreamingAssets to persistent path at runtime and mak
   - Added static-file serving support rooted in the persistent WebUI directory so LAN requests for non-API assets resolve instead of falling through to 404/white-screen behavior.
   - Added EditMode coverage to verify the persistent HTML copy is created during Awake and contains expected WebUI content.
 
+T16.8 - make the webview settings work on the android device within the app. Currently it tries to open a jar:file:///data/app/~~ url but gets and error: net::ERR_UNKOWN_URL_SCHEME
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
 
 
 T15.1 - Refactor the code so that we have a SaveLoadSettings.cs class that handles all the saving and loading of the playerprefs. Any class that needs to handle saving ofr loding of playerprefs needs to use this class. This makes for cleaner code and makes it easier to debug.
