@@ -4,6 +4,7 @@ using UnityEngine.InputSystem;
 public class UI_SettingsPanelToggle : MonoBehaviour
 {
     [SerializeField] private GameObject targetObject;
+    [SerializeField] private bool keepTargetObjectActiveWhenHidden;
     [SerializeField] private InputActionReference showMenuAction;
     [SerializeField] private InputActionReference hideMenuAction;
     [SerializeField] private InAppWebViewSurface inAppWebViewSurface;
@@ -59,7 +60,8 @@ public class UI_SettingsPanelToggle : MonoBehaviour
             return;
         }
 
-        targetObject.SetActive(visible);
+        bool shouldTargetStayActive = keepTargetObjectActiveWhenHidden && !visible;
+        targetObject.SetActive(visible || shouldTargetStayActive);
         if (inAppWebViewSurface != null)
         {
             inAppWebViewSurface.SetVisible(visible);
