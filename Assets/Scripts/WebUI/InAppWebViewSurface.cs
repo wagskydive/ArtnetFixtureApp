@@ -8,6 +8,7 @@ public class InAppWebViewSurface : MonoBehaviour
     [SerializeField] private bool transparentOverlay = true;
     [SerializeField] private Vector2 overlayPositionNormalized = Vector2.zero;
     [SerializeField] private Vector2 overlaySizeNormalized = Vector2.one;
+    
 
 #if UNITY_EDITOR
     private bool _editorBrowserOpened;
