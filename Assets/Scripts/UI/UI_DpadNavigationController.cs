@@ -75,6 +75,12 @@ public class UI_DpadNavigationController : MonoBehaviour
 
     private int FindSelectableNavigationTarget(int originIndex, Vector2 navigationInput)
     {
+        int groupedTargetIndex = FindGroupedSelectableTarget(originIndex, navigationInput);
+        if (groupedTargetIndex >= 0)
+        {
+            return groupedTargetIndex;
+        }
+
         int builtInTargetIndex = FindBuiltInSelectableTarget(originIndex, navigationInput);
         if (builtInTargetIndex >= 0)
         {
@@ -160,8 +166,38 @@ public class UI_DpadNavigationController : MonoBehaviour
         _lastSubmitFrame = Time.frameCount;
         Selectable selected = _runtimeSelectables[selectedIndex];
         var submitData = new BaseEventData(EventSystem.current);
-        ExecuteEvents.Execute<ISubmitHandler>(selected.gameObject, submitData, ExecuteEvents.submitHandler);
+        if (!TrySubmitSingleHandler(selected, submitData))
+        {
+            ExecuteEvents.Execute<ISubmitHandler>(selected.gameObject, submitData, ExecuteEvents.submitHandler);
+        }
         Debug.Log("Submitted Current Selection "+_runtimeSelectables[selectedIndex]+" game object: "+selected.gameObject+" submit data: "+submitData+" submit handler "+ExecuteEvents.submitHandler);
+    }
+
+    private static bool TrySubmitSingleHandler(Selectable selected, BaseEventData submitData)
+    {
+        if (selected == null)
+        {
+            return false;
+        }
+
+        Component[] components = selected.GetComponents<Component>();
+        for (int i = 0; i < components.Length; i++)
+        {
+            if (!(components[i] is ISubmitHandler submitHandler))
+            {
+                continue;
+            }
+
+            if (components[i] is Behaviour behaviour && !behaviour.isActiveAndEnabled)
+            {
+                continue;
+            }
+
+            submitHandler.OnSubmit(submitData);
+            return true;
+        }
+
+        return false;
     }
 
     private void SelectIndex(int index)
@@ -246,6 +282,91 @@ public class UI_DpadNavigationController : MonoBehaviour
         }
 
         return leftPosition.x.CompareTo(rightPosition.x);
+    }
+
+    private int FindGroupedSelectableTarget(int originIndex, Vector2 navigationInput)
+    {
+        if (!IsSelectable(originIndex))
+        {
+            return -1;
+        }
+
+        Transform originGroup = FindNavigationGroup(_runtimeSelectables[originIndex]);
+        if (originGroup == null)
+        {
+            return -1;
+        }
+
+        float horizontalMagnitude = Mathf.Abs(navigationInput.x);
+        float verticalMagnitude = Mathf.Abs(navigationInput.y);
+        bool useVertical = verticalMagnitude >= horizontalMagnitude;
+
+        Vector2 origin = GetScreenPosition(_runtimeSelectables[originIndex]);
+        int bestIndex = -1;
+        float bestAxisDistance = float.MaxValue;
+        float bestCrossDistance = float.MaxValue;
+        float bestSquaredDistance = float.MaxValue;
+
+        for (int i = 0; i < _runtimeSelectables.Count; i++)
+        {
+            if (i == originIndex || !IsSelectable(i))
+            {
+                continue;
+            }
+
+            if (FindNavigationGroup(_runtimeSelectables[i]) != originGroup)
+            {
+                continue;
+            }
+
+            Vector2 candidatePosition = GetScreenPosition(_runtimeSelectables[i]);
+            Vector2 delta = candidatePosition - origin;
+            float axisDelta = useVertical ? delta.y : delta.x;
+            if ((useVertical && navigationInput.y > 0f && axisDelta <= 0f) ||
+                (useVertical && navigationInput.y < 0f && axisDelta >= 0f) ||
+                (!useVertical && navigationInput.x > 0f && axisDelta <= 0f) ||
+                (!useVertical && navigationInput.x < 0f && axisDelta >= 0f))
+            {
+                continue;
+            }
+
+            float axisDistance = Mathf.Abs(axisDelta);
+            float crossDistance = Mathf.Abs(useVertical ? delta.x : delta.y);
+            float squaredDistance = delta.sqrMagnitude;
+            if (axisDistance < bestAxisDistance - 0.01f ||
+                (Mathf.Abs(axisDistance - bestAxisDistance) <= 0.01f && crossDistance < bestCrossDistance - 0.01f) ||
+                (Mathf.Abs(axisDistance - bestAxisDistance) <= 0.01f && Mathf.Abs(crossDistance - bestCrossDistance) <= 0.01f && squaredDistance < bestSquaredDistance))
+            {
+                bestAxisDistance = axisDistance;
+                bestCrossDistance = crossDistance;
+                bestSquaredDistance = squaredDistance;
+                bestIndex = i;
+            }
+        }
+
+        return bestIndex;
+    }
+
+    private Transform FindNavigationGroup(Selectable selectable)
+    {
+        if (selectable == null)
+        {
+            return null;
+        }
+
+        Transform candidate = selectable.transform.parent;
+        while (candidate != null && candidate != transform)
+        {
+            Selectable[] groupSelectables = candidate.GetComponentsInChildren<Selectable>(false);
+            if (groupSelectables.Length > 1)
+            {
+                return candidate;
+            }
+
+            candidate = candidate.parent;
+        }
+
+        return selectable.transform.parent;
     }
 
     private int FindNearestIndexInDirection(int originIndex, Vector2 navigationInput)

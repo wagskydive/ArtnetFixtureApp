@@ -148,6 +148,7 @@ _Progress note: external WebUI clients now poll `/api/settings` once per second 
 _Progress note: `UI_DpadNavigationController` now uses Input System actions only, supports position-based selectable discovery when no explicit list is configured, and suppresses duplicate same-frame submit invocations._
 _Progress note: D-pad selection now auto-revalidates after runtime menu layout/visibility changes, directional tie-breaking favors in-lane controls to avoid skipped +/- buttons, and submit callbacks ignore non-pressed phases to prevent multi-step increments._
 _Progress note: D-pad navigation now uses Unity Selectable graph neighbors first (fixing nested parent-group up/down traversal) and submit handling now gates held input until canceled to prevent duplicate +/- increments per press._
+_Progress note: D-pad submit now dispatches to a single active `ISubmitHandler` per control (avoiding double increment/decrement when multiple submit-capable components coexist), and vertical navigation now prioritizes in-group child traversal before cross-group jumps._
 
 ### Goal:
 Enable persistent configuration and easy deployment.
