@@ -76,11 +76,14 @@ T16.6 - Since the projector can’t reliably run HttpListener: Load your HTML di
   - Added EditMode regression coverage for both URL strategies: default StreamingAssets file URL pathing and legacy LAN URL composition.
 
 T16.7 - Copy the HTML from StreamingAssets to persistent path at runtime and make the webui work over LAN work again. Currently the webserver doesn't work on another device. When trying to access it using the android devices ip and port it shows a white screen.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - LocalWebUiServer now copies `StreamingAssets/index.html` into `Application.persistentDataPath/WebUi/index.html` during startup, then serves the cached/persistent copy for LAN clients.
+  - Added static-file serving support rooted in the persistent WebUI directory so LAN requests for non-API assets resolve instead of falling through to 404/white-screen behavior.
+  - Added EditMode coverage to verify the persistent HTML copy is created during Awake and contains expected WebUI content.
 
 
 
@@ -1043,7 +1046,7 @@ T9.8 - Document Pixel Mapping setup, DMX addressing scheme, and operational limi
 
 
 
-T16.7 - Next run: Validate Android-device behavior for in-app WebView API calls and all relative resource/script fetches when loaded via direct StreamingAssets file:// URLs.
+T16.8 - Next run: Validate Android LAN client behavior against `LocalWebUiServer` persistent WebUI copy serving, including `/api/settings` requests and any additional static assets referenced by the page.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written

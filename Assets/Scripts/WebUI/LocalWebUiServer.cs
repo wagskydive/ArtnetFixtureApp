@@ -21,6 +21,7 @@ public class LocalWebUiServer : MonoBehaviour
     [SerializeField] private WebUiSettingsBridge settingsBridge;
     [SerializeField] private int port = 8080;
     [SerializeField] private string webUiFileName = "index.html";
+    [SerializeField] private string persistentWebUiFolderName = "WebUi";
 
     private readonly Queue<MainThreadInvocation> _mainThreadQueue = new Queue<MainThreadInvocation>(8);
     private readonly object _queueLock = new object();
@@ -29,11 +30,13 @@ public class LocalWebUiServer : MonoBehaviour
     private Thread _serverThread;
     private volatile bool _isRunning;
     private byte[] _cachedHtmlBytes;
+    private string _persistentWebUiFilePath;
 
     public int Port => port;
 
     private void Awake()
     {
+        CopyWebUiFileToPersistentPath();
         CacheHtmlPayload();
     }
 
@@ -60,7 +63,7 @@ public class LocalWebUiServer : MonoBehaviour
 
     private void CacheHtmlPayload()
     {
-        string html = LoadHtmlFromStreamingAssets();
+        string html = LoadHtmlFromPersistentCopy();
         _cachedHtmlBytes = Encoding.UTF8.GetBytes(html);
     }
 
@@ -69,9 +72,66 @@ public class LocalWebUiServer : MonoBehaviour
         return _cachedHtmlBytes;
     }
 
-    private string LoadHtmlFromStreamingAssets()
+    public string GetPersistentWebUiFilePath()
+    {
+        return _persistentWebUiFilePath;
+    }
+
+    private void CopyWebUiFileToPersistentPath()
+    {
+        try
+        {
+            string fileName = string.IsNullOrWhiteSpace(webUiFileName) ? "index.html" : webUiFileName;
+            string persistentDirectory = Path.Combine(Application.persistentDataPath, persistentWebUiFolderName);
+            Directory.CreateDirectory(persistentDirectory);
+
+            _persistentWebUiFilePath = Path.Combine(persistentDirectory, fileName);
+
+            byte[] htmlBytes = ReadStreamingAssetBytes(fileName);
+            if (htmlBytes == null || htmlBytes.Length == 0)
+            {
+                return;
+            }
+
+            File.WriteAllBytes(_persistentWebUiFilePath, htmlBytes);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"LocalWebUiServer failed to copy WebUI HTML to persistent storage: {ex.Message}");
+        }
+    }
+
+    private string LoadHtmlFromPersistentCopy()
     {
         string fallbackHtml = "<html><body>Missing StreamingAssets/index.html content.</body></html>";
+
+        try
+        {
+            if (!string.IsNullOrEmpty(_persistentWebUiFilePath) && File.Exists(_persistentWebUiFilePath))
+            {
+                return File.ReadAllText(_persistentWebUiFilePath, Encoding.UTF8);
+            }
+
+            byte[] bytes = ReadStreamingAssetBytes(webUiFileName);
+            if (bytes != null && bytes.Length > 0)
+            {
+                return Encoding.UTF8.GetString(bytes);
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"LocalWebUiServer failed to load persistent WebUI HTML: {ex.Message}");
+        }
+
+        return fallbackHtml;
+    }
+
+    private byte[] ReadStreamingAssetBytes(string fileName)
+    {
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            return null;
+        }
 
         try
         {
@@ -81,34 +141,38 @@ public class LocalWebUiServer : MonoBehaviour
                 AndroidJavaObject activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
                 AndroidJavaObject assetManager = activity.Call<AndroidJavaObject>("getAssets");
 
-                using (var inputStream = assetManager.Call<AndroidJavaObject>("open", webUiFileName))
+                using (var inputStream = assetManager.Call<AndroidJavaObject>("open", fileName))
+                using (var outputStream = new AndroidJavaObject("java.io.ByteArrayOutputStream"))
                 {
-                    int available = inputStream.Call<int>("available");
-                    if (available <= 0)
+                    var buffer = new byte[4096];
+                    while (true)
                     {
-                        return fallbackHtml;
+                        int bytesRead = inputStream.Call<int>("read", buffer);
+                        if (bytesRead <= 0)
+                        {
+                            break;
+                        }
+
+                        outputStream.Call("write", buffer, 0, bytesRead);
                     }
 
-                    byte[] bytes = new byte[available];
-                    inputStream.Call<int>("read", bytes);
-                    inputStream.Call("close");
-                    return Encoding.UTF8.GetString(bytes);
+                    return outputStream.Call<byte[]>("toByteArray");
                 }
             }
 #else
-            string htmlPath = Path.Combine(Application.streamingAssetsPath, webUiFileName);
+            string htmlPath = Path.Combine(Application.streamingAssetsPath, fileName);
             if (File.Exists(htmlPath))
             {
-                return File.ReadAllText(htmlPath, Encoding.UTF8);
+                return File.ReadAllBytes(htmlPath);
             }
 #endif
         }
         catch (Exception ex)
         {
-            Debug.LogWarning($"LocalWebUiServer failed to load StreamingAssets HTML: {ex.Message}");
+            Debug.LogWarning($"LocalWebUiServer failed to read StreamingAssets file '{fileName}': {ex.Message}");
         }
 
-        return fallbackHtml;
+        return null;
     }
 
     private void StartServer()
@@ -207,6 +271,11 @@ public class LocalWebUiServer : MonoBehaviour
         if (path == "/" || path == "/index.html")
         {
             WriteHtml(context.Response);
+            return;
+        }
+
+        if (TryWriteStaticFile(path, context.Response))
+        {
             return;
         }
 
@@ -318,6 +387,68 @@ public class LocalWebUiServer : MonoBehaviour
     private void WriteHtml(HttpListenerResponse response)
     {
         WritePayload(response, _cachedHtmlBytes ?? Array.Empty<byte>(), "text/html");
+    }
+
+    private bool TryWriteStaticFile(string path, HttpListenerResponse response)
+    {
+        if (string.IsNullOrEmpty(path) || path == "/")
+        {
+            return false;
+        }
+
+        string relativePath = path.TrimStart('/');
+        if (string.IsNullOrEmpty(relativePath))
+        {
+            return false;
+        }
+
+        string baseDirectory = !string.IsNullOrEmpty(_persistentWebUiFilePath)
+            ? Path.GetDirectoryName(_persistentWebUiFilePath)
+            : null;
+
+        if (string.IsNullOrEmpty(baseDirectory) || !Directory.Exists(baseDirectory))
+        {
+            return false;
+        }
+
+        string resolvedPath = Path.GetFullPath(Path.Combine(baseDirectory, relativePath));
+        string resolvedBaseDirectory = Path.GetFullPath(baseDirectory);
+        if (!resolvedPath.StartsWith(resolvedBaseDirectory, StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        if (!File.Exists(resolvedPath))
+        {
+            return false;
+        }
+
+        byte[] payload = File.ReadAllBytes(resolvedPath);
+        WritePayload(response, payload, GetMimeTypeFromPath(resolvedPath));
+        return true;
+    }
+
+    private static string GetMimeTypeFromPath(string filePath)
+    {
+        string extension = Path.GetExtension(filePath).ToLowerInvariant();
+        switch (extension)
+        {
+            case ".css":
+                return "text/css";
+            case ".js":
+                return "application/javascript";
+            case ".json":
+                return "application/json";
+            case ".png":
+                return "image/png";
+            case ".jpg":
+            case ".jpeg":
+                return "image/jpeg";
+            case ".svg":
+                return "image/svg+xml";
+            default:
+                return "application/octet-stream";
+        }
     }
 
     private static string ReadBody(HttpListenerRequest request)
