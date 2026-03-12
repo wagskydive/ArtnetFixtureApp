@@ -145,6 +145,7 @@ _Progress note: settings menu startup behavior is now fixed to always hidden on 
 _Progress note: in-app Android WebView overlay now supports transparent background plus normalized position/size controls so the WebUI can run as a resizable non-fullscreen overlay._
 _Progress note: in-app settings now run Unity UI only; `InAppWebViewSurface` has been removed, while LAN/localhost WebUI continues through `LocalWebUiServer` as an external client surface._
 _Progress note: external WebUI clients now poll `/api/settings` once per second to reflect live settings changes made from Unity UI or another browser session._
+_Progress note: `UI_DpadNavigationController` now uses Input System actions only, supports position-based selectable discovery when no explicit list is configured, and suppresses duplicate same-frame submit invocations._
 
 ### Goal:
 Enable persistent configuration and easy deployment.
@@ -245,5 +246,4 @@ Add a new mode that makes the app function like a pixel wall.
 - Prioritize **stability, low memory use, and predictable 30 FPS performance**.
 - Avoid any runtime memory allocations in Update/Render loops.
 - All features that risk performance (high-res video, multi-pass shaders) are optional and must be gated by mode selection.
-
 
