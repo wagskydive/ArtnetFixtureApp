@@ -9,7 +9,9 @@ public class WebUiSettingsTests
     public void SetUp()
     {
         PlayerPrefs.DeleteKey("webui.device.name");
-        PlayerPrefs.DeleteKey("webui.password");
+        PlayerPrefs.DeleteKey(SaveLoadSettings.WebUiPasswordLegacyKey);
+        PlayerPrefs.DeleteKey(SaveLoadSettings.WebUiPasswordHashKey);
+        PlayerPrefs.DeleteKey(SaveLoadSettings.WebUiPasswordEnabledKey);
         PlayerPrefs.DeleteKey("dmx.fixture.mode");
         PlayerPrefs.DeleteKey("dmx.universe");
         PlayerPrefs.DeleteKey("dmx.channel");
@@ -116,8 +118,8 @@ public class WebUiSettingsTests
     [Test]
     public void LocalWebUiServer_LoginApi_ValidatesConfiguredPassword()
     {
-        SaveLoadSettings.SaveString(SaveLoadSettings.WebUiPasswordKey, "secret");
-        SaveLoadSettings.Save();
+        WebUiPasswordProtection.SetPassword("secret");
+        WebUiPasswordProtection.SetEnabled(true);
 
         var serverGo = new GameObject("web-server");
         var server = serverGo.AddComponent<LocalWebUiServer>();
@@ -129,6 +131,20 @@ public class WebUiSettingsTests
         Assert.That(succeeded, Does.Contain("\"authenticated\":true"));
 
         Object.DestroyImmediate(serverGo);
+    }
+
+    [Test]
+    public void WebUiPasswordProtection_StoresHashAndVerifiesRawPassword()
+    {
+        bool saved = WebUiPasswordProtection.SetPassword("hello123");
+
+        string storedHash = SaveLoadSettings.LoadString(SaveLoadSettings.WebUiPasswordHashKey, string.Empty);
+
+        Assert.That(saved, Is.True);
+        Assert.That(storedHash, Is.Not.EqualTo("hello123"));
+        Assert.That(storedHash.Length, Is.EqualTo(64));
+        Assert.That(WebUiPasswordProtection.VerifyPassword("hello123"), Is.True);
+        Assert.That(WebUiPasswordProtection.VerifyPassword("bad"), Is.False);
     }
 
     private static void SetPrivateField(object target, string fieldName, object value)

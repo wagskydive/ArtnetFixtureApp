@@ -11,6 +11,9 @@ public class UI_DmxSettings : MonoBehaviour
     [SerializeField] private InputField universeInputField;
     [SerializeField] private Text fixtureNameValueText;
     [SerializeField] private Text ipAddressValueText;
+    [SerializeField] private Toggle webUiPasswordEnabledToggle;
+    [SerializeField] private InputField webUiPasswordInputField;
+    [SerializeField] private Button webUiPasswordApplyButton;
     [SerializeField] private int currentPatternType = 0; // Pattern type selector (0=Static, 1=Pulse, 2=ColorShift)
     [SerializeField] private ArtNetReceiver artNetReceiver;
     [SerializeField] private UI_FixtureMeshManager fixtureMeshManager;
@@ -69,6 +72,12 @@ public class UI_DmxSettings : MonoBehaviour
         LoadPreferences();
         ApplySettingsToReceiver();
         SaveLoadSettings.OnSettingsSaved += LoadSettingsAndUpdateDisplay;
+        RefreshPasswordControls();
+    }
+
+    private void OnDestroy()
+    {
+        SaveLoadSettings.OnSettingsSaved -= LoadSettingsAndUpdateDisplay;
     }
 
     private void OnDisable()
@@ -163,6 +172,7 @@ public class UI_DmxSettings : MonoBehaviour
         }
 
         UpdateDeviceInfoDisplay();
+        RefreshPasswordControls();
     }
 
     private void ApplySettingsToReceiver()
@@ -252,6 +262,53 @@ public class UI_DmxSettings : MonoBehaviour
         }
 
         return "127.0.0.1";
+    }
+
+    public void OnWebUiPasswordProtectionToggleChanged(bool enabled)
+    {
+        WebUiPasswordProtection.SetEnabled(enabled);
+        RefreshPasswordControls();
+    }
+
+    public void ApplyWebUiPasswordFromInput()
+    {
+        if (webUiPasswordInputField == null)
+        {
+            return;
+        }
+
+        bool saved = WebUiPasswordProtection.SetPassword(webUiPasswordInputField.text);
+        if (saved)
+        {
+            webUiPasswordInputField.text = string.Empty;
+        }
+
+        RefreshPasswordControls();
+    }
+
+    private void RefreshPasswordControls()
+    {
+        bool enabled = WebUiPasswordProtection.IsEnabled();
+        bool configured = WebUiPasswordProtection.HasConfiguredPassword();
+
+        if (webUiPasswordEnabledToggle != null)
+        {
+            webUiPasswordEnabledToggle.SetIsOnWithoutNotify(enabled);
+        }
+
+        if (webUiPasswordInputField != null)
+        {
+            Text placeholderText = webUiPasswordInputField.placeholder as Text;
+            if (placeholderText != null)
+            {
+                placeholderText.text = configured ? "Enter new password" : "Set password";
+            }
+        }
+
+        if (webUiPasswordApplyButton != null)
+        {
+            webUiPasswordApplyButton.interactable = enabled;
+        }
     }
 
     private void OnPatternTypeChanged()

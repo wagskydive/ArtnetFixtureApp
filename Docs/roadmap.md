@@ -254,3 +254,4 @@ _Progress note: WebUI fixture-name editing now saves on submit (`change`/Enter) 
 _Progress note: fixture name + resolved local IPv4 are now surfaced in WebUI (`/api/settings` metadata) and Unity UI display fields for faster device identification on-site._
 _Progress note: WebUI now includes responsive mobile styling for phone-sized screens with larger controls and improved layout density._
 _Progress note: WebUI password flow is now active with persisted password storage and `/api/login` validation endpoint for lock/unlock behavior._
+_Progress note: WebUI password protection now uses SHA-256 hashed storage with a Unity UI-managed enable toggle, and browser clients cache successful auth state while still re-locking when protection is enabled/configured._

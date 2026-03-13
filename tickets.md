@@ -76,11 +76,14 @@ T17.8 - Make the password function working
 
 
 T17.8a - Store a hashed password using sha256 and make a password handling class with a input panel field inside the UnityUi and a toggle to enable/disable password protection from the UnityUI. Default this toggle to be off and save its state in user prefs. The password can only be set and changed in the UnityUI and the webui locks up when the password is not provided. And once its authorized, the password field should dissapear. When the password is toggled or changed in the Unity UI the webui should respond accordingly. The webui should be able to cache the password in the browser.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - Added `WebUiPasswordProtection` with SHA-256 hashing, legacy plaintext migration, and persisted password-enabled toggle state in PlayerPrefs.
+  - Updated `LocalWebUiServer` login flow to validate against hashed passwords and gate auth only when password protection is enabled + configured.
+  - Updated WebUI lock/unlock behavior to cache authorization in browser storage and react to Unity-side password toggle changes via `/api/settings` refresh.
 
 T17.9 - Redesign the Unity UI to look more professional
 - [ ] Started

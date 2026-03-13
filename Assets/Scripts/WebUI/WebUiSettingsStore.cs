@@ -12,6 +12,7 @@ public class WebUiSettingsData
     public int gridX = 8;
     public int gridY = 8;
     public bool passwordConfigured;
+    public bool passwordEnabled;
 }
 
 public static class WebUiSettingsStore
@@ -29,7 +30,8 @@ public static class WebUiSettingsStore
             fixtureAmount = Mathf.Clamp(SaveLoadSettings.LoadInt(SaveLoadSettings.FixtureCountKey, 1), 1, 16),
             gridX = ClampPixelDimension(SaveLoadSettings.LoadInt(SaveLoadSettings.PixelColumnsKey, 8)),
             gridY = ClampPixelDimension(SaveLoadSettings.LoadInt(SaveLoadSettings.PixelRowsKey, 8)),
-            passwordConfigured = !string.IsNullOrWhiteSpace(SaveLoadSettings.LoadString(SaveLoadSettings.WebUiPasswordKey, string.Empty))
+            passwordConfigured = WebUiPasswordProtection.HasConfiguredPassword(),
+            passwordEnabled = WebUiPasswordProtection.IsEnabled()
         };
     }
 
@@ -49,7 +51,8 @@ public static class WebUiSettingsStore
             fixtureAmount = Mathf.Clamp(raw.fixtureAmount, 1, 16),
             gridX = ClampPixelDimension(raw.gridX),
             gridY = ClampPixelDimension(raw.gridY),
-            passwordConfigured = raw.passwordConfigured
+            passwordConfigured = raw.passwordConfigured,
+            passwordEnabled = raw.passwordEnabled
         };
     }
 

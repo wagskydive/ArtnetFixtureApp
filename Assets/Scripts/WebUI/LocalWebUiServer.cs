@@ -45,6 +45,7 @@ public class LocalWebUiServer : MonoBehaviour
 
     private void Awake()
     {
+        WebUiPasswordProtection.MigrateLegacyPasswordIfNeeded();
         CacheHtmlPayload();
     }
 
@@ -210,19 +211,14 @@ public class LocalWebUiServer : MonoBehaviour
         {
             WebUiSettingsData loaded = settingsBridge != null ? settingsBridge.GetSettings() : WebUiSettingsStore.Load();
             loaded.ipAddress = GetLocalIpv4Address();
-            loaded.passwordConfigured = IsPasswordConfigured();
+            loaded.passwordConfigured = WebUiPasswordProtection.HasConfiguredPassword();
+            loaded.passwordEnabled = WebUiPasswordProtection.IsEnabled();
             return WebUiSettingsStore.ToJson(loaded);
         }
 
         if (httpMethod == "POST")
         {
             WebUiSettingsData request = WebUiSettingsStore.FromJson(requestBody);
-            string incomingPassword = ExtractPasswordFromRequest(requestBody);
-            if (incomingPassword != null)
-            {
-                SaveLoadSettings.SaveString(SaveLoadSettings.WebUiPasswordKey, incomingPassword.Trim());
-            }
-
             WebUiSettingsData settings = settingsBridge != null
                 ? settingsBridge.SaveSettingsFromJson(WebUiSettingsStore.ToJson(request))
                 : request;
@@ -233,7 +229,8 @@ public class LocalWebUiServer : MonoBehaviour
             }
 
             settings.ipAddress = GetLocalIpv4Address();
-            settings.passwordConfigured = IsPasswordConfigured();
+            settings.passwordConfigured = WebUiPasswordProtection.HasConfiguredPassword();
+            settings.passwordEnabled = WebUiPasswordProtection.IsEnabled();
             return WebUiSettingsStore.ToJson(settings);
         }
 
@@ -261,9 +258,10 @@ public class LocalWebUiServer : MonoBehaviour
             ? new WebUiAuthRequest()
             : JsonUtility.FromJson<WebUiAuthRequest>(requestBody);
 
-        string configuredPassword = SaveLoadSettings.LoadString(SaveLoadSettings.WebUiPasswordKey, string.Empty);
-        bool authenticated = string.IsNullOrWhiteSpace(configuredPassword)
-            || string.Equals(configuredPassword, request != null ? request.password : string.Empty, StringComparison.Ordinal);
+        bool passwordEnabled = WebUiPasswordProtection.IsEnabled();
+        bool passwordConfigured = WebUiPasswordProtection.HasConfiguredPassword();
+        bool authenticated = !passwordEnabled || !passwordConfigured
+            || WebUiPasswordProtection.VerifyPassword(request != null ? request.password : string.Empty);
 
         return JsonUtility.ToJson(new WebUiAuthResponse { authenticated = authenticated });
     }
@@ -327,45 +325,6 @@ public class LocalWebUiServer : MonoBehaviour
         }
     }
 
-    private static string ExtractPasswordFromRequest(string requestBody)
-    {
-        if (string.IsNullOrWhiteSpace(requestBody))
-        {
-            return null;
-        }
-
-        const string token = "\"password\"";
-        int tokenIndex = requestBody.IndexOf(token, StringComparison.Ordinal);
-        if (tokenIndex < 0)
-        {
-            return null;
-        }
-
-        int colonIndex = requestBody.IndexOf(':', tokenIndex + token.Length);
-        if (colonIndex < 0)
-        {
-            return null;
-        }
-
-        int firstQuote = requestBody.IndexOf('"', colonIndex + 1);
-        if (firstQuote < 0)
-        {
-            return null;
-        }
-
-        int secondQuote = requestBody.IndexOf('"', firstQuote + 1);
-        if (secondQuote < 0)
-        {
-            return null;
-        }
-
-        return requestBody.Substring(firstQuote + 1, secondQuote - firstQuote - 1);
-    }
-
-    private static bool IsPasswordConfigured()
-    {
-        return !string.IsNullOrWhiteSpace(SaveLoadSettings.LoadString(SaveLoadSettings.WebUiPasswordKey, string.Empty));
-    }
 
     private static string GetLocalIpv4Address()
     {
