@@ -85,6 +85,13 @@ T17.8a - Store a hashed password using sha256 and make a password handling class
   - Updated `LocalWebUiServer` login flow to validate against hashed passwords and gate auth only when password protection is enabled + configured.
   - Updated WebUI lock/unlock behavior to cache authorization in browser storage and react to Unity-side password toggle changes via `/api/settings` refresh.
 
+T17.8b - Make the webui react directly when a password is enabled or changed. Currently, when the webui is already loaded and a password is enabled, the webui is still functional until the page is refreshed. The enable password toggle needs to directly tell the webui to refresh/reload and show the login screen. Currently the reverse already works, so whe  the login page is shown because the the password toggle is enabled and the user disables the password in the unity ui, the webui automatically leaves the login screen and opens the main settings.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 T17.9 - Redesign the Unity UI to look more professional
 - [ ] Started
 - [ ] Behavior Written
