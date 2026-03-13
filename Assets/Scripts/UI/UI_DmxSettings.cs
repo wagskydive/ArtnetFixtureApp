@@ -11,6 +11,7 @@ public class UI_DmxSettings : MonoBehaviour
     [SerializeField] private InputField universeInputField;
     [SerializeField] private Text fixtureNameValueText;
     [SerializeField] private Text ipAddressValueText;
+    [SerializeField] private GameObject passwordPanel;
     [SerializeField] private Toggle webUiPasswordEnabledToggle;
     [SerializeField] private InputField webUiPasswordInputField;
     [SerializeField] private Button webUiPasswordApplyButton;
@@ -166,7 +167,7 @@ public class UI_DmxSettings : MonoBehaviour
         CurrentPatternType = SaveLoadSettings.LoadInt(SaveLoadSettings.DmxPatternKey, CurrentPatternType);
         isLoadingPreferences = false;
         hasLoadedPreferences = true;
-        if(apply)
+        if (apply)
         {
             ApplySettingsToReceiver();
         }
@@ -290,6 +291,10 @@ public class UI_DmxSettings : MonoBehaviour
     {
         bool enabled = WebUiPasswordProtection.IsEnabled();
         bool configured = WebUiPasswordProtection.HasConfiguredPassword();
+        if(passwordPanel != null)
+        {
+            passwordPanel.SetActive(enabled);
+        }
 
         if (webUiPasswordEnabledToggle != null)
         {
