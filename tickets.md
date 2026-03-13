@@ -1,5 +1,14 @@
 # Tickets
 
+
+
+T18.1 - Add help button in UI. The help button should open a dialog popup to explain how the app is supposed to work.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 T17.1 - Rework the ui idea. abandon the webview approach. The webui will only be used on external devices and the in-app ui will be unity ui. This ui still exists, But the UI_SettingsPanelToggle needs to be modified. and the InAppWebViewSurface is no longer needed. The UnityUi needs to use playerprefs and also the webui uses those, so settings nan be adjusted through both those ways. If a webui browser is open while settings are changed inside the app that should directly update the webui and alse vise versa.
 - [x] Started
 - [x] Behavior Written
@@ -93,11 +102,11 @@ T17.8b - Make the webui react directly when a password is enabled or changed. Cu
 - [ ] Documentation Written
 
 T17.9 - Redesign the Unity UI to look more professional
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
 
 T16.1 - The in-app menu is not shown inside the app, but that might require to write a webviewer or if it is aleady written it is a bug that needs to be fixed.
 Currently on app start, the app is opening the settings menu, which gives a black screen now and requires the user to press the back button. The app should not open the settings menu on app start. The required behavior is for the app to start running normally and only show the settings menu when the user opens it.
