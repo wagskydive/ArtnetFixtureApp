@@ -44,6 +44,11 @@ public class DmxModeManager : MonoBehaviour
 
     public void SetFixtureMode(FixtureMode mode)
     {
+        if (currentMode == mode)
+        {
+            return;
+        }
+
         currentMode = mode;
         ApplyModeMaterials();
         OnModeChanged?.Invoke(mode);

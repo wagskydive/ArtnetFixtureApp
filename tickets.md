@@ -40,39 +40,39 @@ T17.4 - Make the unity Ui update when the webui changes a setting. This can be d
 - [x] Documentation Written
 
 T17.4a - The app now shows a white frame when a setting is changed. Make the system that prevents that so that the white flash is not visible when the universe, dmx channel or mode is changed.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
 
 T17.5 - Make the Webui Name field react only after it is completely typed and submitted. Currently it doesn't make typeing a name easy because the player pref gets saved to quickly and the webui reloads during typing.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
   
 T17.6 - Add Fixture name and IP address in the Unity UI and in the webui.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
 
 T17.7 - Make the webui mobile friendly. The scaling is not good on telephone
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
 
 T17.8 - Make the password function working
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
 
 T17.9 - Redesign the Unity UI to look more professional
 - [ ] Started
@@ -1077,5 +1077,3 @@ T9.8 - Document Pixel Mapping setup, DMX addressing scheme, and operational limi
 - [ ] Code Written
 - [ ] Tests Passed
 - [ ] Documentation Written
-
-
