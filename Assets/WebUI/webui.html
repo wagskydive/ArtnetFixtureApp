@@ -194,9 +194,7 @@
 
             <div class="section">
 
-                <label>WebUI Password</label> <input id="webUiPassword" type="password" tabindex="8" placeholder="Leave empty to keep unchanged">
-
-                <button class="secondary" id="restartFixture" tabindex="9">Restart
+                <button class="secondary" id="restartFixture" tabindex="8">Restart
                     Fixture</button>
                 <p id="settingsStatus" class="status" aria-live="polite"></p>
 
@@ -246,13 +244,35 @@
         const companion = params.get("companion") === "true"
 
         let passwordEnabled = false
+        let hasSessionAuthorization = false
+        const authCacheKey = "webui.password.auth"
 
         const loginSection = document.getElementById("loginSection")
         const settingsPage = document.getElementById("settingsPage")
 
-        if (!isLocal && passwordEnabled) {
-            loginSection.classList.remove("hidden")
-            settingsPage.classList.add("hidden")
+        function readCachedAuth() {
+            return window.localStorage.getItem(authCacheKey) === "1"
+        }
+
+        function writeCachedAuth(value) {
+            if (value) {
+                window.localStorage.setItem(authCacheKey, "1")
+            } else {
+                window.localStorage.removeItem(authCacheKey)
+            }
+        }
+
+        function syncAuthUi() {
+            const mustLock = !isLocal && passwordEnabled && !hasSessionAuthorization
+            if (mustLock) {
+                loginSection.classList.remove("hidden")
+                settingsPage.classList.add("hidden")
+                settingsStatus.textContent = "Password required"
+                return
+            }
+
+            loginSection.classList.add("hidden")
+            settingsPage.classList.remove("hidden")
         }
 
         document.getElementById("loginBtn").onclick = async function () {
@@ -272,9 +292,10 @@
                 return
             }
 
-            settingsPage.classList.remove("hidden")
-            loginSection.classList.add("hidden")
+            hasSessionAuthorization = true
+            writeCachedAuth(true)
             settingsStatus.textContent = "Unlocked"
+            syncAuthUi()
         }
 
         const modeSelect = document.getElementById("fixtureMode")
@@ -323,11 +344,9 @@
             document.getElementById("startChannel"),
             document.getElementById("fixtureAmount"),
             document.getElementById("gridX"),
-            document.getElementById("gridY"),
-            document.getElementById("webUiPassword")
+            document.getElementById("gridY")
         ]
         const deviceNameElement = document.getElementById("deviceName")
-        const webUiPasswordElement = document.getElementById("webUiPassword")
         const fixtureNameHeading = document.getElementById("fixtureNameHeading")
         const ipAddressLabel = document.getElementById("ipAddressLabel")
         const navigableElements = Array.from(document.querySelectorAll("input, select, button"))
@@ -350,8 +369,7 @@
                 startChannel: parseInt(document.getElementById("startChannel").value),
                 fixtureAmount: parseInt(document.getElementById("fixtureAmount").value),
                 gridX: parseInt(document.getElementById("gridX").value),
-                gridY: parseInt(document.getElementById("gridY").value),
-                password: webUiPasswordElement.value
+                gridY: parseInt(document.getElementById("gridY").value)
             }
         }
 
@@ -365,7 +383,11 @@
             document.getElementById("gridY").value = clampValue(parseInt(settings.gridY) || 8, 8, 32)
             fixtureNameHeading.textContent = `Fixture: ${settings.deviceName || "ArtnetFixture"}`
             ipAddressLabel.textContent = settings.ipAddress || "127.0.0.1"
-            passwordEnabled = !!settings.passwordConfigured
+            passwordEnabled = !!settings.passwordEnabled && !!settings.passwordConfigured
+            if (!passwordEnabled) {
+                hasSessionAuthorization = true
+                writeCachedAuth(false)
+            }
             modeSelect.dispatchEvent(new Event("change"))
         }
 
@@ -391,7 +413,6 @@
                 suppressAutoSave = true
                 applySettingsToUi(persisted)
                 suppressAutoSave = false
-                webUiPasswordElement.value = ""
                 settingsStatus.textContent = "Saved"
             } catch (error) {
                 settingsStatus.textContent = "Save failed"
@@ -428,15 +449,9 @@
                 lastServerSettingsJson = settingsJson
                 applySettingsToUi(settings)
 
-                if (!isLocal && passwordEnabled) {
-                    loginSection.classList.remove("hidden")
-                    settingsPage.classList.add("hidden")
-                    settingsStatus.textContent = "Password required"
-                } else {
-                    loginSection.classList.add("hidden")
-                    settingsPage.classList.remove("hidden")
-                    settingsStatus.textContent = "Ready"
-                }
+                hasSessionAuthorization = isLocal || !passwordEnabled || readCachedAuth()
+                settingsStatus.textContent = hasSessionAuthorization ? "Ready" : "Password required"
+                syncAuthUi()
             } catch (e) {
                 console.log("Failed to load settings", e)
             }
@@ -465,7 +480,8 @@
                 applySettingsToUi(settings)
                 suppressAutoSave = false
                 isApplyingRemoteState = false
-                settingsStatus.textContent = "Updated"
+                settingsStatus.textContent = hasSessionAuthorization ? "Updated" : "Password required"
+                syncAuthUi()
             } catch (e) {
                 console.log("Failed to refresh settings", e)
             }
