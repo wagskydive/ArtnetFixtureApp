@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using UnityEngine;
@@ -14,6 +15,18 @@ public class LocalWebUiServer : MonoBehaviour
         public ManualResetEventSlim WaitHandle;
         public string Result;
         public Exception Exception;
+    }
+
+    [Serializable]
+    private class WebUiAuthRequest
+    {
+        public string password;
+    }
+
+    [Serializable]
+    private class WebUiAuthResponse
+    {
+        public bool authenticated;
     }
 
     [SerializeField] private TextAsset webUiHtml;
@@ -168,6 +181,14 @@ public class LocalWebUiServer : MonoBehaviour
             return;
         }
 
+        if (path == "/api/login")
+        {
+            string requestBody = context.Request.HttpMethod == "POST" ? ReadBody(context.Request) : null;
+            string json = HandleLoginApiRequest(context.Request.HttpMethod, requestBody);
+            WriteJson(context.Response, json);
+            return;
+        }
+
         context.Response.StatusCode = 404;
         WriteText(context.Response, "Not found", "text/plain");
     }
@@ -187,25 +208,66 @@ public class LocalWebUiServer : MonoBehaviour
     {
         if (httpMethod == "GET")
         {
-            return settingsBridge != null ? settingsBridge.GetSettingsJson() : WebUiSettingsStore.ToJson(WebUiSettingsStore.Load());
+            WebUiSettingsData loaded = settingsBridge != null ? settingsBridge.GetSettings() : WebUiSettingsStore.Load();
+            loaded.ipAddress = GetLocalIpv4Address();
+            loaded.passwordConfigured = IsPasswordConfigured();
+            return WebUiSettingsStore.ToJson(loaded);
         }
 
         if (httpMethod == "POST")
         {
+            WebUiSettingsData request = WebUiSettingsStore.FromJson(requestBody);
+            string incomingPassword = ExtractPasswordFromRequest(requestBody);
+            if (incomingPassword != null)
+            {
+                SaveLoadSettings.SaveString(SaveLoadSettings.WebUiPasswordKey, incomingPassword.Trim());
+            }
+
             WebUiSettingsData settings = settingsBridge != null
-                ? settingsBridge.SaveSettingsFromJson(requestBody)
-                : WebUiSettingsStore.FromJson(requestBody);
+                ? settingsBridge.SaveSettingsFromJson(WebUiSettingsStore.ToJson(request))
+                : request;
 
             if (settingsBridge == null)
             {
                 WebUiSettingsStore.Save(settings);
             }
 
+            settings.ipAddress = GetLocalIpv4Address();
+            settings.passwordConfigured = IsPasswordConfigured();
             return WebUiSettingsStore.ToJson(settings);
         }
 
         return "{}";
     }
+
+    internal string HandleLoginApiRequest(string httpMethod, string requestBody)
+    {
+        return InvokeOnMainThread(() => ExecuteLoginApiActionImmediately(httpMethod, requestBody));
+    }
+
+    public string HandleLoginApiRequestImmediately(string httpMethod, string requestBody)
+    {
+        return ExecuteLoginApiActionImmediately(httpMethod, requestBody);
+    }
+
+    private string ExecuteLoginApiActionImmediately(string httpMethod, string requestBody)
+    {
+        if (httpMethod != "POST")
+        {
+            return JsonUtility.ToJson(new WebUiAuthResponse { authenticated = false });
+        }
+
+        WebUiAuthRequest request = string.IsNullOrWhiteSpace(requestBody)
+            ? new WebUiAuthRequest()
+            : JsonUtility.FromJson<WebUiAuthRequest>(requestBody);
+
+        string configuredPassword = SaveLoadSettings.LoadString(SaveLoadSettings.WebUiPasswordKey, string.Empty);
+        bool authenticated = string.IsNullOrWhiteSpace(configuredPassword)
+            || string.Equals(configuredPassword, request != null ? request.password : string.Empty, StringComparison.Ordinal);
+
+        return JsonUtility.ToJson(new WebUiAuthResponse { authenticated = authenticated });
+    }
+
     private string InvokeOnMainThread(Func<string> action)
     {
         if (action == null)
@@ -263,6 +325,69 @@ public class LocalWebUiServer : MonoBehaviour
                 invocation.WaitHandle.Set();
             }
         }
+    }
+
+    private static string ExtractPasswordFromRequest(string requestBody)
+    {
+        if (string.IsNullOrWhiteSpace(requestBody))
+        {
+            return null;
+        }
+
+        const string token = "\"password\"";
+        int tokenIndex = requestBody.IndexOf(token, StringComparison.Ordinal);
+        if (tokenIndex < 0)
+        {
+            return null;
+        }
+
+        int colonIndex = requestBody.IndexOf(':', tokenIndex + token.Length);
+        if (colonIndex < 0)
+        {
+            return null;
+        }
+
+        int firstQuote = requestBody.IndexOf('"', colonIndex + 1);
+        if (firstQuote < 0)
+        {
+            return null;
+        }
+
+        int secondQuote = requestBody.IndexOf('"', firstQuote + 1);
+        if (secondQuote < 0)
+        {
+            return null;
+        }
+
+        return requestBody.Substring(firstQuote + 1, secondQuote - firstQuote - 1);
+    }
+
+    private static bool IsPasswordConfigured()
+    {
+        return !string.IsNullOrWhiteSpace(SaveLoadSettings.LoadString(SaveLoadSettings.WebUiPasswordKey, string.Empty));
+    }
+
+    private static string GetLocalIpv4Address()
+    {
+        try
+        {
+            string hostName = Dns.GetHostName();
+            IPAddress[] addresses = Dns.GetHostAddresses(hostName);
+            for (int i = 0; i < addresses.Length; i++)
+            {
+                IPAddress address = addresses[i];
+                if (address.AddressFamily == AddressFamily.InterNetwork && !IPAddress.IsLoopback(address))
+                {
+                    return address.ToString();
+                }
+            }
+        }
+        catch (Exception)
+        {
+            // Ignore network enumeration errors.
+        }
+
+        return "127.0.0.1";
     }
 
     private void WriteHtml(HttpListenerResponse response)

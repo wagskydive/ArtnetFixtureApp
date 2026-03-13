@@ -11,6 +11,7 @@ public static class SaveLoadSettings
     public const string PixelRowsKey = "dmx.pixel.rows";
     public const string PixelColumnsKey = "dmx.pixel.columns";
     public const string WebUiDeviceNameKey = "webui.device.name";
+    public const string WebUiPasswordKey = "webui.password";
 
     public static event Action OnSettingsSaved;
 

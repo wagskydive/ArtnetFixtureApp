@@ -9,6 +9,7 @@ public class WebUiSettingsTests
     public void SetUp()
     {
         PlayerPrefs.DeleteKey("webui.device.name");
+        PlayerPrefs.DeleteKey("webui.password");
         PlayerPrefs.DeleteKey("dmx.fixture.mode");
         PlayerPrefs.DeleteKey("dmx.universe");
         PlayerPrefs.DeleteKey("dmx.channel");
@@ -41,6 +42,7 @@ public class WebUiSettingsTests
         Assert.That(loaded.fixtureAmount, Is.EqualTo(16));
         Assert.That(loaded.gridX, Is.EqualTo(24));
         Assert.That(loaded.gridY, Is.EqualTo(8));
+        Assert.That(loaded.passwordConfigured, Is.False);
     }
 
     [Test]
@@ -106,12 +108,28 @@ public class WebUiSettingsTests
         Assert.That(getData.fixtureMode, Is.EqualTo("surface"));
         Assert.That(getData.dmxUniverse, Is.EqualTo(7));
         Assert.That(getData.startChannel, Is.EqualTo(144));
+        Assert.That(string.IsNullOrWhiteSpace(getData.ipAddress), Is.False);
 
         Object.DestroyImmediate(serverGo);
     }
 
+    [Test]
+    public void LocalWebUiServer_LoginApi_ValidatesConfiguredPassword()
+    {
+        SaveLoadSettings.SaveString(SaveLoadSettings.WebUiPasswordKey, "secret");
+        SaveLoadSettings.Save();
 
+        var serverGo = new GameObject("web-server");
+        var server = serverGo.AddComponent<LocalWebUiServer>();
 
+        string failed = server.HandleLoginApiRequestImmediately("POST", "{\"password\":\"wrong\"}");
+        string succeeded = server.HandleLoginApiRequestImmediately("POST", "{\"password\":\"secret\"}");
+
+        Assert.That(failed, Does.Contain("\"authenticated\":false"));
+        Assert.That(succeeded, Does.Contain("\"authenticated\":true"));
+
+        Object.DestroyImmediate(serverGo);
+    }
 
     private static void SetPrivateField(object target, string fieldName, object value)
     {

@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Net;
+using System.Net.Sockets;
 
 public class UI_DmxSettings : MonoBehaviour
 {
@@ -7,6 +9,8 @@ public class UI_DmxSettings : MonoBehaviour
     [SerializeField] private Text universeValueText;
     [SerializeField] private InputField channelInputField;
     [SerializeField] private InputField universeInputField;
+    [SerializeField] private Text fixtureNameValueText;
+    [SerializeField] private Text ipAddressValueText;
     [SerializeField] private int currentPatternType = 0; // Pattern type selector (0=Static, 1=Pulse, 2=ColorShift)
     [SerializeField] private ArtNetReceiver artNetReceiver;
     [SerializeField] private UI_FixtureMeshManager fixtureMeshManager;
@@ -157,7 +161,8 @@ public class UI_DmxSettings : MonoBehaviour
         {
             ApplySettingsToReceiver();
         }
-        
+
+        UpdateDeviceInfoDisplay();
     }
 
     private void ApplySettingsToReceiver()
@@ -210,6 +215,43 @@ public class UI_DmxSettings : MonoBehaviour
         currentDmxUniverse = Mathf.Clamp(artNetReceiver.GetUniverseForUserInput(), 1, 16);
         UpdateChannelDisplay();
         UpdateUniverseDisplay();
+    }
+
+
+    private void UpdateDeviceInfoDisplay()
+    {
+        if (fixtureNameValueText != null)
+        {
+            fixtureNameValueText.text = SaveLoadSettings.LoadString(SaveLoadSettings.WebUiDeviceNameKey, "ArtnetFixture");
+        }
+
+        if (ipAddressValueText != null)
+        {
+            ipAddressValueText.text = ResolveLocalIpv4Address();
+        }
+    }
+
+    private static string ResolveLocalIpv4Address()
+    {
+        try
+        {
+            string host = Dns.GetHostName();
+            IPAddress[] addresses = Dns.GetHostAddresses(host);
+            for (int i = 0; i < addresses.Length; i++)
+            {
+                IPAddress candidate = addresses[i];
+                if (candidate.AddressFamily == AddressFamily.InterNetwork && !IPAddress.IsLoopback(candidate))
+                {
+                    return candidate.ToString();
+                }
+            }
+        }
+        catch (System.Exception)
+        {
+            // Ignore network lookup issues and fallback to localhost.
+        }
+
+        return "127.0.0.1";
     }
 
     private void OnPatternTypeChanged()

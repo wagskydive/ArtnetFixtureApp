@@ -72,6 +72,27 @@
             display: none;
         }
 
+        @media (max-width: 640px) {
+            body {
+                padding: 8px;
+            }
+
+            .container {
+                width: 100%;
+                max-width: 100%;
+                padding: 12px;
+                border-radius: 8px;
+            }
+
+            .navbar button,
+            button,
+            input,
+            select {
+                font-size: 16px;
+                min-height: 44px;
+            }
+        }
+
         input:focus,
         select:focus,
         button:focus {
@@ -122,6 +143,11 @@
 
         <h1>Virtual Fixture Control</h1>
 
+        <div class="section">
+            <h2 id="fixtureNameHeading">Fixture: ArtnetFixture</h2>
+            <p class="status">IP Address: <span id="ipAddressLabel">127.0.0.1</span></p>
+        </div>
+
         <div id="loginSection" class="section hidden">
 
             <h2>Login</h2>
@@ -136,7 +162,7 @@
 
             <div class="section">
 
-                <label>Device Name</label> <input id="deviceName" tabindex="1">
+                <label>Fixture Name</label> <input id="deviceName" tabindex="1">
 
                 <label>Fixture Mode</label> <select id="fixtureMode" tabindex="2">
 
@@ -168,7 +194,9 @@
 
             <div class="section">
 
-                <button class="secondary" id="restartFixture" tabindex="8">Restart
+                <label>WebUI Password</label> <input id="webUiPassword" type="password" tabindex="8" placeholder="Leave empty to keep unchanged">
+
+                <button class="secondary" id="restartFixture" tabindex="9">Restart
                     Fixture</button>
                 <p id="settingsStatus" class="status" aria-live="polite"></p>
 
@@ -217,7 +245,7 @@
         const tvMode = params.get("tv") === "true"
         const companion = params.get("companion") === "true"
 
-        const passwordEnabled = false
+        let passwordEnabled = false
 
         const loginSection = document.getElementById("loginSection")
         const settingsPage = document.getElementById("settingsPage")
@@ -227,9 +255,26 @@
             settingsPage.classList.add("hidden")
         }
 
-        document.getElementById("loginBtn").onclick = function () {
+        document.getElementById("loginBtn").onclick = async function () {
+            const response = await fetch("/api/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ password: document.getElementById("passwordInput").value || "" })
+            })
+
+            if (!response.ok) {
+                return
+            }
+
+            const payload = await response.json()
+            if (!payload.authenticated) {
+                settingsStatus.textContent = "Invalid password"
+                return
+            }
+
             settingsPage.classList.remove("hidden")
             loginSection.classList.add("hidden")
+            settingsStatus.textContent = "Unlocked"
         }
 
         const modeSelect = document.getElementById("fixtureMode")
@@ -278,8 +323,13 @@
             document.getElementById("startChannel"),
             document.getElementById("fixtureAmount"),
             document.getElementById("gridX"),
-            document.getElementById("gridY")
+            document.getElementById("gridY"),
+            document.getElementById("webUiPassword")
         ]
+        const deviceNameElement = document.getElementById("deviceName")
+        const webUiPasswordElement = document.getElementById("webUiPassword")
+        const fixtureNameHeading = document.getElementById("fixtureNameHeading")
+        const ipAddressLabel = document.getElementById("ipAddressLabel")
         const navigableElements = Array.from(document.querySelectorAll("input, select, button"))
         let saveDebounceTimeout = null
         let suppressAutoSave = false
@@ -300,7 +350,8 @@
                 startChannel: parseInt(document.getElementById("startChannel").value),
                 fixtureAmount: parseInt(document.getElementById("fixtureAmount").value),
                 gridX: parseInt(document.getElementById("gridX").value),
-                gridY: parseInt(document.getElementById("gridY").value)
+                gridY: parseInt(document.getElementById("gridY").value),
+                password: webUiPasswordElement.value
             }
         }
 
@@ -312,6 +363,9 @@
             document.getElementById("fixtureAmount").value = clampValue(parseInt(settings.fixtureAmount) || 1, 1, 16)
             document.getElementById("gridX").value = clampValue(parseInt(settings.gridX) || 8, 8, 32)
             document.getElementById("gridY").value = clampValue(parseInt(settings.gridY) || 8, 8, 32)
+            fixtureNameHeading.textContent = `Fixture: ${settings.deviceName || "ArtnetFixture"}`
+            ipAddressLabel.textContent = settings.ipAddress || "127.0.0.1"
+            passwordEnabled = !!settings.passwordConfigured
             modeSelect.dispatchEvent(new Event("change"))
         }
 
@@ -337,6 +391,7 @@
                 suppressAutoSave = true
                 applySettingsToUi(persisted)
                 suppressAutoSave = false
+                webUiPasswordElement.value = ""
                 settingsStatus.textContent = "Saved"
             } catch (error) {
                 settingsStatus.textContent = "Save failed"
@@ -372,7 +427,16 @@
                 const settingsJson = JSON.stringify(settings)
                 lastServerSettingsJson = settingsJson
                 applySettingsToUi(settings)
-                settingsStatus.textContent = "Ready"
+
+                if (!isLocal && passwordEnabled) {
+                    loginSection.classList.remove("hidden")
+                    settingsPage.classList.add("hidden")
+                    settingsStatus.textContent = "Password required"
+                } else {
+                    loginSection.classList.add("hidden")
+                    settingsPage.classList.remove("hidden")
+                    settingsStatus.textContent = "Ready"
+                }
             } catch (e) {
                 console.log("Failed to load settings", e)
             }
@@ -534,8 +598,14 @@
 
         autoSaveElements.forEach(element => {
             element.addEventListener("change", scheduleAutoSave)
-            if (element.tagName.toLowerCase() === "input" && element.type !== "number") {
-                element.addEventListener("input", scheduleAutoSave)
+            if (element === deviceNameElement) {
+                element.addEventListener("keydown", (event) => {
+                    if (event.key === "Enter") {
+                        event.preventDefault()
+                        element.blur()
+                        scheduleAutoSave()
+                    }
+                })
             }
         })
 
