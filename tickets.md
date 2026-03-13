@@ -39,14 +39,21 @@ T17.4 - Make the unity Ui update when the webui changes a setting. This can be d
 - [x] Tests Passed
 - [x] Documentation Written
 
-T17.5 - Make the Webui Name field react only after it is completely typed. Currently it doesn't make typeig a name easy because the player pref gets saved to quickly.
+T17.4a - The app now shows a white frame when a setting is changed. Make the system that prevents that so that the white flash is not visible when the universe, dmx channel or mode is changed.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T17.5 - Make the Webui Name field react only after it is completely typed and submitted. Currently it doesn't make typeig a name easy because the player pref gets saved to quickly.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
 - [ ] Tests Passed
 - [ ] Documentation Written
   
-T17.6 - Add Fixture name and IP address in the Unity UI
+T17.6 - Add Fixture name and IP address in the Unity UI and in the webui.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
