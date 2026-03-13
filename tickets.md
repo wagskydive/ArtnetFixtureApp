@@ -46,7 +46,7 @@ T17.4a - The app now shows a white frame when a setting is changed. Make the sys
 - [ ] Tests Passed
 - [ ] Documentation Written
 
-T17.5 - Make the Webui Name field react only after it is completely typed and submitted. Currently it doesn't make typeig a name easy because the player pref gets saved to quickly.
+T17.5 - Make the Webui Name field react only after it is completely typed and submitted. Currently it doesn't make typeing a name easy because the player pref gets saved to quickly and the webui reloads during typing.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
