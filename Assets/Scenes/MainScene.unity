@@ -2944,7 +2944,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: DMX Channel
+  m_Text: DMX Start Channel
 --- !u!222 &582470047
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -8279,10 +8279,10 @@ RectTransform:
   - {fileID: 178334946}
   - {fileID: 1757005267}
   - {fileID: 861607806}
-  - {fileID: 582470045}
-  - {fileID: 20346255}
   - {fileID: 19304844}
   - {fileID: 1177559042}
+  - {fileID: 582470045}
+  - {fileID: 20346255}
   - {fileID: 1471253832}
   - {fileID: 2010723720}
   - {fileID: 396933164}
