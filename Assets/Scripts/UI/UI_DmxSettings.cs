@@ -13,6 +13,7 @@ public class UI_DmxSettings : MonoBehaviour
     [SerializeField] private Text fixtureNameValueText;
     [SerializeField] private Text ipAddressValueText;
     [SerializeField] private GameObject passwordPanel;
+    [SerializeField] private GameObject networkWarning;
     [SerializeField] private Toggle webUiPasswordEnabledToggle;
     [SerializeField] private Text webUiPasswordText;
     [SerializeField] private Text webUiPasswordPlaceholderText;
@@ -73,10 +74,22 @@ public class UI_DmxSettings : MonoBehaviour
 
     private void Awake()
     {
+        artNetReceiver.NoDataReceivedRecently += ShowNetworkWarning;
+        artNetReceiver.DataReceivedAgain += HideNetworkWarning;
         LoadPreferences();
         ApplySettingsToReceiver();
         SaveLoadSettings.OnSettingsSaved += LoadSettingsAndUpdateDisplay;
         RefreshPasswordControls();
+    }
+
+    void ShowNetworkWarning()
+    {
+        networkWarning.SetActive(true);
+    }
+
+    void HideNetworkWarning()
+    {
+        networkWarning.SetActive(false);
     }
 
     private void OnDestroy()

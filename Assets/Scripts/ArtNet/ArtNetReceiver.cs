@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -8,6 +9,11 @@ using UnityEngine;
 
 public class ArtNetReceiver : MonoBehaviour
 {
+
+    public event Action NoDataReceivedRecently;
+
+    public event Action DataReceivedAgain;
+
     [Range(0, 15)]
     public int Universe = 0;
     [Range(1, 512)]
@@ -20,6 +26,16 @@ public class ArtNetReceiver : MonoBehaviour
     private bool _running = false;
 
     private byte[] _packetBuffer = new byte[1024]; // reused buffer
+
+    [HideInInspector]
+    public bool HasReceivedDataRecently = false;
+
+    private volatile bool _receivedPacketThisFrame = false; // set by receive thread
+
+    private float _lastPacketTime = 0f;
+    public float TimeoutSeconds = 5f; // Show message if no data for 5 seconds
+
+    bool HasNotReceivedDataEventSent = false;
 
     void Start()
     {
@@ -80,10 +96,36 @@ public class ArtNetReceiver : MonoBehaviour
     {
         if (DmxBuffer == null)
         {
+
             return;
         }
 
         DmxBuffer.SwapIfNewFrame();
+
+        if (_receivedPacketThisFrame)
+        {
+            _lastPacketTime = Time.time;
+            _receivedPacketThisFrame = false;
+        }
+
+        // Update whether we should show the "waiting for data" message
+        HasReceivedDataRecently = (Time.time - _lastPacketTime) <= TimeoutSeconds;
+        if (!HasReceivedDataRecently)
+        {
+            if (!HasNotReceivedDataEventSent)
+            {
+                NoDataReceivedRecently?.Invoke();
+                HasNotReceivedDataEventSent = true;
+            }
+        }
+        else
+        {
+            if (HasNotReceivedDataEventSent)
+            {
+                DataReceivedAgain?.Invoke();
+                HasNotReceivedDataEventSent = false;
+            }
+        }
     }
 
     private void StartReceiver()
@@ -133,6 +175,8 @@ public class ArtNetReceiver : MonoBehaviour
 
                     Buffer.BlockCopy(data, 18, _packetBuffer, 0, length);
                     DmxBuffer.WriteFrame(_packetBuffer, length);
+
+                    _receivedPacketThisFrame = true;
                 }
             }
             catch (Exception)
@@ -163,7 +207,7 @@ public class ArtNetReceiver : MonoBehaviour
     {
         if (universe0Based < 0 || universe0Based > 15)
         {
-            Debug.LogWarning($"Universe {universe0Based} is invalid. Clamping to 0-15.");
+            UnityEngine.Debug.LogWarning($"Universe {universe0Based} is invalid. Clamping to 0-15.");
         }
 
         return Mathf.Clamp(universe0Based, 0, 15);
@@ -173,7 +217,7 @@ public class ArtNetReceiver : MonoBehaviour
     {
         if (startChannel1Based < 1 || startChannel1Based > 512)
         {
-            Debug.LogWarning($"Start channel {startChannel1Based} is invalid. Clamping to 1-512.");
+            UnityEngine.Debug.LogWarning($"Start channel {startChannel1Based} is invalid. Clamping to 1-512.");
         }
 
         return Mathf.Clamp(startChannel1Based, 1, 512);
