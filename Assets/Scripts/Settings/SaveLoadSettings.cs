@@ -14,6 +14,7 @@ public static class SaveLoadSettings
     public const string WebUiDeviceNameKey = "webui.device.name";
     public const string WebUiPasswordKey = "webui.password";
     public const string WebUiPasswordEnabledKey = "webui.password.enabled";
+    public const string NetworkWarningEnabledKey = "network.warning.enabled";
 
     public static event Action OnSettingsSaved;
 
@@ -43,6 +44,8 @@ public static class SaveLoadSettings
         OnSettingsSaved?.Invoke();
     }
 }
+
+
 
 public static class WebUiPasswordProtection
 {
