@@ -254,7 +254,7 @@ public class UI_DmxSettings : MonoBehaviour
     {
         if (networkWarningToggle != null)
         {
-            bool enabled = SaveLoadSettings.LoadInt(SaveLoadSettings.NetworkWarningEnabledKey, 0) == 1;
+            bool enabled = SaveLoadSettings.LoadInt(SaveLoadSettings.NetworkWarningEnabledKey, 1) == 1;
             networkWarningToggle.SetIsOnWithoutNotify(enabled);
 
         }
