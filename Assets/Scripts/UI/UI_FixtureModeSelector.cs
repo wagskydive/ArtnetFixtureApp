@@ -13,6 +13,7 @@ public class UI_FixtureModeSelector : MonoBehaviour
     [SerializeField] private Text pixelRowsValueText;
     [SerializeField] private Text pixelColumnsValueText;
     [SerializeField] private UI_FixtureMeshManager fixtureMeshManager;
+    [SerializeField] private UI_InfoPanelController infoPanelController;
     [SerializeField] private GameObject fixtureCountControlsContainer;
     [SerializeField] private DmxModeManager dmxModeManager;
     [SerializeField] private int currentPixelRows = 8;
@@ -91,6 +92,7 @@ public class UI_FixtureModeSelector : MonoBehaviour
         ApplyPixelGridSettings();
         SyncUiState();
         SavePreferences();
+        infoPanelController.SetInfoText();
     }
 
     public void IncreaseMode()

@@ -1,0 +1,81 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2c8c673688eb5f49beb593911c9d414, type: 3}
+  m_Name: InfoTexts
+  m_EditorClassIdentifier: ArtnetFixture.Core::InfoTextsScriptableObject
+  fixtureName: This is the name of the Fixture that will be visible on the network
+    and in the webui
+  ipAddress: This is the ip address of this fixture on the local network
+  standardMode: 'Surface mode is intended to be used to project on surfaces. The
+    Fixture Amount setting can be used to add more surfaces. Each surface has 16
+    DMX channels and each added fixture adds another 16 channels.
+
+
+    Channel mapping:
+
+
+    CH
+    1: Master Dimmer
+
+    CH 2: Red
+
+    CH 3: Green
+
+    CH 4: Blue
+
+    CH 5: Pattern
+    Select (16 patterns) 0 = full color.
+
+    CH 6: Pattern Parameter
+
+    CH 7:
+    Pattern Animation Speed
+
+    CH 8: Strobe
+
+
+    CH 9-16: Corner pinning X and
+    Y (Calculated from the bottom left corner of the screen)
+
+'
+  movingHeadMode: "Moving Head Mode is intended to view the beam itself (using haze
+    or smoke). This mode has 14 channels that are trying to mimic a standard Moving
+    Head behavior.\n\nChannel Mapping:\n\nCH 1: Master Dimmer\nCH 2: Red\nCH 3: Green\nCH
+    4: Blue\nCH 5: Pan\nCH 6: Pan Fine\nCH 7: Tilt\nCH 8: Tilt Fine\nCH 9: Pattern/Gobo
+    Select\nCH 10: Pattern/Gobo Animation Speed\nCH 11: Pattern Scale\nCH 12: Iris
+    / Mask Scale\nCH 13: Pattern / Gobo Rotation\nCH 14: Strobe\n "
+  pixelMappingMode: "Pixel Mapping Mode is intended to be used as a virtual pixel
+    wall. This mode has 10 DMX channels reserved for Dimmer, Strobe and Corner Pinning.
+    The channels from channel 11 and upward are RGB channels for each pixel. The
+    amount of pixels can be configured by adjusting the Rows and Columns in 8 pixel
+    increments. \n\nChannel Mapping:\n\nCH 1: Master Dimmer\nCH 2: Strobe\nCH 3-10:
+    Corner Pinning X and Y (Calculated from the bottom left corner of the screen)\nCH
+    11+: RGB for each pixel\n"
+  universe: This is the starting universe (1 Base)
+  startChannel: 'This is the first DMX channel that the fixture will react to, all
+    other channels are calculated from the start channel without any gaps '
+  fixtureAmount: "The Fixture Amount setting adds extra virtual fixtures for surface
+    mapping. Each additional surface will effectively me a 16 channel fixture. \n*
+    Depending on the hardware used in your projector, the amount of fixtures you
+    choose to use, may slow down performance"
+  pixelRows: The amount of rows used for the pixel grid
+  pixelColumns: The amount of columns used for the pixel grid
+  networkWarning: 'This toggles the network warning banner on or off. The warning
+    banner will show when the fixture doesn''t reveive any values for 2 seconds. '
+  passwordProtection: "The pasword protection can be used to lock the webui behind
+    a password so that only devices with the password can modify the settings through
+    the webui. \n\nThe Show button will reveal the password for 3 seconds\n\nThe
+    Set/Reset password button lets the user set or change the password\n\n* The password
+    is stored internally as plain text and not hashed, so do not use passwords that
+    should be completely private "
+  infoPanel: Toggle this info panel on or off, using this toggle
+  infoPanelDefault: This is the info panel default message

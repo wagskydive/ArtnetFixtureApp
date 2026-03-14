@@ -14,7 +14,9 @@ public class UI_DmxSettings : MonoBehaviour
     [SerializeField] private Text ipAddressValueText;
     [SerializeField] private GameObject passwordPanel;
     [SerializeField] private GameObject networkWarning;
+    [SerializeField] private GameObject infoPanel;
     [SerializeField] private Toggle networkWarningToggle;
+    [SerializeField] private Toggle infoPanelToggle;
     [SerializeField] private Toggle webUiPasswordEnabledToggle;
     [SerializeField] private Text webUiPasswordText;
     [SerializeField] private Text webUiPasswordPlaceholderText;
@@ -85,11 +87,11 @@ public class UI_DmxSettings : MonoBehaviour
 
     void ShowNetworkWarning()
     {
-        if(SaveLoadSettings.LoadInt(SaveLoadSettings.NetworkWarningEnabledKey, 1) == 1)
+        if (SaveLoadSettings.LoadInt(SaveLoadSettings.NetworkWarningEnabledKey, 1) == 1)
         {
             networkWarning.SetActive(true);
         }
-        
+
     }
 
     void HideNetworkWarning()
@@ -195,8 +197,11 @@ public class UI_DmxSettings : MonoBehaviour
 
         UpdateDeviceInfoDisplay();
         UpdateWarningToggleState();
+        UpdateInfoPanelState();
         RefreshPasswordControls();
     }
+
+
 
     private void ApplySettingsToReceiver()
     {
@@ -250,27 +255,45 @@ public class UI_DmxSettings : MonoBehaviour
         UpdateUniverseDisplay();
     }
 
+    void UpdateInfoPanelState()
+    {
+        if (infoPanelToggle != null)
+        {
+            bool enabled = SaveLoadSettings.LoadInt(SaveLoadSettings.InfoPanelEnabledKey, 1) == 1;
+            infoPanelToggle.SetIsOnWithoutNotify(enabled);
+            infoPanel.SetActive(enabled);
+        }
+    }
+
     void UpdateWarningToggleState()
     {
         if (networkWarningToggle != null)
         {
             bool enabled = SaveLoadSettings.LoadInt(SaveLoadSettings.NetworkWarningEnabledKey, 1) == 1;
             networkWarningToggle.SetIsOnWithoutNotify(enabled);
-
         }
 
     }
+
+    public void SetInfoPanel(bool isOn)
+    {
+        SaveLoadSettings.SaveInt(SaveLoadSettings.InfoPanelEnabledKey, isOn ? 1 : 0);
+        SaveLoadSettings.Save();
+        infoPanel.SetActive(isOn);
+    }
+
+
 
     public void SetNetworkWarning(bool isOn)
     {
         SaveLoadSettings.SaveInt(SaveLoadSettings.NetworkWarningEnabledKey, isOn ? 1 : 0);
         SaveLoadSettings.Save();
-        if(isOn && !artNetReceiver.HasReceivedDataRecently)
+        if (isOn && !artNetReceiver.HasReceivedDataRecently)
         {
             ShowNetworkWarning();
             return;
-        }  
-        if(!isOn)
+        }
+        if (!isOn)
         {
             HideNetworkWarning();
         }
