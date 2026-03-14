@@ -92,7 +92,7 @@ public class UI_FixtureModeSelector : MonoBehaviour
         ApplyPixelGridSettings();
         SyncUiState();
         SavePreferences();
-        infoPanelController.SetInfoText();
+        
     }
 
     public void IncreaseMode()
@@ -100,6 +100,7 @@ public class UI_FixtureModeSelector : MonoBehaviour
         int modeCount = System.Enum.GetValues(typeof(DmxModeManager.FixtureMode)).Length;
         int nextMode = ((int)dmxModeManager.CurrentMode + 1) % modeCount;
         SetMode((DmxModeManager.FixtureMode)nextMode);
+
     }
 
     public void DecreaseMode()
@@ -107,6 +108,7 @@ public class UI_FixtureModeSelector : MonoBehaviour
         int modeCount = System.Enum.GetValues(typeof(DmxModeManager.FixtureMode)).Length;
         int previousMode = ((int)dmxModeManager.CurrentMode - 1 + modeCount) % modeCount;
         SetMode((DmxModeManager.FixtureMode)previousMode);
+
     }
 
     public void IncreasePixelRows()

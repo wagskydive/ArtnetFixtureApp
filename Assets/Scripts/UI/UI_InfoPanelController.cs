@@ -10,6 +10,16 @@ public class UI_InfoPanelController : MonoBehaviour
 
     private GameObject lastSelected;
 
+    void Awake()
+    {
+        DmxModeManager.OnModeChanged += HandleModeChange;
+    }
+
+    void HandleModeChange(DmxModeManager.FixtureMode mode)
+    {
+        SetInfoText();
+    }
+
     void Update()
     {
         GameObject selected = EventSystem.current.currentSelectedGameObject;
@@ -27,13 +37,13 @@ public class UI_InfoPanelController : MonoBehaviour
             return;
         }
         SetInfoText();
-       
+
     }
 
     public void SetInfoText()
     {
-        GameObject selected = lastSelected;
-         IInfoText info = selected.GetComponent<IInfoText>();
+        GameObject selected = EventSystem.current.currentSelectedGameObject;
+        IInfoText info = selected.GetComponent<IInfoText>();
 
         if (info != null)
             infoText.text = info.GetInfoText();

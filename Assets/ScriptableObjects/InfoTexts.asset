@@ -71,7 +71,7 @@ MonoBehaviour:
   pixelColumns: The amount of columns used for the pixel grid
   networkWarning: 'This toggles the network warning banner on or off. The warning
     banner will show when the fixture doesn''t reveive any values for 2 seconds. '
-  passwordProtection: "The pasword protection can be used to lock the webui behind
+  passwordProtection: "The password protection can be used to lock the webui behind
     a password so that only devices with the password can modify the settings through
     the webui. \n\nThe Show button will reveal the password for 3 seconds\n\nThe
     Set/Reset password button lets the user set or change the password\n\n* The password
