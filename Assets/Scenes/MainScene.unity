@@ -10814,8 +10814,12 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "WARNING: No DMX data is being Received. \nConnect a lighting controller
-    to your local network.\nPress OK to access the settings menu."
+  m_Text: 'Waiting for Art-Net / DMX data.
+
+    Connect a lighting controller to
+    the local network.
+
+    Press OK to open the settings.'
 --- !u!222 &1953107969
 CanvasRenderer:
   m_ObjectHideFlags: 0

@@ -33,7 +33,7 @@ public class ArtNetReceiver : MonoBehaviour
     private volatile bool _receivedPacketThisFrame = false; // set by receive thread
 
     private float _lastPacketTime = 0f;
-    public float TimeoutSeconds = 5f; // Show message if no data for 5 seconds
+    public float TimeoutSeconds = 2f; // Show message if no data for 2 seconds
 
     bool HasNotReceivedDataEventSent = false;
 
