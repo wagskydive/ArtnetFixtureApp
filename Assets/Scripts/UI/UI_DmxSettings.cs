@@ -85,7 +85,7 @@ public class UI_DmxSettings : MonoBehaviour
 
     void ShowNetworkWarning()
     {
-        if(SaveLoadSettings.LoadInt(SaveLoadSettings.NetworkWarningEnabledKey, 0) == 1)
+        if(SaveLoadSettings.LoadInt(SaveLoadSettings.NetworkWarningEnabledKey, 1) == 1)
         {
             networkWarning.SetActive(true);
         }
