@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Net;
 using System.Net.Sockets;
+using System.Timers;
 
 public class UI_DmxSettings : MonoBehaviour
 {
@@ -13,8 +14,10 @@ public class UI_DmxSettings : MonoBehaviour
     [SerializeField] private Text ipAddressValueText;
     [SerializeField] private GameObject passwordPanel;
     [SerializeField] private Toggle webUiPasswordEnabledToggle;
-    [SerializeField] private InputField webUiPasswordInputField;
-    [SerializeField] private Button webUiPasswordApplyButton;
+    [SerializeField] private Text webUiPasswordText;
+    [SerializeField] private Text webUiPasswordPlaceholderText;
+    [SerializeField] private Text webUiPasswordAstrisksText;
+    [SerializeField] private Text webUiPasswordResetButtonText;
     [SerializeField] private int currentPatternType = 0; // Pattern type selector (0=Static, 1=Pulse, 2=ColorShift)
     [SerializeField] private ArtNetReceiver artNetReceiver;
     [SerializeField] private UI_FixtureMeshManager fixtureMeshManager;
@@ -273,25 +276,70 @@ public class UI_DmxSettings : MonoBehaviour
 
     public void ApplyWebUiPasswordFromInput()
     {
-        if (webUiPasswordInputField == null)
+        if (webUiPasswordText == null)
         {
             return;
         }
 
-        bool saved = WebUiPasswordProtection.SetPassword(webUiPasswordInputField.text);
+        bool saved = WebUiPasswordProtection.SetPassword(webUiPasswordText.text);
         if (saved)
         {
-            webUiPasswordInputField.text = string.Empty;
+            SetPasswordAstisks();
+            PasswordVisibility(false);
+            //webUiPasswordText.text = string.Empty;
+        }
+        else
+        {
+            SetPlaceholderVisible();
         }
 
         RefreshPasswordControls();
     }
 
+    void SetPasswordAstisks()
+    {
+        int length = webUiPasswordText.text.Length;
+        string astrisks = "";
+        for (int i = 0; i < length; i++)
+        {
+            astrisks += "*";
+        }
+        webUiPasswordAstrisksText.text = astrisks;
+    }
+
+    void PasswordVisibility(bool isVisible)
+    {
+        webUiPasswordText.gameObject.SetActive(isVisible);
+        webUiPasswordAstrisksText.gameObject.SetActive(!isVisible);
+        webUiPasswordPlaceholderText.gameObject.SetActive(false);
+    }
+
+    void SetPlaceholderVisible()
+    {
+        webUiPasswordText.gameObject.SetActive(false);
+        webUiPasswordAstrisksText.gameObject.SetActive(false);
+        webUiPasswordPlaceholderText.gameObject.SetActive(true);
+    }
+
+    public void ShowPasswordTemporarily()
+    {
+        webUiPasswordText.text = WebUiPasswordProtection.GetStoredPassword();
+        RefreshPasswordControls();
+        TimedCall.Temporary(
+            () => PasswordVisibility(true),
+            () => PasswordVisibility(false),
+            3f
+            );
+
+    }
+
+
+
     private void RefreshPasswordControls()
     {
         bool enabled = WebUiPasswordProtection.IsEnabled();
         bool configured = WebUiPasswordProtection.HasConfiguredPassword();
-        if(passwordPanel != null)
+        if (passwordPanel != null)
         {
             passwordPanel.SetActive(enabled);
         }
@@ -301,19 +349,41 @@ public class UI_DmxSettings : MonoBehaviour
             webUiPasswordEnabledToggle.SetIsOnWithoutNotify(enabled);
         }
 
-        if (webUiPasswordInputField != null)
+
+
+        if (enabled && !configured)
         {
-            Text placeholderText = webUiPasswordInputField.placeholder as Text;
-            if (placeholderText != null)
+            SetPlaceholderVisible();
+            webUiPasswordPlaceholderText.text = "password not set";
+            if (webUiPasswordResetButtonText != null)
             {
-                placeholderText.text = configured ? "Enter new password" : "Set password";
+                webUiPasswordResetButtonText.text = "Set";
             }
         }
 
-        if (webUiPasswordApplyButton != null)
+        if (enabled && configured)
         {
-            webUiPasswordApplyButton.interactable = enabled;
+            string storedPassword = WebUiPasswordProtection.GetStoredPassword();
+
+            webUiPasswordText.text = storedPassword;
+            SetPasswordAstisks();
+            PasswordVisibility(false);
+            if (webUiPasswordResetButtonText != null)
+            {
+                webUiPasswordResetButtonText.text = "Reset";
+            }
         }
+
+    }
+
+    public void ShowPassword()
+    {
+        PasswordVisibility(true);
+    }
+
+    public void HidePassword()
+    {
+        PasswordVisibility(false);
     }
 
     private void OnPatternTypeChanged()

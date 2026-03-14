@@ -188,7 +188,7 @@ public class UI_FixtureModeSelector : MonoBehaviour
             return "Pixel Mapping";
         }
 
-        return "Standard";
+        return "Surface";
     }
 
     private void EnforceFixtureCountForMode()

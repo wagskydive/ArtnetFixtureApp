@@ -1,6 +1,5 @@
 using UnityEngine;
 using System;
-using System.Security.Cryptography;
 using System.Text;
 
 public static class SaveLoadSettings
@@ -13,8 +12,7 @@ public static class SaveLoadSettings
     public const string PixelRowsKey = "dmx.pixel.rows";
     public const string PixelColumnsKey = "dmx.pixel.columns";
     public const string WebUiDeviceNameKey = "webui.device.name";
-    public const string WebUiPasswordLegacyKey = "webui.password";
-    public const string WebUiPasswordHashKey = "webui.password.hash";
+    public const string WebUiPasswordKey = "webui.password";
     public const string WebUiPasswordEnabledKey = "webui.password.enabled";
 
     public static event Action OnSettingsSaved;
@@ -53,6 +51,11 @@ public static class WebUiPasswordProtection
         return SaveLoadSettings.LoadInt(SaveLoadSettings.WebUiPasswordEnabledKey, 0) == 1;
     }
 
+    public static string GetStoredPassword()
+    {
+        return SaveLoadSettings.LoadString(SaveLoadSettings.WebUiPasswordKey, string.Empty);
+    }
+
     public static void SetEnabled(bool enabled)
     {
         SaveLoadSettings.SaveInt(SaveLoadSettings.WebUiPasswordEnabledKey, enabled ? 1 : 0);
@@ -61,7 +64,7 @@ public static class WebUiPasswordProtection
 
     public static bool HasConfiguredPassword()
     {
-        return !string.IsNullOrWhiteSpace(SaveLoadSettings.LoadString(SaveLoadSettings.WebUiPasswordHashKey, string.Empty));
+        return !string.IsNullOrWhiteSpace(SaveLoadSettings.LoadString(SaveLoadSettings.WebUiPasswordKey, string.Empty));
     }
 
     public static bool SetPassword(string rawPassword)
@@ -69,27 +72,25 @@ public static class WebUiPasswordProtection
         string trimmed = string.IsNullOrWhiteSpace(rawPassword) ? string.Empty : rawPassword.Trim();
         if (string.IsNullOrEmpty(trimmed))
         {
+            SaveLoadSettings.SaveString(SaveLoadSettings.WebUiPasswordKey, rawPassword);
+            SaveLoadSettings.Save();
             return false;
         }
-
-        string hash = ComputeSha256Hex(trimmed);
-        SaveLoadSettings.SaveString(SaveLoadSettings.WebUiPasswordHashKey, hash);
-        SaveLoadSettings.SaveString(SaveLoadSettings.WebUiPasswordLegacyKey, string.Empty);
+        SaveLoadSettings.SaveString(SaveLoadSettings.WebUiPasswordKey, rawPassword);
         SaveLoadSettings.Save();
         return true;
     }
 
-    public static bool VerifyPassword(string rawPassword)
+    public static bool VerifyPassword(string providedPassword)
     {
-        string storedHash = SaveLoadSettings.LoadString(SaveLoadSettings.WebUiPasswordHashKey, string.Empty);
-        if (string.IsNullOrWhiteSpace(storedHash))
+        string storedPassword = SaveLoadSettings.LoadString(SaveLoadSettings.WebUiPasswordKey, string.Empty);
+        if (string.IsNullOrWhiteSpace(storedPassword))
         {
             return false;
         }
 
-        string provided = string.IsNullOrWhiteSpace(rawPassword) ? string.Empty : rawPassword.Trim();
-        string providedHash = ComputeSha256Hex(provided);
-        return string.Equals(storedHash, providedHash, StringComparison.OrdinalIgnoreCase);
+
+        return string.Equals(storedPassword, providedPassword);
     }
 
     public static void MigrateLegacyPasswordIfNeeded()
@@ -99,7 +100,7 @@ public static class WebUiPasswordProtection
             return;
         }
 
-        string legacy = SaveLoadSettings.LoadString(SaveLoadSettings.WebUiPasswordLegacyKey, string.Empty);
+        string legacy = SaveLoadSettings.LoadString(SaveLoadSettings.WebUiPasswordKey, string.Empty);
         if (string.IsNullOrWhiteSpace(legacy))
         {
             return;
@@ -108,19 +109,5 @@ public static class WebUiPasswordProtection
         SetPassword(legacy);
     }
 
-    private static string ComputeSha256Hex(string value)
-    {
-        byte[] source = Encoding.UTF8.GetBytes(value ?? string.Empty);
-        using (SHA256 sha = SHA256.Create())
-        {
-            byte[] hash = sha.ComputeHash(source);
-            var builder = new StringBuilder(hash.Length * 2);
-            for (int i = 0; i < hash.Length; i++)
-            {
-                builder.Append(hash[i].ToString("x2"));
-            }
 
-            return builder.ToString();
-        }
-    }
 }
