@@ -11,7 +11,7 @@ public static class SaveLoadSettings
     public const string FixtureModeKey = "dmx.fixture.mode";
     public const string PixelRowsKey = "dmx.pixel.rows";
     public const string PixelColumnsKey = "dmx.pixel.columns";
-    public const string WebUiDeviceNameKey = "webui.device.name";
+    public const string DeviceNetworkKey = "device.network.name";
     public const string WebUiPasswordKey = "webui.password";
     public const string WebUiPasswordEnabledKey = "webui.password.enabled";
     public const string NetworkWarningEnabledKey = "network.warning.enabled";

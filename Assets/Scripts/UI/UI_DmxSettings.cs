@@ -306,7 +306,7 @@ public class UI_DmxSettings : MonoBehaviour
     {
         if (fixtureNameValueText != null)
         {
-            fixtureNameValueText.text = SaveLoadSettings.LoadString(SaveLoadSettings.WebUiDeviceNameKey, "ArtnetFixture");
+            fixtureNameValueText.text = SaveLoadSettings.LoadString(SaveLoadSettings.DeviceNetworkKey, "ArtnetFixture");
         }
 
         if (ipAddressValueText != null)

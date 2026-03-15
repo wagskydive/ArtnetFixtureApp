@@ -23,7 +23,7 @@ public static class WebUiSettingsStore
 
         return new WebUiSettingsData
         {
-            deviceName = SaveLoadSettings.LoadString(SaveLoadSettings.WebUiDeviceNameKey, "ArtnetFixture"),
+            deviceName = SaveLoadSettings.LoadString(SaveLoadSettings.DeviceNetworkKey, "ArtnetFixture"),
             fixtureMode = ToFixtureModeValue(fixtureMode),
             dmxUniverse = Mathf.Clamp(SaveLoadSettings.LoadInt(SaveLoadSettings.DmxUniverseKey, 1), 1, 16),
             startChannel = Mathf.Clamp(SaveLoadSettings.LoadInt(SaveLoadSettings.DmxChannelKey, 1), 1, 512),
@@ -60,7 +60,7 @@ public static class WebUiSettingsStore
     {
         WebUiSettingsData data = Sanitize(raw);
 
-        SaveLoadSettings.SaveString(SaveLoadSettings.WebUiDeviceNameKey, data.deviceName);
+        SaveLoadSettings.SaveString(SaveLoadSettings.DeviceNetworkKey, data.deviceName);
         SaveLoadSettings.SaveInt(SaveLoadSettings.FixtureModeKey, ToFixtureModeIndex(data.fixtureMode));
         SaveLoadSettings.SaveInt(SaveLoadSettings.DmxUniverseKey, data.dmxUniverse);
         SaveLoadSettings.SaveInt(SaveLoadSettings.DmxChannelKey, data.startChannel);
