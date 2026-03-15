@@ -16,7 +16,7 @@ public static class PixelMappingDmxPersonality
     public static float ParseStrobeGate(ArtNetReceiver receiver, float timeSeconds)
     {
         float strobe = receiver.GetFixtureChannelValue(StrobeChannel) / 255f;
-        float strobeFrequency = Mathf.Lerp(1f, 20f, strobe);
+        float strobeFrequency = Mathf.Lerp(1f, 50f, strobe);
         return (strobe < 0.05f || Mathf.Sin(timeSeconds * strobeFrequency) > 0f) ? 1f : 0f;
     }
 

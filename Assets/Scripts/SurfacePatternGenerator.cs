@@ -43,7 +43,7 @@ public class SurfacePatternGenerator : MonoBehaviour
         float size = Mathf.Lerp(0.5f, 8f, artNetReceiver.GetFixtureChannelValue(7) / 255f);
 
         float strobe = artNetReceiver.GetFixtureChannelValue(8) / 255f;
-        float strobeFrequency = Mathf.Lerp(1f, 20f, strobe);
+        float strobeFrequency = Mathf.Lerp(1f, 50f, strobe);
         float strobeGate = (strobe < 0.05f || Mathf.Sin(Time.time * strobeFrequency) > 0f) ? 1f : 0f;
 
         _outputMaterial.SetInt("_PatternType", patternType);
