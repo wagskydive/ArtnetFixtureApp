@@ -59,7 +59,8 @@ public static class MovingHeadDmxPersonality
             PatternType = patternType,
             PatternSpeed = speed,
             PatternSize = size,
-            BeamSoftness = beamSoftness,
+            //Commented out BeamSoftness because that is not currently working nicely. I could add a seperate DMX channel for this
+            //BeamSoftness = beamSoftness,
             IrisScale = irisScale,
             RotateRadians = rotateRadians,
             StrobeGate = strobeGate
