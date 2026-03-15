@@ -15,6 +15,8 @@ Shader "Custom/MaliSafeMovingHead"
         _BeamOffsetX ("Beam Offset X", Range(-1,1)) = 0
         _BeamOffsetY ("Beam Offset Y", Range(-1,1)) = 0
         _BeamRotation ("Beam Rotation", Range(0,6.2831853)) = 0
+
+        _GoboTex("Gobo Texture", 2D) = "white" {}
     }
 
     SubShader
@@ -32,17 +34,7 @@ Shader "Custom/MaliSafeMovingHead"
             #pragma fragment frag
             #include "UnityCG.cginc"
 
-            struct appdata
-            {
-                float4 vertex : POSITION;
-                float2 uv : TEXCOORD0;
-            };
-
-            struct v2f
-            {
-                float2 uv : TEXCOORD0;
-                float4 vertex : SV_POSITION;
-            };
+            sampler2D _GoboTex;
 
             fixed4 _Color;
             float _Intensity;
@@ -61,11 +53,30 @@ Shader "Custom/MaliSafeMovingHead"
             // Vertex
             //--------------------------------------------
 
+            struct appdata
+            {
+                float4 vertex : POSITION;
+                float2 uv : TEXCOORD0;
+            };
+
+            struct v2f
+            {
+                float2 uv : TEXCOORD0;
+                float4 vertex : SV_POSITION;
+                float2x2 rotMatrix : TEXCOORD1;
+            };
+
             v2f vert(appdata v)
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.uv = v.uv;
+
+                // precompute rotation matrix
+                float s = sin(_BeamRotation);
+                float c = cos(_BeamRotation);
+                o.rotMatrix = float2x2(c, -s, s, c);
+
                 return o;
             }
 
@@ -73,26 +84,12 @@ Shader "Custom/MaliSafeMovingHead"
             // Beam Transform
             //--------------------------------------------
 
-            float2 RotateUV(float2 p, float angle)
-            {
-                float s = sin(angle);
-                float c = cos(angle);
-                return float2(
-                    p.x * c - p.y * s,
-                    p.x * s + p.y * c
-                );
-            }
-
-            float2 GetBeamSpaceUV(float2 uv)
+            float2 GetBeamSpaceUV(float2 uv, float2x2 rotMatrix)
             {
                 float2 centered = (uv - 0.5) * 2.0;
-
-                // Offset applied in screen space
                 float2 offset = float2(_BeamOffsetX, _BeamOffsetY);
                 float2 shifted = centered - offset;
-
-                // Rotation around beam center
-                return RotateUV(shifted, _BeamRotation);
+                return mul(rotMatrix, shifted);
             }
 
             //--------------------------------------------
@@ -117,27 +114,28 @@ Shader "Custom/MaliSafeMovingHead"
 
                 // Masks
                 float solidMask = 1.0 - step(0.5, abs(pattern - 0.0));
-                float radialMask = 1.0 - step(0.5, abs(pattern - 1.0));
-                float pulseMask = 1.0 - step(0.5, abs(pattern - 2.0));
-                float barsMask = 1.0 - step(0.5, abs(pattern - 3.0));
-                float beamMaskPattern = 1.0 - step(0.5, abs(pattern - 4.0));
-                float horizontalStripesMask = 1.0 - step(0.5, abs(pattern - 5.0));
-                float checkerMask = 1.0 - step(0.5, abs(pattern - 6.0));
-                float diagonalWaveMask = 1.0 - step(0.5, abs(pattern - 7.0));
-                float outlineMask = 1.0 - step(0.5, abs(pattern - 8.0));
-                float verticalWaveMask = 1.0 - step(0.5, abs(pattern - 9.0));
-                float ringBandsMask = 1.0 - step(0.5, abs(pattern - 10.0));
-                float spiralMask = 1.0 - step(0.5, abs(pattern - 11.0));
-                float diamondGridMask = 1.0 - step(0.5, abs(pattern - 12.0));
-                float sparkleMask = 1.0 - step(0.5, abs(pattern - 13.0));
-                float pinwheelMask = 1.0 - step(0.5, abs(pattern - 14.0));
-                float sweepMask = 1.0 - step(0.5, abs(pattern - 15.0));
-                float rippleMask = 1.0 - step(0.5, abs(pattern - 16.0));
-                float plasmaMask = 1.0 - step(0.5, abs(pattern - 17.0));
-                float crossPulseMask = 1.0 - step(0.5, abs(pattern - 18.0));
-                float coneMaskPattern = 1.0 - step(0.5, abs(pattern - 19.0));
+                float goboMask = 1.0 - step(0.5, abs(pattern - 1.0));
+                float radialMask = 1.0 - step(0.5, abs(pattern - 2.0));
+                float pulseMask = 1.0 - step(0.5, abs(pattern - 3.0));
+                float barsMask = 1.0 - step(0.5, abs(pattern - 4.0));
+                float beamMaskPattern = 1.0 - step(0.5, abs(pattern - 5.0));
+                float horizontalStripesMask = 1.0 - step(0.5, abs(pattern - 6.0));
+                float checkerMask = 1.0 - step(0.5, abs(pattern - 7.0));
+                float diagonalWaveMask = 1.0 - step(0.5, abs(pattern - 8.0));
+                float outlineMask = 1.0 - step(0.5, abs(pattern - 9.0));
+                float verticalWaveMask = 1.0 - step(0.5, abs(pattern - 10.0));
+                float ringBandsMask = 1.0 - step(0.5, abs(pattern - 11.0));
+                float spiralMask = 1.0 - step(0.5, abs(pattern - 12.0));
+                float diamondGridMask = 1.0 - step(0.5, abs(pattern - 13.0));
+                float sparkleMask = 1.0 - step(0.5, abs(pattern - 14.0));
+                float pinwheelMask = 1.0 - step(0.5, abs(pattern - 15.0));
+                float sweepMask = 1.0 - step(0.5, abs(pattern - 16.0));
+                float rippleMask = 1.0 - step(0.5, abs(pattern - 17.0));
+                float plasmaMask = 1.0 - step(0.5, abs(pattern - 18.0));
+                float crossPulseMask = 1.0 - step(0.5, abs(pattern - 19.0));
+                float coneMaskPattern = 1.0 - step(0.5, abs(pattern - 20.0));
 
-                // Brightness calculations
+                // Standard brightness calculations
                 float radialBrightness = saturate(1.0 - radialDist * size);
                 float pulseBrightness = 0.5 + 0.5 * sin(time);
                 float barsBrightness = step(0.5, frac(beamUV.x * size * 4.0 + time));
@@ -181,9 +179,14 @@ Shader "Custom/MaliSafeMovingHead"
                 float coneNoise = 0.5 + 0.5 * sin(radialDist * 30.0 - time * 2.0);
                 float coneMaskBrightness = coneFalloff * coneNoise;
 
+                // Gobo sampling scaled by _Size
+                float2 goboUV = beamUV * (size * 0.5) + 0.5;
+                float goboSample = tex2D(_GoboTex, goboUV).a;
+
                 // Combine all patterns
                 float brightness =
                     solidMask +
+                    goboMask * goboSample +
                     radialMask * radialBrightness +
                     pulseMask * pulseBrightness +
                     barsMask * barsBrightness +
@@ -216,11 +219,9 @@ Shader "Custom/MaliSafeMovingHead"
                 float safeSize = max(_Size, 0.01);
                 float time = _Time.y * _Speed;
 
-                // Beam coordinate system
-                float2 beamUV = GetBeamSpaceUV(i.uv);
+                float2 beamUV = GetBeamSpaceUV(i.uv, i.rotMatrix);
                 float radialDist = length(beamUV);
 
-                // Pattern
                 float brightness = PatternBrightness(
                     beamUV,
                     i.uv,
@@ -229,17 +230,12 @@ Shader "Custom/MaliSafeMovingHead"
                     safeSize
                 );
 
-                // Beam mask
                 float mask = BeamMask(beamUV);
 
                 float3 color = _Color.rgb * brightness;
-
                 float gate = _Intensity * _StrobeGate;
 
-                return float4(
-                    color * gate,
-                    saturate(brightness) * mask * gate
-                );
+                return float4(color * gate, saturate(brightness) * mask * gate);
             }
 
             ENDCG

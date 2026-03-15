@@ -47,7 +47,7 @@ public static class MovingHeadDmxPersonality
         float rotateRadians = (receiver.GetFixtureChannelValue(13) / 255f) * Mathf.PI * 2f;
 
         float strobeValue = receiver.GetFixtureChannelValue(14) / 255f;
-        float strobeFrequency = Mathf.Lerp(1f, 20f, strobeValue);
+        float strobeFrequency = Mathf.Lerp(1f, 50f, strobeValue);
         float strobeGate = (strobeValue < 0.05f || Mathf.Sin(timeSeconds * strobeFrequency) > 0f) ? 1f : 0f;
 
         return new Snapshot
