@@ -1,18 +1,35 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using System;
 
 public class UI_InfoPanelController : MonoBehaviour
 {
     [TextArea] public string defaultText;
     [SerializeField] private Text infoText;
-
+    [SerializeField] private Text webUiText;
+    [SerializeField] private GameObject webUiPanel;
 
     private GameObject lastSelected;
 
     void Awake()
     {
         DmxModeManager.OnModeChanged += HandleModeChange;
+    }
+
+    void Start()
+    {
+        SetWebUiText();
+    }
+
+    private void SetWebUiText()
+    {
+        IInfoText info = webUiPanel.GetComponent<IInfoText>();
+
+        if (info != null)
+            webUiText.text = info.GetInfoText();
+        else
+            webUiText.text = defaultText;
     }
 
     void HandleModeChange(DmxModeManager.FixtureMode mode)

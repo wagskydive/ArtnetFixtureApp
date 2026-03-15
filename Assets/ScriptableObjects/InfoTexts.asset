@@ -14,14 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: ArtnetFixture.Core::InfoTextsScriptableObject
   generalInfo: 'This device functions as a virtual lighting fixture.
 
-    
+
 
     Video
     output from the device is controlled
 
     by incoming DMX data over the network.
 
-    
+
 
     Connect
     a lighting controller on the same
@@ -31,43 +31,34 @@ MonoBehaviour:
     UI.
   ipAddress: 'This fixture receives DMX data over the network.
 
-    
 
-    Supported
-    protocols may include Art-Net and sACN,
+
+    Supported protocols
+    may include Art-Net and sACN,
 
     depending on the firmware version.
 
-    
+
 
     The
     fixture listens for DMX data on the selected
 
     DMX Universe and Start Channel.'
-  webUi: 'This is the IP address of this fixture
+  webUi: 'You can access the Web UI from another device on the same network to configure
+    fixture settings remotely.
 
-    on the local network.
 
-    
+    Scan the QR Code or open this address in a web
+    browser :
 
-    You
-    can access the Web UI from another
 
-    device on the same network:
-
-    
 
     http://{ip}:8080
 
-    
-
-    Open
-    this address in a web browser
-
-    to configure fixture settings remotely.'
+'
   fixtureModeGeneral: 'DMX Mode selects how this fixture interprets DMX data.
 
-    
+
 
     Each
     mode uses a different channel layout and is designed
@@ -75,28 +66,28 @@ MonoBehaviour:
     for different lighting
     applications.
 
-    
+
 
     Surface Mode:
 
     For projection mapping onto surfaces.
 
-    
+
 
     Moving
     Head Mode:
 
     Simulates a beam-style moving head fixture.
 
-    
 
-    Pixel
-    Mapping Mode:
+
+    Pixel Mapping
+    Mode:
 
     Allows the fixture to function as a pixel grid
 
-    for
-    LED-style pixel mapping.'
+    for LED-style
+    pixel mapping.'
   standardMode: "Surface Mode is intended for projecting onto surfaces.\r\n\r\nThe
     Fixture Amount setting can be used to add additional surfaces.  \r\nEach surface
     uses 16 DMX channels. Each added fixture adds another 16 channels.\r\n\r\nChannel
@@ -109,21 +100,21 @@ MonoBehaviour:
     (using
     haze or smoke).
 
-    
+
 
     This mode uses 14 DMX channels and mimics the behavior
     of
 
     a standard moving head fixture.
 
-    
+
 
     Channel Mapping:
 
-    
 
-    CH
-    1: Master Dimmer
+
+    CH 1:
+    Master Dimmer
 
     CH 2: Red
 
@@ -131,29 +122,28 @@ MonoBehaviour:
 
     CH 4: Blue
 
-    CH
-    5: Pan
+    CH 5: Pan
 
-    CH 6: Pan Fine
+    CH
+    6: Pan Fine
 
     CH 7: Tilt
 
     CH 8: Tilt Fine
 
-    CH 9:
-    Pattern / Gobo Select
+    CH 9: Pattern / Gobo Select
 
-    CH 10: Pattern / Gobo Animation Speed
+    CH
+    10: Pattern / Gobo Animation Speed
 
-    CH 11:
-    Pattern Scale
+    CH 11: Pattern Scale
 
-    CH 12: Iris / Mask Scale
+    CH 12: Iris
+    / Mask Scale
 
     CH 13: Pattern / Gobo Rotation
 
-    CH
-    14: Strobe'
+    CH 14: Strobe'
   pixelMappingMode: "Pixel Mapping Mode allows the fixture to function as a virtual
     pixel wall.\r\n\r\nThis mode reserves 10 DMX channels for Dimmer, Strobe,\r\nand
     Corner Pinning.\r\n\r\nChannels starting from channel 11 are used as RGB channels\r\nfor
@@ -164,31 +154,31 @@ MonoBehaviour:
     pixel"
   universe: 'The DMX universe this fixture listens to.
 
-    
 
-    This setting
-    determines which universe
+
+    This setting determines
+    which universe
 
     the fixture receives DMX data from.
 
-    
 
-    Universe
-    numbering is 1-based.'
+
+    Universe numbering
+    is 1-based.'
   startChannel: 'The first DMX channel this fixture responds to.
 
-    All other
-    channels are calculated sequentially from this starting channel.'
+    All other channels
+    are calculated sequentially from this starting channel.'
   performance: 'Performance depends on the hardware used.
 
-    
 
-    Higher fixture
-    counts or large pixel grids may
+
+    Higher fixture counts
+    or large pixel grids may
 
     reduce performance on low-power devices.
 
-    
+
 
     For
     best results, use wired Ethernet and
@@ -200,55 +190,54 @@ MonoBehaviour:
     for
     surface mapping.
 
-    
 
-    Each additional surface behaves like a 16-channel
-    fixture.
 
-    
+    Each additional surface behaves like a 16-channel fixture.
 
-    * Depending on the hardware used in your projector,
 
-    a
-    high number of fixtures may reduce performance.'
+
+    *
+    Depending on the hardware used in your projector,
+
+    a high number of fixtures
+    may reduce performance.'
   pixelRows: The number of rows used for the pixel grid.
   pixelColumns: The number of columns used for the pixel grid.
   networkWarning: 'Toggle the network warning banner on or off.
 
-    
 
-    The
-    warning banner appears when the fixture
 
-    does not receive DMX data for 2
-    seconds.'
+    The warning
+    banner appears when the fixture
+
+    does not receive DMX data for 2 seconds.'
   passwordProtection: 'Password protection restricts access to the Web UI.
 
-    
+
 
     Only
     devices with the correct password can modify
 
     settings through the Web UI.
 
-    
+
 
     The
     Show button reveals the password for 3 seconds.
 
-    
+
 
     The Set/Reset Password
     button allows the user
 
     to set or change the password.
 
-    
 
-    * The
-    password is stored internally as plain text
 
-    and is not hashed. Do not use
-    sensitive passwords.'
+    * The password
+    is stored internally as plain text
+
+    and is not hashed. Do not use sensitive
+    passwords.'
   infoPanel: Toggle the info panel on or off.
   infoPanelDefault: Default message shown in the info panel.
