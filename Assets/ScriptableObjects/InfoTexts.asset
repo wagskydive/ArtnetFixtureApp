@@ -12,16 +12,115 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2c8c673688eb5f49beb593911c9d414, type: 3}
   m_Name: InfoTexts
   m_EditorClassIdentifier: ArtnetFixture.Core::InfoTextsScriptableObject
-  fixtureName: This is the name of the Fixture that will be visible on the network
-    and in the webui
-  ipAddress: This is the ip address of this fixture on the local network
-  standardMode: 'Surface mode is intended to be used to project on surfaces. The
-    Fixture Amount setting can be used to add more surfaces. Each surface has 16
-    DMX channels and each added fixture adds another 16 channels.
+  generalInfo: 'This device functions as a virtual lighting fixture.
 
+    
 
-    Channel mapping:
+    Video
+    output from the device is controlled
 
+    by incoming DMX data over the network.
+
+    
+
+    Connect
+    a lighting controller on the same
+
+    network to control the fixture.'
+  fixtureName: The name of this fixture as it appears on the network and in the Web
+    UI.
+  ipAddress: 'This fixture receives DMX data over the network.
+
+    
+
+    Supported
+    protocols may include Art-Net and sACN,
+
+    depending on the firmware version.
+
+    
+
+    The
+    fixture listens for DMX data on the selected
+
+    DMX Universe and Start Channel.'
+  webUi: 'This is the IP address of this fixture
+
+    on the local network.
+
+    
+
+    You
+    can access the Web UI from another
+
+    device on the same network:
+
+    
+
+    http://{ip}:8080
+
+    
+
+    Open
+    this address in a web browser
+
+    to configure fixture settings remotely.'
+  fixtureModeGeneral: 'DMX Mode selects how this fixture interprets DMX data.
+
+    
+
+    Each
+    mode uses a different channel layout and is designed
+
+    for different lighting
+    applications.
+
+    
+
+    Surface Mode:
+
+    For projection mapping onto surfaces.
+
+    
+
+    Moving
+    Head Mode:
+
+    Simulates a beam-style moving head fixture.
+
+    
+
+    Pixel
+    Mapping Mode:
+
+    Allows the fixture to function as a pixel grid
+
+    for
+    LED-style pixel mapping.'
+  standardMode: "Surface Mode is intended for projecting onto surfaces.\r\n\r\nThe
+    Fixture Amount setting can be used to add additional surfaces.  \r\nEach surface
+    uses 16 DMX channels. Each added fixture adds another 16 channels.\r\n\r\nChannel
+    Mapping:\r\n\r\nCH 1: Master Dimmer\r\nCH 2: Red\r\nCH 3: Green\r\nCH 4: Blue\r\nCH
+    5: Pattern Select (16 patterns, 0 = full color)\r\nCH 6: Pattern Parameter\r\nCH
+    7: Pattern Animation Speed\r\nCH 8: Strobe\r\n\r\nCH 9\u201316: Corner Pinning
+    X and Y\r\n(Referenced from the bottom-left corner of the screen)"
+  movingHeadMode: 'Moving Head Mode is intended for viewing the beam itself
+
+    (using
+    haze or smoke).
+
+    
+
+    This mode uses 14 DMX channels and mimics the behavior
+    of
+
+    a standard moving head fixture.
+
+    
+
+    Channel Mapping:
+
+    
 
     CH
     1: Master Dimmer
@@ -32,50 +131,124 @@ MonoBehaviour:
 
     CH 4: Blue
 
-    CH 5: Pattern
-    Select (16 patterns) 0 = full color.
+    CH
+    5: Pan
 
-    CH 6: Pattern Parameter
+    CH 6: Pan Fine
 
-    CH 7:
-    Pattern Animation Speed
+    CH 7: Tilt
 
-    CH 8: Strobe
+    CH 8: Tilt Fine
 
+    CH 9:
+    Pattern / Gobo Select
 
-    CH 9-16: Corner pinning X and
-    Y (Calculated from the bottom left corner of the screen)
+    CH 10: Pattern / Gobo Animation Speed
 
-'
-  movingHeadMode: "Moving Head Mode is intended to view the beam itself (using haze
-    or smoke). This mode has 14 channels that are trying to mimic a standard Moving
-    Head behavior.\n\nChannel Mapping:\n\nCH 1: Master Dimmer\nCH 2: Red\nCH 3: Green\nCH
-    4: Blue\nCH 5: Pan\nCH 6: Pan Fine\nCH 7: Tilt\nCH 8: Tilt Fine\nCH 9: Pattern/Gobo
-    Select\nCH 10: Pattern/Gobo Animation Speed\nCH 11: Pattern Scale\nCH 12: Iris
-    / Mask Scale\nCH 13: Pattern / Gobo Rotation\nCH 14: Strobe\n "
-  pixelMappingMode: "Pixel Mapping Mode is intended to be used as a virtual pixel
-    wall. This mode has 10 DMX channels reserved for Dimmer, Strobe and Corner Pinning.
-    The channels from channel 11 and upward are RGB channels for each pixel. The
-    amount of pixels can be configured by adjusting the Rows and Columns in 8 pixel
-    increments. \n\nChannel Mapping:\n\nCH 1: Master Dimmer\nCH 2: Strobe\nCH 3-10:
-    Corner Pinning X and Y (Calculated from the bottom left corner of the screen)\nCH
-    11+: RGB for each pixel\n"
-  universe: This is the starting universe (1 Base)
-  startChannel: 'This is the first DMX channel that the fixture will react to, all
-    other channels are calculated from the start channel without any gaps '
-  fixtureAmount: "The Fixture Amount setting adds extra virtual fixtures for surface
-    mapping. Each additional surface will effectively me a 16 channel fixture. \n*
-    Depending on the hardware used in your projector, the amount of fixtures you
-    choose to use, may slow down performance"
-  pixelRows: The amount of rows used for the pixel grid
-  pixelColumns: The amount of columns used for the pixel grid
-  networkWarning: 'This toggles the network warning banner on or off. The warning
-    banner will show when the fixture doesn''t reveive any values for 2 seconds. '
-  passwordProtection: "The password protection can be used to lock the webui behind
-    a password so that only devices with the password can modify the settings through
-    the webui. \n\nThe Show button will reveal the password for 3 seconds\n\nThe
-    Set/Reset password button lets the user set or change the password\n\n* The password
-    is stored internally as plain text and not hashed, so do not use passwords that
-    should be completely private "
-  infoPanel: Toggle this info panel on or off, using this toggle
-  infoPanelDefault: This is the info panel default message
+    CH 11:
+    Pattern Scale
+
+    CH 12: Iris / Mask Scale
+
+    CH 13: Pattern / Gobo Rotation
+
+    CH
+    14: Strobe'
+  pixelMappingMode: "Pixel Mapping Mode allows the fixture to function as a virtual
+    pixel wall.\r\n\r\nThis mode reserves 10 DMX channels for Dimmer, Strobe,\r\nand
+    Corner Pinning.\r\n\r\nChannels starting from channel 11 are used as RGB channels\r\nfor
+    each pixel.\r\n\r\nThe number of pixels can be configured by adjusting\r\nRows
+    and Columns in increments of 8 pixels.\r\n\r\nChannel Mapping:\r\n\r\nCH 1: Master
+    Dimmer\r\nCH 2: Strobe\r\nCH 3\u201310: Corner Pinning X and Y\r\n(Referenced
+    from the bottom-left corner of the screen)\r\n\r\nCH 11+: RGB channels for each
+    pixel"
+  universe: 'The DMX universe this fixture listens to.
+
+    
+
+    This setting
+    determines which universe
+
+    the fixture receives DMX data from.
+
+    
+
+    Universe
+    numbering is 1-based.'
+  startChannel: 'The first DMX channel this fixture responds to.
+
+    All other
+    channels are calculated sequentially from this starting channel.'
+  performance: 'Performance depends on the hardware used.
+
+    
+
+    Higher fixture
+    counts or large pixel grids may
+
+    reduce performance on low-power devices.
+
+    
+
+    For
+    best results, use wired Ethernet and
+
+    limit the number of active fixtures
+    if needed.'
+  fixtureAmount: 'The Fixture Amount setting adds additional virtual fixtures
+
+    for
+    surface mapping.
+
+    
+
+    Each additional surface behaves like a 16-channel
+    fixture.
+
+    
+
+    * Depending on the hardware used in your projector,
+
+    a
+    high number of fixtures may reduce performance.'
+  pixelRows: The number of rows used for the pixel grid.
+  pixelColumns: The number of columns used for the pixel grid.
+  networkWarning: 'Toggle the network warning banner on or off.
+
+    
+
+    The
+    warning banner appears when the fixture
+
+    does not receive DMX data for 2
+    seconds.'
+  passwordProtection: 'Password protection restricts access to the Web UI.
+
+    
+
+    Only
+    devices with the correct password can modify
+
+    settings through the Web UI.
+
+    
+
+    The
+    Show button reveals the password for 3 seconds.
+
+    
+
+    The Set/Reset Password
+    button allows the user
+
+    to set or change the password.
+
+    
+
+    * The
+    password is stored internally as plain text
+
+    and is not hashed. Do not use
+    sensitive passwords.'
+  infoPanel: Toggle the info panel on or off.
+  infoPanelDefault: Default message shown in the info panel.
