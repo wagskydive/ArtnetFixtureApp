@@ -7,7 +7,15 @@ public static class IapEntitlementCrypto
     private const string Prefix = "enc_v1:";
     private const string EntitlementSeed = "ArtnetFixtureApp.IAP.Entitlements.v1";
 
-    private static readonly byte[] KeyBytes = SHA256.HashData(Encoding.UTF8.GetBytes(EntitlementSeed));
+    private static readonly byte[] KeyBytes;
+
+    static IapEntitlementCrypto()
+    {
+        using (SHA256 sha = SHA256.Create())
+        {
+            KeyBytes = sha.ComputeHash(Encoding.UTF8.GetBytes(EntitlementSeed));
+        }
+    }
 
     public static string Encrypt(string plainText)
     {
