@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
 
 #if UNITY_PURCHASING
@@ -97,6 +98,61 @@ public class UnityIapPurchaseGateway : MonoBehaviour
         return true;
 #else
         Debug.LogWarning($"Purchase requested for '{productId}', but Unity Purchasing is unavailable in this build.", this);
+        return false;
+#endif
+    }
+
+    public string GetDisplayPrice(CapabilityDefinition definition)
+    {
+        if (definition == null)
+        {
+            return string.Empty;
+        }
+
+        string localizedPrice;
+        if (TryGetLivePrice(definition.ProductId, out localizedPrice))
+        {
+            return localizedPrice;
+        }
+
+#if UNITY_EDITOR
+        if (definition.EditorTestPriceUsd > 0f)
+        {
+            return string.Format(CultureInfo.InvariantCulture, "${0:0.00}", definition.EditorTestPriceUsd);
+        }
+#endif
+
+        return string.Empty;
+    }
+
+    public bool TryGetLivePrice(string productId, out string localizedPrice)
+    {
+        localizedPrice = string.Empty;
+        if (string.IsNullOrWhiteSpace(productId))
+        {
+            return false;
+        }
+
+#if UNITY_PURCHASING
+        if (_storeController == null)
+        {
+            InitializePurchasing();
+        }
+
+        if (_storeController == null || _storeController.products == null)
+        {
+            return false;
+        }
+
+        Product product = _storeController.products.WithID(productId);
+        if (product == null || product.metadata == null || string.IsNullOrWhiteSpace(product.metadata.localizedPriceString))
+        {
+            return false;
+        }
+
+        localizedPrice = product.metadata.localizedPriceString;
+        return true;
+#else
         return false;
 #endif
     }

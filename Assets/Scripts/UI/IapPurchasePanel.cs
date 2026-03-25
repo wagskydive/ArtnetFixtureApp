@@ -115,6 +115,21 @@ public class IapPurchasePanel : MonoBehaviour
                && definition.IsUnlockedBy(CapabilityService.Instance.Entitlements);
     }
 
+    public string GetDisplayPrice(CapabilityDefinition definition)
+    {
+        if (definition == null)
+        {
+            return string.Empty;
+        }
+
+        if (purchaseGateway == null)
+        {
+            purchaseGateway = FindFirstObjectByType<UnityIapPurchaseGateway>();
+        }
+
+        return purchaseGateway != null ? purchaseGateway.GetDisplayPrice(definition) : string.Empty;
+    }
+
     private void ClearItems()
     {
         for (int i = 0; i < _spawnedItems.Count; i++)

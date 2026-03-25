@@ -19,6 +19,8 @@ public class CapabilityDefinition : ScriptableObject
     [SerializeField] private string displayTitle;
     [TextArea]
     [SerializeField] private string displayDescription;
+    [Min(0f)]
+    [SerializeField] private float editorTestPriceUsd = 0.99f;
 
     public string Id => id;
     public CapabilityValueType ValueType => valueType;
@@ -28,6 +30,7 @@ public class CapabilityDefinition : ScriptableObject
     public IReadOnlyList<string> AdditionalProductIds => additionalProductIds;
     public string DisplayTitle => displayTitle;
     public string DisplayDescription => displayDescription;
+    public float EditorTestPriceUsd => editorTestPriceUsd;
 
     public bool IsUnlockedBy(EntitlementStore entitlementStore)
     {

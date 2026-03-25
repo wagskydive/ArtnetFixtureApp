@@ -433,6 +433,17 @@ Implement the ability to make the actual in app purchase using Google Play store
   - Added entitlement-change notifications in `CapabilityService` and rebuild hooks in `IapPurchasePanel` so lock/unlock state refreshes immediately after purchase callbacks.
 
 T19.19 - Modify UnityIapPurchaseGateway.cs so it tries to fetch the price of each IAP and add a fallback for inside the Unity Editor that looks up a test price amount that is sotred in the Scriptable object. So also update the CapabilityDefinition Scriptable object so it has a test-price field. Also add a function in IapPurchasePanelItem.cs that will get the price and adds it to a PriceText Text Ui component.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Added `editorTestPriceUsd` to `CapabilityDefinition` so each capability can define an Editor-only fallback display price.
+  - Extended `UnityIapPurchaseGateway` with live localized-price lookup via Unity IAP metadata plus Editor fallback formatting when store pricing is unavailable.
+  - Added panel/item wiring (`IapPurchasePanel.GetDisplayPrice`, `IapPurchasePanelItem.priceText`, `RefreshPriceText`) so generated purchase rows show each product price.
+  - Updated EditMode `IapPurchasePanelTests` to verify displayed price text for multiple capabilities.
+
+T19.20 - Next run: add a Play Store restore/ownership sync pass on IAP panel open so previously purchased non-consumables are reflected even before new purchase callbacks.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
