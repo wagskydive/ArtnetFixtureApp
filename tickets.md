@@ -423,20 +423,25 @@ Implement the ability to make the actual in app purchase using Google Play store
 ### Acceptance Criteria
 - The IAP ui purchase buttons are wired up to a purchasing system that uses UnityEngine.Purchasing namespace
 
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Added `UnityIapPurchaseGateway` using `UnityEngine.Purchasing` (`IDetailedStoreListener`) to initialize products from `CapabilityDatabase`, initiate purchases, and unlock entitlements when purchases complete.
+  - Updated `IapPurchasePanel` purchase-button flow to route purchases through the new gateway, while keeping a local unlock fallback for development/test environments where the store backend is unavailable.
+  - Added entitlement-change notifications in `CapabilityService` and rebuild hooks in `IapPurchasePanel` so lock/unlock state refreshes immediately after purchase callbacks.
 
 
 
 T18.2 - Add a popup.cs script that can be added as a component to any panel that is used as a popup. It handles the correct behavior of the back button and blocks any ui navigation for any underlying/inactive ui elements.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Added reusable `Popup` component for panel-style dialogs with explicit `Open`/`Close`, back-button close handling (Input System + fallback keys), focus restore to previous selection, and navigation confinement to popup descendants.
+  - Added `PopupTests` EditMode coverage for open/close visibility and selection handoff behavior.
 
 
 T18.1 - Add help button in UI. The help button should open a dialog popup to explain how the app is supposed to work.

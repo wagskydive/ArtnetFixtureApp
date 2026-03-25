@@ -17,11 +17,11 @@ public class EntitlementStore
         }
     }
 
-    public void MarkUnlocked(string productId)
+    public bool MarkUnlocked(string productId)
     {
         if (string.IsNullOrWhiteSpace(productId))
         {
-            return;
+            return false;
         }
 
         bool changed = _unlockedProductIds.Add(productId);
@@ -29,6 +29,8 @@ public class EntitlementStore
         {
             SaveToLocalStorage();
         }
+
+        return changed;
     }
 
     public bool IsUnlocked(string productId)

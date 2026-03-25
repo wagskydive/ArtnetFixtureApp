@@ -6,10 +6,35 @@ public class IapPurchasePanel : MonoBehaviour
 {
     [SerializeField] private GameObject panelRoot;
     [SerializeField] private CapabilityDatabase capabilityDatabase;
+    [SerializeField] private UnityIapPurchaseGateway purchaseGateway;
     [SerializeField] private Transform contentRoot;
     [SerializeField] private IapPurchasePanelItem itemPrefab;
 
     private readonly List<IapPurchasePanelItem> _spawnedItems = new List<IapPurchasePanelItem>();
+
+    private void Awake()
+    {
+        if (purchaseGateway == null)
+        {
+            purchaseGateway = FindObjectOfType<UnityIapPurchaseGateway>();
+        }
+    }
+
+    private void OnEnable()
+    {
+        if (CapabilityService.Instance != null)
+        {
+            CapabilityService.Instance.EntitlementsChanged += HandleEntitlementsChanged;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (CapabilityService.Instance != null)
+        {
+            CapabilityService.Instance.EntitlementsChanged -= HandleEntitlementsChanged;
+        }
+    }
 
     public void Show()
     {
@@ -18,6 +43,7 @@ public class IapPurchasePanel : MonoBehaviour
             panelRoot.SetActive(true);
         }
 
+        purchaseGateway?.InitializePurchasing();
         RebuildItems();
     }
 
@@ -56,13 +82,24 @@ public class IapPurchasePanel : MonoBehaviour
 
     public void Purchase(CapabilityDefinition definition)
     {
-        if (definition == null || CapabilityService.Instance == null)
+        if (definition == null)
         {
             return;
         }
 
-        if (!string.IsNullOrWhiteSpace(definition.ProductId))
+        if (purchaseGateway == null)
         {
+            purchaseGateway = FindObjectOfType<UnityIapPurchaseGateway>();
+        }
+
+        if (purchaseGateway != null && purchaseGateway.PurchaseProduct(definition.ProductId))
+        {
+            return;
+        }
+
+        if (CapabilityService.Instance != null && !string.IsNullOrWhiteSpace(definition.ProductId))
+        {
+            // Fallback path for development/test environments without a configured store backend.
             CapabilityService.Instance.UnlockProduct(definition.ProductId);
         }
 
@@ -87,5 +124,10 @@ public class IapPurchasePanel : MonoBehaviour
         }
 
         _spawnedItems.Clear();
+    }
+
+    private void HandleEntitlementsChanged()
+    {
+        RebuildItems();
     }
 }
