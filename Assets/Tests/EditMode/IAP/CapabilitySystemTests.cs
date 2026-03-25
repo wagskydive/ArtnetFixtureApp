@@ -89,22 +89,40 @@ public class CapabilitySystemTests
     public void CapabilitySystem_SameProductUnlocksMultipleCapabilities()
     {
         var universeLimit = CreateCapabilityDefinition("capability.universe.max", CapabilityValueType.Numeric, "product.pro.bundle", false, 16);
-        var advancedInfoPanel = CreateCapabilityDefinition("capability.info-panel.advanced", CapabilityValueType.Boolean, "product.pro.bundle", true, 0);
+        var outputBoost = CreateCapabilityDefinition("capability.output.boost", CapabilityValueType.Boolean, "product.pro.bundle", true, 0);
 
-        var lookup = new InMemoryCapabilityLookup(universeLimit, advancedInfoPanel);
+        var lookup = new InMemoryCapabilityLookup(universeLimit, outputBoost);
         var store = new EntitlementStore();
         var capabilitySystem = new CapabilitySystem(lookup, store);
 
         Assert.That(capabilitySystem.ResolveNumeric("capability.universe.max", 1), Is.EqualTo(1));
-        Assert.That(capabilitySystem.ResolveBoolean("capability.info-panel.advanced", false), Is.False);
+        Assert.That(capabilitySystem.ResolveBoolean("capability.output.boost", false), Is.False);
 
         store.MarkUnlocked("product.pro.bundle");
 
         Assert.That(capabilitySystem.ResolveNumeric("capability.universe.max", 1), Is.EqualTo(16));
-        Assert.That(capabilitySystem.ResolveBoolean("capability.info-panel.advanced", false), Is.True);
+        Assert.That(capabilitySystem.ResolveBoolean("capability.output.boost", false), Is.True);
 
         Object.DestroyImmediate(universeLimit);
-        Object.DestroyImmediate(advancedInfoPanel);
+        Object.DestroyImmediate(outputBoost);
+    }
+
+    [Test]
+    public void CapabilitySystem_AlternateProductUnlock_UnlocksCapability()
+    {
+        var universeLimit = CreateCapabilityDefinition("capability.universe.max", CapabilityValueType.Numeric, "product.universe.single", false, 16);
+        SetPrivateField(universeLimit, "additionalProductIds", new List<string> { "product.pro.bundle" });
+        var lookup = new InMemoryCapabilityLookup(universeLimit);
+        var store = new EntitlementStore();
+        var capabilitySystem = new CapabilitySystem(lookup, store);
+
+        Assert.That(capabilitySystem.ResolveNumeric("capability.universe.max", 1), Is.EqualTo(1));
+
+        store.MarkUnlocked("product.pro.bundle");
+
+        Assert.That(capabilitySystem.ResolveNumeric("capability.universe.max", 1), Is.EqualTo(16));
+
+        Object.DestroyImmediate(universeLimit);
     }
 
     private static CapabilityDefinition CreateCapabilityDefinition(string id, CapabilityValueType valueType, string productId, bool unlockedBooleanValue, int unlockedNumericValue)
