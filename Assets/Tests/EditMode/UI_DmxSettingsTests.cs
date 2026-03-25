@@ -10,6 +10,7 @@ public class UI_DmxSettingsTests
         PlayerPrefs.DeleteKey("dmx.channel");
         PlayerPrefs.DeleteKey("dmx.universe");
         PlayerPrefs.DeleteKey("dmx.pattern");
+        PlayerPrefs.DeleteKey("infoPanel");
     }
 
     [Test]
@@ -155,6 +156,51 @@ public class UI_DmxSettingsTests
         Assert.That(reloadedSettings.CurrentDmxChannel, Is.EqualTo(200));
         Assert.That(reloadedSettings.CurrentDmxUniverse, Is.EqualTo(12));
         Assert.That(reloadedSettings.CurrentPatternType, Is.EqualTo(2));
+    }
+
+    [Test]
+    public void LoadPreferences_DefaultsInfoPanelToEnabled_WhenNoPreferenceExists()
+    {
+        var (settings, _, _, _) = CreateSettings();
+        var infoPanel = new GameObject("info-panel");
+        var toggle = new GameObject("info-toggle").AddComponent<Toggle>();
+
+        typeof(UI_DmxSettings)
+            .GetField("infoPanel", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            .SetValue(settings, infoPanel);
+
+        typeof(UI_DmxSettings)
+            .GetField("infoPanelToggle", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            .SetValue(settings, toggle);
+
+        settings.LoadPreferences();
+
+        Assert.That(toggle.isOn, Is.True);
+        Assert.That(infoPanel.activeSelf, Is.True);
+    }
+
+    [Test]
+    public void SetInfoPanelEnabled_TogglesPanelAndPersistsWithoutCapabilityChecks()
+    {
+        var (settings, _, _, _) = CreateSettings();
+        var infoPanel = new GameObject("info-panel");
+        var toggle = new GameObject("info-toggle").AddComponent<Toggle>();
+
+        typeof(UI_DmxSettings)
+            .GetField("infoPanel", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            .SetValue(settings, infoPanel);
+
+        typeof(UI_DmxSettings)
+            .GetField("infoPanelToggle", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            .SetValue(settings, toggle);
+
+        settings.SetInfoPanelEnabled(false);
+        Assert.That(PlayerPrefs.GetInt("infoPanel", -1), Is.EqualTo(0));
+        Assert.That(infoPanel.activeSelf, Is.False);
+
+        settings.SetInfoPanelEnabled(true);
+        Assert.That(PlayerPrefs.GetInt("infoPanel", -1), Is.EqualTo(1));
+        Assert.That(infoPanel.activeSelf, Is.True);
     }
 
     private static (UI_DmxSettings settings, Text channelText, Text universeText, ArtNetReceiver receiver) CreateSettings()

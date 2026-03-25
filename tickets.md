@@ -370,6 +370,24 @@ Revert back to the info panel to be part of the app without an IAP
 ### Acceptance Criteria
 - The info panel always works and defaults to be on and can be switched using the info panel toggle
 
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - Removed the info-panel capability gate from `UI_DmxSettings` so the toggle no longer depends on IAP unlock state.
+  - Changed info-panel startup default to enabled (`InfoPanelEnabledKey` fallback now `1`) while preserving user toggle persistence.
+  - Added EditMode coverage proving info panel defaults on when no pref exists and can always be toggled/persisted.
+
+## 19.16 — next run — clean up unused advanced info panel capability asset references
+
+### Goal
+Remove stale advanced-info-panel scene/database references now that the info panel is no longer an IAP-gated feature.
+
+### Acceptance Criteria
+- MainScene and capability database no longer reference an advanced info panel capability asset
+- Universe-limit IAP flow keeps working unchanged
+
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
