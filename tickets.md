@@ -433,6 +433,13 @@ Implement the ability to make the actual in app purchase using Google Play store
   - Added entitlement-change notifications in `CapabilityService` and rebuild hooks in `IapPurchasePanel` so lock/unlock state refreshes immediately after purchase callbacks.
 
 
+T18.3 - rework UI_DpadNavigationController.cs so it works correctly and add a checkbox to allow/disallow horizontal and/or vetical navigation and/or wrapping. Currently Horizontal navigation doesn't work and verticle wrapping is buggy and not reliable.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 
 T18.2 - Add a popup.cs script that can be added as a component to any panel that is used as a popup. It handles the correct behavior of the back button and blocks any ui navigation for any underlying/inactive ui elements.
 - [x] Started
