@@ -148,17 +148,18 @@ Introduce a CapabilitySystem that resolves capabilities using the database and e
 
 ---
 
-## 19.5 — in app purchase implementation — integrate first real capability into gameplay (fixture limit)
+## 19.5 — in app purchase implementation — integrate first real capability into gameplay (universe limit)
 
 ### Goal
 Use the system in real application logic for the first time.
 
 ### Description
-Implement the fixture limit using the capability system instead of hardcoded values.
+Implement the Universe limit using the capability system instead of hardcoded values.
+Free users can only use Universe 1 and premium users can select any other universes
 
 ### Unity-specific approach
-- Create a capability asset representing fixture limits
-- Use the capability system inside existing fixture logic
+- Create a capability asset representing universe limits
+- Use the capability system inside existing universe selection logic
 
 ### Important constraints
 - Do not hardcode limits anymore
@@ -166,9 +167,9 @@ Implement the fixture limit using the capability system instead of hardcoded val
 
 ### Acceptance Criteria
 - Free users are limited correctly
-- Unlocking increases the limit
+- Unlocking removes the limit
 
-- [x] Started
+- [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
 - [ ] Tests Passed
