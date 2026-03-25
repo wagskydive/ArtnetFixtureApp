@@ -685,6 +685,29 @@ T99.7 - Find and fix a bug where the settings menu webui over LAN on the android
   - Added EditMode coverage for hide behavior to verify default hide semantics still work and the new keep-active mode preserves GameObject activation.
 
 
+T99.8 - Refactor the code so that every class and every interface lives in its own file and fix these bugs: 
+
+- Assets\Scripts\UI\UI_DmxSettings.cs(347,48): error CS0117: 'WebUiPasswordProtection' does not contain a definition for 'SetProtectionEnabled'
+
+- Assets\Scripts\UI\UI_PasswordHelper.cs(44,28): error CS1061: 'UI_DmxSettings' does not contain a definition for 'ApplyWebUiPasswordFromInput' and no accessible extension method 'ApplyWebUiPasswordFromInput' accepting a first argument of type 'UI_DmxSettings' could be found (are you missing a using directive or an assembly reference?)
+
+- Assets\Scripts\UI\UI_DmxSettings.cs(363,51): error CS0117: 'WebUiPasswordProtection' does not contain a definition for 'GetPasswordForUnityUi'
+
+- Assets\Scripts\UI\UI_DmxSettings.cs(391,33): error CS0117: 'WebUiPasswordProtection' does not contain a definition for 'ClearPassword'
+
+- Assets\Scripts\UI\UI_DmxSettings.cs(398,54): error CS0117: 'SaveLoadSettings' does not contain a definition for 'FixtureNameKey'
+
+- Assets\Scripts\UI\UI_DmxSettings.cs(407,86): error CS0117: 'SaveLoadSettings' does not contain a definition for 'FixtureNameKey'
+
+- Assets\Scripts\UI\UI_DmxSettings.cs(439,51): error CS0117: 'WebUiPasswordProtection' does not contain a definition for 'GetPasswordForUnityUi'
+
+- Assets\Scripts\UI\UI_DmxSettings.cs(441,58): error CS0117: 'WebUiPasswordProtection' does not contain a definition for 'IsProtectionEnabled'
+
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
 
 T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode
 - [x] Started
