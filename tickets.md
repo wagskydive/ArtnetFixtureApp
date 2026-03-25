@@ -463,7 +463,7 @@ and  Before calling purchase, verify the product exists and is available to avoi
   - Purchase calls now validate store readiness, product existence, and `availableToPurchase` before initiating a transaction; invalid states log warnings and return `false`.
   - `IapPurchasePanel` fallback unlock path is now compiled only for non-Unity-IAP builds to avoid masking store configuration issues in purchasing-enabled builds.
 
-T19.22 - Ensure that purchased items stay unlocked if the device is not online
+T19.22 - Ensure that purchased items stay unlocked if the device is not online. The purchased state should also be saved in the playerprefs (encrypted to reduce hacking opportunities) and if the state is already unlocked and the device is offline, the unlocked state should still be correct. and the ulocked functionallity should work.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
