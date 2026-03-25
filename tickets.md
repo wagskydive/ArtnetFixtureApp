@@ -54,7 +54,7 @@ Each capability must:
 - [x] Started
 - [x] Behavior Written
 - [x] Code Written
-- [x] Tests Passed
+- [ ] Tests Passed
 - [x] Documentation Written
 
 ---
@@ -84,7 +84,7 @@ Introduce a MonoBehaviour that holds references to all capability ScriptableObje
 - [x] Started
 - [x] Behavior Written
 - [x] Code Written
-- [x] Tests Passed
+- [ ] Tests Passed
 - [x] Documentation Written
 
 ---
@@ -114,7 +114,7 @@ Introduce an EntitlementStore that tracks unlocked product IDs.
 - [x] Started
 - [x] Behavior Written
 - [x] Code Written
-- [x] Tests Passed
+- [ ] Tests Passed
 - [x] Documentation Written
 
 ---
@@ -143,7 +143,7 @@ Introduce a CapabilitySystem that resolves capabilities using the database and e
 - [x] Started
 - [x] Behavior Written
 - [x] Code Written
-- [x] Tests Passed
+- [ ] Tests Passed
 - [x] Documentation Written
 
 ---
@@ -444,14 +444,26 @@ T19.19 - Modify UnityIapPurchaseGateway.cs so it tries to fetch the price of eac
   - Updated EditMode `IapPurchasePanelTests` to verify displayed price text for multiple capabilities.
 
 T19.20 - Next run: add a Play Store restore/ownership sync pass on IAP panel open so previously purchased non-consumables are reflected even before new purchase callbacks.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Added `UnityIapPurchaseGateway.SyncOwnedPurchases()` to sweep initialized Unity IAP products for non-consumable receipts and unlock matching entitlements immediately.
+  - Updated `IapPurchasePanel.Show()` to run ownership sync before rebuilding rows so already-owned items display as unlocked as soon as the panel opens.
 
 T19.21 -  Initialize IAP once at app startup instead of lazily during purchase/price calls, so prices and products are reliably available when the UI loads.
 and  Before calling purchase, verify the product exists and is available to avoid silent failures.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - `UnityIapPurchaseGateway` now initializes in `Awake()` with one-shot initialization guarding, rather than initializing inside purchase/price query code paths.
+  - Purchase calls now validate store readiness, product existence, and `availableToPurchase` before initiating a transaction; invalid states log warnings and return `false`.
+  - `IapPurchasePanel` fallback unlock path is now compiled only for non-Unity-IAP builds to avoid masking store configuration issues in purchasing-enabled builds.
+
+T19.22 - Next run: add EditMode coverage for Unity IAP gateway purchase validation and ownership sync behavior using an injectable product-collection adapter.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written

@@ -45,7 +45,7 @@ public class IapPurchasePanel : MonoBehaviour
             panelRoot.SetActive(true);
         }
 
-        purchaseGateway?.InitializePurchasing();
+        purchaseGateway?.SyncOwnedPurchases();
         RebuildItems();
     }
 
@@ -99,11 +99,13 @@ public class IapPurchasePanel : MonoBehaviour
             return;
         }
 
+#if !UNITY_PURCHASING
         if (CapabilityService.Instance != null && !string.IsNullOrWhiteSpace(definition.ProductId))
         {
             // Fallback path for development/test environments without a configured store backend.
             CapabilityService.Instance.UnlockProduct(definition.ProductId);
         }
+#endif
 
         RebuildItems();
     }
