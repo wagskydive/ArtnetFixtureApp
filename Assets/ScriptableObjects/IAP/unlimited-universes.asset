@@ -20,7 +20,8 @@ MonoBehaviour:
   additionalProductIds:
   - product.pro.bundle
   displayTitle: Unlimited universes
-  displayDescription: 'The use of unlimited universes is a premium feature.
+  displayDescription: 'The use of unlimited universes is a premium feature that will
+    allow the use of any universe number to be used.
 
 '
   editorTestPriceUsd: 4.99
