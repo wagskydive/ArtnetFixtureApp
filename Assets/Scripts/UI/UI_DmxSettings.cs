@@ -27,7 +27,6 @@ public class UI_DmxSettings : MonoBehaviour
     [SerializeField] private UI_FixtureMeshManager fixtureMeshManager;
     [SerializeField] private CapabilityBlockUiTrigger capabilityBlockUiTrigger;
     [SerializeField] private CapabilityDefinition universeLimitCapability;
-    [SerializeField] private CapabilityDefinition infoPanelCapability;
 
     private int currentDmxChannel = 1;
     private int currentDmxUniverse = 1;
@@ -299,7 +298,7 @@ public class UI_DmxSettings : MonoBehaviour
             return;
         }
 
-        bool enabled = SaveLoadSettings.LoadInt(SaveLoadSettings.InfoPanelEnabledKey, 0) == 1;
+        bool enabled = SaveLoadSettings.LoadInt(SaveLoadSettings.InfoPanelEnabledKey, 1) == 1;
         infoPanelToggle.SetIsOnWithoutNotify(enabled);
         if (infoPanel != null)
         {
@@ -309,23 +308,6 @@ public class UI_DmxSettings : MonoBehaviour
 
     public void SetInfoPanelEnabled(bool isOn)
     {
-        if (isOn && !ResolveBooleanCapability(infoPanelCapability, lockedValue: false))
-        {
-            TriggerLockedCapability(infoPanelCapability);
-
-            if (infoPanelToggle != null)
-            {
-                infoPanelToggle.SetIsOnWithoutNotify(false);
-            }
-
-            if (infoPanel != null)
-            {
-                infoPanel.SetActive(false);
-            }
-
-            return;
-        }
-
         SaveLoadSettings.SaveInt(SaveLoadSettings.InfoPanelEnabledKey, isOn ? 1 : 0);
         SaveLoadSettings.Save();
 
@@ -494,22 +476,6 @@ public class UI_DmxSettings : MonoBehaviour
 
         int maxUniverse = CapabilityService.Instance.ResolveNumeric(capabilityId, 1);
         return Mathf.Clamp(maxUniverse, 1, 16);
-    }
-
-    private bool ResolveBooleanCapability(CapabilityDefinition capabilityDefinition, bool lockedValue)
-    {
-        if (CapabilityService.Instance == null)
-        {
-            return lockedValue;
-        }
-
-        string capabilityId = GetCapabilityId(capabilityDefinition);
-        if (string.IsNullOrWhiteSpace(capabilityId))
-        {
-            return lockedValue;
-        }
-
-        return CapabilityService.Instance.ResolveBoolean(capabilityId, lockedValue);
     }
 
     private void TriggerLockedCapability(CapabilityDefinition capabilityDefinition)
