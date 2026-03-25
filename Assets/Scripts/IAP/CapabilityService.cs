@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 
 public class CapabilityService : MonoBehaviour
 {
@@ -7,6 +8,7 @@ public class CapabilityService : MonoBehaviour
 
     private EntitlementStore _entitlementStore;
     private CapabilitySystem _capabilitySystem;
+    public event Action EntitlementsChanged;
 
     public static CapabilityService Instance { get; private set; }
 
@@ -49,11 +51,25 @@ public class CapabilityService : MonoBehaviour
 
     public void UnlockProduct(string productId)
     {
-        _entitlementStore?.MarkUnlocked(productId);
+        if (_entitlementStore == null)
+        {
+            return;
+        }
+
+        if (_entitlementStore.MarkUnlocked(productId))
+        {
+            EntitlementsChanged?.Invoke();
+        }
     }
 
     public void ResetEntitlements()
     {
-        _entitlementStore?.ResetAll();
+        if (_entitlementStore == null)
+        {
+            return;
+        }
+
+        _entitlementStore.ResetAll();
+        EntitlementsChanged?.Invoke();
     }
 }
