@@ -444,7 +444,7 @@ T18.3 - rework UI_DpadNavigationController.cs so it works correctly and add a ch
   - Expanded EditMode test coverage for horizontal enable/disable behavior and vertical wrapping.
 
 
-T18.4 - next run - wire inspector defaults for new UI_DpadNavigationController axis/wrap toggles across scenes and prefabs
+T18.4 - rework popup.cs so that it when the popup is enabled it blocks any onavgation and submitting and canceling for any other panels
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
