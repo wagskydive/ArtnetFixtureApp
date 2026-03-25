@@ -32,8 +32,8 @@ public class Popup : MonoBehaviour
 
     private void OnDisable()
     {
-        DisableAction(backAction, OnBackAction);
         ReleaseNavigationBlock();
+        DisableAction(backAction, OnBackAction);
     }
 
     private void Update()
