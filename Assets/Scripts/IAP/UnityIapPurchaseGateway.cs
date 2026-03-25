@@ -12,6 +12,7 @@ public class UnityIapPurchaseGateway : MonoBehaviour
 #endif
 {
     [SerializeField] private CapabilityDatabase capabilityDatabase;
+    private bool _hasAttemptedInitialization;
 
 #if UNITY_PURCHASING
     private IStoreController _storeController;
@@ -29,13 +30,20 @@ public class UnityIapPurchaseGateway : MonoBehaviour
         }
     }
 
+    private void Awake()
+    {
+        InitializePurchasing();
+    }
+
     public void InitializePurchasing()
     {
 #if UNITY_PURCHASING
-        if (_storeController != null)
+        if (_hasAttemptedInitialization || _storeController != null)
         {
             return;
         }
+
+        _hasAttemptedInitialization = true;
 
         CapabilityDatabase database = capabilityDatabase != null ? capabilityDatabase : CapabilityDatabase.Instance;
         if (database == null)
@@ -84,13 +92,22 @@ public class UnityIapPurchaseGateway : MonoBehaviour
         }
 
 #if UNITY_PURCHASING
-        if (_storeController == null)
+        if (_storeController == null || _storeController.products == null)
         {
-            InitializePurchasing();
+            Debug.LogWarning($"Purchase requested for '{productId}' before Unity IAP finished initialization.", this);
+            return false;
         }
 
-        if (_storeController == null)
+        Product product = _storeController.products.WithID(productId);
+        if (product == null)
         {
+            Debug.LogWarning($"Purchase requested for unknown product '{productId}'. Verify CapabilityDefinition product IDs.", this);
+            return false;
+        }
+
+        if (!product.availableToPurchase)
+        {
+            Debug.LogWarning($"Purchase requested for unavailable product '{productId}'.", this);
             return false;
         }
 
@@ -134,11 +151,6 @@ public class UnityIapPurchaseGateway : MonoBehaviour
         }
 
 #if UNITY_PURCHASING
-        if (_storeController == null)
-        {
-            InitializePurchasing();
-        }
-
         if (_storeController == null || _storeController.products == null)
         {
             return false;
@@ -152,6 +164,42 @@ public class UnityIapPurchaseGateway : MonoBehaviour
 
         localizedPrice = product.metadata.localizedPriceString;
         return true;
+#else
+        return false;
+#endif
+    }
+
+    public bool SyncOwnedPurchases()
+    {
+#if UNITY_PURCHASING
+        if (_storeController == null || _storeController.products == null || CapabilityService.Instance == null)
+        {
+            return false;
+        }
+
+        bool changed = false;
+        Product[] allProducts = _storeController.products.all;
+        for (int i = 0; i < allProducts.Length; i++)
+        {
+            Product product = allProducts[i];
+            if (product?.definition == null || product.definition.type != ProductType.NonConsumable)
+            {
+                continue;
+            }
+
+            if (product.hasReceipt)
+            {
+                int unlockedCountBefore = CapabilityService.Instance.Entitlements.GetUnlockedProductIds().Count;
+                CapabilityService.Instance.UnlockProduct(product.definition.id);
+                int unlockedCountAfter = CapabilityService.Instance.Entitlements.GetUnlockedProductIds().Count;
+                if (unlockedCountAfter > unlockedCountBefore)
+                {
+                    changed = true;
+                }
+            }
+        }
+
+        return changed;
 #else
         return false;
 #endif
