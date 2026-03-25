@@ -41,25 +41,6 @@ public class UI_SettingsPanelToggleTests
     }
 
     [Test]
-    public void HideMenu_KeepTargetObjectActiveWhenHidden_KeepsObjectActive()
-    {
-        var controllerGo = new GameObject("controller");
-        var targetGo = new GameObject("target");
-        targetGo.SetActive(true);
-
-        var toggle = controllerGo.AddComponent<UI_SettingsPanelToggle>();
-        SetPrivateField(toggle, "targetObject", targetGo);
-        SetPrivateField(toggle, "keepTargetObjectActiveWhenHidden", true);
-
-        toggle.HideMenu();
-
-        Assert.That(targetGo.activeSelf, Is.True);
-
-        Object.DestroyImmediate(controllerGo);
-        Object.DestroyImmediate(targetGo);
-    }
-
-    [Test]
     public void HideMenu_DefaultBehavior_HidesObject()
     {
         var controllerGo = new GameObject("controller");

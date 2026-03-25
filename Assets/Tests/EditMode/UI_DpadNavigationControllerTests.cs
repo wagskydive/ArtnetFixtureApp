@@ -2,7 +2,7 @@ using NUnit.Framework;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.EventSystems;
-
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class UI_DpadNavigationControllerTests
@@ -186,6 +186,28 @@ public class UI_DpadNavigationControllerTests
     }
 
     
+
+
+    [Test]
+    public void HandleCancelInput_InvokesCancelEvent_OncePerFrame()
+    {
+        var root = CreateRootWithCanvas();
+        var controller = root.AddComponent<UI_DpadNavigationController>();
+
+        int cancelCount = 0;
+        SetPrivateField(controller, "onCancel", new UnityEvent());
+        var eventField = typeof(UI_DpadNavigationController)
+            .GetField("onCancel", BindingFlags.NonPublic | BindingFlags.Instance);
+        var onCancel = (UnityEvent)eventField.GetValue(controller);
+        onCancel.AddListener(() => cancelCount++);
+
+        controller.HandleCancelInput();
+        controller.HandleCancelInput();
+
+        Assert.That(cancelCount, Is.EqualTo(1));
+
+        Object.DestroyImmediate(root);
+    }
 
     private static GameObject CreateEventSystem()
     {
