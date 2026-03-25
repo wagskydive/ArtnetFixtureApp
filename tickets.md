@@ -327,7 +327,22 @@ Create debug controls to unlock/reset capabilities and simulate purchases.
 
 ---
 
-## 19.13 — next run — wire IAP capability assets + locked panel prefab in MainScene and validate Android purchase callbacks end-to-end
+## 19.13 — iap improvments - remove CapabilityIds.cs - only refer to the data inside the scriptable objects
+
+### Goal
+No hard coded premium features anywhere in the code, so adding premium features is only done by adding more scripptable objects
+
+### Acceptance Criteria
+- CapabilityIds are inside the Scriptable objects only and are not hardcoded anywhere
+
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+---
+
+## 19.14 — next run — wire IAP capability assets + locked panel prefab in MainScene and validate Android purchase callbacks end-to-end
 
 ### Goal
 Complete scene-level wiring and device validation for the newly added IAP runtime components.
