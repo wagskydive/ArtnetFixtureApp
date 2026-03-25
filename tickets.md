@@ -455,11 +455,13 @@ T18.4 - rework popup.cs so that it when the popup is enabled it blocks any onavg
   - Extended `PopupTests` with coverage that verifies background navigation controllers are blocked on open and restored on close.
 
 T18.5 - Find and fix a bug where the UI_DpadNavigationController.cs OnEnable function doesn't work properly. When the Popup.cs script blocks the navigation of any other UI_DpadNavigationController script and the popup object gets disabled, the UI_DpadNavigationController doesn't let navigation work when its enabled again. When that script is disabled by hand in the editor and enabled again normal navigation is possible again, but not directly when the popup is closed using the "SetActive" method with a cancel button wired up. If this is expected behavior but not used correctly, explain how it is supposed to work under this ticket
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Fixed shared Input System action lifecycle in `UI_DpadNavigationController`: action references are now reference-counted across multiple controllers, so disabling one controller (e.g. popup close path) no longer disables `navigate/submit` actions that active controllers still depend on.
+  - Added EditMode regression test coverage for shared navigate-action ownership to ensure one controller disabling cannot break another controller's navigation.
 
 
 T18.2 - Add a popup.cs script that can be added as a component to any panel that is used as a popup. It handles the correct behavior of the back button and blocks any ui navigation for any underlying/inactive ui elements.
