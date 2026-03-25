@@ -15,6 +15,7 @@ public class UI_DpadNavigationController : MonoBehaviour
     [SerializeField] private InputActionReference submitAction;
 
     private readonly List<Selectable> _runtimeSelectables = new List<Selectable>();
+    private static readonly Dictionary<InputAction, int> ActionUsageCounts = new Dictionary<InputAction, int>();
     private int _currentIndex;
     private int _lastSubmitFrame = -1;
 
@@ -344,8 +345,17 @@ public class UI_DpadNavigationController : MonoBehaviour
             return;
         }
 
-        actionReference.action.performed += callback;
-        actionReference.action.Enable();
+        InputAction action = actionReference.action;
+        action.performed += callback;
+
+        ActionUsageCounts.TryGetValue(action, out int usageCount);
+        usageCount++;
+        ActionUsageCounts[action] = usageCount;
+
+        if (usageCount == 1)
+        {
+            action.Enable();
+        }
     }
 
     private static void DisableAction(InputActionReference actionReference, System.Action<InputAction.CallbackContext> callback)
@@ -355,7 +365,22 @@ public class UI_DpadNavigationController : MonoBehaviour
             return;
         }
 
-        actionReference.action.performed -= callback;
-        actionReference.action.Disable();
+        InputAction action = actionReference.action;
+        action.performed -= callback;
+
+        if (!ActionUsageCounts.TryGetValue(action, out int usageCount))
+        {
+            return;
+        }
+
+        usageCount = Mathf.Max(usageCount - 1, 0);
+        if (usageCount == 0)
+        {
+            ActionUsageCounts.Remove(action);
+            action.Disable();
+            return;
+        }
+
+        ActionUsageCounts[action] = usageCount;
     }
 }
