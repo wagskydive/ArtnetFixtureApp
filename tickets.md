@@ -1,5 +1,316 @@
 # Tickets
 
+# In-App Purchase Implementation Tickets
+
+## Key Components
+- CapabilityDefinition (data)
+- CapabilityDatabase (lookup)
+- EntitlementStore (ownership)
+- CapabilitySystem (logic)
+
+## Guidelines
+- No hardcoded product IDs
+- No UI logic in core systems
+- Keep systems decoupled
+- Ensure offline functionality
+
+## Development Workflow
+1. Define capability
+2. Assign product ID
+3. Use capability in logic
+
+---
+
+## 19.1 — in app purchase implementation — create capability data model using ScriptableObjects
+
+### Goal
+Create a flexible, data-driven way to define premium capabilities using Unity’s asset system.
+
+### Description
+Introduce a new ScriptableObject type that represents a single capability. This asset will act as the central definition of what a premium feature does.
+
+Each capability must:
+- have a unique string identifier (used at runtime)
+- define its type (boolean or numeric)
+- define the value it provides when unlocked
+- reference the product ID that unlocks it
+- include user-facing metadata (title and description)
+
+### Unity-specific approach
+- Use ScriptableObject assets so capabilities can be created via the editor
+- Use CreateAssetMenu so new capabilities can be added without code
+- Treat these assets as configuration, not logic
+
+### Important constraints
+- IDs must be unique and stable
+- Product IDs must match Play Store configuration later
+- Do not include any logic inside the ScriptableObject
+
+### Acceptance Criteria
+- New capability assets can be created from the Unity menu
+- All fields are visible and editable in the inspector
+- No runtime behavior yet
+
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+---
+
+## 19.2 — in app purchase implementation — create centralized capability database
+
+### Goal
+Create a runtime-accessible registry of all capability definitions.
+
+### Description
+Introduce a MonoBehaviour that holds references to all capability ScriptableObjects and builds a runtime lookup table.
+
+### Unity-specific approach
+- Use a serialized list in the inspector to assign capability assets
+- On initialization (Awake), convert the list into a dictionary for fast lookup
+
+### Important constraints
+- The database must exist exactly once
+- Must handle duplicate IDs safely
+- Must handle missing IDs gracefully
+
+### Acceptance Criteria
+- Capabilities can be retrieved by ID at runtime
+- Lookup is fast and does not rely on iteration
+- Errors are logged for invalid configurations
+
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+---
+
+## 19.3 — in app purchase implementation — create entitlement store abstraction (no IAP yet)
+
+### Goal
+Create a system that represents which purchases the user owns.
+
+### Description
+Introduce an EntitlementStore that tracks unlocked product IDs.
+
+### Unity/C# patterns used
+- Use an in-memory structure to track ownership
+- No MonoBehaviour required (pure logic class)
+- Keep it decoupled from Unity lifecycle
+
+### Important constraints
+- Must be replaceable later with real IAP backend
+- Must not depend on UI or gameplay systems
+
+### Acceptance Criteria
+- Can mark a product ID as unlocked
+- Can query if a product ID is unlocked
+- Works entirely offline
+
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+---
+
+## 19.4 — in app purchase implementation — create capability resolution system
+
+### Goal
+Create the core system that determines what the user is allowed to do.
+
+### Description
+Introduce a CapabilitySystem that resolves capabilities using the database and entitlement store.
+
+### Unity/C# patterns used
+- Dependency injection for database and store
+- No MonoBehaviour required (pure logic class)
+
+### Important constraints
+- No UI logic
+- No direct IAP calls
+- Must be safe to call frequently
+
+### Acceptance Criteria
+- Correct values returned for locked and unlocked states
+- Works without UI or Play Store integration
+
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+---
+
+## 19.5 — in app purchase implementation — integrate first real capability into gameplay (fixture limit)
+
+### Goal
+Use the system in real application logic for the first time.
+
+### Description
+Implement the fixture limit using the capability system instead of hardcoded values.
+
+### Unity-specific approach
+- Create a capability asset representing fixture limits
+- Use the capability system inside existing fixture logic
+
+### Important constraints
+- Do not hardcode limits anymore
+- All values must come from the capability system
+
+### Acceptance Criteria
+- Free users are limited correctly
+- Unlocking increases the limit
+
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+---
+
+## 19.6 — in app purchase implementation — introduce locked feature UI trigger
+
+### Goal
+Provide feedback when a user hits a premium limitation.
+
+### Description
+Trigger a UI panel when a capability blocks an action.
+
+### Unity-specific approach
+- Use a reusable UI prefab
+- Pass capability ID to the UI
+
+### Important constraints
+- UI must not contain business logic
+- Must support D-pad navigation
+
+### Acceptance Criteria
+- UI appears when limit is reached
+- Displays correct information
+
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+---
+
+## 19.7 — in app purchase implementation — support boolean capability use cases
+
+### Goal
+Validate system flexibility with a toggle feature.
+
+### Description
+Implement a boolean capability such as enabling a setting.
+
+### Important constraints
+- No special-case logic
+- Must reuse existing system
+
+### Acceptance Criteria
+- Feature blocked when locked
+- Works when unlocked
+
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+---
+
+## 19.8 — in app purchase implementation — persist entitlements locally for offline use
+
+### Goal
+Ensure purchases work without internet.
+
+### Description
+Extend EntitlementStore to persist unlocked product IDs locally.
+
+### Unity-specific approach
+- Use local storage (PlayerPrefs or similar)
+
+### Important constraints
+- Must work offline
+- Must survive restarts
+
+### Acceptance Criteria
+- Unlocks persist after restart
+
+---
+
+## 19.9 — in app purchase implementation — integrate Unity IAP with entitlement store
+
+### Goal
+Connect real purchases to the system.
+
+### Description
+On purchase success, unlock the corresponding product ID in the entitlement store.
+
+### Important constraints
+- EntitlementStore is the single source of truth
+- CapabilitySystem must remain unchanged
+
+### Acceptance Criteria
+- Purchase unlocks capability immediately
+- Unlock persists
+
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+---
+
+## 19.10 — in app purchase implementation — support multiple capabilities per product
+
+### Goal
+Allow one IAP to unlock multiple capabilities.
+
+### Description
+Multiple capability assets can reference the same product ID.
+
+### Acceptance Criteria
+- One purchase unlocks multiple features
+
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+---
+
+## 19.11 — in app purchase implementation — add developer debug tools for testing
+
+### Goal
+Speed up development and testing.
+
+### Description
+Create debug controls to unlock/reset capabilities and simulate purchases.
+
+### Important constraints
+- Must not be included in production builds
+
+### Acceptance Criteria
+- Developer can test all features instantly
+
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 
 
 T18.1 - Add help button in UI. The help button should open a dialog popup to explain how the app is supposed to work.
