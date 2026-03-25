@@ -363,11 +363,13 @@ Complete scene-level wiring and device validation for the newly added IAP runtim
 
 
 T18.1 - Add help button in UI. The help button should open a dialog popup to explain how the app is supposed to work.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Split `WebUiPasswordProtection` into its own file so classes are no longer co-located in `SaveLoadSettings.cs`, and restored the expected legacy API surface (`SetProtectionEnabled`, `IsProtectionEnabled`, `GetPasswordForUnityUi`, `ClearPassword`) used by existing UI callers.
+  - Added missing `SaveLoadSettings.FixtureNameKey` constant and restored `UI_DmxSettings.ApplyWebUiPasswordFromInput()` so password helper and fixture-name persistence compile again.
 
 T17.1 - Rework the ui idea. abandon the webview approach. The webui will only be used on external devices and the in-app ui will be unity ui. This ui still exists, But the UI_SettingsPanelToggle needs to be modified. and the InAppWebViewSurface is no longer needed. The UnityUi needs to use playerprefs and also the webui uses those, so settings nan be adjusted through both those ways. If a webui browser is open while settings are changed inside the app that should directly update the webui and alse vise versa.
 - [x] Started
@@ -455,11 +457,13 @@ T17.8a - Store a hashed password using sha256 and make a password handling class
   - Updated WebUI lock/unlock behavior to cache authorization in browser storage and react to Unity-side password toggle changes via `/api/settings` refresh.
 
 T17.8b - Make the webui react directly when a password is enabled or changed. Currently, when the webui is already loaded and a password is enabled, the webui is still functional until the page is refreshed. The enable password toggle needs to directly tell the webui to refresh/reload and show the login screen. Currently the reverse already works, so whe  the login page is shown because the the password toggle is enabled and the user disables the password in the unity ui, the webui automatically leaves the login screen and opens the main settings.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Split `WebUiPasswordProtection` into its own file so classes are no longer co-located in `SaveLoadSettings.cs`, and restored the expected legacy API surface (`SetProtectionEnabled`, `IsProtectionEnabled`, `GetPasswordForUnityUi`, `ClearPassword`) used by existing UI callers.
+  - Added missing `SaveLoadSettings.FixtureNameKey` constant and restored `UI_DmxSettings.ApplyWebUiPasswordFromInput()` so password helper and fixture-name persistence compile again.
 
 T17.9 - Redesign the Unity UI to look more professional
 - [x] Started
@@ -703,11 +707,13 @@ T99.8 - Refactor the code so that every class and every interface lives in its o
 
 - Assets\Scripts\UI\UI_DmxSettings.cs(441,58): error CS0117: 'WebUiPasswordProtection' does not contain a definition for 'IsProtectionEnabled'
 
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Split `WebUiPasswordProtection` into its own file so classes are no longer co-located in `SaveLoadSettings.cs`, and restored the expected legacy API surface (`SetProtectionEnabled`, `IsProtectionEnabled`, `GetPasswordForUnityUi`, `ClearPassword`) used by existing UI callers.
+  - Added missing `SaveLoadSettings.FixtureNameKey` constant and restored `UI_DmxSettings.ApplyWebUiPasswordFromInput()` so password helper and fixture-name persistence compile again.
 
 T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode
 - [x] Started
