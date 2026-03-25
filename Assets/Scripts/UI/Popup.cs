@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class Popup : MonoBehaviour
 {
@@ -12,6 +13,7 @@ public class Popup : MonoBehaviour
     [SerializeField] private bool keepNavigationInsidePopup = true;
 
     private GameObject _previousSelected;
+    private readonly List<UI_DpadNavigationController> _blockedNavigationControllers = new List<UI_DpadNavigationController>();
 
     private void Awake()
     {
@@ -24,12 +26,14 @@ public class Popup : MonoBehaviour
     private void OnEnable()
     {
         EnableAction(backAction, OnBackAction);
+        ApplyNavigationBlock();
         FocusDefaultSelection();
     }
 
     private void OnDisable()
     {
         DisableAction(backAction, OnBackAction);
+        ReleaseNavigationBlock();
     }
 
     private void Update()
@@ -60,6 +64,7 @@ public class Popup : MonoBehaviour
             panelRoot.SetActive(true);
         }
 
+        ApplyNavigationBlock();
         FocusDefaultSelection();
     }
 
@@ -74,6 +79,8 @@ public class Popup : MonoBehaviour
         {
             EventSystem.current.SetSelectedGameObject(_previousSelected);
         }
+
+        ReleaseNavigationBlock();
     }
 
     private bool IsOpen()
@@ -124,6 +131,48 @@ public class Popup : MonoBehaviour
         {
             Close();
         }
+    }
+
+    private void ApplyNavigationBlock()
+    {
+        _blockedNavigationControllers.Clear();
+
+        if (!keepNavigationInsidePopup || panelRoot == null)
+        {
+            return;
+        }
+
+        UI_DpadNavigationController[] controllers = FindObjectsByType<UI_DpadNavigationController>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        for (int i = 0; i < controllers.Length; i++)
+        {
+            UI_DpadNavigationController controller = controllers[i];
+            if (controller == null || !controller.isActiveAndEnabled)
+            {
+                continue;
+            }
+
+            bool isPopupController = controller.transform.IsChildOf(panelRoot.transform) || controller.gameObject == panelRoot;
+            if (isPopupController)
+            {
+                continue;
+            }
+
+            controller.enabled = false;
+            _blockedNavigationControllers.Add(controller);
+        }
+    }
+
+    private void ReleaseNavigationBlock()
+    {
+        for (int i = 0; i < _blockedNavigationControllers.Count; i++)
+        {
+            if (_blockedNavigationControllers[i] != null)
+            {
+                _blockedNavigationControllers[i].enabled = true;
+            }
+        }
+
+        _blockedNavigationControllers.Clear();
     }
 
     private static void EnableAction(InputActionReference actionReference, System.Action<InputAction.CallbackContext> callback)

@@ -445,6 +445,16 @@ T18.3 - rework UI_DpadNavigationController.cs so it works correctly and add a ch
 
 
 T18.4 - rework popup.cs so that it when the popup is enabled it blocks any onavgation and submitting and canceling for any other panels
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Updated `Popup` to behave as a modal controller by disabling all active `UI_DpadNavigationController` instances outside the popup hierarchy while the popup is open, preventing underlying panels from receiving navigation/submit/cancel input.
+  - Added restoration logic so previously blocked navigation controllers are re-enabled when the popup closes or is disabled.
+  - Extended `PopupTests` with coverage that verifies background navigation controllers are blocked on open and restored on close.
+
+T18.5 - Add EditMode tests that simulate submit/cancel behavior while popup modal state is active to verify only popup controls respond.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
