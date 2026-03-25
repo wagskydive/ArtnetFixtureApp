@@ -342,6 +342,12 @@ public class UI_DmxSettings : MonoBehaviour
         SaveLoadSettings.Save();
     }
 
+    public void ApplyWebUiPasswordFromInput()
+    {
+        string value = webUiPasswordText != null ? webUiPasswordText.text : string.Empty;
+        SetWebUiPassword(value);
+    }
+
     public void OnWebUiPasswordProtectionToggleChanged(bool isOn)
     {
         bool changed = WebUiPasswordProtection.SetProtectionEnabled(isOn);
@@ -540,4 +546,3 @@ public class UnityShaderGlobalIntSetter : IShaderGlobalIntSetter
         Shader.SetGlobalInt(propertyName, value);
     }
 }
-

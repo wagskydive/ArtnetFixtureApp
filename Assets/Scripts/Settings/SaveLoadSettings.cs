@@ -1,6 +1,5 @@
 using UnityEngine;
 using System;
-using System.Text;
 
 public static class SaveLoadSettings
 {
@@ -8,6 +7,7 @@ public static class SaveLoadSettings
     public const string DmxUniverseKey = "dmx.universe";
     public const string DmxPatternKey = "dmx.pattern";
     public const string FixtureCountKey = "dmx.fixture.count";
+    public const string FixtureNameKey = "dmx.fixture.name";
     public const string FixtureModeKey = "dmx.fixture.mode";
     public const string PixelRowsKey = "dmx.pixel.rows";
     public const string PixelColumnsKey = "dmx.pixel.columns";
@@ -45,74 +45,4 @@ public static class SaveLoadSettings
         PlayerPrefs.Save();
         OnSettingsSaved?.Invoke();
     }
-}
-
-
-
-public static class WebUiPasswordProtection
-{
-    public static bool IsEnabled()
-    {
-        return SaveLoadSettings.LoadInt(SaveLoadSettings.WebUiPasswordEnabledKey, 0) == 1;
-    }
-
-    public static string GetStoredPassword()
-    {
-        return SaveLoadSettings.LoadString(SaveLoadSettings.WebUiPasswordKey, string.Empty);
-    }
-
-    public static void SetEnabled(bool enabled)
-    {
-        SaveLoadSettings.SaveInt(SaveLoadSettings.WebUiPasswordEnabledKey, enabled ? 1 : 0);
-        SaveLoadSettings.Save();
-    }
-
-    public static bool HasConfiguredPassword()
-    {
-        return !string.IsNullOrWhiteSpace(SaveLoadSettings.LoadString(SaveLoadSettings.WebUiPasswordKey, string.Empty));
-    }
-
-    public static bool SetPassword(string rawPassword)
-    {
-        string trimmed = string.IsNullOrWhiteSpace(rawPassword) ? string.Empty : rawPassword.Trim();
-        if (string.IsNullOrEmpty(trimmed))
-        {
-            SaveLoadSettings.SaveString(SaveLoadSettings.WebUiPasswordKey, rawPassword);
-            SaveLoadSettings.Save();
-            return false;
-        }
-        SaveLoadSettings.SaveString(SaveLoadSettings.WebUiPasswordKey, rawPassword);
-        SaveLoadSettings.Save();
-        return true;
-    }
-
-    public static bool VerifyPassword(string providedPassword)
-    {
-        string storedPassword = SaveLoadSettings.LoadString(SaveLoadSettings.WebUiPasswordKey, string.Empty);
-        if (string.IsNullOrWhiteSpace(storedPassword))
-        {
-            return false;
-        }
-
-
-        return string.Equals(storedPassword, providedPassword);
-    }
-
-    public static void MigrateLegacyPasswordIfNeeded()
-    {
-        if (HasConfiguredPassword())
-        {
-            return;
-        }
-
-        string legacy = SaveLoadSettings.LoadString(SaveLoadSettings.WebUiPasswordKey, string.Empty);
-        if (string.IsNullOrWhiteSpace(legacy))
-        {
-            return;
-        }
-
-        SetPassword(legacy);
-    }
-
-
 }
