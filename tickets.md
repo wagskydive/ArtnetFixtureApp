@@ -335,11 +335,13 @@ No hard coded premium features anywhere in the code, so adding premium features 
 ### Acceptance Criteria
 - CapabilityIds are inside the Scriptable objects only and are not hardcoded anywhere
 
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Removed `CapabilityIds.cs` and switched capability gates in `UI_DmxSettings` and `WebUiSettingsBridge` to ScriptableObject references (`CapabilityDefinition`) so runtime IDs come from asset data only.
+  - Updated capability tests to use explicit capability IDs without static constants.
 ---
 
 ## 19.14 — next run — wire IAP capability assets + locked panel prefab in MainScene and validate Android purchase callbacks end-to-end
@@ -351,12 +353,13 @@ Complete scene-level wiring and device validation for the newly added IAP runtim
 - CapabilityDatabase + CapabilityService + UI trigger references are configured in MainScene
 - Android test purchase unlocks capability and survives app restart
 
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
-
+- [x] Documentation Written
+  - Wired `MainScene` with `CapabilityDatabase`, `CapabilityService`, `CapabilityBlockUiTrigger`, and `LockedCapabilityPanel` references plus capability assets (`unlimited-universes`, `advanced-info-panel`).
+  - Android purchase callback/end-to-end validation is still pending a physical/CI Android runtime pass.
 
 
 T18.1 - Add help button in UI. The help button should open a dialog popup to explain how the app is supposed to work.

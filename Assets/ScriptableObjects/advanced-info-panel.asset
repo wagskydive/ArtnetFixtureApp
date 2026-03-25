@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ce9125eae17d4b538dca2cb9961847ac, type: 3}
-  m_Name: unlimited-universes
+  m_Name: advanced-info-panel
   m_EditorClassIdentifier: ArtnetFixture.Core::CapabilityDefinition
-  id: capability.universe.max
-  valueType: 1
-  unlockedBooleanValue: 0
-  unlockedNumericValue: 16
+  id: capability.info-panel.advanced
+  valueType: 0
+  unlockedBooleanValue: 1
+  unlockedNumericValue: 0
   productId: product.pro.bundle
-  displayTitle: Unlimited universes
-  displayDescription: Unlock all DMX universes up to 16.
+  displayTitle: Advanced info panel
+  displayDescription: Unlock the advanced information panel in settings.

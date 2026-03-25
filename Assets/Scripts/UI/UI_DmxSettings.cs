@@ -26,8 +26,8 @@ public class UI_DmxSettings : MonoBehaviour
     [SerializeField] private ArtNetReceiver artNetReceiver;
     [SerializeField] private UI_FixtureMeshManager fixtureMeshManager;
     [SerializeField] private CapabilityBlockUiTrigger capabilityBlockUiTrigger;
-    [SerializeField] private string universeLimitCapabilityId = CapabilityIds.UniverseLimit;
-    [SerializeField] private string infoPanelCapabilityId = CapabilityIds.AdvancedInfoPanel;
+    [SerializeField] private CapabilityDefinition universeLimitCapability;
+    [SerializeField] private CapabilityDefinition infoPanelCapability;
 
     private int currentDmxChannel = 1;
     private int currentDmxUniverse = 1;
@@ -63,7 +63,7 @@ public class UI_DmxSettings : MonoBehaviour
 
             if (clampedRequested > maxSelectableUniverse)
             {
-                TriggerLockedCapability(universeLimitCapabilityId);
+                TriggerLockedCapability(universeLimitCapability);
             }
 
             currentDmxUniverse = resolvedUniverse;
@@ -220,34 +220,6 @@ public class UI_DmxSettings : MonoBehaviour
 
         artNetReceiver.SetStartChannelFromUserInput(CurrentDmxChannel);
         artNetReceiver.SetUniverseFromUserInput(CurrentDmxUniverse);
-
-        if (fixtureMeshManager != null)
-        {
-            fixtureMeshManager.SyncFixtureAddresses();
-        }
-    }
-
-    private void UpdateChannelDisplay()
-    {
-        if (channelValueText != null)
-        {
-            channelValueText.text = currentDmxChannel.ToString();
-        }
-
-        if (channelInputField != null)
-        {
-            channelInputField.text = currentDmxChannel.ToString();
-            channelInputField.interactable = false;
-        }
-    }
-
-    private void UpdateUniverseDisplay()
-    {
-        if (universeValueText != null)
-        {
-            universeValueText.text = currentDmxUniverse.ToString();
-        }
-
     }
 
     private void SyncValuesFromReceiver()
@@ -258,70 +230,181 @@ public class UI_DmxSettings : MonoBehaviour
         }
 
         currentDmxChannel = Mathf.Clamp(artNetReceiver.StartChannel, 1, 512);
-        currentDmxUniverse = Mathf.Clamp(artNetReceiver.GetUniverseForUserInput(), 1, 16);
+        currentDmxUniverse = Mathf.Clamp(artNetReceiver.Universe + 1, 1, 16);
         UpdateChannelDisplay();
         UpdateUniverseDisplay();
     }
 
-    void UpdateInfoPanelState()
+    private void UpdateChannelDisplay()
     {
-        if (infoPanelToggle != null)
+        if (channelValueText != null)
         {
-            bool enabled = SaveLoadSettings.LoadInt(SaveLoadSettings.InfoPanelEnabledKey, 1) == 1;
-            infoPanelToggle.SetIsOnWithoutNotify(enabled);
-            infoPanel.SetActive(enabled);
+            channelValueText.text = CurrentDmxChannel.ToString();
+        }
+        if (channelInputField != null)
+        {
+            channelInputField.text = CurrentDmxChannel.ToString();
         }
     }
 
-    void UpdateWarningToggleState()
+    private void UpdateUniverseDisplay()
     {
-        if (networkWarningToggle != null)
+        if (universeValueText != null)
         {
-            bool enabled = SaveLoadSettings.LoadInt(SaveLoadSettings.NetworkWarningEnabledKey, 1) == 1;
-            networkWarningToggle.SetIsOnWithoutNotify(enabled);
+            universeValueText.text = CurrentDmxUniverse.ToString();
         }
-
+        if (universeInputField != null)
+        {
+            universeInputField.text = CurrentDmxUniverse.ToString();
+        }
     }
 
-    public void SetInfoPanel(bool isOn)
+    // Called whenever currentPatternType changes
+    private void OnPatternTypeChanged()
     {
-        if (isOn && !ResolveBooleanCapability(infoPanelCapabilityId, lockedValue: false))
-        {
-            TriggerLockedCapability(infoPanelCapabilityId);
-            infoPanel.SetActive(false);
-            return;
-        }
-
-        SaveLoadSettings.SaveInt(SaveLoadSettings.InfoPanelEnabledKey, isOn ? 1 : 0);
-        SaveLoadSettings.Save();
-        infoPanel.SetActive(isOn);
+        // Update any visual output or shader based on currentPatternType
+        // Example: Set shader global int (replace with your actual logic)
+        ShaderGlobalIntSetter.SetGlobalInt("_PatternType", currentPatternType);
     }
-
-
 
     public void SetNetworkWarning(bool isOn)
     {
         SaveLoadSettings.SaveInt(SaveLoadSettings.NetworkWarningEnabledKey, isOn ? 1 : 0);
         SaveLoadSettings.Save();
-        if (isOn && !artNetReceiver.HasReceivedDataRecently)
+        if (networkWarning != null)
         {
-            ShowNetworkWarning();
-            return;
+            networkWarning.SetActive(isOn);
         }
-        if (!isOn)
-        {
-            HideNetworkWarning();
-        }
-
-
     }
 
+    private void UpdateWarningToggleState()
+    {
+        if (networkWarningToggle == null)
+        {
+            return;
+        }
 
-    private void UpdateDeviceInfoDisplay()
+        bool enabled = SaveLoadSettings.LoadInt(SaveLoadSettings.NetworkWarningEnabledKey, 1) == 1;
+        networkWarningToggle.SetIsOnWithoutNotify(enabled);
+        if (networkWarning != null)
+        {
+            networkWarning.SetActive(enabled);
+        }
+    }
+
+    private void UpdateInfoPanelState()
+    {
+        if (infoPanelToggle == null)
+        {
+            return;
+        }
+
+        bool enabled = SaveLoadSettings.LoadInt(SaveLoadSettings.InfoPanelEnabledKey, 0) == 1;
+        infoPanelToggle.SetIsOnWithoutNotify(enabled);
+        if (infoPanel != null)
+        {
+            infoPanel.SetActive(enabled);
+        }
+    }
+
+    public void SetInfoPanelEnabled(bool isOn)
+    {
+        if (isOn && !ResolveBooleanCapability(infoPanelCapability, lockedValue: false))
+        {
+            TriggerLockedCapability(infoPanelCapability);
+
+            if (infoPanelToggle != null)
+            {
+                infoPanelToggle.SetIsOnWithoutNotify(false);
+            }
+
+            if (infoPanel != null)
+            {
+                infoPanel.SetActive(false);
+            }
+
+            return;
+        }
+
+        SaveLoadSettings.SaveInt(SaveLoadSettings.InfoPanelEnabledKey, isOn ? 1 : 0);
+        SaveLoadSettings.Save();
+
+        if (infoPanel != null)
+        {
+            infoPanel.SetActive(isOn);
+        }
+    }
+
+    public void SetWebUiPassword(string value)
+    {
+        WebUiPasswordProtection.SetPassword(value);
+        RefreshPasswordControls();
+        SaveLoadSettings.Save();
+    }
+
+    public void OnWebUiPasswordProtectionToggleChanged(bool isOn)
+    {
+        bool changed = WebUiPasswordProtection.SetProtectionEnabled(isOn);
+        RefreshPasswordControls();
+
+        if (changed)
+        {
+            SaveLoadSettings.Save();
+        }
+    }
+
+    public void ShowPasswordTemporarily()
+    {
+        if (webUiPasswordText == null || webUiPasswordAstrisksText == null)
+        {
+            return;
+        }
+
+        string password = WebUiPasswordProtection.GetPasswordForUnityUi();
+        bool hasPassword = !string.IsNullOrEmpty(password);
+
+        if (!hasPassword)
+        {
+            return;
+        }
+
+        webUiPasswordText.text = password;
+        webUiPasswordAstrisksText.gameObject.SetActive(false);
+
+        Timer timer = new Timer(3000);
+        timer.Elapsed += (sender, e) =>
+        {
+            timer.Stop();
+            timer.Dispose();
+            if (webUiPasswordText != null && webUiPasswordAstrisksText != null)
+            {
+                webUiPasswordText.text = string.Empty;
+                webUiPasswordAstrisksText.gameObject.SetActive(true);
+            }
+        };
+        timer.AutoReset = false;
+        timer.Start();
+    }
+
+    public void ResetWebUiPassword()
+    {
+        WebUiPasswordProtection.ClearPassword();
+        RefreshPasswordControls();
+        SaveLoadSettings.Save();
+    }
+
+    public void SetFixtureName(string fixtureName)
+    {
+        SaveLoadSettings.SaveString(SaveLoadSettings.FixtureNameKey, fixtureName);
+        SaveLoadSettings.Save();
+        UpdateDeviceInfoDisplay();
+    }
+
+    public void UpdateDeviceInfoDisplay()
     {
         if (fixtureNameValueText != null)
         {
-            fixtureNameValueText.text = SaveLoadSettings.LoadString(SaveLoadSettings.DeviceNetworkKey, "VirtualFixture");
+            fixtureNameValueText.text = SaveLoadSettings.LoadString(SaveLoadSettings.FixtureNameKey, "Fixture");
         }
 
         if (ipAddressValueText != null)
@@ -332,149 +415,90 @@ public class UI_DmxSettings : MonoBehaviour
 
     private static string ResolveLocalIpv4Address()
     {
-        
-
-        return IpSolver.ResolveLocalIpv4Address();
-    }
-
-    public void OnWebUiPasswordProtectionToggleChanged(bool enabled)
-    {
-        WebUiPasswordProtection.SetEnabled(enabled);
-        RefreshPasswordControls();
-    }
-
-    public void ApplyWebUiPasswordFromInput()
-    {
-        if (webUiPasswordText == null)
+        try
         {
-            return;
+            IPAddress[] addresses = Dns.GetHostAddresses(Dns.GetHostName());
+            for (int i = 0; i < addresses.Length; i++)
+            {
+                IPAddress address = addresses[i];
+                if (address.AddressFamily == AddressFamily.InterNetwork && !IPAddress.IsLoopback(address))
+                {
+                    return address.ToString();
+                }
+            }
+        }
+        catch (SocketException)
+        {
         }
 
-        bool saved = WebUiPasswordProtection.SetPassword(webUiPasswordText.text);
-        if (saved)
-        {
-            SetPasswordAstisks();
-            PasswordVisibility(false);
-            //webUiPasswordText.text = string.Empty;
-        }
-        else
-        {
-            SetPlaceholderVisible();
-        }
-
-        RefreshPasswordControls();
+        return "Unavailable";
     }
-
-    void SetPasswordAstisks()
-    {
-        int length = webUiPasswordText.text.Length;
-        string astrisks = "";
-        for (int i = 0; i < length; i++)
-        {
-            astrisks += "*";
-        }
-        webUiPasswordAstrisksText.text = astrisks;
-    }
-
-    void PasswordVisibility(bool isVisible)
-    {
-        webUiPasswordText.gameObject.SetActive(isVisible);
-        webUiPasswordAstrisksText.gameObject.SetActive(!isVisible);
-        webUiPasswordPlaceholderText.gameObject.SetActive(false);
-    }
-
-    void SetPlaceholderVisible()
-    {
-        webUiPasswordText.gameObject.SetActive(false);
-        webUiPasswordAstrisksText.gameObject.SetActive(false);
-        webUiPasswordPlaceholderText.gameObject.SetActive(true);
-    }
-
-    public void ShowPasswordTemporarily()
-    {
-        webUiPasswordText.text = WebUiPasswordProtection.GetStoredPassword();
-        RefreshPasswordControls();
-        TimedCall.Temporary(
-            () => PasswordVisibility(true),
-            () => PasswordVisibility(false),
-            3f
-            );
-
-    }
-
-
 
     private void RefreshPasswordControls()
     {
-        bool enabled = WebUiPasswordProtection.IsEnabled();
-        bool configured = WebUiPasswordProtection.HasConfiguredPassword();
-        if (passwordPanel != null)
-        {
-            passwordPanel.SetActive(enabled);
-        }
+        string password = WebUiPasswordProtection.GetPasswordForUnityUi();
+        bool hasPassword = !string.IsNullOrEmpty(password);
+        bool protectionEnabled = WebUiPasswordProtection.IsProtectionEnabled();
 
         if (webUiPasswordEnabledToggle != null)
         {
-            webUiPasswordEnabledToggle.SetIsOnWithoutNotify(enabled);
+            webUiPasswordEnabledToggle.SetIsOnWithoutNotify(protectionEnabled);
         }
 
-
-
-        if (enabled && !configured)
+        if (webUiPasswordText != null)
         {
-            SetPlaceholderVisible();
-            webUiPasswordPlaceholderText.text = "password not set";
-            if (webUiPasswordResetButtonText != null)
-            {
-                webUiPasswordResetButtonText.text = "Set";
-            }
+            webUiPasswordText.text = string.Empty;
         }
 
-        if (enabled && configured)
+        if (webUiPasswordPlaceholderText != null)
         {
-            string storedPassword = WebUiPasswordProtection.GetStoredPassword();
-
-            webUiPasswordText.text = storedPassword;
-            SetPasswordAstisks();
-            PasswordVisibility(false);
-            if (webUiPasswordResetButtonText != null)
-            {
-                webUiPasswordResetButtonText.text = "Reset";
-            }
+            webUiPasswordPlaceholderText.gameObject.SetActive(!hasPassword);
         }
 
-    }
+        if (webUiPasswordAstrisksText != null)
+        {
+            webUiPasswordAstrisksText.gameObject.SetActive(hasPassword);
+        }
 
-    public void ShowPassword()
-    {
-        PasswordVisibility(true);
-    }
+        if (webUiPasswordResetButtonText != null)
+        {
+            webUiPasswordResetButtonText.color = hasPassword
+                ? Color.white
+                : new Color(0.75f, 0.75f, 0.75f, 1f);
+        }
 
-    public void HidePassword()
-    {
-        PasswordVisibility(false);
-    }
-
-    private void OnPatternTypeChanged()
-    {
-        ShaderGlobalIntSetter.SetGlobalInt("_PatternType", currentPatternType);
-        SavePreferences();
+        if (passwordPanel != null)
+        {
+            passwordPanel.SetActive(protectionEnabled);
+        }
     }
 
     private int GetMaxSelectableUniverse()
     {
-        if (CapabilityService.Instance == null || string.IsNullOrWhiteSpace(universeLimitCapabilityId))
+        if (CapabilityService.Instance == null)
         {
             return 1;
         }
 
-        int maxUniverse = CapabilityService.Instance.ResolveNumeric(universeLimitCapabilityId, 1);
+        string capabilityId = GetCapabilityId(universeLimitCapability);
+        if (string.IsNullOrWhiteSpace(capabilityId))
+        {
+            return 1;
+        }
+
+        int maxUniverse = CapabilityService.Instance.ResolveNumeric(capabilityId, 1);
         return Mathf.Clamp(maxUniverse, 1, 16);
     }
 
-    private bool ResolveBooleanCapability(string capabilityId, bool lockedValue)
+    private bool ResolveBooleanCapability(CapabilityDefinition capabilityDefinition, bool lockedValue)
     {
-        if (CapabilityService.Instance == null || string.IsNullOrWhiteSpace(capabilityId))
+        if (CapabilityService.Instance == null)
+        {
+            return lockedValue;
+        }
+
+        string capabilityId = GetCapabilityId(capabilityDefinition);
+        if (string.IsNullOrWhiteSpace(capabilityId))
         {
             return lockedValue;
         }
@@ -482,26 +506,24 @@ public class UI_DmxSettings : MonoBehaviour
         return CapabilityService.Instance.ResolveBoolean(capabilityId, lockedValue);
     }
 
-    private void TriggerLockedCapability(string capabilityId)
+    private void TriggerLockedCapability(CapabilityDefinition capabilityDefinition)
     {
-        if (capabilityBlockUiTrigger == null || string.IsNullOrWhiteSpace(capabilityId))
+        if (capabilityBlockUiTrigger == null)
+        {
+            return;
+        }
+
+        string capabilityId = GetCapabilityId(capabilityDefinition);
+        if (string.IsNullOrWhiteSpace(capabilityId))
         {
             return;
         }
 
         capabilityBlockUiTrigger.NotifyBlocked(capabilityId);
     }
-}
 
-public interface IShaderGlobalIntSetter
-{
-    void SetGlobalInt(string propertyName, int value);
-}
-
-public class UnityShaderGlobalIntSetter : IShaderGlobalIntSetter
-{
-    public void SetGlobalInt(string propertyName, int value)
+    private static string GetCapabilityId(CapabilityDefinition definition)
     {
-        Shader.SetGlobalInt(propertyName, value);
+        return definition != null ? definition.Id : null;
     }
 }
