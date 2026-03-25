@@ -527,3 +527,17 @@ public class UI_DmxSettings : MonoBehaviour
         return definition != null ? definition.Id : null;
     }
 }
+
+public interface IShaderGlobalIntSetter
+{
+    void SetGlobalInt(string propertyName, int value);
+}
+
+public class UnityShaderGlobalIntSetter : IShaderGlobalIntSetter
+{
+    public void SetGlobalInt(string propertyName, int value)
+    {
+        Shader.SetGlobalInt(propertyName, value);
+    }
+}
+
