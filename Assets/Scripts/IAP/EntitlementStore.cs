@@ -60,12 +60,38 @@ public class EntitlementStore
 
     private void LoadFromLocalStorage()
     {
-        string raw = SaveLoadSettings.LoadString(SaveLoadSettings.IapEntitlementsKey, string.Empty);
-        if (string.IsNullOrWhiteSpace(raw))
+        string storedValue = SaveLoadSettings.LoadString(SaveLoadSettings.IapEntitlementsKey, string.Empty);
+        if (string.IsNullOrWhiteSpace(storedValue))
         {
             return;
         }
 
+        string decodedValue;
+        bool wasEncrypted = IapEntitlementCrypto.TryDecrypt(storedValue, out decodedValue);
+
+        if (!wasEncrypted)
+        {
+            // Backward compatibility: older builds stored IDs as plain text.
+            decodedValue = storedValue;
+        }
+
+        bool loadedAny = LoadIdsFromRawString(decodedValue);
+
+        // If we loaded from legacy plaintext, immediately migrate to encrypted format.
+        if (loadedAny && !wasEncrypted)
+        {
+            SaveToLocalStorage();
+        }
+    }
+
+    private bool LoadIdsFromRawString(string raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            return false;
+        }
+
+        bool loadedAny = false;
         string[] productIds = raw.Split('|');
         for (int i = 0; i < productIds.Length; i++)
         {
@@ -75,14 +101,17 @@ public class EntitlementStore
                 continue;
             }
 
-            _unlockedProductIds.Add(productId.Trim());
+            loadedAny |= _unlockedProductIds.Add(productId.Trim());
         }
+
+        return loadedAny;
     }
 
     private void SaveToLocalStorage()
     {
         string raw = string.Join("|", _unlockedProductIds.OrderBy(id => id, StringComparer.Ordinal));
-        SaveLoadSettings.SaveString(SaveLoadSettings.IapEntitlementsKey, raw);
+        string encrypted = IapEntitlementCrypto.Encrypt(raw);
+        SaveLoadSettings.SaveString(SaveLoadSettings.IapEntitlementsKey, encrypted);
         SaveLoadSettings.Save();
     }
 }

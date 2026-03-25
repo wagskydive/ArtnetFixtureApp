@@ -85,6 +85,36 @@ public class CapabilitySystemTests
         Assert.That(reloadedStore.IsUnlocked("product.extra"), Is.True);
     }
 
+
+    [Test]
+    public void EntitlementStore_WithPersistence_SavesEncryptedPayload()
+    {
+        PlayerPrefs.DeleteKey(SaveLoadSettings.IapEntitlementsKey);
+
+        var store = new EntitlementStore(persistLocally: true);
+        store.MarkUnlocked("product.bundle");
+
+        string stored = PlayerPrefs.GetString(SaveLoadSettings.IapEntitlementsKey, string.Empty);
+        Assert.That(stored, Does.StartWith("enc_v1:"));
+        Assert.That(stored, Does.Not.Contain("product.bundle"));
+    }
+
+    [Test]
+    public void EntitlementStore_WithLegacyPlaintext_MigratesToEncryptedStorage()
+    {
+        PlayerPrefs.SetString(SaveLoadSettings.IapEntitlementsKey, "product.bundle|product.extra");
+        PlayerPrefs.Save();
+
+        var store = new EntitlementStore(persistLocally: true);
+
+        Assert.That(store.IsUnlocked("product.bundle"), Is.True);
+        Assert.That(store.IsUnlocked("product.extra"), Is.True);
+
+        string migrated = PlayerPrefs.GetString(SaveLoadSettings.IapEntitlementsKey, string.Empty);
+        Assert.That(migrated, Does.StartWith("enc_v1:"));
+        Assert.That(migrated, Does.Not.Contain("product.bundle"));
+    }
+
     [Test]
     public void CapabilitySystem_SameProductUnlocksMultipleCapabilities()
     {
