@@ -16,7 +16,7 @@ public class IapPurchasePanel : MonoBehaviour
     {
         if (purchaseGateway == null)
         {
-            purchaseGateway = FindObjectOfType<UnityIapPurchaseGateway>();
+            purchaseGateway = FindFirstObjectByType<UnityIapPurchaseGateway>();
         }
     }
 
@@ -89,7 +89,7 @@ public class IapPurchasePanel : MonoBehaviour
 
         if (purchaseGateway == null)
         {
-            purchaseGateway = FindObjectOfType<UnityIapPurchaseGateway>();
+            purchaseGateway = FindFirstObjectByType<UnityIapPurchaseGateway>();
         }
 
         if (purchaseGateway != null && purchaseGateway.PurchaseProduct(definition.ProductId))
