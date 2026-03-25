@@ -15,7 +15,9 @@ MonoBehaviour:
   id: capability.universe.max
   valueType: 1
   unlockedBooleanValue: 0
-  unlockedNumericValue: 16
+  unlockedNumericValue: 999
   productId: product.pro.bundle
   displayTitle: Unlimited universes
-  displayDescription: Unlock all DMX universes up to 16.
+  displayDescription: 'The use of unlimited universes is a premium feature.
+
+'

@@ -290,16 +290,18 @@ On purchase success, unlock the corresponding product ID in the entitlement stor
 Allow one IAP to unlock multiple capabilities.
 
 ### Description
-Multiple capability assets can reference the same product ID.
+The Scriptable object code lets the user add references to multiple product Ids, so a premium feature can be unlocked from multiple purchase ids.
+Once any of the the product Ids has been bought, the feature will register as being unlocked
+EXAMPLE: The unlimited universes premium feature can be bought directly as a iap or can also be bundled inside the PRO bundle, so the "unlimited universes" iap can reference the PRO bundle iap as its requirement
 
 ### Acceptance Criteria
 - One purchase unlocks multiple features
 
-- [x] Started
-- [x] Behavior Written
-- [x] Code Written
-- [x] Tests Passed
-- [x] Documentation Written
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
   - Added test coverage proving a single product unlock can resolve both numeric and boolean capabilities.
 
 ---
@@ -387,6 +389,21 @@ Remove stale advanced-info-panel scene/database references now that the info pan
 ### Acceptance Criteria
 - MainScene and capability database no longer reference an advanced info panel capability asset
 - Universe-limit IAP flow keeps working unchanged
+
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+  
+
+## 19.17 — Add a IAP user interface panel script that hadles the purchases.
+
+### Goal
+A panel that can be accessed through other ui elements that lets the user make the actual purchases.
+
+### Acceptance Criteria
+- The IAP panel shows all available IAPs and their locked/unlocked state. It will have purchase buttons that are generated using the capabilty database.
 
 - [ ] Started
 - [ ] Behavior Written
