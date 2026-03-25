@@ -169,11 +169,13 @@ Free users can only use Universe 1 and premium users can select any other univer
 - Free users are limited correctly
 - Unlocking removes the limit
 
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - Universe selection now resolves max allowed universe through `CapabilityService` + `CapabilitySystem` (`CapabilityIds.UniverseLimit`) instead of hardcoded premium checks.
+  - WebUI universe payloads are clamped against the same resolved capability limit so browser and Unity UI behavior match.
 
 ---
 
@@ -197,11 +199,12 @@ Trigger a UI panel when a capability blocks an action.
 - UI appears when limit is reached
 - Displays correct information
 
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - Added reusable locked-capability UI flow (`CapabilityBlockUiTrigger` + `LockedCapabilityPanel`) that receives a capability ID and resolves title/description metadata from capability assets.
 
 ---
 
@@ -221,11 +224,12 @@ Implement a boolean capability such as enabling a setting.
 - Feature blocked when locked
 - Works when unlocked
 
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - Added boolean capability gate path for info-panel activation in `UI_DmxSettings` using `CapabilityIds.AdvancedInfoPanel`.
 
 ---
 
@@ -246,6 +250,12 @@ Extend EntitlementStore to persist unlocked product IDs locally.
 
 ### Acceptance Criteria
 - Unlocks persist after restart
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - `EntitlementStore` now supports optional local persistence and hydration via `PlayerPrefs` key `iap.entitlements` for offline unlock continuity.
 
 ---
 
@@ -265,11 +275,12 @@ On purchase success, unlock the corresponding product ID in the entitlement stor
 - Purchase unlocks capability immediately
 - Unlock persists
 
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - Added `UnityIapEntitlementBridge` purchase callback adapter that routes successful purchase product IDs into `CapabilityService`/`EntitlementStore`.
 
 ---
 
@@ -284,11 +295,12 @@ Multiple capability assets can reference the same product ID.
 ### Acceptance Criteria
 - One purchase unlocks multiple features
 
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - Added test coverage proving a single product unlock can resolve both numeric and boolean capabilities.
 
 ---
 
@@ -305,6 +317,24 @@ Create debug controls to unlock/reset capabilities and simulate purchases.
 
 ### Acceptance Criteria
 - Developer can test all features instantly
+
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - Added `IapDebugTools` (Editor/Development builds only) for unlock/reset simulation without production inclusion.
+
+---
+
+## 19.13 — next run — wire IAP capability assets + locked panel prefab in MainScene and validate Android purchase callbacks end-to-end
+
+### Goal
+Complete scene-level wiring and device validation for the newly added IAP runtime components.
+
+### Acceptance Criteria
+- CapabilityDatabase + CapabilityService + UI trigger references are configured in MainScene
+- Android test purchase unlocks capability and survives app restart
 
 - [ ] Started
 - [ ] Behavior Written

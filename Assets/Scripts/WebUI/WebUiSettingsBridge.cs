@@ -24,6 +24,7 @@ public class WebUiSettingsBridge : MonoBehaviour
     public WebUiSettingsData SaveSettingsFromJson(string json)
     {
         WebUiSettingsData parsed = WebUiSettingsStore.FromJson(json);
+        parsed.dmxUniverse = Mathf.Clamp(parsed.dmxUniverse, 1, GetMaxSelectableUniverse());
         WebUiSettingsStore.Save(parsed);
         ApplySettings(parsed);
         return parsed;
@@ -32,6 +33,7 @@ public class WebUiSettingsBridge : MonoBehaviour
     public void ApplySettings(WebUiSettingsData raw)
     {
         WebUiSettingsData data = WebUiSettingsStore.Sanitize(raw);
+        data.dmxUniverse = Mathf.Clamp(data.dmxUniverse, 1, GetMaxSelectableUniverse());
         DmxModeManager.FixtureMode selectedMode = ToFixtureMode(data.fixtureMode);
 
         if (fixtureModeSelector != null)
@@ -79,5 +81,16 @@ public class WebUiSettingsBridge : MonoBehaviour
         }
 
         return DmxModeManager.FixtureMode.Standard;
+    }
+
+    private static int GetMaxSelectableUniverse()
+    {
+        if (CapabilityService.Instance == null)
+        {
+            return 1;
+        }
+
+        int maxUniverse = CapabilityService.Instance.ResolveNumeric(CapabilityIds.UniverseLimit, 1);
+        return Mathf.Clamp(maxUniverse, 1, 16);
     }
 }
