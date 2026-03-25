@@ -5,6 +5,7 @@ public class WebUiSettingsBridge : MonoBehaviour
     [SerializeField] private ArtNetReceiver artNetReceiver;
     [SerializeField] private UI_FixtureMeshManager fixtureMeshManager;
     [SerializeField] private UI_FixtureModeSelector fixtureModeSelector;
+    [SerializeField] private CapabilityDefinition universeLimitCapability;
 
     private void Start()
     {
@@ -24,7 +25,7 @@ public class WebUiSettingsBridge : MonoBehaviour
     public WebUiSettingsData SaveSettingsFromJson(string json)
     {
         WebUiSettingsData parsed = WebUiSettingsStore.FromJson(json);
-        parsed.dmxUniverse = Mathf.Clamp(parsed.dmxUniverse, 1, GetMaxSelectableUniverse());
+        parsed.dmxUniverse = Mathf.Clamp(parsed.dmxUniverse, 1, GetMaxSelectableUniverse(universeLimitCapability));
         WebUiSettingsStore.Save(parsed);
         ApplySettings(parsed);
         return parsed;
@@ -33,7 +34,7 @@ public class WebUiSettingsBridge : MonoBehaviour
     public void ApplySettings(WebUiSettingsData raw)
     {
         WebUiSettingsData data = WebUiSettingsStore.Sanitize(raw);
-        data.dmxUniverse = Mathf.Clamp(data.dmxUniverse, 1, GetMaxSelectableUniverse());
+        data.dmxUniverse = Mathf.Clamp(data.dmxUniverse, 1, GetMaxSelectableUniverse(universeLimitCapability));
         DmxModeManager.FixtureMode selectedMode = ToFixtureMode(data.fixtureMode);
 
         if (fixtureModeSelector != null)
@@ -83,14 +84,14 @@ public class WebUiSettingsBridge : MonoBehaviour
         return DmxModeManager.FixtureMode.Standard;
     }
 
-    private static int GetMaxSelectableUniverse()
+    private static int GetMaxSelectableUniverse(CapabilityDefinition capabilityDefinition)
     {
-        if (CapabilityService.Instance == null)
+        if (CapabilityService.Instance == null || capabilityDefinition == null || string.IsNullOrWhiteSpace(capabilityDefinition.Id))
         {
             return 1;
         }
 
-        int maxUniverse = CapabilityService.Instance.ResolveNumeric(CapabilityIds.UniverseLimit, 1);
+        int maxUniverse = CapabilityService.Instance.ResolveNumeric(capabilityDefinition.Id, 1);
         return Mathf.Clamp(maxUniverse, 1, 16);
     }
 }

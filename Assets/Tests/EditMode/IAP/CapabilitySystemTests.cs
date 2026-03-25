@@ -88,20 +88,20 @@ public class CapabilitySystemTests
     [Test]
     public void CapabilitySystem_SameProductUnlocksMultipleCapabilities()
     {
-        var universeLimit = CreateCapabilityDefinition(CapabilityIds.UniverseLimit, CapabilityValueType.Numeric, "product.pro.bundle", false, 16);
-        var advancedInfoPanel = CreateCapabilityDefinition(CapabilityIds.AdvancedInfoPanel, CapabilityValueType.Boolean, "product.pro.bundle", true, 0);
+        var universeLimit = CreateCapabilityDefinition("capability.universe.max", CapabilityValueType.Numeric, "product.pro.bundle", false, 16);
+        var advancedInfoPanel = CreateCapabilityDefinition("capability.info-panel.advanced", CapabilityValueType.Boolean, "product.pro.bundle", true, 0);
 
         var lookup = new InMemoryCapabilityLookup(universeLimit, advancedInfoPanel);
         var store = new EntitlementStore();
         var capabilitySystem = new CapabilitySystem(lookup, store);
 
-        Assert.That(capabilitySystem.ResolveNumeric(CapabilityIds.UniverseLimit, 1), Is.EqualTo(1));
-        Assert.That(capabilitySystem.ResolveBoolean(CapabilityIds.AdvancedInfoPanel, false), Is.False);
+        Assert.That(capabilitySystem.ResolveNumeric("capability.universe.max", 1), Is.EqualTo(1));
+        Assert.That(capabilitySystem.ResolveBoolean("capability.info-panel.advanced", false), Is.False);
 
         store.MarkUnlocked("product.pro.bundle");
 
-        Assert.That(capabilitySystem.ResolveNumeric(CapabilityIds.UniverseLimit, 1), Is.EqualTo(16));
-        Assert.That(capabilitySystem.ResolveBoolean(CapabilityIds.AdvancedInfoPanel, false), Is.True);
+        Assert.That(capabilitySystem.ResolveNumeric("capability.universe.max", 1), Is.EqualTo(16));
+        Assert.That(capabilitySystem.ResolveBoolean("capability.info-panel.advanced", false), Is.True);
 
         Object.DestroyImmediate(universeLimit);
         Object.DestroyImmediate(advancedInfoPanel);
