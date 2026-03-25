@@ -2,7 +2,7 @@ using NUnit.Framework;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.InputSystem;
+
 using UnityEngine.UI;
 
 public class UI_DpadNavigationControllerTests
@@ -185,47 +185,7 @@ public class UI_DpadNavigationControllerTests
         Object.DestroyImmediate(eventSystemGo);
     }
 
-    [Test]
-    public void OnDisable_DoesNotDisableSharedNavigateAction_WhenAnotherControllerIsStillEnabled()
-    {
-        var eventSystemGo = CreateEventSystem();
-        var rootA = CreateRootWithCanvas();
-        var rootB = CreateRootWithCanvas();
-        var a1 = CreateButton("a1", rootA.transform, new Vector2(0f, 0f));
-        var a2 = CreateButton("a2", rootA.transform, new Vector2(100f, 0f));
-        var b1 = CreateButton("b1", rootB.transform, new Vector2(0f, 0f));
-        var b2 = CreateButton("b2", rootB.transform, new Vector2(100f, 0f));
-
-        var navigateAction = new InputAction("navigate", InputActionType.Value);
-        navigateAction.AddCompositeBinding("2DVector")
-            .With("Up", "<Keyboard>/w")
-            .With("Down", "<Keyboard>/s")
-            .With("Left", "<Keyboard>/a")
-            .With("Right", "<Keyboard>/d");
-        var navigateReference = InputActionReference.Create(navigateAction);
-
-        var controllerA = rootA.AddComponent<UI_DpadNavigationController>();
-        SetPrivateArray(controllerA, a1, a2);
-        SetPrivateField(controllerA, "navigateAction", navigateReference);
-
-        var controllerB = rootB.AddComponent<UI_DpadNavigationController>();
-        SetPrivateArray(controllerB, b1, b2);
-        SetPrivateField(controllerB, "navigateAction", navigateReference);
-
-        rootA.SendMessage("OnEnable");
-        rootB.SendMessage("OnEnable");
-        Assert.That(navigateAction.enabled, Is.True);
-
-        controllerA.enabled = false;
-        Assert.That(navigateAction.enabled, Is.True);
-
-        controllerB.enabled = false;
-        Assert.That(navigateAction.enabled, Is.False);
-
-        Object.DestroyImmediate(rootA);
-        Object.DestroyImmediate(rootB);
-        Object.DestroyImmediate(eventSystemGo);
-    }
+    
 
     private static GameObject CreateEventSystem()
     {

@@ -464,6 +464,14 @@ T18.5 - Find and fix a bug where the UI_DpadNavigationController.cs OnEnable fun
   - Added EditMode regression test coverage for shared navigate-action ownership to ensure one controller disabling cannot break another controller's navigation.
 
 
+T18.6 - rework UI_SettingsPanelToggle so it only is used to show the settings panel and remove the hide option when pressing the cancel/back button. Make the UI_DpadNavigationController handle the cancel/back button, so it doesn't hide the panel when the UI_DpadNavigationController component is inactive. Currently when the user presses the back/cancel button when a modal popup is open it also hides the settings panel
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+
 T18.2 - Add a popup.cs script that can be added as a component to any panel that is used as a popup. It handles the correct behavior of the back button and blocks any ui navigation for any underlying/inactive ui elements.
 - [x] Started
 - [x] Behavior Written
