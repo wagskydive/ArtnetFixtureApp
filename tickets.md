@@ -297,12 +297,13 @@ EXAMPLE: The unlimited universes premium feature can be bought directly as a iap
 ### Acceptance Criteria
 - One purchase unlocks multiple features
 
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
-  - Added test coverage proving a single product unlock can resolve both numeric and boolean capabilities.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - Capability definitions now support `additionalProductIds`, allowing one capability to be unlocked by any of multiple purchase IDs (primary or alternatives).
+  - Added EditMode test coverage for alternate-product unlock resolution.
 
 ---
 
@@ -390,11 +391,12 @@ Remove stale advanced-info-panel scene/database references now that the info pan
 - MainScene and capability database no longer reference an advanced info panel capability asset
 - Universe-limit IAP flow keeps working unchanged
 
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - Removed stale advanced-info capability GUID reference from `MainScene` capability database list; scene now only references the active universe-limit capability asset.
   
 
 ## 19.17 — Add a IAP user interface panel script that hadles the purchases.
@@ -405,11 +407,13 @@ A panel that can be accessed through other ui elements that lets the user make t
 ### Acceptance Criteria
 - The IAP panel shows all available IAPs and their locked/unlocked state. It will have purchase buttons that are generated using the capabilty database.
 
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - Added `IapPurchasePanel` + `IapPurchasePanelItem` scripts that dynamically generate purchase UI rows from `CapabilityDatabase` and show locked/unlocked state with purchase button handling.
+  - Added EditMode test coverage validating generated row states for locked vs unlocked capabilities.
 
 
 T18.1 - Add help button in UI. The help button should open a dialog popup to explain how the app is supposed to work.

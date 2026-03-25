@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public enum CapabilityValueType
 {
@@ -14,6 +15,7 @@ public class CapabilityDefinition : ScriptableObject
     [SerializeField] private bool unlockedBooleanValue = true;
     [SerializeField] private int unlockedNumericValue = 1;
     [SerializeField] private string productId;
+    [SerializeField] private List<string> additionalProductIds = new List<string>();
     [SerializeField] private string displayTitle;
     [TextArea]
     [SerializeField] private string displayDescription;
@@ -23,6 +25,31 @@ public class CapabilityDefinition : ScriptableObject
     public bool UnlockedBooleanValue => unlockedBooleanValue;
     public int UnlockedNumericValue => unlockedNumericValue;
     public string ProductId => productId;
+    public IReadOnlyList<string> AdditionalProductIds => additionalProductIds;
     public string DisplayTitle => displayTitle;
     public string DisplayDescription => displayDescription;
+
+    public bool IsUnlockedBy(EntitlementStore entitlementStore)
+    {
+        if (entitlementStore == null)
+        {
+            return false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(productId) && entitlementStore.IsUnlocked(productId))
+        {
+            return true;
+        }
+
+        for (int i = 0; i < additionalProductIds.Count; i++)
+        {
+            string alternativeProductId = additionalProductIds[i];
+            if (!string.IsNullOrWhiteSpace(alternativeProductId) && entitlementStore.IsUnlocked(alternativeProductId))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

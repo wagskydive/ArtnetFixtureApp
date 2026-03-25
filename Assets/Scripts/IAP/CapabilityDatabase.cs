@@ -8,6 +8,7 @@ public class CapabilityDatabase : MonoBehaviour, ICapabilityLookup
     private readonly Dictionary<string, CapabilityDefinition> _definitionsById = new Dictionary<string, CapabilityDefinition>();
 
     public static CapabilityDatabase Instance { get; private set; }
+    public IReadOnlyList<CapabilityDefinition> CapabilityDefinitions => capabilityDefinitions;
 
     private void Awake()
     {

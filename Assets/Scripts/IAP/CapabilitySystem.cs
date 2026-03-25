@@ -43,6 +43,6 @@ public class CapabilitySystem
             return false;
         }
 
-        return _entitlementStore.IsUnlocked(definition.ProductId);
+        return definition.IsUnlockedBy(_entitlementStore);
     }
 }
