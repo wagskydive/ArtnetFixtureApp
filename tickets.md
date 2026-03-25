@@ -415,6 +415,29 @@ A panel that can be accessed through other ui elements that lets the user make t
   - Added `IapPurchasePanel` + `IapPurchasePanelItem` scripts that dynamically generate purchase UI rows from `CapabilityDatabase` and show locked/unlocked state with purchase button handling.
   - Added EditMode test coverage validating generated row states for locked vs unlocked capabilities.
 
+## 19.18 — Implement the purchasing logic using UnityEngine.Purchasing namespace
+
+### Goal
+Implement the ability to make the actual in app purchase using Google Play store backend with the help of UnityEngine.Purchasing namespace
+
+### Acceptance Criteria
+- The IAP ui purchase buttons are wired up to a purchasing system that uses UnityEngine.Purchasing namespace
+
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+
+
+T18.2 - Add a popup.cs script that can be added as a component to any panel that is used as a popup. It handles the correct behavior of the back button and blocks any ui navigation for any underlying/inactive ui elements.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 
 T18.1 - Add help button in UI. The help button should open a dialog popup to explain how the app is supposed to work.
 - [x] Started
