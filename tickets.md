@@ -51,11 +51,11 @@ Each capability must:
 - All fields are visible and editable in the inspector
 - No runtime behavior yet
 
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
 
 ---
 
@@ -81,11 +81,11 @@ Introduce a MonoBehaviour that holds references to all capability ScriptableObje
 - Lookup is fast and does not rely on iteration
 - Errors are logged for invalid configurations
 
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
 
 ---
 
@@ -111,11 +111,11 @@ Introduce an EntitlementStore that tracks unlocked product IDs.
 - Can query if a product ID is unlocked
 - Works entirely offline
 
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
 
 ---
 
@@ -140,11 +140,11 @@ Introduce a CapabilitySystem that resolves capabilities using the database and e
 - Correct values returned for locked and unlocked states
 - Works without UI or Play Store integration
 
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
 
 ---
 
@@ -168,7 +168,7 @@ Implement the fixture limit using the capability system instead of hardcoded val
 - Free users are limited correctly
 - Unlocking increases the limit
 
-- [ ] Started
+- [x] Started
 - [ ] Behavior Written
 - [ ] Code Written
 - [ ] Tests Passed
@@ -1410,6 +1410,14 @@ T9.7 - Next run: execute HY300 stress/performance validation for Pixel Mapping m
 - [ ] Documentation Written
 
 T9.8 - Document Pixel Mapping setup, DMX addressing scheme, and operational limits in project docs
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T19.12 - Next run: wire IAP capability assets/database into MainScene and add locked-feature UI trigger (ticket 19.6) backed by capability IDs.
+
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
