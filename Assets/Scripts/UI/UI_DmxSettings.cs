@@ -25,6 +25,9 @@ public class UI_DmxSettings : MonoBehaviour
     [SerializeField] private int currentPatternType = 0; // Pattern type selector (0=Static, 1=Pulse, 2=ColorShift)
     [SerializeField] private ArtNetReceiver artNetReceiver;
     [SerializeField] private UI_FixtureMeshManager fixtureMeshManager;
+    [SerializeField] private CapabilityBlockUiTrigger capabilityBlockUiTrigger;
+    [SerializeField] private string universeLimitCapabilityId = CapabilityIds.UniverseLimit;
+    [SerializeField] private string infoPanelCapabilityId = CapabilityIds.AdvancedInfoPanel;
 
     private int currentDmxChannel = 1;
     private int currentDmxUniverse = 1;
@@ -54,13 +57,18 @@ public class UI_DmxSettings : MonoBehaviour
         get => currentDmxUniverse;
         set
         {
-            if (value >= 1 && value <= 16)
-            {
-                currentDmxUniverse = value;
-                UpdateUniverseDisplay();
+            int clampedRequested = Mathf.Clamp(value, 1, 16);
+            int maxSelectableUniverse = GetMaxSelectableUniverse();
+            int resolvedUniverse = Mathf.Clamp(clampedRequested, 1, maxSelectableUniverse);
 
-                ApplySettingsToReceiver();
+            if (clampedRequested > maxSelectableUniverse)
+            {
+                TriggerLockedCapability(universeLimitCapabilityId);
             }
+
+            currentDmxUniverse = resolvedUniverse;
+            UpdateUniverseDisplay();
+            ApplySettingsToReceiver();
         }
     }
 
@@ -277,6 +285,13 @@ public class UI_DmxSettings : MonoBehaviour
 
     public void SetInfoPanel(bool isOn)
     {
+        if (isOn && !ResolveBooleanCapability(infoPanelCapabilityId, lockedValue: false))
+        {
+            TriggerLockedCapability(infoPanelCapabilityId);
+            infoPanel.SetActive(false);
+            return;
+        }
+
         SaveLoadSettings.SaveInt(SaveLoadSettings.InfoPanelEnabledKey, isOn ? 1 : 0);
         SaveLoadSettings.Save();
         infoPanel.SetActive(isOn);
@@ -444,6 +459,37 @@ public class UI_DmxSettings : MonoBehaviour
     {
         ShaderGlobalIntSetter.SetGlobalInt("_PatternType", currentPatternType);
         SavePreferences();
+    }
+
+    private int GetMaxSelectableUniverse()
+    {
+        if (CapabilityService.Instance == null || string.IsNullOrWhiteSpace(universeLimitCapabilityId))
+        {
+            return 1;
+        }
+
+        int maxUniverse = CapabilityService.Instance.ResolveNumeric(universeLimitCapabilityId, 1);
+        return Mathf.Clamp(maxUniverse, 1, 16);
+    }
+
+    private bool ResolveBooleanCapability(string capabilityId, bool lockedValue)
+    {
+        if (CapabilityService.Instance == null || string.IsNullOrWhiteSpace(capabilityId))
+        {
+            return lockedValue;
+        }
+
+        return CapabilityService.Instance.ResolveBoolean(capabilityId, lockedValue);
+    }
+
+    private void TriggerLockedCapability(string capabilityId)
+    {
+        if (capabilityBlockUiTrigger == null || string.IsNullOrWhiteSpace(capabilityId))
+        {
+            return;
+        }
+
+        capabilityBlockUiTrigger.NotifyBlocked(capabilityId);
     }
 }
 
