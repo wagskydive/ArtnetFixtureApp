@@ -450,6 +450,14 @@ T19.20 - Next run: add a Play Store restore/ownership sync pass on IAP panel ope
 - [ ] Tests Passed
 - [ ] Documentation Written
 
+T19.21 -  Initialize IAP once at app startup instead of lazily during purchase/price calls, so prices and products are reliably available when the UI loads.
+and  Before calling purchase, verify the product exists and is available to avoid silent failures.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 
 T18.3 - rework UI_DpadNavigationController.cs so it works correctly and add a checkbox to allow/disallow horizontal and/or vetical navigation and/or wrapping. Currently Horizontal navigation doesn't work and verticle wrapping is buggy and not reliable.
 - [x] Started
