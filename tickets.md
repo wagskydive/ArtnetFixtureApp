@@ -362,7 +362,7 @@ Complete scene-level wiring and device validation for the newly added IAP runtim
   - Android purchase callback/end-to-end validation is still pending a physical/CI Android runtime pass.
 
 
-## 19.15 — remove "advanced info panel IAP
+## 19.15 — remove advanced info panel IAP
 
 ### Goal
 Revert back to the info panel to be part of the app without an IAP
