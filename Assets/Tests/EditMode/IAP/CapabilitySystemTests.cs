@@ -70,6 +70,43 @@ public class CapabilitySystemTests
         Object.DestroyImmediate(definition);
     }
 
+    [Test]
+    public void EntitlementStore_WithPersistence_RestoresUnlockedProducts()
+    {
+        PlayerPrefs.DeleteKey(SaveLoadSettings.IapEntitlementsKey);
+
+        var writableStore = new EntitlementStore(persistLocally: true);
+        writableStore.MarkUnlocked("product.bundle");
+        writableStore.MarkUnlocked("product.extra");
+
+        var reloadedStore = new EntitlementStore(persistLocally: true);
+
+        Assert.That(reloadedStore.IsUnlocked("product.bundle"), Is.True);
+        Assert.That(reloadedStore.IsUnlocked("product.extra"), Is.True);
+    }
+
+    [Test]
+    public void CapabilitySystem_SameProductUnlocksMultipleCapabilities()
+    {
+        var universeLimit = CreateCapabilityDefinition(CapabilityIds.UniverseLimit, CapabilityValueType.Numeric, "product.pro.bundle", false, 16);
+        var advancedInfoPanel = CreateCapabilityDefinition(CapabilityIds.AdvancedInfoPanel, CapabilityValueType.Boolean, "product.pro.bundle", true, 0);
+
+        var lookup = new InMemoryCapabilityLookup(universeLimit, advancedInfoPanel);
+        var store = new EntitlementStore();
+        var capabilitySystem = new CapabilitySystem(lookup, store);
+
+        Assert.That(capabilitySystem.ResolveNumeric(CapabilityIds.UniverseLimit, 1), Is.EqualTo(1));
+        Assert.That(capabilitySystem.ResolveBoolean(CapabilityIds.AdvancedInfoPanel, false), Is.False);
+
+        store.MarkUnlocked("product.pro.bundle");
+
+        Assert.That(capabilitySystem.ResolveNumeric(CapabilityIds.UniverseLimit, 1), Is.EqualTo(16));
+        Assert.That(capabilitySystem.ResolveBoolean(CapabilityIds.AdvancedInfoPanel, false), Is.True);
+
+        Object.DestroyImmediate(universeLimit);
+        Object.DestroyImmediate(advancedInfoPanel);
+    }
+
     private static CapabilityDefinition CreateCapabilityDefinition(string id, CapabilityValueType valueType, string productId, bool unlockedBooleanValue, int unlockedNumericValue)
     {
         var definition = ScriptableObject.CreateInstance<CapabilityDefinition>();
