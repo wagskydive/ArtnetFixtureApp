@@ -362,6 +362,21 @@ Complete scene-level wiring and device validation for the newly added IAP runtim
   - Android purchase callback/end-to-end validation is still pending a physical/CI Android runtime pass.
 
 
+## 19.15 — remove "advanced info panel IAP
+
+### Goal
+Revert back to the info panel to be part of the app without an IAP
+
+### Acceptance Criteria
+- The info panel always works and defaults to be on and can be switched using the info panel toggle
+
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+
 T18.1 - Add help button in UI. The help button should open a dialog popup to explain how the app is supposed to work.
 - [x] Started
 - [x] Behavior Written
