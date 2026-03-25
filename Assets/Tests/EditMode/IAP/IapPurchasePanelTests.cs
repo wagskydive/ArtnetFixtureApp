@@ -13,6 +13,8 @@ public class IapPurchasePanelTests
         var database = databaseGo.AddComponent<CapabilityDatabase>();
         var capabilityA = CreateCapabilityDefinition("capability.universe.max", "Unlimited Universes", "product.pro.bundle");
         var capabilityB = CreateCapabilityDefinition("capability.output.boost", "Output Boost", "product.output.boost");
+        SetPrivateField(capabilityA, "editorTestPriceUsd", 3.49f);
+        SetPrivateField(capabilityB, "editorTestPriceUsd", 7.99f);
         SetPrivateField(database, "capabilityDefinitions", new List<CapabilityDefinition> { capabilityA, capabilityB });
         database.RebuildLookup();
 
@@ -38,9 +40,14 @@ public class IapPurchasePanelTests
         var firstItem = contentRoot.GetChild(0).GetComponent<IapPurchasePanelItem>();
         var firstStatus = ((Text)GetPrivateField(firstItem, "statusText")).text;
         Assert.That(firstStatus, Is.EqualTo("Unlocked"));
+        var firstPrice = ((Text)GetPrivateField(firstItem, "priceText")).text;
+        Assert.That(firstPrice, Is.EqualTo("$3.49"));
 
         var secondButton = contentRoot.GetChild(1).GetComponentInChildren<Button>();
         Assert.That(secondButton.interactable, Is.True);
+        var secondItem = contentRoot.GetChild(1).GetComponent<IapPurchasePanelItem>();
+        var secondPrice = ((Text)GetPrivateField(secondItem, "priceText")).text;
+        Assert.That(secondPrice, Is.EqualTo("$7.99"));
 
         Object.DestroyImmediate(panelGo);
         Object.DestroyImmediate(contentRoot.gameObject);
@@ -57,19 +64,19 @@ public class IapPurchasePanelTests
         var itemGo = new GameObject("item-prefab");
         var item = itemGo.AddComponent<IapPurchasePanelItem>();
         var title = new GameObject("title").AddComponent<Text>();
-        var description = new GameObject("description").AddComponent<Text>();
         var status = new GameObject("status").AddComponent<Text>();
+        var price = new GameObject("price").AddComponent<Text>();
         var button = new GameObject("purchase").AddComponent<Button>();
         button.gameObject.AddComponent<Image>();
 
         title.transform.SetParent(itemGo.transform);
-        description.transform.SetParent(itemGo.transform);
         status.transform.SetParent(itemGo.transform);
+        price.transform.SetParent(itemGo.transform);
         button.transform.SetParent(itemGo.transform);
 
         SetPrivateField(item, "titleText", title);
-        SetPrivateField(item, "descriptionText", description);
         SetPrivateField(item, "statusText", status);
+        SetPrivateField(item, "priceText", price);
         SetPrivateField(item, "purchaseButton", button);
 
         return item;

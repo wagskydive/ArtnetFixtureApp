@@ -5,6 +5,7 @@ public class IapPurchasePanelItem : MonoBehaviour
 {
     [SerializeField] private Text titleText;
     [SerializeField] private Text statusText;
+    [SerializeField] private Text priceText;
     [SerializeField] private Button purchaseButton;
 
     private CapabilityDefinition _definition;
@@ -31,6 +32,7 @@ public class IapPurchasePanelItem : MonoBehaviour
 
 
         bool unlocked = _panel != null && _panel.IsUnlocked(_definition);
+        RefreshPriceText();
         if (statusText != null)
         {
             statusText.text = unlocked ? "Unlocked" : "Locked";
@@ -60,5 +62,16 @@ public class IapPurchasePanelItem : MonoBehaviour
         }
 
         return "";
+    }
+
+    public void RefreshPriceText()
+    {
+        if (priceText == null)
+        {
+            return;
+        }
+
+        string displayPrice = _panel != null ? _panel.GetDisplayPrice(_definition) : string.Empty;
+        priceText.text = string.IsNullOrWhiteSpace(displayPrice) ? "-" : displayPrice;
     }
 }
