@@ -4,7 +4,6 @@ using UnityEngine.UI;
 public class IapPurchasePanelItem : MonoBehaviour
 {
     [SerializeField] private Text titleText;
-    [SerializeField] private Text descriptionText;
     [SerializeField] private Text statusText;
     [SerializeField] private Button purchaseButton;
 
@@ -29,10 +28,7 @@ public class IapPurchasePanelItem : MonoBehaviour
                 : definition.Id;
         }
 
-        if (descriptionText != null)
-        {
-            descriptionText.text = definition.DisplayDescription;
-        }
+
 
         bool unlocked = _panel != null && _panel.IsUnlocked(_definition);
         if (statusText != null)
@@ -44,10 +40,25 @@ public class IapPurchasePanelItem : MonoBehaviour
         {
             purchaseButton.interactable = !unlocked;
         }
+        if(unlocked)
+        {
+            purchaseButton.interactable = false;
+            
+        }
     }
 
     private void HandlePurchaseClicked()
     {
         _panel?.Purchase(_definition);
+    }
+
+    public string GetInfoText()
+    {
+        if (_definition != null)
+        {
+            return _definition.DisplayDescription;
+        }
+
+        return "";
     }
 }

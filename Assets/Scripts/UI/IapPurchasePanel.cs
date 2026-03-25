@@ -26,6 +26,7 @@ public class IapPurchasePanel : MonoBehaviour
         {
             CapabilityService.Instance.EntitlementsChanged += HandleEntitlementsChanged;
         }
+        Show();
     }
 
     private void OnDisable()
@@ -34,6 +35,7 @@ public class IapPurchasePanel : MonoBehaviour
         {
             CapabilityService.Instance.EntitlementsChanged -= HandleEntitlementsChanged;
         }
+        Hide();
     }
 
     public void Show()

@@ -432,6 +432,13 @@ Implement the ability to make the actual in app purchase using Google Play store
   - Updated `IapPurchasePanel` purchase-button flow to route purchases through the new gateway, while keeping a local unlock fallback for development/test environments where the store backend is unavailable.
   - Added entitlement-change notifications in `CapabilityService` and rebuild hooks in `IapPurchasePanel` so lock/unlock state refreshes immediately after purchase callbacks.
 
+T19.19 - Modify UnityIapPurchaseGateway.cs so it tries to fetch the price of each IAP and add a fallback for inside the Unity Editor that looks up a test price amount that is sotred in the Scriptable object. So also update the CapabilityDefinition Scriptable object so it has a test-price field. Also add a function in IapPurchasePanelItem.cs that will get the price and adds it to a PriceText Text Ui component.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 
 T18.3 - rework UI_DpadNavigationController.cs so it works correctly and add a checkbox to allow/disallow horizontal and/or vetical navigation and/or wrapping. Currently Horizontal navigation doesn't work and verticle wrapping is buggy and not reliable.
 - [x] Started
