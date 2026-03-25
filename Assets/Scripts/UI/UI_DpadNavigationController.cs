@@ -7,7 +7,10 @@ using UnityEngine.UI;
 public class UI_DpadNavigationController : MonoBehaviour
 {
     [SerializeField] private Selectable[] orderedSelectables;
+    [SerializeField] private bool allowHorizontalNavigation = true;
+    [SerializeField] private bool allowVerticalNavigation = true;
     [SerializeField] private bool horizontalWrap = false;
+    [SerializeField] private bool verticalWrap = false;
     [SerializeField] private InputActionReference navigateAction;
     [SerializeField] private InputActionReference submitAction;
 
@@ -175,14 +178,7 @@ public class UI_DpadNavigationController : MonoBehaviour
 
     private int FindNearestIndexInDirection(int originIndex, Vector2 navigationInput)
     {
-        float horizontalMagnitude = Mathf.Abs(navigationInput.x);
-        float verticalMagnitude = Mathf.Abs(navigationInput.y);
-        bool useVertical = verticalMagnitude >= horizontalMagnitude;
-        Vector2 axisDirection = useVertical
-            ? new Vector2(0f, navigationInput.y > 0f ? 1f : -1f)
-            : new Vector2(navigationInput.x > 0f ? 1f : -1f, 0f);
-
-        if (!useVertical && !horizontalWrap)
+        if (!TryResolveNavigationAxis(navigationInput, out bool useVertical, out int axisSign))
         {
             return -1;
         }
@@ -201,15 +197,13 @@ public class UI_DpadNavigationController : MonoBehaviour
             Vector2 candidatePosition = GetScreenPosition(_runtimeSelectables[i]);
             Vector2 delta = candidatePosition - origin;
             float axisDelta = useVertical ? delta.y : delta.x;
-            if ((axisDirection.y > 0f && axisDelta <= 0f) ||
-                (axisDirection.y < 0f && axisDelta >= 0f) ||
-                (axisDirection.x > 0f && axisDelta <= 0f) ||
-                (axisDirection.x < 0f && axisDelta >= 0f))
+            if ((axisSign > 0 && axisDelta <= 0f) || (axisSign < 0 && axisDelta >= 0f))
             {
                 continue;
             }
 
-            float score = delta.sqrMagnitude;
+            float perpendicularDelta = useVertical ? Mathf.Abs(delta.x) : Mathf.Abs(delta.y);
+            float score = Mathf.Abs(axisDelta) * 1000f + perpendicularDelta;
             if (score < bestScore)
             {
                 bestScore = score;
@@ -222,13 +216,14 @@ public class UI_DpadNavigationController : MonoBehaviour
             return bestIndex;
         }
 
-        if (!horizontalWrap || useVertical)
+        if (!ShouldWrap(useVertical))
         {
             return -1;
         }
 
-        // Wrap horizontally to the nearest item on the opposite side.
-        float wrapBest = float.MaxValue;
+        // Wrap to the furthest selectable on the opposite side while keeping close perpendicular alignment.
+        float wrapBestPerpendicular = float.MaxValue;
+        float wrapBestAxisDistance = -1f;
         for (int i = 0; i < _runtimeSelectables.Count; i++)
         {
             if (i == originIndex || !IsSelectable(i))
@@ -237,15 +232,52 @@ public class UI_DpadNavigationController : MonoBehaviour
             }
 
             Vector2 candidatePosition = GetScreenPosition(_runtimeSelectables[i]);
-            float score = Mathf.Abs(candidatePosition.y - origin.y);
-            if (score < wrapBest)
+            Vector2 delta = candidatePosition - origin;
+            float axisDelta = useVertical ? delta.y : delta.x;
+            bool isOppositeDirection = axisSign > 0 ? axisDelta < 0f : axisDelta > 0f;
+            if (!isOppositeDirection)
             {
-                wrapBest = score;
+                continue;
+            }
+
+            float perpendicularDelta = useVertical ? Mathf.Abs(delta.x) : Mathf.Abs(delta.y);
+            float axisDistance = Mathf.Abs(axisDelta);
+            if (perpendicularDelta < wrapBestPerpendicular ||
+                (Mathf.Approximately(perpendicularDelta, wrapBestPerpendicular) && axisDistance > wrapBestAxisDistance))
+            {
+                wrapBestPerpendicular = perpendicularDelta;
+                wrapBestAxisDistance = axisDistance;
                 bestIndex = i;
             }
         }
 
         return bestIndex;
+    }
+
+    private bool TryResolveNavigationAxis(Vector2 navigationInput, out bool useVertical, out int axisSign)
+    {
+        float horizontalMagnitude = Mathf.Abs(navigationInput.x);
+        float verticalMagnitude = Mathf.Abs(navigationInput.y);
+        bool horizontalAvailable = allowHorizontalNavigation && horizontalMagnitude > 0f;
+        bool verticalAvailable = allowVerticalNavigation && verticalMagnitude > 0f;
+
+        if (!horizontalAvailable && !verticalAvailable)
+        {
+            useVertical = true;
+            axisSign = 1;
+            return false;
+        }
+
+        useVertical = verticalAvailable && (!horizontalAvailable || verticalMagnitude >= horizontalMagnitude);
+        axisSign = useVertical
+            ? (navigationInput.y >= 0f ? 1 : -1)
+            : (navigationInput.x >= 0f ? 1 : -1);
+        return true;
+    }
+
+    private bool ShouldWrap(bool useVertical)
+    {
+        return useVertical ? verticalWrap : horizontalWrap;
     }
 
     private int GetCurrentIndex()

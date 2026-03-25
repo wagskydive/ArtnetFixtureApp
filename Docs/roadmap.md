@@ -262,3 +262,4 @@ _Progress note: Capability definitions now support multiple unlock product IDs, 
 _Progress note: Info panel access is no longer IAP-gated; `UI_DmxSettings` now defaults the info panel to enabled and always allows toggle-based control with persisted state._
 _Progress note: Purchase execution now routes through a new `UnityIapPurchaseGateway` (`UnityEngine.Purchasing`) that initializes products from capability assets and unlocks entitlements on successful purchase callbacks._
 _Progress note: A reusable `Popup` UI component now provides back-button close handling and keeps navigation focus inside active popup dialogs, preventing accidental interaction with underlying menus._
+_Progress note: `UI_DpadNavigationController` now supports independent horizontal/vertical navigation toggles plus separate horizontal/vertical wrapping, with improved deterministic vertical wrap behavior._

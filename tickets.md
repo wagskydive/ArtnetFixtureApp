@@ -434,6 +434,17 @@ Implement the ability to make the actual in app purchase using Google Play store
 
 
 T18.3 - rework UI_DpadNavigationController.cs so it works correctly and add a checkbox to allow/disallow horizontal and/or vetical navigation and/or wrapping. Currently Horizontal navigation doesn't work and verticle wrapping is buggy and not reliable.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - Reworked directional navigation axis resolution so horizontal navigation functions reliably when enabled and both axes can be independently enabled/disabled.
+  - Added separate vertical wrap support (`verticalWrap`) and improved wrap target selection so vertical wrapping is deterministic and no longer skips unpredictably.
+  - Expanded EditMode test coverage for horizontal enable/disable behavior and vertical wrapping.
+
+
+T18.4 - next run - wire inspector defaults for new UI_DpadNavigationController axis/wrap toggles across scenes and prefabs
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written

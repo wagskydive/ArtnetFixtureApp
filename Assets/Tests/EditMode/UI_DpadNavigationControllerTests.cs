@@ -120,7 +120,7 @@ public class UI_DpadNavigationControllerTests
     }
 
     [Test]
-    public void HandleNavigationInput_UsesHorizontalWhenWrapEnabled()
+    public void HandleNavigationInput_UsesHorizontalWhenEnabled()
     {
         var eventSystemGo = CreateEventSystem();
         var root = CreateRootWithCanvas();
@@ -128,13 +128,57 @@ public class UI_DpadNavigationControllerTests
         var buttonB = CreateButton("b", root.transform, new Vector2(100f, 0f));
 
         var controller = root.AddComponent<UI_DpadNavigationController>();
-        SetPrivateField(controller, "horizontalWrap", true);
+        SetPrivateField(controller, "allowHorizontalNavigation", true);
 
         root.SendMessage("OnEnable");
         EventSystem.current.SetSelectedGameObject(buttonA.gameObject);
         controller.HandleNavigationInput(Vector2.right);
 
         Assert.That(EventSystem.current.currentSelectedGameObject, Is.EqualTo(buttonB.gameObject));
+
+        Object.DestroyImmediate(root);
+        Object.DestroyImmediate(eventSystemGo);
+    }
+
+    [Test]
+    public void HandleNavigationInput_WrapsVertically_WhenVerticalWrapEnabled()
+    {
+        var eventSystemGo = CreateEventSystem();
+        var root = CreateRootWithCanvas();
+        var top = CreateButton("top", root.transform, new Vector2(0f, 100f));
+        var middle = CreateButton("middle", root.transform, new Vector2(0f, 0f));
+        var bottom = CreateButton("bottom", root.transform, new Vector2(0f, -100f));
+
+        var controller = root.AddComponent<UI_DpadNavigationController>();
+        SetPrivateField(controller, "allowVerticalNavigation", true);
+        SetPrivateField(controller, "verticalWrap", true);
+
+        root.SendMessage("OnEnable");
+        EventSystem.current.SetSelectedGameObject(bottom.gameObject);
+        controller.HandleNavigationInput(Vector2.down);
+
+        Assert.That(EventSystem.current.currentSelectedGameObject, Is.EqualTo(top.gameObject));
+
+        Object.DestroyImmediate(root);
+        Object.DestroyImmediate(eventSystemGo);
+    }
+
+    [Test]
+    public void HandleNavigationInput_DoesNotMoveHorizontally_WhenHorizontalNavigationDisabled()
+    {
+        var eventSystemGo = CreateEventSystem();
+        var root = CreateRootWithCanvas();
+        var buttonA = CreateButton("a", root.transform, new Vector2(0f, 0f));
+        CreateButton("b", root.transform, new Vector2(100f, 0f));
+
+        var controller = root.AddComponent<UI_DpadNavigationController>();
+        SetPrivateField(controller, "allowHorizontalNavigation", false);
+
+        root.SendMessage("OnEnable");
+        EventSystem.current.SetSelectedGameObject(buttonA.gameObject);
+        controller.HandleNavigationInput(Vector2.right);
+
+        Assert.That(EventSystem.current.currentSelectedGameObject, Is.EqualTo(buttonA.gameObject));
 
         Object.DestroyImmediate(root);
         Object.DestroyImmediate(eventSystemGo);
