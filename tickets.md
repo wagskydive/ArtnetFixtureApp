@@ -465,11 +465,14 @@ T18.5 - Find and fix a bug where the UI_DpadNavigationController.cs OnEnable fun
 
 
 T18.6 - rework UI_SettingsPanelToggle so it only is used to show the settings panel and remove the hide option when pressing the cancel/back button. Make the UI_DpadNavigationController handle the cancel/back button, so it doesn't hide the panel when the UI_DpadNavigationController component is inactive. Currently when the user presses the back/cancel button when a modal popup is open it also hides the settings panel
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - Reworked `UI_SettingsPanelToggle` so it only listens for show/open input and no longer binds any cancel/back hide action, preventing modal popup cancel presses from closing the settings panel globally.
+  - Added cancel/back handling to `UI_DpadNavigationController` through a dedicated cancel action + `onCancel` event so cancel logic now follows panel-local navigation ownership and only fires on active controllers.
+  - Expanded EditMode coverage for the new cancel event behavior and updated settings-panel toggle tests to match show-only responsibility.
 
 
 T18.2 - Add a popup.cs script that can be added as a component to any panel that is used as a popup. It handles the correct behavior of the back button and blocks any ui navigation for any underlying/inactive ui elements.

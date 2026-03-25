@@ -264,3 +264,4 @@ _Progress note: Info panel access is no longer IAP-gated; `UI_DmxSettings` now d
 _Progress note: Purchase execution now routes through a new `UnityIapPurchaseGateway` (`UnityEngine.Purchasing`) that initializes products from capability assets and unlocks entitlements on successful purchase callbacks._
 _Progress note: A reusable `Popup` UI component now provides back-button close handling and keeps navigation focus inside active popup dialogs, preventing accidental interaction with underlying menus._
 _Progress note: `UI_DpadNavigationController` now supports independent horizontal/vertical navigation toggles plus separate horizontal/vertical wrapping, with improved deterministic vertical wrap behavior._
+_Progress note: Settings menu toggling is now show-only in `UI_SettingsPanelToggle`; cancel/back handling moved into panel-local `UI_DpadNavigationController` cancel events so popup cancel input no longer hides the underlying settings panel._

@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using UnityEngine.Events;
 
 public class UI_DpadNavigationController : MonoBehaviour
 {
@@ -13,11 +14,14 @@ public class UI_DpadNavigationController : MonoBehaviour
     [SerializeField] private bool verticalWrap = false;
     [SerializeField] private InputActionReference navigateAction;
     [SerializeField] private InputActionReference submitAction;
+    [SerializeField] private InputActionReference cancelAction;
+    [SerializeField] private UnityEvent onCancel;
 
     private readonly List<Selectable> _runtimeSelectables = new List<Selectable>();
     private static readonly Dictionary<InputAction, int> ActionUsageCounts = new Dictionary<InputAction, int>();
     private int _currentIndex;
     private int _lastSubmitFrame = -1;
+    private int _lastCancelFrame = -1;
 
     private void OnEnable()
     {
@@ -25,12 +29,23 @@ public class UI_DpadNavigationController : MonoBehaviour
         SelectFirstValid();
         EnableAction(navigateAction, OnNavigate);
         EnableAction(submitAction, OnSubmit);
+        EnableAction(cancelAction, OnCancel);
     }
 
     private void OnDisable()
     {
         DisableAction(navigateAction, OnNavigate);
         DisableAction(submitAction, OnSubmit);
+        DisableAction(cancelAction, OnCancel);
+    }
+
+
+    private void Update()
+    {
+        if (WasFallbackCancelPressed())
+        {
+            HandleCancelInput();
+        }
     }
 
     public void HandleNavigationInput(Vector2 navigationInput)
@@ -78,6 +93,19 @@ public class UI_DpadNavigationController : MonoBehaviour
                 return;
             }
         }
+    }
+
+
+
+    public void HandleCancelInput()
+    {
+        if (_lastCancelFrame == Time.frameCount)
+        {
+            return;
+        }
+
+        _lastCancelFrame = Time.frameCount;
+        onCancel?.Invoke();
     }
 
     public void SubmitCurrentSelection()
@@ -336,6 +364,24 @@ public class UI_DpadNavigationController : MonoBehaviour
     private void OnSubmit(InputAction.CallbackContext _)
     {
         SubmitCurrentSelection();
+    }
+
+    private void OnCancel(InputAction.CallbackContext _)
+    {
+        HandleCancelInput();
+    }
+
+    private static bool WasFallbackCancelPressed()
+    {
+#if ENABLE_LEGACY_INPUT_MANAGER
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            return true;
+        }
+#endif
+        return (Gamepad.current != null && Gamepad.current.buttonEast.wasPressedThisFrame)
+               || (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+               || (Keyboard.current != null && Keyboard.current.backspaceKey.wasPressedThisFrame);
     }
 
     private static void EnableAction(InputActionReference actionReference, System.Action<InputAction.CallbackContext> callback)
