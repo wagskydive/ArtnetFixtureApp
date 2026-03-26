@@ -655,6 +655,388 @@ Current implementation allows purchases to succeed instantly in certain environm
   - Purchase flow now blocks non-Google Play store transactions before `InitiatePurchase`, keeps initialization/product availability guards, and prevents entitlement unlock in `ProcessPurchase` unless the active store is Google Play.
   - Added detailed price lookup diagnostics for uninitialized store, missing products, and missing metadata so panel pricing failures no longer fail silently.
 
+
+T19.25 - Refund handling: 
+Here’s a **clean implementation spec** you can hand off to your agent. It’s tailored to your existing architecture (CapabilityService, SyncOwnedPurchases, encrypted PlayerPrefs, etc.) and adds **online validation + offline fallback** without breaking your current flow.
+
+---
+
+# 🧾 Goal
+
+Implement a **hybrid entitlement system**:
+
+* ✅ Works offline using cached entitlements
+* ✅ When online, validates purchases via backend
+* ✅ Automatically **revokes refunded purchases**
+* ✅ Keeps your existing Unity IAP flow intact
+
+---
+
+# 🧱 High-Level Architecture
+
+### Current (you already have)
+
+* Unity IAP purchase flow
+* Local entitlement storage (CapabilityService + encrypted PlayerPrefs)
+* `SyncOwnedPurchases()` (but only adds, doesn’t remove)
+
+---
+
+### Add this
+
+**New components:**
+
+1. **Receipt Parser (client)**
+2. **Validation Manager (client)**
+3. **Backend Validation API**
+4. **Entitlement Sync (bidirectional)**
+
+---
+
+# 🧩 1. Receipt Parsing (Client)
+
+### Purpose
+
+Extract `purchaseToken` from Unity IAP receipt.
+
+### Implementation
+
+Create utility:
+
+```csharp
+public static class GooglePlayReceiptParser
+{
+    public static string ExtractPurchaseToken(string receiptJson)
+    {
+        if (string.IsNullOrEmpty(receiptJson))
+            return null;
+
+        var wrapper = JsonUtility.FromJson<ReceiptWrapper>(receiptJson);
+        var payload = JsonUtility.FromJson<PayloadWrapper>(wrapper.Payload);
+        var purchaseData = JsonUtility.FromJson<PurchaseData>(payload.json);
+
+        return purchaseData.purchaseToken;
+    }
+
+    [Serializable]
+    private class ReceiptWrapper
+    {
+        public string Store;
+        public string TransactionID;
+        public string Payload;
+    }
+
+    [Serializable]
+    private class PayloadWrapper
+    {
+        public string json;
+        public string signature;
+    }
+
+    [Serializable]
+    private class PurchaseData
+    {
+        public string purchaseToken;
+        public string productId;
+    }
+}
+```
+
+---
+
+# 🌐 2. Backend Validation API
+
+### Purpose
+
+Authoritative source of truth using
+Google Play Developer API
+
+---
+
+## Endpoint
+
+```
+POST /validatePurchase
+```
+
+### Request
+
+```json
+{
+  "productId": "premium_upgrade",
+  "purchaseToken": "token_here"
+}
+```
+
+### Server Logic
+
+* Call Google API:
+
+  ```
+  purchases.products.get
+  ```
+
+* Evaluate:
+
+  * `purchaseState == 0` → valid
+  * `purchaseState != 0` → invalid/refunded
+
+---
+
+### Response
+
+```json
+{
+  "productId": "premium_upgrade",
+  "valid": true
+}
+```
+
+---
+
+# 🔄 3. Validation Manager (Client)
+
+### Purpose
+
+Handles online sync and entitlement correction.
+
+---
+
+## New Class
+
+```csharp
+public class PurchaseValidationManager : MonoBehaviour
+{
+    public float validationIntervalHours = 24f;
+
+    private const string LastValidationKey = "last_validation_time";
+
+    public void TryValidatePurchases()
+    {
+        if (!IsOnline())
+            return;
+
+        if (!ShouldValidate())
+            return;
+
+        StartCoroutine(ValidateAllPurchases());
+    }
+
+    private bool ShouldValidate()
+    {
+        long lastTicks = LoadLastValidationTicks();
+        DateTime last = new DateTime(lastTicks);
+
+        return (DateTime.UtcNow - last).TotalHours >= validationIntervalHours;
+    }
+}
+```
+
+---
+
+## Core Validation Logic
+
+```csharp
+private IEnumerator ValidateAllPurchases()
+{
+    var validProducts = new HashSet<string>();
+
+#if UNITY_PURCHASING
+    var products = _storeController.products.all;
+
+    foreach (var product in products)
+    {
+        if (product.definition.type != ProductType.NonConsumable)
+            continue;
+
+        if (!product.hasReceipt)
+            continue;
+
+        string token = GooglePlayReceiptParser.ExtractPurchaseToken(product.receipt);
+
+        yield return StartCoroutine(ValidateWithServer(product.definition.id, token, (isValid) =>
+        {
+            if (isValid)
+                validProducts.Add(product.definition.id);
+        }));
+    }
+#endif
+
+    CapabilityService.Instance.SyncEntitlements(validProducts);
+
+    SaveValidationTime();
+}
+```
+
+---
+
+## Server Call
+
+```csharp
+private IEnumerator ValidateWithServer(string productId, string token, Action<bool> callback)
+{
+    var request = new ValidationRequest
+    {
+        productId = productId,
+        purchaseToken = token
+    };
+
+    string json = JsonUtility.ToJson(request);
+
+    using (UnityWebRequest www = UnityWebRequest.Post("https://yourapi.com/validatePurchase", json))
+    {
+        www.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(json));
+        www.downloadHandler = new DownloadHandlerBuffer();
+        www.SetRequestHeader("Content-Type", "application/json");
+
+        yield return www.SendWebRequest();
+
+        if (www.result != UnityWebRequest.Result.Success)
+        {
+            callback(false);
+            yield break;
+        }
+
+        var response = JsonUtility.FromJson<ValidationResponse>(www.downloadHandler.text);
+        callback(response.valid);
+    }
+}
+```
+
+---
+
+# 🔁 4. Fix Your Entitlement Logic (CRITICAL)
+
+### Replace your current one-way unlock logic
+
+## New method (you must implement this)
+
+```csharp
+public void SyncEntitlements(HashSet<string> validProducts)
+{
+    var current = GetUnlockedProductIds();
+
+    // 🔴 REVOKE missing ones
+    foreach (var unlocked in current)
+    {
+        if (!validProducts.Contains(unlocked))
+        {
+            RevokeProduct(unlocked);
+        }
+    }
+
+    // 🟢 ADD valid ones
+    foreach (var valid in validProducts)
+    {
+        UnlockProduct(valid);
+    }
+}
+```
+
+---
+
+# 🔌 5. Integration Points
+
+### Modify your existing flow:
+
+## On app start
+
+```csharp
+SyncOwnedPurchases(); // fast local sync
+validationManager.TryValidatePurchases(); // async correction
+```
+
+---
+
+## After purchase
+
+Inside `ProcessPurchase`:
+
+```csharp
+UnlockProduct(productId);
+
+// trigger validation soon after
+validationManager.TryValidatePurchases();
+```
+
+---
+
+# 📡 6. Offline Behavior
+
+### When offline:
+
+* Use cached entitlements ✔
+* Skip validation ✔
+
+### When back online:
+
+* Validation runs ✔
+* Refunded items get revoked ✔
+
+---
+
+# 🧠 7. Important Rules
+
+### NEVER:
+
+* Trust `hasReceipt` alone ❌
+* Store permanent entitlement without revalidation ❌
+
+---
+
+### ALWAYS:
+
+* Sync entitlements BOTH directions ✔
+* Validate periodically ✔
+* Use backend as source of truth ✔
+
+---
+
+# 🧪 8. Testing Scenarios
+
+Your agent should verify:
+
+### Case 1 — Normal purchase
+
+* Buy → unlock → validate → stays unlocked
+
+### Case 2 — Refund WITHOUT revoke (your current issue)
+
+* Refund externally
+* Open app online
+* Validation runs
+* ❗ entitlement gets removed
+
+---
+
+### Case 3 — Offline refund
+
+* Refund
+* Open app offline → still unlocked
+* Go online → gets revoked
+
+---
+
+# ✅ Final Result
+
+You now have:
+
+* ✅ Offline-capable purchases
+* ✅ Automatic refund correction
+* ✅ Protection against abuse
+* ✅ Minimal changes to your architecture
+
+---
+
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+
+
+
 T18.3 - rework UI_DpadNavigationController.cs so it works correctly and add a checkbox to allow/disallow horizontal and/or vetical navigation and/or wrapping. Currently Horizontal navigation doesn't work and verticle wrapping is buggy and not reliable.
 - [x] Started
 - [x] Behavior Written
