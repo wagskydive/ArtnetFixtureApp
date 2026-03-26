@@ -1060,6 +1060,14 @@ T99.8 - Refactor the code so that every class and every interface lives in its o
   - Split `WebUiPasswordProtection` into its own file so classes are no longer co-located in `SaveLoadSettings.cs`, and restored the expected legacy API surface (`SetProtectionEnabled`, `IsProtectionEnabled`, `GetPasswordForUnityUi`, `ClearPassword`) used by existing UI callers.
   - Added missing `SaveLoadSettings.FixtureNameKey` constant and restored `UI_DmxSettings.ApplyWebUiPasswordFromInput()` so password helper and fixture-name persistence compile again.
 
+
+T99.9 - Find and fix a bug where the fixture name text in the in-app ui is not showing the current name that is saved in the player prefs. Currently when the name is changed inside the app or through the webui, the fixture name in the webui does change, but the ui Text element always shows the text "Fixture"
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode
 - [x] Started
 - [x] Behavior Written
