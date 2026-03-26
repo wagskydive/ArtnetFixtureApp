@@ -23,6 +23,7 @@ public class UI_DmxSettings : MonoBehaviour
     [SerializeField] private Text webUiPasswordAstrisksText;
     [SerializeField] private Text webUiPasswordResetButtonText;
     [SerializeField] private int currentPatternType = 0; // Pattern type selector (0=Static, 1=Pulse, 2=ColorShift)
+    private bool shouldDisplayNetworkWarning;
     [SerializeField] private ArtNetReceiver artNetReceiver;
     [SerializeField] private UI_FixtureMeshManager fixtureMeshManager;
     [SerializeField] private CapabilityBlockUiTrigger capabilityBlockUiTrigger;
@@ -84,8 +85,11 @@ public class UI_DmxSettings : MonoBehaviour
 
     private void Awake()
     {
-        artNetReceiver.NoDataReceivedRecently += ShowNetworkWarning;
-        artNetReceiver.DataReceivedAgain += HideNetworkWarning;
+        if (artNetReceiver != null)
+        {
+            artNetReceiver.NoDataReceivedRecently += ShowNetworkWarning;
+            artNetReceiver.DataReceivedAgain += HideNetworkWarning;
+        }
         LoadPreferences();
         ApplySettingsToReceiver();
         SaveLoadSettings.OnSettingsSaved += LoadSettingsAndUpdateDisplay;
@@ -94,21 +98,25 @@ public class UI_DmxSettings : MonoBehaviour
 
     void ShowNetworkWarning()
     {
-        if (SaveLoadSettings.LoadInt(SaveLoadSettings.NetworkWarningEnabledKey, 1) == 1)
-        {
-            networkWarning.SetActive(true);
-        }
-
+        shouldDisplayNetworkWarning = true;
+        RefreshNetworkWarningVisibility();
     }
 
     void HideNetworkWarning()
     {
-        networkWarning.SetActive(false);
+        shouldDisplayNetworkWarning = false;
+        RefreshNetworkWarningVisibility();
     }
 
     private void OnDestroy()
     {
         SaveLoadSettings.OnSettingsSaved -= LoadSettingsAndUpdateDisplay;
+
+        if (artNetReceiver != null)
+        {
+            artNetReceiver.NoDataReceivedRecently -= ShowNetworkWarning;
+            artNetReceiver.DataReceivedAgain -= HideNetworkWarning;
+        }
     }
 
     private void OnDisable()
@@ -270,25 +278,29 @@ public class UI_DmxSettings : MonoBehaviour
     {
         SaveLoadSettings.SaveInt(SaveLoadSettings.NetworkWarningEnabledKey, isOn ? 1 : 0);
         SaveLoadSettings.Save();
-        if (networkWarning != null)
-        {
-            networkWarning.SetActive(isOn);
-        }
+        RefreshNetworkWarningVisibility();
     }
 
     private void UpdateWarningToggleState()
     {
-        if (networkWarningToggle == null)
+        bool enabled = SaveLoadSettings.LoadInt(SaveLoadSettings.NetworkWarningEnabledKey, 1) == 1;
+        if (networkWarningToggle != null)
+        {
+            networkWarningToggle.SetIsOnWithoutNotify(enabled);
+        }
+
+        RefreshNetworkWarningVisibility();
+    }
+
+    private void RefreshNetworkWarningVisibility()
+    {
+        if (networkWarning == null)
         {
             return;
         }
 
-        bool enabled = SaveLoadSettings.LoadInt(SaveLoadSettings.NetworkWarningEnabledKey, 1) == 1;
-        networkWarningToggle.SetIsOnWithoutNotify(enabled);
-        if (networkWarning != null)
-        {
-            networkWarning.SetActive(enabled);
-        }
+        bool warningEnabled = SaveLoadSettings.LoadInt(SaveLoadSettings.NetworkWarningEnabledKey, 1) == 1;
+        networkWarning.SetActive(warningEnabled && shouldDisplayNetworkWarning);
     }
 
     private void UpdateInfoPanelState()
