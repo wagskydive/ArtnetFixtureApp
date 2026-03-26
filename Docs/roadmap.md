@@ -147,6 +147,7 @@ _Progress note: in-app settings now run Unity UI only; `InAppWebViewSurface` has
 _Progress note: external WebUI clients now poll `/api/settings` once per second to reflect live settings changes made from Unity UI or another browser session._
 _Progress note: `UI_DpadNavigationController` now uses Input System actions only, supports position-based selectable discovery when no explicit list is configured, and suppresses duplicate same-frame submit invocations._
 _Progress note: popup panels now enforce modal D-pad behavior by temporarily disabling non-popup `UI_DpadNavigationController` instances while open, preventing background panel navigation/submit/cancel handling._
+_Progress note: IAP entitlement flow now supports online backend validation with offline cache fallback, including automatic refunded-product revocation via bidirectional entitlement sync._
 
 ### Goal:
 Enable persistent configuration and easy deployment.

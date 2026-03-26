@@ -474,11 +474,11 @@ T19.22 - Ensure that purchased items stay unlocked if the device is not online. 
   - Added EditMode coverage validating encrypted persistence and legacy-to-encrypted migration behavior.
 
 T19.23 - Next run: add integrity/tamper handling telemetry for encrypted entitlement loads so invalid payloads are detectable in QA logs without crashing entitlement resolution.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
 
 T19.24 — in app purchase implementation — secure store validation and debugging
 
@@ -1028,11 +1028,17 @@ You now have:
 
 ---
 
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Added bidirectional entitlement support (`MarkLocked`, `RevokeProduct`, `SyncEntitlements`) so refunded/missing products are revoked while valid products remain unlocked and persisted for offline usage.
+  - Added `GooglePlayReceiptParser` and `PurchaseValidationManager` to extract Google purchase tokens and periodically validate owned receipts against a backend endpoint when online.
+  - Updated `UnityIapPurchaseGateway` to expose owned non-consumable receipts, run local ownership sync after IAP initialization, and trigger async validation after initialization and successful purchases.
+  - Added EditMode coverage for entitlement revocation/sync behavior and receipt parsing.
+
+T19.26 - Next run: wire `PurchaseValidationManager.validationEndpoint` in `MainScene`, add QA telemetry assertions for validation failures, and execute Unity EditMode tests on licensed CI runner.
 
 
 
