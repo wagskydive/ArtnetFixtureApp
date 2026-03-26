@@ -480,6 +480,177 @@ T19.23 - Next run: add integrity/tamper handling telemetry for encrypted entitle
 - [ ] Tests Passed
 - [ ] Documentation Written
 
+T19.24 — in app purchase implementation — secure store validation and debugging
+
+## Goal
+
+Ensure that purchases only succeed when connected to the real Google Play Store and prevent FakeStore or offline scenarios from unlocking premium features.
+
+---
+
+## Problem Statement
+
+Current implementation allows purchases to succeed instantly in certain environments (e.g., FakeStore or unsupported devices). This creates a critical security issue where premium features can be unlocked without a real transaction.
+
+---
+
+## Implementation Requirements
+
+### 1. Add Store Type Detection and Logging
+
+**Objective:** Identify which store backend Unity IAP is using.
+
+**Tasks:**
+
+* During IAP initialization, detect the active store
+* Log the detected store type
+* Log all registered products and their availability status
+
+**Expected Logs:**
+
+* "IAP initialized"
+* "Store: GooglePlay" OR "Store: Fake"
+* "Product: <id> | availableToPurchase: true/false"
+
+---
+
+### 2. Track Store Type at Runtime
+
+**Objective:** Make store type accessible for validation checks.
+
+**Tasks:**
+
+* Store the detected store type in a runtime variable
+* Expose a public read-only property (e.g. IsUsingRealStore)
+
+**Rules:**
+
+* Only Google Play counts as a valid store
+* All other stores must be treated as invalid for purchases
+
+---
+
+### 3. Block Purchases on Invalid Store
+
+**Objective:** Prevent purchases when not connected to Google Play.
+
+**Tasks:**
+
+* Before initiating a purchase, check store type
+* If not Google Play:
+
+  * Do not call purchase API
+  * Log a warning
+  * Return failure
+
+**Expected Log:**
+
+* "Purchase blocked: not connected to Google Play store"
+
+---
+
+### 4. Validate Product Before Purchase
+
+**Objective:** Ensure product exists and is purchasable.
+
+**Tasks:**
+
+* Verify store controller is initialized
+* Verify product exists
+* Verify product is available to purchase
+
+**Failure Handling:**
+
+* Do not initiate purchase
+* Log clear reason for failure
+
+---
+
+### 5. Protect Unlock Logic (Critical)
+
+**Objective:** Prevent FakeStore from unlocking premium features.
+
+**Tasks:**
+
+* Inside purchase success handler (ProcessPurchase):
+
+  * Check store type
+  * If NOT Google Play:
+
+    * Do NOT unlock anything
+    * Log warning
+    * Exit early
+
+**Expected Log:**
+
+* "Purchase ignored: FakeStore detected, unlock blocked"
+
+---
+
+### 6. Add Initialization State Guard
+
+**Objective:** Prevent actions before IAP is ready.
+
+**Tasks:**
+
+* Ensure purchases cannot be triggered before initialization completes
+* If attempted:
+
+  * Block action
+  * Log warning
+
+---
+
+### 7. Improve Price Debugging
+
+**Objective:** Make product loading issues visible.
+
+**Tasks:**
+
+* When price lookup fails, log reason:
+
+  * product not found
+  * metadata missing
+  * store not initialized
+
+---
+
+## Acceptance Criteria
+
+* Purchases are ONLY possible when connected to Google Play
+* FakeStore does NOT unlock any features
+* Offline purchases do NOT succeed
+* All invalid purchase attempts are logged clearly
+* Product availability is logged during initialization
+* No silent failures remain in purchase flow
+
+---
+
+## Definition of Done
+
+* System tested on:
+
+  * Google Play test track (real store)
+  * Offline mode
+  * Unsupported / FakeStore device
+* Verified that:
+
+  * Only real purchases unlock features
+  * FakeStore cannot bypass monetization
+
+---
+
+## Notes
+
+* This is a critical security ticket and must be completed before release
+* Do not rely on UI to enforce restrictions — all checks must exist in core logic
+* This system must remain compatible with offline entitlement usage after a valid purchase
+
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
 
 T18.3 - rework UI_DpadNavigationController.cs so it works correctly and add a checkbox to allow/disallow horizontal and/or vetical navigation and/or wrapping. Currently Horizontal navigation doesn't work and verticle wrapping is buggy and not reliable.
 - [x] Started
