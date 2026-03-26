@@ -29,6 +29,17 @@ public static class SaveLoadSettings
         return PlayerPrefs.GetString(key, defaultValue);
     }
 
+    public static long LoadLong(string key, long defaultValue)
+    {
+        string raw = PlayerPrefs.GetString(key, string.Empty);
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            return defaultValue;
+        }
+
+        return long.TryParse(raw, out long parsed) ? parsed : defaultValue;
+    }
+
     public static void SaveInt(string key, int value)
     {
         PlayerPrefs.SetInt(key, value);
@@ -37,6 +48,11 @@ public static class SaveLoadSettings
     public static void SaveString(string key, string value)
     {
         PlayerPrefs.SetString(key, value);
+    }
+
+    public static void SaveLong(string key, long value)
+    {
+        PlayerPrefs.SetString(key, value.ToString());
     }
 
     public static void Save()

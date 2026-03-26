@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using UnityEngine;
-using UnityEngine.UI;
 
 #if UNITY_PURCHASING
 using UnityEngine.Purchasing;
@@ -12,6 +11,18 @@ public class UnityIapPurchaseGateway : MonoBehaviour
     , IDetailedStoreListener
 #endif
 {
+    public struct OwnedProductReceipt
+    {
+        public OwnedProductReceipt(string productId, string receiptJson)
+        {
+            ProductId = productId;
+            ReceiptJson = receiptJson;
+        }
+
+        public string ProductId { get; }
+        public string ReceiptJson { get; }
+    }
+
     public enum StoreBackendType
     {
         Unknown,
@@ -21,6 +32,7 @@ public class UnityIapPurchaseGateway : MonoBehaviour
     }
 
     [SerializeField] private CapabilityDatabase capabilityDatabase;
+    [SerializeField] private PurchaseValidationManager purchaseValidationManager;
     private bool _hasAttemptedInitialization;
     private bool _initializationCompleted;
     private StoreBackendType _storeBackend = StoreBackendType.Unknown;
@@ -240,6 +252,30 @@ public class UnityIapPurchaseGateway : MonoBehaviour
 #endif
     }
 
+    public IReadOnlyList<OwnedProductReceipt> GetOwnedNonConsumableReceipts()
+    {
+        var ownedReceipts = new List<OwnedProductReceipt>();
+#if UNITY_PURCHASING
+        if (_storeController == null || _storeController.products == null)
+        {
+            return ownedReceipts;
+        }
+
+        Product[] allProducts = _storeController.products.all;
+        for (int i = 0; i < allProducts.Length; i++)
+        {
+            Product product = allProducts[i];
+            if (product?.definition == null || product.definition.type != ProductType.NonConsumable || !product.hasReceipt)
+            {
+                continue;
+            }
+
+            ownedReceipts.Add(new OwnedProductReceipt(product.definition.id, product.receipt));
+        }
+#endif
+        return ownedReceipts;
+    }
+
 #if UNITY_PURCHASING
     public void OnInitialized(IStoreController controller, IExtensionProvider extensions)
     {
@@ -263,6 +299,9 @@ public class UnityIapPurchaseGateway : MonoBehaviour
             bool availableToPurchase = product != null && product.availableToPurchase;
             Debug.Log($"Product: {productId} | availableToPurchase: {availableToPurchase}", this);
         }
+
+        SyncOwnedPurchases();
+        TriggerPurchaseValidation();
     }
 
     public void OnInitializeFailed(InitializationFailureReason error)
@@ -296,6 +335,7 @@ public class UnityIapPurchaseGateway : MonoBehaviour
         if (purchaseEvent?.purchasedProduct?.definition != null)
         {
             CapabilityService.Instance?.UnlockProduct(purchaseEvent.purchasedProduct.definition.id);
+            TriggerPurchaseValidation();
         }
 
         return PurchaseProcessingResult.Complete;
@@ -344,6 +384,16 @@ public class UnityIapPurchaseGateway : MonoBehaviour
         }
 
         return StoreBackendType.Other;
+    }
+
+    private void TriggerPurchaseValidation()
+    {
+        if (purchaseValidationManager == null)
+        {
+            purchaseValidationManager = FindFirstObjectByType<PurchaseValidationManager>();
+        }
+
+        purchaseValidationManager?.TryValidatePurchases();
     }
 #endif
 }

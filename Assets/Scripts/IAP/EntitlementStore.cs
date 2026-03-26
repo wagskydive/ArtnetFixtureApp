@@ -33,6 +33,22 @@ public class EntitlementStore
         return changed;
     }
 
+    public bool MarkLocked(string productId)
+    {
+        if (string.IsNullOrWhiteSpace(productId))
+        {
+            return false;
+        }
+
+        bool changed = _unlockedProductIds.Remove(productId);
+        if (changed && _persistLocally)
+        {
+            SaveToLocalStorage();
+        }
+
+        return changed;
+    }
+
     public bool IsUnlocked(string productId)
     {
         if (string.IsNullOrWhiteSpace(productId))

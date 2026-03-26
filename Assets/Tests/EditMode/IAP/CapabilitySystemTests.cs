@@ -18,6 +18,18 @@ public class CapabilitySystemTests
     }
 
     [Test]
+    public void EntitlementStore_MarkLocked_RemovesUnlockedProduct()
+    {
+        var store = new EntitlementStore();
+        store.MarkUnlocked("product.fixture.limit");
+
+        bool changed = store.MarkLocked("product.fixture.limit");
+
+        Assert.That(changed, Is.True);
+        Assert.That(store.IsUnlocked("product.fixture.limit"), Is.False);
+    }
+
+    [Test]
     public void CapabilityDatabase_TryGetCapability_ReturnsDefinitionById()
     {
         var databaseGo = new GameObject("capability-db");
@@ -155,6 +167,42 @@ public class CapabilitySystemTests
         Object.DestroyImmediate(universeLimit);
     }
 
+    [Test]
+    public void CapabilityService_SyncEntitlements_RevokesAndUnlocksProducts()
+    {
+        var serviceGo = new GameObject("capability-service");
+        var service = serviceGo.AddComponent<CapabilityService>();
+        InvokeAwake(service);
+
+        service.UnlockProduct("product.keep");
+        service.UnlockProduct("product.revoke");
+
+        service.SyncEntitlements(new HashSet<string> { "product.keep", "product.new" });
+
+        Assert.That(service.Entitlements.IsUnlocked("product.keep"), Is.True);
+        Assert.That(service.Entitlements.IsUnlocked("product.new"), Is.True);
+        Assert.That(service.Entitlements.IsUnlocked("product.revoke"), Is.False);
+
+        Object.DestroyImmediate(serviceGo);
+    }
+
+    [Test]
+    public void GooglePlayReceiptParser_ExtractPurchaseToken_ReturnsToken()
+    {
+        const string receipt = "{\"Store\":\"GooglePlay\",\"TransactionID\":\"txn-1\",\"Payload\":\"{\\\"json\\\":\\\"{\\\\\\\"purchaseToken\\\\\\\":\\\\\\\"token-123\\\\\\\",\\\\\\\"productId\\\\\\\":\\\\\\\"product.pro.bundle\\\\\\\"}\\\",\\\"signature\\\":\\\"sig\\\"}\"}";
+
+        string token = GooglePlayReceiptParser.ExtractPurchaseToken(receipt);
+
+        Assert.That(token, Is.EqualTo("token-123"));
+    }
+
+    [Test]
+    public void GooglePlayReceiptParser_ExtractPurchaseToken_WithInvalidPayload_ReturnsNull()
+    {
+        string token = GooglePlayReceiptParser.ExtractPurchaseToken("not-json");
+        Assert.That(token, Is.Null);
+    }
+
     private static CapabilityDefinition CreateCapabilityDefinition(string id, CapabilityValueType valueType, string productId, bool unlockedBooleanValue, int unlockedNumericValue)
     {
         var definition = ScriptableObject.CreateInstance<CapabilityDefinition>();
@@ -172,6 +220,11 @@ public class CapabilitySystemTests
     {
         var field = target.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
         field.SetValue(target, value);
+    }
+
+    private static void InvokeAwake(MonoBehaviour behaviour)
+    {
+        behaviour.GetType().GetMethod("Awake", BindingFlags.NonPublic | BindingFlags.Instance)?.Invoke(behaviour, null);
     }
 
     private class InMemoryCapabilityLookup : ICapabilityLookup

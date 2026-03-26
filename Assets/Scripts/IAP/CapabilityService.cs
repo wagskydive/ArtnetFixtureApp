@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using System.Collections.Generic;
 
 public class CapabilityService : MonoBehaviour
 {
@@ -57,6 +58,52 @@ public class CapabilityService : MonoBehaviour
         }
 
         if (_entitlementStore.MarkUnlocked(productId))
+        {
+            EntitlementsChanged?.Invoke();
+        }
+    }
+
+    public void RevokeProduct(string productId)
+    {
+        if (_entitlementStore == null)
+        {
+            return;
+        }
+
+        if (_entitlementStore.MarkLocked(productId))
+        {
+            EntitlementsChanged?.Invoke();
+        }
+    }
+
+    public void SyncEntitlements(IReadOnlyCollection<string> validProducts)
+    {
+        if (_entitlementStore == null)
+        {
+            return;
+        }
+
+        HashSet<string> validProductSet = validProducts != null
+            ? new HashSet<string>(validProducts, StringComparer.Ordinal)
+            : new HashSet<string>(StringComparer.Ordinal);
+        var currentProducts = new List<string>(_entitlementStore.GetUnlockedProductIds());
+        bool changed = false;
+
+        for (int i = 0; i < currentProducts.Count; i++)
+        {
+            string currentProductId = currentProducts[i];
+            if (!validProductSet.Contains(currentProductId))
+            {
+                changed |= _entitlementStore.MarkLocked(currentProductId);
+            }
+        }
+
+        foreach (string validProductId in validProductSet)
+        {
+            changed |= _entitlementStore.MarkUnlocked(validProductId);
+        }
+
+        if (changed)
         {
             EntitlementsChanged?.Invoke();
         }
