@@ -12735,7 +12735,7 @@ MonoBehaviour:
   allowHorizontalNavigation: 0
   allowVerticalNavigation: 1
   horizontalWrap: 0
-  verticalWrap: 1
+  verticalWrap: 0
   navigateAction: {fileID: -8784545083839296357, guid: 289c1b55c9541489481df5cc06664110, type: 3}
   submitAction: {fileID: 392368643174621059, guid: 289c1b55c9541489481df5cc06664110, type: 3}
   cancelAction: {fileID: 7727032971491509709, guid: 289c1b55c9541489481df5cc06664110, type: 3}

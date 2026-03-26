@@ -23,7 +23,7 @@ public static class WebUiSettingsStore
 
         return new WebUiSettingsData
         {
-            deviceName = SaveLoadSettings.LoadString(SaveLoadSettings.DeviceNetworkKey, "ArtnetFixture"),
+            deviceName = SaveLoadSettings.LoadString(SaveLoadSettings.DeviceNetworkKey, "DMX Projector"),
             fixtureMode = ToFixtureModeValue(fixtureMode),
             dmxUniverse = Mathf.Clamp(SaveLoadSettings.LoadInt(SaveLoadSettings.DmxUniverseKey, 1), 1, 16),
             startChannel = Mathf.Clamp(SaveLoadSettings.LoadInt(SaveLoadSettings.DmxChannelKey, 1), 1, 512),

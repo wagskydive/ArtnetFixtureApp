@@ -392,7 +392,7 @@ public class UI_DmxSettings : MonoBehaviour
     {
         if (fixtureNameValueText != null)
         {
-            fixtureNameValueText.text = SaveLoadSettings.LoadString(SaveLoadSettings.DeviceNetworkKey, "Fixture");
+            fixtureNameValueText.text = SaveLoadSettings.LoadString(SaveLoadSettings.DeviceNetworkKey, "DMX Projector");
         }
 
         if (ipAddressValueText != null)
