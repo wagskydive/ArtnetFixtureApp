@@ -1062,6 +1062,17 @@ T99.8 - Refactor the code so that every class and every interface lives in its o
 
 
 T99.9 - Find and fix a bug where the network warning still shows after network data is being received
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Fixed `UI_DmxSettings` network-warning visibility flow so the warning panel only appears when both (a) warning toggle is enabled and (b) the receiver is currently in a no-data state, preventing stale warning UI after data resumes.
+  - Added safe ArtNet event subscribe/unsubscribe guards in `Awake`/`OnDestroy` and extracted `RefreshNetworkWarningVisibility()` to keep warning state deterministic across settings reloads.
+  - Added EditMode coverage for the regression path (show -> hide) and for settings-load behavior so enabling the warning preference no longer forces the panel visible when there is no active warning condition.
+
+
+T99.10 - Next run: execute Unity EditMode suite on a licensed Unity runner to validate T99.9 network-warning regression coverage in-engine
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written

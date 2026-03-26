@@ -11,6 +11,7 @@ public class UI_DmxSettingsTests
         PlayerPrefs.DeleteKey("dmx.universe");
         PlayerPrefs.DeleteKey("dmx.pattern");
         PlayerPrefs.DeleteKey("infoPanel");
+        PlayerPrefs.DeleteKey("network.warning.enabled");
     }
 
     [Test]
@@ -158,6 +159,49 @@ public class UI_DmxSettingsTests
         Assert.That(reloadedSettings.CurrentPatternType, Is.EqualTo(2));
     }
 
+
+    [Test]
+    public void NetworkWarning_RemainsHiddenAfterDataReturns_WhenWarningIsEnabled()
+    {
+        var (settings, _, _, _) = CreateSettings();
+        var warningPanel = new GameObject("network-warning");
+
+        typeof(UI_DmxSettings)
+            .GetField("networkWarning", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            .SetValue(settings, warningPanel);
+
+        SaveLoadSettings.SaveInt(SaveLoadSettings.NetworkWarningEnabledKey, 1);
+
+        InvokePrivate(settings, "ShowNetworkWarning");
+        Assert.That(warningPanel.activeSelf, Is.True);
+
+        InvokePrivate(settings, "HideNetworkWarning");
+        Assert.That(warningPanel.activeSelf, Is.False);
+    }
+
+    [Test]
+    public void LoadPreferences_DoesNotForceNetworkWarningVisible_WhenNoWarningIsActive()
+    {
+        var (settings, _, _, _) = CreateSettings();
+        var warningPanel = new GameObject("network-warning");
+        var warningToggle = new GameObject("network-warning-toggle").AddComponent<Toggle>();
+
+        typeof(UI_DmxSettings)
+            .GetField("networkWarning", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            .SetValue(settings, warningPanel);
+
+        typeof(UI_DmxSettings)
+            .GetField("networkWarningToggle", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            .SetValue(settings, warningToggle);
+
+        SaveLoadSettings.SaveInt(SaveLoadSettings.NetworkWarningEnabledKey, 1);
+
+        settings.LoadPreferences();
+
+        Assert.That(warningToggle.isOn, Is.True);
+        Assert.That(warningPanel.activeSelf, Is.False);
+    }
+
     [Test]
     public void LoadPreferences_DefaultsInfoPanelToEnabled_WhenNoPreferenceExists()
     {
@@ -231,6 +275,14 @@ public class UI_DmxSettingsTests
             .SetValue(settings, receiver);
 
         return (settings, channelText, universeText, receiver);
+    }
+
+
+    private static void InvokePrivate(UI_DmxSettings settings, string methodName)
+    {
+        typeof(UI_DmxSettings)
+            .GetMethod(methodName, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            .Invoke(settings, null);
     }
 
     private class FakeShaderSetter : IShaderGlobalIntSetter
