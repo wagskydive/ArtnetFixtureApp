@@ -7,7 +7,6 @@ public static class SaveLoadSettings
     public const string DmxUniverseKey = "dmx.universe";
     public const string DmxPatternKey = "dmx.pattern";
     public const string FixtureCountKey = "dmx.fixture.count";
-    public const string FixtureNameKey = "dmx.fixture.name";
     public const string FixtureModeKey = "dmx.fixture.mode";
     public const string PixelRowsKey = "dmx.pixel.rows";
     public const string PixelColumnsKey = "dmx.pixel.columns";

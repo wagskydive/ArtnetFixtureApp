@@ -383,7 +383,7 @@ public class UI_DmxSettings : MonoBehaviour
 
     public void SetFixtureName(string fixtureName)
     {
-        SaveLoadSettings.SaveString(SaveLoadSettings.FixtureNameKey, fixtureName);
+        SaveLoadSettings.SaveString(SaveLoadSettings.DeviceNetworkKey, fixtureName);
         SaveLoadSettings.Save();
         UpdateDeviceInfoDisplay();
     }
@@ -392,7 +392,7 @@ public class UI_DmxSettings : MonoBehaviour
     {
         if (fixtureNameValueText != null)
         {
-            fixtureNameValueText.text = SaveLoadSettings.LoadString(SaveLoadSettings.FixtureNameKey, "Fixture");
+            fixtureNameValueText.text = SaveLoadSettings.LoadString(SaveLoadSettings.DeviceNetworkKey, "Fixture");
         }
 
         if (ipAddressValueText != null)
