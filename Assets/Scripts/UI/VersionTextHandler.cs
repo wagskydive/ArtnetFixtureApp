@@ -11,7 +11,7 @@ public class VersionTextHandler : MonoBehaviour
         string versionString = "Version: " + Application.version;
 #if UNITY_ANDROID && !UNITY_EDITOR
 
-      versionString = versionString+$"  Version Code: {VersionCode.GetVersionCode()}";
+      versionString = versionString+$" Code: {VersionCode.GetVersionCode()}";
 
 #endif
 
