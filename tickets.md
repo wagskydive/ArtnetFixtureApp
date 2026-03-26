@@ -1061,7 +1061,7 @@ T99.8 - Refactor the code so that every class and every interface lives in its o
   - Added missing `SaveLoadSettings.FixtureNameKey` constant and restored `UI_DmxSettings.ApplyWebUiPasswordFromInput()` so password helper and fixture-name persistence compile again.
 
 
-T99.9 - Find and fix a bug where the fixture name text in the in-app ui is not showing the current name that is saved in the player prefs. Currently when the name is changed inside the app or through the webui, the fixture name in the webui does change, but the ui Text element always shows the text "Fixture"
+T99.9 - Find and fix a bug where the network warning still shows after network data is being received
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written

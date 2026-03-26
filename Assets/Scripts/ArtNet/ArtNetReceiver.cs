@@ -165,6 +165,11 @@ public class ArtNetReceiver : MonoBehaviour
             {
                 byte[] data = _udpClient.Receive(ref remoteEP);
 
+                if (IsArtPollPacket(data))
+                {
+                    SendArtPollReply(remoteEP);
+                }
+
                 if (IsArtDmxPacket(data))
                 {
                     int universe = data[14] | (data[15] << 8);
@@ -201,6 +206,68 @@ public class ArtNetReceiver : MonoBehaviour
                data[7] == 0x00 &&
                data[8] == 0x00 &&
                data[9] == 0x50; // OpCode low/high for ArtDMX
+    }
+
+    private bool IsArtPollPacket(byte[] data)
+    {
+        if (data.Length < 10) return false;
+
+        return data[0] == 'A' &&
+               data[1] == 'r' &&
+               data[2] == 't' &&
+               data[3] == '-' &&
+               data[4] == 'N' &&
+               data[5] == 'e' &&
+               data[6] == 't' &&
+               data[7] == 0x00 &&
+               data[8] == 0x00 &&
+               data[9] == 0x20; // ArtPoll opcode
+    }
+
+    private void SendArtPollReply(IPEndPoint target)
+    {
+        byte[] reply = new byte[239]; // standard size
+
+        // Header
+        System.Text.Encoding.ASCII.GetBytes("Art-Net\0").CopyTo(reply, 0);
+
+        // OpCode (ArtPollReply = 0x2100 little endian)
+        reply[8] = 0x00;
+        reply[9] = 0x21;
+
+        // IP address (your device)
+        byte[] ip = IpSolver.ResolveLocalIpv4AddressBytes();
+        Array.Copy(ip, 0, reply, 10, 4);
+
+        // Port (Art-Net port 6454)
+        reply[14] = 0x36;
+        reply[15] = 0x19;
+
+        // Version info
+        reply[16] = 0;
+        reply[17] = 1;
+
+        // Net/Subnet/Universe info
+        reply[18] = 0; // Net
+        reply[19] = (byte)Universe;
+
+        // Short name (18 bytes)
+        WriteString(reply, 26, SaveLoadSettings.LoadString(SaveLoadSettings.DeviceNetworkKey, "DMX Projector"));
+
+        // Long name (64 bytes)
+        WriteString(reply, 44, SaveLoadSettings.LoadString(SaveLoadSettings.DeviceNetworkKey, "DMX Projector"));
+
+        // Number of ports
+        reply[173] = 0;
+        reply[174] = 1;
+
+        _udpClient.Send(reply, reply.Length, target);
+    }
+
+    private void WriteString(byte[] buffer, int index, string text)
+    {
+        var bytes = System.Text.Encoding.ASCII.GetBytes(text);
+        Array.Copy(bytes, 0, buffer, index, Mathf.Min(bytes.Length, buffer.Length - index));
     }
 
     private static int ClampUniverse(int universe0Based)
