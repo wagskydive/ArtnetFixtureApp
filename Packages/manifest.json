@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.natewilliford.unitymobileversioncode": "https://github.com/natewilliford/unity-mobile-version-code.git",
     "com.unity.2d.sprite": "1.0.0",
     "com.unity.collab-proxy": "2.11.3",
     "com.unity.feature.development": "1.0.2",

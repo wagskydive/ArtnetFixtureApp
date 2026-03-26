@@ -1,5 +1,12 @@
 {
   "dependencies": {
+    "com.natewilliford.unitymobileversioncode": {
+      "version": "https://github.com/natewilliford/unity-mobile-version-code.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "bf3d09e265198b8a9f7b507fe1c9f09d6871c7f5"
+    },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
       "depth": 0,
