@@ -646,11 +646,14 @@ Current implementation allows purchases to succeed instantly in certain environm
 * Do not rely on UI to enforce restrictions — all checks must exist in core logic
 * This system must remain compatible with offline entitlement usage after a valid purchase
 
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Hardened `UnityIapPurchaseGateway` with runtime store-backend detection (`ActiveStoreBackend`, `ActiveStoreName`, `IsUsingRealStore`) and explicit initialization/product availability logging to surface FakeStore/offline scenarios.
+  - Purchase flow now blocks non-Google Play store transactions before `InitiatePurchase`, keeps initialization/product availability guards, and prevents entitlement unlock in `ProcessPurchase` unless the active store is Google Play.
+  - Added detailed price lookup diagnostics for uninitialized store, missing products, and missing metadata so panel pricing failures no longer fail silently.
 
 T18.3 - rework UI_DpadNavigationController.cs so it works correctly and add a checkbox to allow/disallow horizontal and/or vetical navigation and/or wrapping. Currently Horizontal navigation doesn't work and verticle wrapping is buggy and not reliable.
 - [x] Started
