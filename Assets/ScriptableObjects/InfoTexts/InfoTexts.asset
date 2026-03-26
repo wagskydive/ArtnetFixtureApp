@@ -241,3 +241,4 @@ MonoBehaviour:
     passwords.'
   infoPanel: Toggle the info panel on or off.
   infoPanelDefault: Default message shown in the info panel.
+  purchases: 'Open the in app purchases menu to unlock premium features '

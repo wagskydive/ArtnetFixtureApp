@@ -22,6 +22,7 @@ public class InfoTextsScriptableObject : ScriptableObject
     [TextArea] public string infoPanel;
 
     [TextArea] public string infoPanelDefault;
+    [TextArea] public string purchases;
 
     // Add more entries as needed
 }
