@@ -11,19 +11,34 @@ public class UnityIapPurchaseGateway : MonoBehaviour
     , IDetailedStoreListener
 #endif
 {
+    public enum StoreBackendType
+    {
+        Unknown,
+        GooglePlay,
+        Fake,
+        Other
+    }
+
     [SerializeField] private CapabilityDatabase capabilityDatabase;
     private bool _hasAttemptedInitialization;
+    private bool _initializationCompleted;
+    private StoreBackendType _storeBackend = StoreBackendType.Unknown;
+    private string _storeName = "Unknown";
 
 #if UNITY_PURCHASING
     private IStoreController _storeController;
 #endif
+
+    public StoreBackendType ActiveStoreBackend => _storeBackend;
+    public string ActiveStoreName => _storeName;
+    public bool IsUsingRealStore => _storeBackend == StoreBackendType.GooglePlay;
 
     public bool IsReady
     {
         get
         {
 #if UNITY_PURCHASING
-            return _storeController != null;
+            return _storeController != null && _initializationCompleted;
 #else
             return false;
 #endif
@@ -52,7 +67,12 @@ public class UnityIapPurchaseGateway : MonoBehaviour
             return;
         }
 
-        var builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
+        StandardPurchasingModule purchasingModule = StandardPurchasingModule.Instance();
+        _storeName = purchasingModule.appStore.ToString();
+        _storeBackend = ParseStoreBackend(_storeName);
+        Debug.Log($"Initializing Unity IAP. Store: {_storeName}", this);
+
+        var builder = ConfigurationBuilder.Instance(purchasingModule);
         var productIds = new HashSet<string>();
         IReadOnlyList<CapabilityDefinition> definitions = database.CapabilityDefinitions;
 
@@ -92,9 +112,15 @@ public class UnityIapPurchaseGateway : MonoBehaviour
         }
 
 #if UNITY_PURCHASING
-        if (_storeController == null || _storeController.products == null)
+        if (!_initializationCompleted || _storeController == null || _storeController.products == null)
         {
             Debug.LogWarning($"Purchase requested for '{productId}' before Unity IAP finished initialization.", this);
+            return false;
+        }
+
+        if (!IsUsingRealStore)
+        {
+            Debug.LogWarning("Purchase blocked: not connected to Google Play store.", this);
             return false;
         }
 
@@ -153,12 +179,20 @@ public class UnityIapPurchaseGateway : MonoBehaviour
 #if UNITY_PURCHASING
         if (_storeController == null || _storeController.products == null)
         {
+            Debug.LogWarning($"Price lookup failed for '{productId}': store not initialized.", this);
             return false;
         }
 
         Product product = _storeController.products.WithID(productId);
-        if (product == null || product.metadata == null || string.IsNullOrWhiteSpace(product.metadata.localizedPriceString))
+        if (product == null)
         {
+            Debug.LogWarning($"Price lookup failed for '{productId}': product not found.", this);
+            return false;
+        }
+
+        if (product.metadata == null || string.IsNullOrWhiteSpace(product.metadata.localizedPriceString))
+        {
+            Debug.LogWarning($"Price lookup failed for '{productId}': product metadata missing.", this);
             return false;
         }
 
@@ -209,20 +243,55 @@ public class UnityIapPurchaseGateway : MonoBehaviour
     public void OnInitialized(IStoreController controller, IExtensionProvider extensions)
     {
         _storeController = controller;
+        _initializationCompleted = true;
+
+        Debug.Log("IAP initialized", this);
+        Debug.Log($"Store: {_storeName}", this);
+
+        ProductCollection products = controller != null ? controller.products : null;
+        if (products?.all == null)
+        {
+            return;
+        }
+
+        Product[] allProducts = products.all;
+        for (int i = 0; i < allProducts.Length; i++)
+        {
+            Product product = allProducts[i];
+            string productId = product?.definition != null ? product.definition.id : "unknown";
+            bool availableToPurchase = product != null && product.availableToPurchase;
+            Debug.Log($"Product: {productId} | availableToPurchase: {availableToPurchase}", this);
+        }
     }
 
     public void OnInitializeFailed(InitializationFailureReason error)
     {
+        _initializationCompleted = false;
         Debug.LogError($"Unity IAP initialization failed: {error}", this);
     }
 
     public void OnInitializeFailed(InitializationFailureReason error, string message)
     {
+        _initializationCompleted = false;
         Debug.LogError($"Unity IAP initialization failed: {error} ({message})", this);
     }
 
     public PurchaseProcessingResult ProcessPurchase(PurchaseEventArgs purchaseEvent)
     {
+        if (!IsUsingRealStore)
+        {
+            if (_storeBackend == StoreBackendType.Fake)
+            {
+                Debug.LogWarning("Purchase ignored: FakeStore detected, unlock blocked", this);
+            }
+            else
+            {
+                Debug.LogWarning($"Purchase ignored: non-GooglePlay store '{_storeName}' detected, unlock blocked", this);
+            }
+
+            return PurchaseProcessingResult.Complete;
+        }
+
         if (purchaseEvent?.purchasedProduct?.definition != null)
         {
             CapabilityService.Instance?.UnlockProduct(purchaseEvent.purchasedProduct.definition.id);
@@ -253,6 +322,27 @@ public class UnityIapPurchaseGateway : MonoBehaviour
         }
 
         builder.AddProduct(productId, ProductType.NonConsumable);
+    }
+
+    private static StoreBackendType ParseStoreBackend(string storeName)
+    {
+        if (string.IsNullOrWhiteSpace(storeName))
+        {
+            return StoreBackendType.Unknown;
+        }
+
+        string normalized = storeName.Trim().ToLowerInvariant();
+        if (normalized.Contains("google"))
+        {
+            return StoreBackendType.GooglePlay;
+        }
+
+        if (normalized.Contains("fake"))
+        {
+            return StoreBackendType.Fake;
+        }
+
+        return StoreBackendType.Other;
     }
 #endif
 }
