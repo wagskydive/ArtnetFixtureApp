@@ -258,6 +258,7 @@ _Progress note: fixture name + resolved local IPv4 are now surfaced in WebUI (`/
 _Progress note: WebUI now includes responsive mobile styling for phone-sized screens with larger controls and improved layout density._
 _Progress note: WebUI password flow is now active with persisted password storage and `/api/login` validation endpoint for lock/unlock behavior._
 _Progress note: WebUI password protection now uses SHA-256 hashed storage with a Unity UI-managed enable toggle, and browser clients cache successful auth state while still re-locking when protection is enabled/configured._
+_Progress note: IAP validation payloads now always include a stable per-device identifier (with persisted fallback when system ID is unavailable), and backend revocation mapping now treats only canceled/refunded Google Play states as revoked for cleaner multi-device entitlement sync._
 _Progress note: in-app purchase capability scaffolding is now in place with ScriptableObject capability definitions, runtime capability lookup database, in-memory entitlement store abstraction, and a core capability resolution service._
 _Progress note: IAP runtime integration now gates universe selection through capabilities, includes locked-feature UI trigger plumbing, adds persisted entitlement storage, and provides development-only debug unlock/reset tools._
 _Progress note: IAP purchase rows now show product pricing by reading live Unity IAP localized metadata when available, with an Editor fallback price sourced from each `CapabilityDefinition` asset._

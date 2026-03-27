@@ -16,7 +16,10 @@ public class PurchaseValidationManager : MonoBehaviour
 
     private const string LastValidationUnixKey = "iap_last_validation_unix";
     private const string PendingRevocationsKey = "iap_pending_revocations";
+    private const string FallbackDeviceIdKey = "iap_device_id";
+    private static readonly string[] InvalidDeviceIds = { "unknown", "n/a", "null", "none", "unsupportedIdentifier" };
     private bool _validationInProgress;
+    private string _resolvedDeviceId;
 
     private void Start()
     {
@@ -248,14 +251,16 @@ public class PurchaseValidationManager : MonoBehaviour
 
     private IEnumerator ValidateWithServer(string productId, string purchaseToken, Action<ValidationResult> callback)
     {
+        string deviceId = GetOrCreateDeviceId();
         var request = new ValidationRequest
         {
             productId = productId,
             purchaseToken = purchaseToken,
-            deviceId = SystemInfo.deviceUniqueIdentifier
+            deviceId = deviceId
         };
 
         string requestJson = JsonUtility.ToJson(request);
+        Debug.Log($"Purchase validation request payload prepared for product '{productId}' with deviceId '{deviceId}'.");
         using (var webRequest = new UnityWebRequest(validationEndpoint, UnityWebRequest.kHttpVerbPOST))
         {
             byte[] payload = System.Text.Encoding.UTF8.GetBytes(requestJson);
@@ -277,6 +282,24 @@ public class PurchaseValidationManager : MonoBehaviour
             {
                 callback(ValidationResult.Invalid);
                 yield break;
+            }
+
+            if (!string.IsNullOrWhiteSpace(response.productId) &&
+                !string.Equals(response.productId, productId, StringComparison.Ordinal))
+            {
+                Debug.LogWarning(
+                    $"Purchase validation response product mismatch. Requested '{productId}' but received '{response.productId}'.",
+                    this);
+                callback(ValidationResult.Invalid);
+                yield break;
+            }
+
+            if (response.deviceIds != null && response.deviceIds.Count > 0 && !response.deviceIds.Contains(deviceId))
+            {
+                Debug.LogWarning(
+                    $"Purchase validation response for '{productId}' did not include current deviceId '{deviceId}'. " +
+                    "This may indicate stale worker cache data.",
+                    this);
             }
 
             if (response.revoked)
@@ -315,6 +338,7 @@ public class PurchaseValidationManager : MonoBehaviour
         public string productId;
         public bool valid;
         public bool revoked;
+        public List<string> deviceIds;
     }
 
     [Serializable]
@@ -413,5 +437,52 @@ public class PurchaseValidationManager : MonoBehaviour
         }
 
         Debug.LogWarning(message, this);
+    }
+
+    private string GetOrCreateDeviceId()
+    {
+        if (!string.IsNullOrWhiteSpace(_resolvedDeviceId))
+        {
+            return _resolvedDeviceId;
+        }
+
+        string systemDeviceId = NormalizeSystemDeviceId(SystemInfo.deviceUniqueIdentifier);
+        if (!string.IsNullOrWhiteSpace(systemDeviceId))
+        {
+            _resolvedDeviceId = systemDeviceId;
+            return _resolvedDeviceId;
+        }
+
+        string persistedFallbackId = SaveLoadSettings.LoadString(FallbackDeviceIdKey, string.Empty);
+        if (!string.IsNullOrWhiteSpace(persistedFallbackId))
+        {
+            _resolvedDeviceId = persistedFallbackId.Trim();
+            return _resolvedDeviceId;
+        }
+
+        _resolvedDeviceId = Guid.NewGuid().ToString("N");
+        SaveLoadSettings.SaveString(FallbackDeviceIdKey, _resolvedDeviceId);
+        SaveLoadSettings.Save();
+        Debug.LogWarning("System device identifier unavailable; generated persistent fallback IAP device ID.", this);
+        return _resolvedDeviceId;
+    }
+
+    private static string NormalizeSystemDeviceId(string rawDeviceId)
+    {
+        if (string.IsNullOrWhiteSpace(rawDeviceId))
+        {
+            return string.Empty;
+        }
+
+        string trimmed = rawDeviceId.Trim();
+        for (int i = 0; i < InvalidDeviceIds.Length; i++)
+        {
+            if (string.Equals(trimmed, InvalidDeviceIds[i], StringComparison.OrdinalIgnoreCase))
+            {
+                return string.Empty;
+            }
+        }
+
+        return trimmed;
     }
 }

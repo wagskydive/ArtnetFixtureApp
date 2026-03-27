@@ -1293,11 +1293,14 @@ Refund a purchase in Google Play → validation should return revoked = true.
 
 This approach ensures multi-device access, refund/revocation detection, and graceful handling of offline devices, all integrated with your current CapabilityService and EntitlementStore.
 
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - `PurchaseValidationManager` now resolves and reuses a stable device identifier per install, falling back to a persisted generated ID when `SystemInfo.deviceUniqueIdentifier` is unavailable/invalid so every validation payload includes a reliable `deviceId`.
+  - Validation POST payload logging and response guards were added (`productId` mismatch check + `deviceIds` visibility warning) to make cross-device entitlement syncing issues observable during QA.
+  - Confirmed and updated `Backend/worker.js` response semantics so `revoked` is only true for Google Play canceled/refunded purchases (`purchaseState === 1`) while still returning `deviceIds` for multi-device tracking.
 
 T18.3 - rework UI_DpadNavigationController.cs so it works correctly and add a checkbox to allow/disallow horizontal and/or vetical navigation and/or wrapping. Currently Horizontal navigation doesn't work and verticle wrapping is buggy and not reliable.
 - [x] Started

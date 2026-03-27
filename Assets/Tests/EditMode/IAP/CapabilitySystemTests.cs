@@ -303,6 +303,30 @@ public class CapabilitySystemTests
         GameObject.DestroyImmediate(validationGo);
     }
 
+    [TestCase(null)]
+    [TestCase("")]
+    [TestCase("   ")]
+    [TestCase("unknown")]
+    [TestCase("UnsupportedIdentifier")]
+    public void PurchaseValidationManager_NormalizeSystemDeviceId_InvalidValues_ReturnEmpty(string input)
+    {
+        string normalized = (string)typeof(PurchaseValidationManager)
+            .GetMethod("NormalizeSystemDeviceId", BindingFlags.NonPublic | BindingFlags.Static)
+            .Invoke(null, new object[] { input });
+
+        Assert.That(normalized, Is.EqualTo(string.Empty));
+    }
+
+    [Test]
+    public void PurchaseValidationManager_NormalizeSystemDeviceId_ValidValue_ReturnTrimmed()
+    {
+        string normalized = (string)typeof(PurchaseValidationManager)
+            .GetMethod("NormalizeSystemDeviceId", BindingFlags.NonPublic | BindingFlags.Static)
+            .Invoke(null, new object[] { "  device-123  " });
+
+        Assert.That(normalized, Is.EqualTo("device-123"));
+    }
+
     private static CapabilityDefinition CreateCapabilityDefinition(string id, CapabilityValueType valueType, string productId, bool unlockedBooleanValue, int unlockedNumericValue)
     {
         var definition = ScriptableObject.CreateInstance<CapabilityDefinition>();
