@@ -45,8 +45,8 @@ public class CapabilitySystemTests
         Assert.That(found, Is.True);
         Assert.That(resolved, Is.EqualTo(definition));
 
-        Object.DestroyImmediate(definition);
-        Object.DestroyImmediate(databaseGo);
+        GameObject.DestroyImmediate(definition);
+        GameObject.DestroyImmediate(databaseGo);
     }
 
     [Test]
@@ -63,7 +63,7 @@ public class CapabilitySystemTests
 
         Assert.That(capabilitySystem.ResolveNumeric("fixture.limit", 3), Is.EqualTo(8));
 
-        Object.DestroyImmediate(definition);
+        GameObject.DestroyImmediate(definition);
     }
 
     [Test]
@@ -80,7 +80,7 @@ public class CapabilitySystemTests
 
         Assert.That(capabilitySystem.ResolveBoolean("feature.advanced"), Is.True);
 
-        Object.DestroyImmediate(definition);
+        GameObject.DestroyImmediate(definition);
     }
 
     [Test]
@@ -146,8 +146,8 @@ public class CapabilitySystemTests
         Assert.That(capabilitySystem.ResolveNumeric("capability.universe.max", 1), Is.EqualTo(16));
         Assert.That(capabilitySystem.ResolveBoolean("capability.output.boost", false), Is.True);
 
-        Object.DestroyImmediate(universeLimit);
-        Object.DestroyImmediate(outputBoost);
+        GameObject.DestroyImmediate(universeLimit);
+        GameObject.DestroyImmediate(outputBoost);
     }
 
     [Test]
@@ -165,7 +165,7 @@ public class CapabilitySystemTests
 
         Assert.That(capabilitySystem.ResolveNumeric("capability.universe.max", 1), Is.EqualTo(16));
 
-        Object.DestroyImmediate(universeLimit);
+        GameObject.DestroyImmediate(universeLimit);
     }
 
     [Test]
@@ -184,7 +184,7 @@ public class CapabilitySystemTests
         Assert.That(service.Entitlements.IsUnlocked("product.new"), Is.True);
         Assert.That(service.Entitlements.IsUnlocked("product.revoke"), Is.False);
 
-        Object.DestroyImmediate(serviceGo);
+        GameObject.DestroyImmediate(serviceGo);
     }
 
     [Test]
@@ -223,8 +223,8 @@ public class CapabilitySystemTests
         Assert.That(service.Entitlements.IsUnlocked("product.revoke"), Is.False);
         Assert.That(PlayerPrefs.GetString("iap_pending_revocations", string.Empty), Is.EqualTo(string.Empty));
 
-        Object.DestroyImmediate(validationGo);
-        Object.DestroyImmediate(serviceGo);
+        GameObject.DestroyImmediate(validationGo);
+        GameObject.DestroyImmediate(serviceGo);
     }
 
     [Test]
