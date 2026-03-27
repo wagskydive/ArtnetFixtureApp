@@ -1238,6 +1238,67 @@ Also add Debug.log statements for each step including a "next validation time" l
   - Updated `ShouldValidate` to correctly validate on first run (no saved timestamp), recover from invalid saved values, and emit step-by-step debug logs including the computed next validation UTC time.
   - Updated timestamp saves to log and persist accurate UTC Unix seconds, plus added EditMode regression coverage for no-timestamp, within-interval, and stale-timestamp validation decisions.
 
+T19.28 Ensure Unity app sends purchase tokens and a unique device ID to the Cloudflare Worker, allowing multi-device entitlement for non-consumable IAPs while detecting refunds/revocations.
+
+check the worker.js file in the Backend folder to verify that the implementation will work
+
+Steps for Unity Implementation
+Generate a unique device identifier
+Use SystemInfo.deviceUniqueIdentifier for each device.
+This deviceId will be sent to the Cloudflare Worker alongside the purchase token.
+Capture purchase tokens
+After each successful purchase via UnityIAP or similar:
+Extract the purchase token from the receipt (e.g., via GooglePlayReceiptParser.ExtractPurchaseToken(receiptJson)).
+
+Send purchase validation request to the worker
+
+Endpoint: Your deployed Cloudflare Worker URL
+POST body JSON:
+{
+    "productId": "<iap_product_id>",
+    "purchaseToken": "<iap_purchase_token>",
+    "deviceId": "<unique_device_id>"
+}
+
+Handle validation response
+
+Expected response JSON:
+{
+    "productId": "<iap_product_id>",
+    "valid": true/false,
+    "revoked": true/false,
+    "deviceIds": ["deviceId1", "deviceId2", ...]
+}
+Logic:
+If valid = true → unlock entitlement for this device.
+If revoked = true → mark entitlement as revoked and notify the user.
+Optionally, store the validated productId in the Entitlement Store to persist access.
+Update Entitlement Store
+
+For each valid purchase returned from the worker:
+
+CapabilityService.Instance.UnlockProduct(productId);
+
+For revoked purchases:
+
+CapabilityService.Instance.RevokeProduct(productId);
+Graceful fallback
+If the worker cannot be reached (offline), rely on local cached entitlements.
+On next startup, attempt validation again.
+Testing
+Test with multiple devices using the same Google account:
+Install app on device A, make a purchase, validate → entitlement unlocked.
+Install app on device B with same account, validate using the same token → entitlement should unlock.
+Refund a purchase in Google Play → validation should return revoked = true.
+
+This approach ensures multi-device access, refund/revocation detection, and graceful handling of offline devices, all integrated with your current CapabilityService and EntitlementStore.
+
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 T18.3 - rework UI_DpadNavigationController.cs so it works correctly and add a checkbox to allow/disallow horizontal and/or vetical navigation and/or wrapping. Currently Horizontal navigation doesn't work and verticle wrapping is buggy and not reliable.
 - [x] Started
 - [x] Behavior Written
