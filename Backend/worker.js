@@ -50,12 +50,14 @@ export default {
             }
 
             const data = await googleRes.json();
-            const isValid = data.purchaseState === 0; // 0 = purchased, 1 = canceled/refunded
+            const purchaseState = typeof data.purchaseState === "number" ? data.purchaseState : -1;
+            const isValid = purchaseState === 0; // 0 = purchased
+            const isRevoked = purchaseState === 1; // 1 = canceled/refunded
 
             const response = {
                 productId,
                 valid: isValid,
-                revoked: !isValid,
+                revoked: isRevoked,
                 deviceIds: [deviceId],
             };
 
