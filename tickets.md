@@ -1197,11 +1197,15 @@ You now have:
 ---
 
 
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Extended `PurchaseValidationManager` validation request/response payloads with `deviceId` and `revoked` handling.
+  - Added deferred-revocation persistence (`iap_pending_revocations`) so revoked products are queued, applied on next startup, then cleared.
+  - Added startup revocation application flow (`ApplyPendingRevocations`) and a user-facing popup/log message for revoked purchases.
+  - Added EditMode coverage for pending-revocation application and deferred-sync behavior.
 
 
 

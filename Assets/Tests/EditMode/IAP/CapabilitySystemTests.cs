@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using NUnit.Framework;
@@ -201,6 +202,46 @@ public class CapabilitySystemTests
     {
         string token = GooglePlayReceiptParser.ExtractPurchaseToken("not-json");
         Assert.That(token, Is.Null);
+    }
+
+    [Test]
+    public void PurchaseValidationManager_ApplyPendingRevocations_RevokesAndClearsQueue()
+    {
+        PlayerPrefs.SetString("iap_pending_revocations", "{\"productIds\":[\"product.revoke\"]}");
+        PlayerPrefs.Save();
+
+        var serviceGo = new GameObject("capability-service");
+        var service = serviceGo.AddComponent<CapabilityService>();
+        InvokeAwake(service);
+        service.UnlockProduct("product.revoke");
+        Assert.That(service.Entitlements.IsUnlocked("product.revoke"), Is.True);
+
+        var validationGo = new GameObject("purchase-validation");
+        var validationManager = validationGo.AddComponent<PurchaseValidationManager>();
+        validationManager.ApplyPendingRevocations();
+
+        Assert.That(service.Entitlements.IsUnlocked("product.revoke"), Is.False);
+        Assert.That(PlayerPrefs.GetString("iap_pending_revocations", string.Empty), Is.EqualTo(string.Empty));
+
+        Object.DestroyImmediate(validationGo);
+        Object.DestroyImmediate(serviceGo);
+    }
+
+    [Test]
+    public void PurchaseValidationManager_HandleValidationResult_RevokedPending_KeepsProductForCurrentSync()
+    {
+        MethodInfo method = typeof(PurchaseValidationManager).GetMethod(
+            "HandleValidationResult",
+            BindingFlags.NonPublic | BindingFlags.Static);
+        Type resultType = typeof(PurchaseValidationManager).GetNestedType(
+            "ValidationResult",
+            BindingFlags.NonPublic);
+        object revokedPending = Enum.Parse(resultType, "RevokedPending");
+
+        var validProducts = new HashSet<string>(StringComparer.Ordinal);
+        method.Invoke(null, new object[] { "product.revoke", revokedPending, validProducts });
+
+        Assert.That(validProducts.Contains("product.revoke"), Is.True);
     }
 
     private static CapabilityDefinition CreateCapabilityDefinition(string id, CapabilityValueType valueType, string productId, bool unlockedBooleanValue, int unlockedNumericValue)
