@@ -148,6 +148,7 @@ _Progress note: external WebUI clients now poll `/api/settings` once per second 
 _Progress note: `UI_DpadNavigationController` now uses Input System actions only, supports position-based selectable discovery when no explicit list is configured, and suppresses duplicate same-frame submit invocations._
 _Progress note: popup panels now enforce modal D-pad behavior by temporarily disabling non-popup `UI_DpadNavigationController` instances while open, preventing background panel navigation/submit/cancel handling._
 _Progress note: IAP entitlement flow now supports online backend validation with offline cache fallback, including automatic refunded-product revocation via bidirectional entitlement sync._
+_Progress note: revoked purchase responses are now handled gracefully by queueing pending revocations for next startup, then applying removals with a user-facing message instead of immediate mid-session access loss._
 
 ### Goal:
 Enable persistent configuration and easy deployment.
