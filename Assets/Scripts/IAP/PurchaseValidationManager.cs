@@ -14,7 +14,7 @@ public class PurchaseValidationManager : MonoBehaviour
     [SerializeField] private Popup revocationPopup;
     [SerializeField] private Text revocationMessageText;
 
-    private const string LastValidationTicksKey = "iap_last_validation_ticks";
+    private const string LastValidationUnixKey = "iap_last_validation_unix";
     private const string PendingRevocationsKey = "iap_pending_revocations";
     private bool _validationInProgress;
 
@@ -82,26 +82,37 @@ public class PurchaseValidationManager : MonoBehaviour
 
     private bool ShouldValidate()
     {
-        long lastTicks = SaveLoadSettings.LoadLong(LastValidationTicksKey, 0L);
-        Debug.Log("last ticks: "+lastTicks);
-        if (lastTicks <= 0)
+        long lastUnixSeconds = SaveLoadSettings.LoadLong(LastValidationUnixKey, 0L);
+        Debug.Log($"Purchase validation: loaded last validation unix seconds = {lastUnixSeconds}.");
+        if (lastUnixSeconds <= 0)
         {
+            Debug.Log("Purchase validation: no previous validation time found; validation required.");
             return true;
         }
 
         DateTime lastValidationUtc;
         try
         {
-            lastValidationUtc = new DateTime(lastTicks, DateTimeKind.Utc);
-            Debug.Log("Last Validation UTC: "+lastValidationUtc);
+            lastValidationUtc = DateTimeOffset.FromUnixTimeSeconds(lastUnixSeconds).UtcDateTime;
+            Debug.Log($"Purchase validation: last validation UTC = {lastValidationUtc:O}.");
         }
         catch (ArgumentOutOfRangeException)
         {
+            Debug.LogWarning(
+                $"Purchase validation: stored last validation unix timestamp '{lastUnixSeconds}' is invalid; validation required.",
+                this);
             return true;
         }
-        Debug.Log("UTC Now: "+DateTime.UtcNow);
 
-        return (DateTime.UtcNow - lastValidationUtc).TotalHours >= validationIntervalHours;
+        DateTime utcNow = DateTime.UtcNow;
+        double hoursSinceLastValidation = (utcNow - lastValidationUtc).TotalHours;
+        DateTime nextValidationUtc = lastValidationUtc.AddHours(validationIntervalHours);
+        bool shouldValidate = hoursSinceLastValidation >= validationIntervalHours;
+        Debug.Log(
+            $"Purchase validation: now={utcNow:O}, hoursSinceLastValidation={hoursSinceLastValidation:F4}, " +
+            $"intervalHours={validationIntervalHours:F4}, nextValidationTimeUtc={nextValidationUtc:O}, shouldValidate={shouldValidate}.");
+
+        return shouldValidate;
     }
 
     private IEnumerator ValidateAllPurchases()
@@ -217,7 +228,12 @@ public class PurchaseValidationManager : MonoBehaviour
 
     private void SaveValidationTimestamp()
     {
-        SaveLoadSettings.SaveLong(LastValidationTicksKey, DateTime.UtcNow.Ticks);
+        long unixSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        DateTime savedUtc = DateTimeOffset.FromUnixTimeSeconds(unixSeconds).UtcDateTime;
+        DateTime nextValidationUtc = savedUtc.AddHours(validationIntervalHours);
+        Debug.Log(
+            $"Purchase validation: saving last validation time unix={unixSeconds}, utc={savedUtc:O}, nextValidationTimeUtc={nextValidationUtc:O}.");
+        SaveLoadSettings.SaveLong(LastValidationUnixKey, unixSeconds);
         SaveLoadSettings.Save();
     }
 

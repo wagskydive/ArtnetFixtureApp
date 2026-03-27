@@ -244,6 +244,65 @@ public class CapabilitySystemTests
         Assert.That(validProducts.Contains("product.revoke"), Is.True);
     }
 
+    [Test]
+    public void PurchaseValidationManager_ShouldValidate_WhenNoPreviousTimestamp_ReturnsTrue()
+    {
+        const string validationKey = "iap_last_validation_unix";
+        PlayerPrefs.DeleteKey(validationKey);
+        PlayerPrefs.Save();
+
+        var validationGo = new GameObject("purchase-validation");
+        var validationManager = validationGo.AddComponent<PurchaseValidationManager>();
+
+        bool shouldValidate = (bool)typeof(PurchaseValidationManager)
+            .GetMethod("ShouldValidate", BindingFlags.NonPublic | BindingFlags.Instance)
+            .Invoke(validationManager, null);
+
+        Assert.That(shouldValidate, Is.True);
+
+        GameObject.DestroyImmediate(validationGo);
+    }
+
+    [Test]
+    public void PurchaseValidationManager_ShouldValidate_WhenWithinInterval_ReturnsFalse()
+    {
+        const string validationKey = "iap_last_validation_unix";
+        long nowUnix = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        SaveLoadSettings.SaveLong(validationKey, nowUnix);
+        SaveLoadSettings.Save();
+
+        var validationGo = new GameObject("purchase-validation");
+        var validationManager = validationGo.AddComponent<PurchaseValidationManager>();
+
+        bool shouldValidate = (bool)typeof(PurchaseValidationManager)
+            .GetMethod("ShouldValidate", BindingFlags.NonPublic | BindingFlags.Instance)
+            .Invoke(validationManager, null);
+
+        Assert.That(shouldValidate, Is.False);
+
+        GameObject.DestroyImmediate(validationGo);
+    }
+
+    [Test]
+    public void PurchaseValidationManager_ShouldValidate_WhenPastInterval_ReturnsTrue()
+    {
+        const string validationKey = "iap_last_validation_unix";
+        long staleUnix = DateTimeOffset.UtcNow.AddHours(-26).ToUnixTimeSeconds();
+        SaveLoadSettings.SaveLong(validationKey, staleUnix);
+        SaveLoadSettings.Save();
+
+        var validationGo = new GameObject("purchase-validation");
+        var validationManager = validationGo.AddComponent<PurchaseValidationManager>();
+
+        bool shouldValidate = (bool)typeof(PurchaseValidationManager)
+            .GetMethod("ShouldValidate", BindingFlags.NonPublic | BindingFlags.Instance)
+            .Invoke(validationManager, null);
+
+        Assert.That(shouldValidate, Is.True);
+
+        GameObject.DestroyImmediate(validationGo);
+    }
+
     private static CapabilityDefinition CreateCapabilityDefinition(string id, CapabilityValueType valueType, string productId, bool unlockedBooleanValue, int unlockedNumericValue)
     {
         var definition = ScriptableObject.CreateInstance<CapabilityDefinition>();
