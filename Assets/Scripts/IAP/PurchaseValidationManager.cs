@@ -9,7 +9,7 @@ public class PurchaseValidationManager : MonoBehaviour
 {
     [SerializeField] private UnityIapPurchaseGateway purchaseGateway;
     [SerializeField] private string validationEndpoint = string.Empty;
-    [SerializeField, Min(0.25f)] private float validationIntervalHours = 24f;
+    [SerializeField, Min(0.001f)] private float validationIntervalHours = 24f;
     [SerializeField] private bool validateOnStart = true;
     [SerializeField] private Popup revocationPopup;
     [SerializeField] private Text revocationMessageText;
@@ -30,13 +30,22 @@ public class PurchaseValidationManager : MonoBehaviour
 
     public void TryValidatePurchases()
     {
+        Debug.Log("Trying validation...");
         if (_validationInProgress)
         {
+            Debug.Log("Validation already in progress.. ");
             return;
         }
 
-        if (!IsOnline() || !ShouldValidate())
+        if (!IsOnline())
         {
+            Debug.Log("Trying validation but not online");
+            return;
+        }
+        
+        if (!ShouldValidate())
+        {
+            Debug.Log("Trying validation but should not validate");
             return;
         }
 
@@ -74,6 +83,7 @@ public class PurchaseValidationManager : MonoBehaviour
     private bool ShouldValidate()
     {
         long lastTicks = SaveLoadSettings.LoadLong(LastValidationTicksKey, 0L);
+        Debug.Log("last ticks: "+lastTicks);
         if (lastTicks <= 0)
         {
             return true;
@@ -83,17 +93,20 @@ public class PurchaseValidationManager : MonoBehaviour
         try
         {
             lastValidationUtc = new DateTime(lastTicks, DateTimeKind.Utc);
+            Debug.Log("Last Validation UTC: "+lastValidationUtc);
         }
         catch (ArgumentOutOfRangeException)
         {
             return true;
         }
+        Debug.Log("UTC Now: "+DateTime.UtcNow);
 
         return (DateTime.UtcNow - lastValidationUtc).TotalHours >= validationIntervalHours;
     }
 
     private IEnumerator ValidateAllPurchases()
     {
+        Debug.Log("Purchase validation coroutine started");
         _validationInProgress = true;
         var validProducts = new HashSet<string>(StringComparer.Ordinal);
 
@@ -101,8 +114,10 @@ public class PurchaseValidationManager : MonoBehaviour
         for (int i = 0; i < receipts.Count; i++)
         {
             UnityIapPurchaseGateway.OwnedProductReceipt receipt = receipts[i];
+            Debug.Log("Purchase validation for receipt: "+receipt.ProductId+" json: "+receipt.ReceiptJson);
             if (string.IsNullOrWhiteSpace(receipt.ProductId) || string.IsNullOrWhiteSpace(receipt.ReceiptJson))
             {
+                
                 continue;
             }
 
@@ -302,6 +317,7 @@ public class PurchaseValidationManager : MonoBehaviour
         {
             return;
         }
+        Debug.Log(revokedProducts);
 
         const string message = "Some purchases were refunded and have been removed.";
         if (revocationMessageText != null)
@@ -311,6 +327,7 @@ public class PurchaseValidationManager : MonoBehaviour
 
         if (revocationPopup != null)
         {
+            revocationPopup.gameObject.SetActive(true);
             revocationPopup.Open();
             return;
         }

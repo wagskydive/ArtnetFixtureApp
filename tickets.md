@@ -1207,7 +1207,33 @@ You now have:
   - Added startup revocation application flow (`ApplyPendingRevocations`) and a user-facing popup/log message for revoked purchases.
   - Added EditMode coverage for pending-revocation application and deferred-sync behavior.
 
+T19.27 - Find and fix a bug where the PurchaseValidationManager doesn't calculate the validation time correctly and never does the validation. Currently, the last validation time returns a time one second before the UtcNow and never starts the validation. The expected behavior is to store the correct last validation time. If no previous validation time is present, validation should be preformed. use this kind of implementation:
+```csharp
+private bool ShouldValidate()
+{
+    long lastUnixSeconds = SaveLoadSettings.LoadLong(LastValidationUnixKey, 0L);
+    if (lastUnixSeconds <= 0)
+        return true;
 
+    DateTime lastValidationUtc = DateTimeOffset.FromUnixTimeSeconds(lastUnixSeconds).UtcDateTime;
+    double hoursSinceLastValidation = (DateTime.UtcNow - lastValidationUtc).TotalHours;
+    return hoursSinceLastValidation >= validationIntervalHours;
+}
+
+private void SaveValidationTime()
+{
+    long unixSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+    SaveLoadSettings.SaveLong(LastValidationUnixKey, unixSeconds);
+}
+```
+
+Also add Debug.log statements for each step including a "next validation time" log
+
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
 
 T18.3 - rework UI_DpadNavigationController.cs so it works correctly and add a checkbox to allow/disallow horizontal and/or vetical navigation and/or wrapping. Currently Horizontal navigation doesn't work and verticle wrapping is buggy and not reliable.
 - [x] Started
