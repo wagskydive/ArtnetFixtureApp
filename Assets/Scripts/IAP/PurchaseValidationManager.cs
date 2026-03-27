@@ -20,6 +20,7 @@ public class PurchaseValidationManager : MonoBehaviour
 
     private void Start()
     {
+        HandleSuspiciousState();
         ApplyPendingRevocations();
 
         if (validateOnStart)
@@ -42,7 +43,7 @@ public class PurchaseValidationManager : MonoBehaviour
             Debug.Log("Trying validation but not online");
             return;
         }
-        
+
         if (!ShouldValidate())
         {
             Debug.Log("Trying validation but should not validate");
@@ -122,31 +123,94 @@ public class PurchaseValidationManager : MonoBehaviour
         var validProducts = new HashSet<string>(StringComparer.Ordinal);
 
         IReadOnlyList<UnityIapPurchaseGateway.OwnedProductReceipt> receipts = purchaseGateway.GetOwnedNonConsumableReceipts();
-        for (int i = 0; i < receipts.Count; i++)
+
+        Debug.Log($"Owned receipts count: {receipts.Count}");
+
+        var currentEntitlements = CapabilityService.Instance?.GetAllActiveProducts();
+
+        // 🔥 ADD FALLBACK HERE
+        if (receipts.Count == 0 && currentEntitlements.Count > 0)
         {
-            UnityIapPurchaseGateway.OwnedProductReceipt receipt = receipts[i];
-            Debug.Log("Purchase validation for receipt: "+receipt.ProductId+" json: "+receipt.ReceiptJson);
-            if (string.IsNullOrWhiteSpace(receipt.ProductId) || string.IsNullOrWhiteSpace(receipt.ReceiptJson))
+            HandleMissingReceiptsFallback();
+        }
+        else
+        {
+            for (int i = 0; i < receipts.Count; i++)
             {
-                
-                continue;
+                UnityIapPurchaseGateway.OwnedProductReceipt receipt = receipts[i];
+                Debug.Log("Purchase validation for receipt: " + receipt.ProductId + " json: " + receipt.ReceiptJson);
+                if (string.IsNullOrWhiteSpace(receipt.ProductId) || string.IsNullOrWhiteSpace(receipt.ReceiptJson))
+                {
+
+                    continue;
+                }
+
+                string purchaseToken = GooglePlayReceiptParser.ExtractPurchaseToken(receipt.ReceiptJson);
+                if (string.IsNullOrWhiteSpace(purchaseToken))
+                {
+                    Debug.LogWarning($"Purchase validation skipped for '{receipt.ProductId}': purchase token missing.", this);
+                    continue;
+                }
+
+                ValidationResult result = ValidationResult.Invalid;
+                yield return ValidateWithServer(receipt.ProductId, purchaseToken, value => result = value);
+                HandleValidationResult(receipt.ProductId, result, validProducts);
             }
 
-            string purchaseToken = GooglePlayReceiptParser.ExtractPurchaseToken(receipt.ReceiptJson);
-            if (string.IsNullOrWhiteSpace(purchaseToken))
-            {
-                Debug.LogWarning($"Purchase validation skipped for '{receipt.ProductId}': purchase token missing.", this);
-                continue;
-            }
+            CapabilityService.Instance?.SyncEntitlements(validProducts);
+            SaveValidationTimestamp();
+        }
+        _validationInProgress = false;
+    }
 
-            ValidationResult result = ValidationResult.Invalid;
-            yield return ValidateWithServer(receipt.ProductId, purchaseToken, value => result = value);
-            HandleValidationResult(receipt.ProductId, result, validProducts);
+    private void HandleMissingReceiptsFallback()
+    {
+        Debug.LogWarning("No receipts found during validation. Checking for stale entitlements...");
+
+        var currentEntitlements = CapabilityService.Instance?.GetAllActiveProducts();
+
+        if (currentEntitlements == null || currentEntitlements.Count == 0)
+        {
+            Debug.Log("No entitlements active → nothing to revoke.");
+            return;
         }
 
-        CapabilityService.Instance?.SyncEntitlements(validProducts);
-        SaveValidationTimestamp();
-        _validationInProgress = false;
+        Debug.LogWarning($"Found {currentEntitlements.Count} active entitlements but no receipts → marking suspicious.");
+
+        // Instead of immediate revoke → graceful approach
+        MarkSuspiciousState(currentEntitlements);
+    }
+
+    private const string SuspiciousStateKey = "iap_suspicious_state";
+
+    private void MarkSuspiciousState(List<string> products)
+    {
+        SavePendingRevocations(products);
+        SaveLoadSettings.SaveInt(SuspiciousStateKey, 1);
+        SaveLoadSettings.Save();
+    }
+
+    private void HandleSuspiciousState()
+    {
+        int suspicious = SaveLoadSettings.LoadInt(SuspiciousStateKey, 0);
+        if (suspicious == 0)
+        {
+            return;
+        }
+
+        Debug.LogWarning("Suspicious IAP state detected from previous session → revoking.");
+
+        var products = LoadPendingRevocations();
+        for (int i = 0; i < products.Count; i++)
+        {
+            CapabilityService.Instance?.RevokeProduct(products[i]);
+        }
+
+        ClearPendingRevocations();
+        SaveLoadSettings.SaveInt(SuspiciousStateKey, 0);
+        SaveLoadSettings.Save();
+
+        ShowRevocationPopup(products);
     }
 
     public void ApplyPendingRevocations()

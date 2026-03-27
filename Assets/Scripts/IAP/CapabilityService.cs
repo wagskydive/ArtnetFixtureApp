@@ -119,4 +119,14 @@ public class CapabilityService : MonoBehaviour
         _entitlementStore.ResetAll();
         EntitlementsChanged?.Invoke();
     }
+
+    public List<string> GetAllActiveProducts()
+    {
+        if (_entitlementStore == null)
+        {
+            return new List<string>();
+        }
+
+        return new List<string>(_entitlementStore.GetUnlockedProductIds());
+    }
 }
