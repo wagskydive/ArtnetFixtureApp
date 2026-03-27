@@ -12,55 +12,65 @@ export default {
         return json({ valid: false });
       }
 
-      const cacheKey = `purchase:${purchaseToken}`;
-      const cachedRaw = await env.PURCHASE_CACHE.get(cacheKey);
+      // 🔐 STEP 1 — Validate incoming purchase with Google
+      const validation = await validateWithGoogle(env, productId, purchaseToken);
 
-      if (cachedRaw) {
-        const cached = JSON.parse(cachedRaw);
+      // 🔐 STEP 2 — Load stored tokens for device
+      const storageKey = `device:${deviceId}`;
+      let stored = await env.PURCHASES.get(storageKey, "json");
+      if (!stored) stored = [];
 
-        if (cached.deviceId && cached.deviceId !== deviceId) {
-          return json({
-            productId,
-            valid: false,
-            revoked: true
-          });
+      // 🔐 STEP 3 — Prevent token reuse across devices
+      const globalTokenKey = `token:${purchaseToken}`;
+      const existingOwner = await env.PURCHASES.get(globalTokenKey);
+
+      if (existingOwner && existingOwner !== deviceId) {
+        return json({
+          productId,
+          valid: false,
+          revoked: true
+        });
+      }
+
+      // 🔐 STEP 4 — Store token if valid
+      if (validation.valid) {
+        const alreadyStored = stored.find(e => e.token === purchaseToken);
+
+        if (!alreadyStored) {
+          stored.push({ productId, token: purchaseToken });
+
+          await env.PURCHASES.put(storageKey, JSON.stringify(stored));
+          await env.PURCHASES.put(globalTokenKey, deviceId);
         }
-
-        return json(cached);
       }
 
-      const accessToken = await getAccessToken(env);
+      // 🔐 STEP 5 — Revalidate ALL stored tokens
+      let validProducts = [];
+      let revokedProducts = [];
 
-      const url = `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${env.PACKAGE_NAME}/purchases/products/${productId}/tokens/${purchaseToken}`;
+      for (const entry of stored) {
+        const result = await validateWithGoogle(env, entry.productId, entry.token);
 
-      const googleRes = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-
-      if (!googleRes.ok) {
-        return json({ productId, valid: false });
+        if (result.valid) {
+          validProducts.push(entry.productId);
+        } else {
+          revokedProducts.push(entry.productId);
+        }
       }
 
-      const data = await googleRes.json();
-
-      const isValid = data.purchaseState === 0;
-
-      const response = {
-        productId,
-        valid: isValid,
-        revoked: !isValid,
-        deviceId
-      };
-
-      await env.PURCHASE_CACHE.put(
-        cacheKey,
-        JSON.stringify(response),
-        { expirationTtl: 86400 }
+      // 🔐 STEP 6 — Clean revoked tokens
+      const cleaned = stored.filter(entry =>
+        validProducts.includes(entry.productId)
       );
 
-      return json(response);
+      await env.PURCHASES.put(storageKey, JSON.stringify(cleaned));
+
+      // 🔐 STEP 7 — Response
+      return json({
+        productId,
+        valid: validProducts.includes(productId),
+        revoked: revokedProducts.includes(productId)
+      });
 
     } catch (e) {
       return json({ valid: false });
@@ -68,6 +78,53 @@ export default {
   }
 };
 
+// =========================
+// 🔐 GOOGLE VALIDATION
+// =========================
+async function validateWithGoogle(env, productId, purchaseToken) {
+  const cacheKey = `cache:${purchaseToken}`;
+  const cachedRaw = await env.PURCHASE_CACHE.get(cacheKey);
+
+  if (cachedRaw) {
+    return JSON.parse(cachedRaw);
+  }
+
+  const accessToken = await getAccessToken(env);
+
+  const url = `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${env.PACKAGE_NAME}/purchases/products/${productId}/tokens/${purchaseToken}`;
+
+  const res = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  if (!res.ok) {
+    return { valid: false };
+  }
+
+  const data = await res.json();
+
+  const valid = data.purchaseState === 0;
+
+  const result = {
+    valid,
+    revoked: !valid
+  };
+
+  // cache for 6 hours
+  await env.PURCHASE_CACHE.put(
+    cacheKey,
+    JSON.stringify(result),
+    { expirationTtl: 21600 }
+  );
+
+  return result;
+}
+
+// =========================
+// 🔐 AUTH
+// =========================
 async function getAccessToken(env) {
   const now = Math.floor(Date.now() / 1000);
 
@@ -96,6 +153,9 @@ async function getAccessToken(env) {
   return data.access_token;
 }
 
+// =========================
+// 🔐 JWT SIGNING
+// =========================
 async function signJWT(header, payload, privateKeyPem) {
   const enc = (obj) =>
     btoa(JSON.stringify(obj))
