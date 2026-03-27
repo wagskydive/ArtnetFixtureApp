@@ -1038,8 +1038,170 @@ You now have:
   - Updated `UnityIapPurchaseGateway` to expose owned non-consumable receipts, run local ownership sync after IAP initialization, and trigger async validation after initialization and successful purchases.
   - Added EditMode coverage for entitlement revocation/sync behavior and receipt parsing.
 
-T19.26 - Next run: wire `PurchaseValidationManager.validationEndpoint` in `MainScene`, add QA telemetry assertions for validation failures, and execute Unity EditMode tests on licensed CI runner.
+T19.26 - Implement **graceful revocation system**:
 
+* If backend says `revoked: true`
+* Do NOT immediately remove access
+* Instead:
+
+  * mark entitlement as **pending revocation**
+  * remove it on next app startup
+  * show user popup
+
+---
+
+## 🧩 1. Extend validation response
+
+Update your Unity model:
+
+```csharp
+[Serializable]
+private class ValidationResponse
+{
+    public string productId;
+    public bool valid;
+    public bool revoked; // NEW
+}
+```
+
+---
+
+## 🧩 2. Track pending revocations
+
+Add storage:
+
+```csharp
+const string PendingRevocationsKey = "iap_pending_revocations";
+```
+
+Store as:
+
+* JSON list of productIds
+
+---
+
+## 🧩 3. Modify validation handling
+
+Inside:
+
+```csharp
+ValidateWithServer(...)
+```
+
+Change logic:
+
+```csharp
+if (response.revoked)
+{
+    AddPendingRevocation(productId);
+}
+else if (response.valid)
+{
+    validProducts.Add(productId);
+}
+```
+
+---
+
+## 🧩 4. Apply revocations on startup
+
+Create method:
+
+```csharp
+public void ApplyPendingRevocations()
+{
+    var pending = LoadPendingRevocations();
+
+    foreach (var productId in pending)
+    {
+        CapabilityService.Instance.RevokeProduct(productId);
+    }
+
+    ClearPendingRevocations();
+
+    if (pending.Count > 0)
+    {
+        ShowRevocationPopup(pending);
+    }
+}
+```
+
+---
+
+## 🧩 5. Call on app start
+
+In your bootstrap:
+
+```csharp
+validationManager.ApplyPendingRevocations();
+```
+
+---
+
+## 🧩 6. Popup requirement
+
+Implement:
+
+```csharp
+void ShowRevocationPopup(List<string> revokedProducts)
+```
+
+Message example:
+
+> “Some purchases were refunded and have been removed.”
+
+Keep it simple — no technical jargon.
+
+---
+
+## 🧩 7. Device ID integration
+
+When sending validation request:
+
+```csharp
+string deviceId = SystemInfo.deviceUniqueIdentifier;
+```
+
+Add to request:
+
+```csharp
+public string deviceId;
+```
+
+---
+
+## 🧩 8. DO NOT change
+
+Keep:
+
+* your offline unlock system
+* your encrypted PlayerPrefs
+* your existing purchase flow
+
+---
+
+# ✅ Final result
+
+You now have:
+
+* ✅ Cached validation (fast + scalable)
+* ✅ Refund detection (even without revoke)
+* ✅ Graceful UX (no sudden loss mid-session)
+* ✅ Offline support intact
+* ✅ Anti-sharing protection
+
+
+
+
+
+---
+
+
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
 
 
 

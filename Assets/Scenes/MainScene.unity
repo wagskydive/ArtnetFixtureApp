@@ -9631,6 +9631,7 @@ GameObject:
   - component: {fileID: 1306288788}
   - component: {fileID: 1306288787}
   - component: {fileID: 1306288793}
+  - component: {fileID: 1306288794}
   m_Layer: 0
   m_Name: IAPs
   m_TagString: Untagged
@@ -9723,6 +9724,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ArtnetFixture.Core::UnityIapPurchaseGateway
   capabilityDatabase: {fileID: 1306288791}
+  purchaseValidationManager: {fileID: 0}
+--- !u!114 &1306288794
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1306288786}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c63d78f76e3e4fb7a89abde8b5f55eb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArtnetFixture.Core::PurchaseValidationManager
+  purchaseGateway: {fileID: 1306288793}
+  validationEndpoint: 'dilarium.es/dmx-projector/api/validatePurchase '
+  validationIntervalHours: 24
+  validateOnStart: 1
 --- !u!1 &1306461971
 GameObject:
   m_ObjectHideFlags: 0
