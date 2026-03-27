@@ -1229,11 +1229,14 @@ private void SaveValidationTime()
 
 Also add Debug.log statements for each step including a "next validation time" log
 
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Fixed `PurchaseValidationManager` validation timestamp persistence/reads to use Unix seconds (`iap_last_validation_unix`) so validation interval checks compare compatible UTC times.
+  - Updated `ShouldValidate` to correctly validate on first run (no saved timestamp), recover from invalid saved values, and emit step-by-step debug logs including the computed next validation UTC time.
+  - Updated timestamp saves to log and persist accurate UTC Unix seconds, plus added EditMode regression coverage for no-timestamp, within-interval, and stale-timestamp validation decisions.
 
 T18.3 - rework UI_DpadNavigationController.cs so it works correctly and add a checkbox to allow/disallow horizontal and/or vetical navigation and/or wrapping. Currently Horizontal navigation doesn't work and verticle wrapping is buggy and not reliable.
 - [x] Started
