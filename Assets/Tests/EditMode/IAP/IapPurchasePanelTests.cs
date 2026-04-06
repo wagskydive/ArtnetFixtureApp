@@ -59,6 +59,51 @@ public class IapPurchasePanelTests
         Object.DestroyImmediate(databaseGo);
     }
 
+    [Test]
+    public void RebuildItems_ConsumableCapability_ShowsPurchaseCountAndKeepsButtonEnabled()
+    {
+        var databaseGo = new GameObject("capability-db");
+        var database = databaseGo.AddComponent<CapabilityDatabase>();
+        var consumable = CreateCapabilityDefinition("capability.coins.pack", "Coin Pack", "product.coins.pack");
+        SetPrivateField(consumable, "consumable", true);
+        SetPrivateField(database, "capabilityDefinitions", new List<CapabilityDefinition> { consumable });
+        database.RebuildLookup();
+
+        var serviceGo = new GameObject("capability-service");
+        var service = serviceGo.AddComponent<CapabilityService>();
+        SetPrivateField(service, "capabilityDatabase", database);
+        InvokeAwake(service);
+        service.RecordConsumablePurchase("product.coins.pack");
+        service.RecordConsumablePurchase("product.coins.pack");
+
+        var panelGo = new GameObject("iap-panel");
+        var panel = panelGo.AddComponent<IapPurchasePanel>();
+        var root = new GameObject("root");
+        var contentRoot = new GameObject("content").transform;
+        var prefab = CreateItemPrefab();
+        SetPrivateField(panel, "panelRoot", root);
+        SetPrivateField(panel, "contentRoot", contentRoot);
+        SetPrivateField(panel, "itemPrefab", prefab);
+        SetPrivateField(panel, "capabilityDatabase", database);
+
+        panel.Show();
+
+        var item = contentRoot.GetChild(0).GetComponent<IapPurchasePanelItem>();
+        var status = ((Text)GetPrivateField(item, "statusText")).text;
+        var button = (Button)GetPrivateField(item, "purchaseButton");
+
+        Assert.That(status, Is.EqualTo("Purchased: 2"));
+        Assert.That(button.interactable, Is.True);
+
+        Object.DestroyImmediate(panelGo);
+        Object.DestroyImmediate(contentRoot.gameObject);
+        Object.DestroyImmediate(root);
+        Object.DestroyImmediate(prefab.gameObject);
+        Object.DestroyImmediate(consumable);
+        Object.DestroyImmediate(serviceGo);
+        Object.DestroyImmediate(databaseGo);
+    }
+
     private static IapPurchasePanelItem CreateItemPrefab()
     {
         var itemGo = new GameObject("item-prefab");

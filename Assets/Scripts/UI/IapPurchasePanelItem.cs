@@ -32,20 +32,24 @@ public class IapPurchasePanelItem : MonoBehaviour
 
 
         bool unlocked = _panel != null && _panel.IsUnlocked(_definition);
+        bool isConsumable = _definition != null && _definition.IsConsumable;
         RefreshPriceText();
         if (statusText != null)
         {
-            statusText.text = unlocked ? "Unlocked" : "Locked";
+            if (isConsumable)
+            {
+                int purchaseCount = _panel != null ? _panel.GetConsumablePurchaseCount(_definition) : 0;
+                statusText.text = $"Purchased: {purchaseCount}";
+            }
+            else
+            {
+                statusText.text = unlocked ? "Unlocked" : "Locked";
+            }
         }
 
         if (purchaseButton != null)
         {
-            purchaseButton.interactable = !unlocked;
-        }
-        if(unlocked)
-        {
-            purchaseButton.interactable = false;
-            
+            purchaseButton.interactable = isConsumable || !unlocked;
         }
     }
 

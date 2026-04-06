@@ -37,6 +37,7 @@ public class UnityIapPurchaseGateway : MonoBehaviour
     private bool _initializationCompleted;
     private StoreBackendType _storeBackend = StoreBackendType.Unknown;
     private string _storeName = "Unknown";
+    private readonly Dictionary<string, bool> _consumableByProductId = new Dictionary<string, bool>();
 
 #if UNITY_PURCHASING
     private IStoreController _storeController;
@@ -86,7 +87,7 @@ public class UnityIapPurchaseGateway : MonoBehaviour
         Debug.Log($"Initializing Unity IAP. Store: {_storeName}", this);
 
         var builder = ConfigurationBuilder.Instance(purchasingModule);
-        var productIds = new HashSet<string>();
+        var productTypesById = new Dictionary<string, ProductType>();
         IReadOnlyList<CapabilityDefinition> definitions = database.CapabilityDefinitions;
 
         for (int i = 0; i < definitions.Count; i++)
@@ -97,18 +98,26 @@ public class UnityIapPurchaseGateway : MonoBehaviour
                 continue;
             }
 
-            AddProductId(definition.ProductId, productIds, builder);
+            ProductType productType = definition.IsConsumable ? ProductType.Consumable : ProductType.NonConsumable;
+            RegisterProductId(definition.ProductId, productType, productTypesById);
             IReadOnlyList<string> additionalIds = definition.AdditionalProductIds;
             for (int additionalIndex = 0; additionalIndex < additionalIds.Count; additionalIndex++)
             {
-                AddProductId(additionalIds[additionalIndex], productIds, builder);
+                RegisterProductId(additionalIds[additionalIndex], productType, productTypesById);
             }
         }
 
-        if (productIds.Count == 0)
+        if (productTypesById.Count == 0)
         {
             Debug.LogWarning("UnityIapPurchaseGateway has no product IDs configured in CapabilityDefinition assets.", this);
             return;
+        }
+
+        _consumableByProductId.Clear();
+        foreach (var pair in productTypesById)
+        {
+            builder.AddProduct(pair.Key, pair.Value);
+            _consumableByProductId[pair.Key] = pair.Value == ProductType.Consumable;
         }
 
         UnityPurchasing.Initialize(this, builder);
@@ -334,8 +343,16 @@ public class UnityIapPurchaseGateway : MonoBehaviour
 
         if (purchaseEvent?.purchasedProduct?.definition != null)
         {
-            CapabilityService.Instance?.UnlockProduct(purchaseEvent.purchasedProduct.definition.id);
-            TriggerPurchaseValidation();
+            string productId = purchaseEvent.purchasedProduct.definition.id;
+            if (IsConsumableProduct(productId))
+            {
+                CapabilityService.Instance?.RecordConsumablePurchase(productId);
+            }
+            else
+            {
+                CapabilityService.Instance?.UnlockProduct(productId);
+                TriggerPurchaseValidation();
+            }
         }
 
         return PurchaseProcessingResult.Complete;
@@ -355,14 +372,73 @@ public class UnityIapPurchaseGateway : MonoBehaviour
         Debug.LogError($"Unity IAP purchase failed for '{productId}': {reason} ({message})", this);
     }
 
-    private static void AddProductId(string productId, HashSet<string> seenProductIds, ConfigurationBuilder builder)
+    private bool IsConsumableProduct(string productId)
     {
-        if (string.IsNullOrWhiteSpace(productId) || !seenProductIds.Add(productId))
+        if (string.IsNullOrWhiteSpace(productId))
+        {
+            return false;
+        }
+
+        if (_consumableByProductId.TryGetValue(productId, out bool cachedValue))
+        {
+            return cachedValue;
+        }
+
+        CapabilityDatabase database = capabilityDatabase != null ? capabilityDatabase : CapabilityDatabase.Instance;
+        if (database == null)
+        {
+            return false;
+        }
+
+        IReadOnlyList<CapabilityDefinition> definitions = database.CapabilityDefinitions;
+        for (int i = 0; i < definitions.Count; i++)
+        {
+            CapabilityDefinition definition = definitions[i];
+            if (definition == null)
+            {
+                continue;
+            }
+
+            if (string.Equals(definition.ProductId, productId, System.StringComparison.Ordinal))
+            {
+                _consumableByProductId[productId] = definition.IsConsumable;
+                return definition.IsConsumable;
+            }
+
+            IReadOnlyList<string> additionalProductIds = definition.AdditionalProductIds;
+            for (int additionalIndex = 0; additionalIndex < additionalProductIds.Count; additionalIndex++)
+            {
+                if (string.Equals(additionalProductIds[additionalIndex], productId, System.StringComparison.Ordinal))
+                {
+                    _consumableByProductId[productId] = definition.IsConsumable;
+                    return definition.IsConsumable;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static void RegisterProductId(string productId, ProductType productType, Dictionary<string, ProductType> productTypesById)
+    {
+        if (string.IsNullOrWhiteSpace(productId))
         {
             return;
         }
 
-        builder.AddProduct(productId, ProductType.NonConsumable);
+        if (productTypesById.TryGetValue(productId, out ProductType existingType))
+        {
+            if (existingType != productType)
+            {
+                Debug.LogWarning(
+                    $"IAP product ID '{productId}' is referenced by both consumable and non-consumable capabilities. " +
+                    $"Keeping the first registered product type '{existingType}'.");
+            }
+
+            return;
+        }
+
+        productTypesById[productId] = productType;
     }
 
     private static StoreBackendType ParseStoreBackend(string storeName)
