@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.IO;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -17,6 +18,12 @@ public class WebUiSettingsTests
         PlayerPrefs.DeleteKey("dmx.fixture.count");
         PlayerPrefs.DeleteKey("dmx.pixel.rows");
         PlayerPrefs.DeleteKey("dmx.pixel.columns");
+        PlayerPrefs.DeleteKey(SaveLoadSettings.IapEntitlementsKey);
+        string customGoboFolder = Path.Combine(Application.persistentDataPath, "CustomGobos");
+        if (Directory.Exists(customGoboFolder))
+        {
+            Directory.Delete(customGoboFolder, true);
+        }
     }
 
     [Test]
@@ -132,11 +139,63 @@ public class WebUiSettingsTests
         Object.DestroyImmediate(serverGo);
     }
 
+    [Test]
+    public void LocalWebUiServer_ImagesApi_Returns16SlotsAndLockedStateWhenIapMissing()
+    {
+        var serverGo = new GameObject("web-server");
+        var server = serverGo.AddComponent<LocalWebUiServer>();
+
+        string response = server.HandleImagesApiRequestImmediately("GET");
+
+        Assert.That(response, Does.Contain("\"unlocked\":false"));
+        Assert.That(response, Does.Contain("\"slot\":1"));
+        Assert.That(response, Does.Contain("\"slot\":16"));
+
+        Object.DestroyImmediate(serverGo);
+    }
+
+    [Test]
+    public void CustomGoboStorage_TrySaveSlotPng_RejectsInvalidSlotAndSize()
+    {
+        byte[] tinyPng = CreatePng(128, 128);
+
+        bool invalidSlotSaved = CustomGoboStorage.TrySaveSlotPng(0, tinyPng, out string slotError);
+        bool wrongSizeSaved = CustomGoboStorage.TrySaveSlotPng(1, tinyPng, out string sizeError);
+
+        Assert.That(invalidSlotSaved, Is.False);
+        Assert.That(slotError, Does.Contain("Slot must be between"));
+        Assert.That(wrongSizeSaved, Is.False);
+        Assert.That(sizeError, Does.Contain("512x512"));
+    }
+
+    [Test]
+    public void CustomGoboStorage_TrySaveSlotPng_AcceptsValidRgba512Png()
+    {
+        byte[] validPng = CreatePng(512, 512);
+
+        bool saved = CustomGoboStorage.TrySaveSlotPng(2, validPng, out string error);
+        string path = CustomGoboStorage.GetSlotPath(2);
+
+        Assert.That(saved, Is.True);
+        Assert.That(error, Is.Null.Or.Empty);
+        Assert.That(File.Exists(path), Is.True);
+    }
+
 
 
     private static void SetPrivateField(object target, string fieldName, object value)
     {
         var field = target.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
         field.SetValue(target, value);
+    }
+
+    private static byte[] CreatePng(int width, int height)
+    {
+        var texture = new Texture2D(width, height, TextureFormat.RGBA32, false);
+        texture.SetPixel(0, 0, new Color(1f, 1f, 1f, 0.5f));
+        texture.Apply();
+        byte[] png = texture.EncodeToPNG();
+        Object.DestroyImmediate(texture);
+        return png;
     }
 }

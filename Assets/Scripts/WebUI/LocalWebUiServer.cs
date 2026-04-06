@@ -4,6 +4,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using UnityEngine;
 
@@ -28,6 +29,33 @@ public class LocalWebUiServer : MonoBehaviour
     {
         public bool authenticated;
     }
+
+    [Serializable]
+    private class GoboSlotState
+    {
+        public int slot;
+        public string fileName;
+        public bool hasImage;
+        public string previewUrl;
+    }
+
+    [Serializable]
+    private class GoboSlotStateList
+    {
+        public GoboSlotState[] slots;
+        public bool unlocked;
+    }
+
+    [Serializable]
+    private class GoboUploadResponse
+    {
+        public bool success;
+        public string message;
+        public int slot;
+    }
+
+    private const string CustomGoboProductId = "custom.gobos.upgrade";
+    private const string CustomGoboCapabilityId = "capability.custom.gobos";
 
     [SerializeField] private TextAsset webUiHtml;
     [SerializeField] private WebUiSettingsBridge settingsBridge;
@@ -190,6 +218,25 @@ public class LocalWebUiServer : MonoBehaviour
             return;
         }
 
+        if (path == "/images")
+        {
+            string json = HandleImagesApiRequest(context.Request.HttpMethod);
+            WriteJson(context.Response, json);
+            return;
+        }
+
+        if (path.StartsWith("/CustomGobos/", StringComparison.OrdinalIgnoreCase))
+        {
+            WriteCustomGoboPreview(context.Request, context.Response);
+            return;
+        }
+
+        if (path == "/upload")
+        {
+            HandleUploadRequest(context.Request, context.Response);
+            return;
+        }
+
         context.Response.StatusCode = 404;
         WriteText(context.Response, "Not found", "text/plain");
     }
@@ -247,6 +294,111 @@ public class LocalWebUiServer : MonoBehaviour
         return ExecuteLoginApiActionImmediately(httpMethod, requestBody);
     }
 
+    internal string HandleImagesApiRequest(string httpMethod)
+    {
+        return InvokeOnMainThread(() => ExecuteImagesApiActionImmediately(httpMethod));
+    }
+
+    public string HandleImagesApiRequestImmediately(string httpMethod)
+    {
+        return ExecuteImagesApiActionImmediately(httpMethod);
+    }
+
+    private string ExecuteImagesApiActionImmediately(string httpMethod)
+    {
+        if (httpMethod != "GET")
+        {
+            return JsonUtility.ToJson(new GoboSlotStateList { slots = Array.Empty<GoboSlotState>(), unlocked = false });
+        }
+
+        bool unlocked = IsCustomGoboUpgradeUnlocked();
+        var slots = new GoboSlotState[CustomGoboStorage.MaxSlots];
+        for (int slot = 1; slot <= CustomGoboStorage.MaxSlots; slot++)
+        {
+            string fileName = CustomGoboStorage.GetSlotFileName(slot);
+            bool hasImage = File.Exists(CustomGoboStorage.GetSlotPath(slot));
+            slots[slot - 1] = new GoboSlotState
+            {
+                slot = slot,
+                fileName = fileName,
+                hasImage = hasImage,
+                previewUrl = hasImage ? $"/CustomGobos/{fileName}?t={DateTime.UtcNow.Ticks}" : string.Empty
+            };
+        }
+
+        return JsonUtility.ToJson(new GoboSlotStateList
+        {
+            slots = slots,
+            unlocked = unlocked
+        });
+    }
+
+    private void HandleUploadRequest(HttpListenerRequest request, HttpListenerResponse response)
+    {
+        if (!string.Equals(request.HttpMethod, "POST", StringComparison.OrdinalIgnoreCase))
+        {
+            response.StatusCode = 405;
+            WriteJson(response, JsonUtility.ToJson(new GoboUploadResponse
+            {
+                success = false,
+                message = "POST is required.",
+                slot = 0
+            }));
+            return;
+        }
+
+        int slot = ParseSlot(request.QueryString["slot"]);
+        byte[] payload = ReadUploadPayload(request);
+
+        string result = InvokeOnMainThread(() =>
+        {
+            if (!IsCustomGoboUpgradeUnlocked())
+            {
+                return JsonUtility.ToJson(new GoboUploadResponse
+                {
+                    success = false,
+                    message = "Custom gobo upgrade not unlocked.",
+                    slot = slot
+                });
+            }
+
+            bool saved = CustomGoboStorage.TrySaveSlotPng(slot, payload, out string error);
+            return JsonUtility.ToJson(new GoboUploadResponse
+            {
+                success = saved,
+                message = saved ? "Upload successful." : error,
+                slot = slot
+            });
+        });
+
+        GoboUploadResponse parsed = JsonUtility.FromJson<GoboUploadResponse>(result);
+        response.StatusCode = parsed != null && parsed.success ? 200 : 400;
+        WriteJson(response, result);
+    }
+
+    private void WriteCustomGoboPreview(HttpListenerRequest request, HttpListenerResponse response)
+    {
+        string path = request.Url != null ? request.Url.AbsolutePath : string.Empty;
+        string fileName = path.Replace("/CustomGobos/", string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(fileName) || !Regex.IsMatch(fileName, "^slot([1-9]|1[0-6])\\.png$", RegexOptions.IgnoreCase))
+        {
+            response.StatusCode = 404;
+            WriteText(response, "Not found", "text/plain");
+            return;
+        }
+
+        string fullPath = Path.Combine(CustomGoboStorage.GetFolderPath(), fileName.ToLowerInvariant());
+        if (!File.Exists(fullPath))
+        {
+            response.StatusCode = 404;
+            WriteText(response, "Not found", "text/plain");
+            return;
+        }
+
+        byte[] data = File.ReadAllBytes(fullPath);
+        WritePayload(response, data, "image/png");
+    }
+
     private string ExecuteLoginApiActionImmediately(string httpMethod, string requestBody)
     {
         if (httpMethod != "POST")
@@ -264,6 +416,33 @@ public class LocalWebUiServer : MonoBehaviour
             || WebUiPasswordProtection.VerifyPassword(request != null ? request.password : string.Empty);
 
         return JsonUtility.ToJson(new WebUiAuthResponse { authenticated = authenticated });
+    }
+
+    private bool IsCustomGoboUpgradeUnlocked()
+    {
+        if (CapabilityService.Instance == null)
+        {
+            return false;
+        }
+
+        bool unlockedByCapability = CapabilityService.Instance.ResolveBoolean(CustomGoboCapabilityId, false);
+        if (unlockedByCapability)
+        {
+            return true;
+        }
+
+        return CapabilityService.Instance.Entitlements != null
+               && CapabilityService.Instance.Entitlements.IsUnlocked(CustomGoboProductId);
+    }
+
+    private static int ParseSlot(string rawSlot)
+    {
+        if (!int.TryParse(rawSlot, out int slot))
+        {
+            return -1;
+        }
+
+        return slot;
     }
 
     private string InvokeOnMainThread(Func<string> action)
@@ -360,6 +539,101 @@ public class LocalWebUiServer : MonoBehaviour
         {
             return reader.ReadToEnd();
         }
+    }
+
+    private static byte[] ReadUploadPayload(HttpListenerRequest request)
+    {
+        if (request == null || request.InputStream == null)
+        {
+            return Array.Empty<byte>();
+        }
+
+        string contentType = request.ContentType ?? string.Empty;
+        if (!contentType.StartsWith("multipart/form-data", StringComparison.OrdinalIgnoreCase))
+        {
+            using (var memory = new MemoryStream())
+            {
+                request.InputStream.CopyTo(memory);
+                return memory.ToArray();
+            }
+        }
+
+        string boundaryToken = "boundary=";
+        int boundaryIndex = contentType.IndexOf(boundaryToken, StringComparison.OrdinalIgnoreCase);
+        if (boundaryIndex < 0)
+        {
+            return Array.Empty<byte>();
+        }
+
+        string boundary = contentType.Substring(boundaryIndex + boundaryToken.Length).Trim().Trim('"');
+        using (var memory = new MemoryStream())
+        {
+            request.InputStream.CopyTo(memory);
+            return ExtractMultipartFile(memory.ToArray(), boundary);
+        }
+    }
+
+    private static byte[] ExtractMultipartFile(byte[] payload, string boundary)
+    {
+        if (payload == null || payload.Length == 0 || string.IsNullOrWhiteSpace(boundary))
+        {
+            return Array.Empty<byte>();
+        }
+
+        byte[] boundaryBytes = Encoding.UTF8.GetBytes("--" + boundary);
+        int firstBoundaryIndex = IndexOf(payload, boundaryBytes, 0);
+        if (firstBoundaryIndex < 0)
+        {
+            return Array.Empty<byte>();
+        }
+
+        byte[] headerDelimiter = Encoding.UTF8.GetBytes("\r\n\r\n");
+        int headerEnd = IndexOf(payload, headerDelimiter, firstBoundaryIndex);
+        if (headerEnd < 0)
+        {
+            return Array.Empty<byte>();
+        }
+
+        int dataStart = headerEnd + headerDelimiter.Length;
+        byte[] nextBoundaryPattern = Encoding.UTF8.GetBytes("\r\n--" + boundary);
+        int dataEnd = IndexOf(payload, nextBoundaryPattern, dataStart);
+        if (dataEnd < 0 || dataEnd <= dataStart)
+        {
+            return Array.Empty<byte>();
+        }
+
+        int length = dataEnd - dataStart;
+        var fileBytes = new byte[length];
+        Buffer.BlockCopy(payload, dataStart, fileBytes, 0, length);
+        return fileBytes;
+    }
+
+    private static int IndexOf(byte[] haystack, byte[] needle, int startIndex)
+    {
+        if (haystack == null || needle == null || needle.Length == 0 || startIndex < 0)
+        {
+            return -1;
+        }
+
+        for (int i = startIndex; i <= haystack.Length - needle.Length; i++)
+        {
+            bool match = true;
+            for (int j = 0; j < needle.Length; j++)
+            {
+                if (haystack[i + j] != needle[j])
+                {
+                    match = false;
+                    break;
+                }
+            }
+
+            if (match)
+            {
+                return i;
+            }
+        }
+
+        return -1;
     }
 
     private static void WriteJson(HttpListenerResponse response, string json)
