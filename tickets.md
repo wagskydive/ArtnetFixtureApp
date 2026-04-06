@@ -1631,6 +1631,18 @@ T14.9 - Add integration coverage for `/api/settings` request handling to validat
 - [x] Documentation Written
   - Refactored `LocalWebUiServer` settings API handling behind reusable request handlers and added an immediate execution path for deterministic EditMode integration tests.
   - Added EditMode coverage that exercises LocalWebUiServer `POST` + `GET` settings flow end-to-end, validating persisted payload rehydration and non-Surface fixture-count enforcement.
+  
+T14.10 - Work on the webui html code. 
+* Remove the "Test DMX" Page.
+* Remove the "Settings" Button. (The settings page is the only page)
+* Remove the "Restart Fixture" button. 
+* Fix the IP address text field so it shows the IP address correctly.
+* Add a feedback button that links to "dilarium.es/dmx-projector/feedback"
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
 
 T99.1 - Find and fix the bug in which the Fixture Amount button that increases the fixture amount in the UI_FixureMeshManager.cs also increments the Universe on the ArtNetReveiver.cs script
 - [x] Started

@@ -12,16 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce9125eae17d4b538dca2cb9961847ac, type: 3}
   m_Name: buy-me-a-coffee
   m_EditorClassIdentifier: ArtnetFixture.Core::CapabilityDefinition
-  id: capability.universe.max
-  valueType: 1
+  id: buy.me.a.coffee
+  valueType: 0
   unlockedBooleanValue: 0
   unlockedNumericValue: 999
-  productId: product.unlimited.universes
-  additionalProductIds:
-  - test.pro.bundle
-  displayTitle: Unlimited universes
-  displayDescription: 'The use of unlimited universes is a premium feature that will
-    allow the use of any universe number to be used.
-
-'
-  editorTestPriceUsd: 4.99
+  productId: buy.me.a.coffee
+  additionalProductIds: []
+  consumable: 1
+  displayTitle: Buy me a coffee
+  displayDescription: This IAP is there to support the development
+  editorTestPriceUsd: 1
