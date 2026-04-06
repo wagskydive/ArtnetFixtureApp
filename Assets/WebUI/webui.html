@@ -100,23 +100,6 @@
             box-shadow: 0 0 0 4px #00c8ff;
         }
 
-        .navbar {
-            margin-bottom: 20px;
-        }
-
-        .navbar button {
-            margin-right: 10px;
-        }
-
-        .fader {
-            margin-top: 10px;
-        }
-
-        .fader input[type=range] {
-            width: 100%;
-            height: 40px;
-        }
-
         .instructions {
             font-size: 20px;
             line-height: 1.5;
@@ -136,16 +119,12 @@
 
     <div class="container">
 
-        <div class="navbar">
-            <button id="settingsTab">Settings</button>
-            <button id="dmxTab">DMX Test</button>
-        </div>
-
         <h1>DMX Projector Control</h1>
 
         <div class="section">
             <h2 id="fixtureNameHeading">Fixture: ArtnetFixture</h2>
-            <p class="status">IP Address: <span id="ipAddressLabel">127.0.0.1</span></p>
+            <label>IP Address</label>
+            <input id="ipAddressField" type="text" value="http://127.0.0.1:8080" readonly>
         </div>
 
         <div id="loginSection" class="section hidden">
@@ -193,9 +172,9 @@
             </div>
 
             <div class="section">
-
-                <button class="secondary" id="restartFixture" tabindex="8">Restart
-                    Fixture</button>
+                <a href="https://dilarium.es/dmx-projector/feedback" target="_blank" rel="noopener noreferrer">
+                    <button class="secondary" type="button" id="feedbackButton" tabindex="8">Feedback</button>
+                </a>
                 <p id="settingsStatus" class="status" aria-live="polite"></p>
 
             </div>
@@ -217,22 +196,6 @@
 
         </div>
 
-        <div id="dmxPage" class="hidden">
-
-            <div class="section">
-
-                <label>Universe</label> <input id="testUniverse" type="number" min="1" max="16" value="1">
-
-                <label>Start Address</label> <input id="testAddress" type="number" min="1" max="512" value="1">
-
-                <button id="sendDMX">Send DMX</button>
-
-            </div>
-
-            <div id="faderContainer" class="section"></div>
-
-        </div>
-
     </div>
 
     <script>
@@ -240,9 +203,6 @@
         const params = new URLSearchParams(window.location.search)
 
         const isLocal = params.get("local") === "true"
-        const tvMode = params.get("tv") === "true"
-        const companion = params.get("companion") === "true"
-
         let passwordEnabled = false
         let hasSessionAuthorization = false
         const authCacheKey = "webui.password.auth"
@@ -321,21 +281,6 @@
 
         })
 
-        document.getElementById("settingsTab").onclick = function () {
-
-            document.getElementById("settingsPage").classList.remove("hidden")
-            document.getElementById("dmxPage").classList.add("hidden")
-
-        }
-
-        document.getElementById("dmxTab").onclick = function () {
-
-            document.getElementById("settingsPage").classList.add("hidden")
-            document.getElementById("dmxPage").classList.remove("hidden")
-
-        }
-
-        const faderContainer = document.getElementById("faderContainer")
         const settingsStatus = document.getElementById("settingsStatus")
         const autoSaveElements = [
             document.getElementById("deviceName"),
@@ -348,7 +293,7 @@
         ]
         const deviceNameElement = document.getElementById("deviceName")
         const fixtureNameHeading = document.getElementById("fixtureNameHeading")
-        const ipAddressLabel = document.getElementById("ipAddressLabel")
+        const ipAddressField = document.getElementById("ipAddressField")
         const navigableElements = Array.from(document.querySelectorAll("input, select, button"))
         let saveDebounceTimeout = null
         let suppressAutoSave = false
@@ -382,7 +327,9 @@
             document.getElementById("gridX").value = clampValue(parseInt(settings.gridX) || 8, 8, 32)
             document.getElementById("gridY").value = clampValue(parseInt(settings.gridY) || 8, 8, 32)
             fixtureNameHeading.textContent = `Fixture: ${settings.deviceName || "ArtnetFixture"}`
-            ipAddressLabel.textContent = settings.ipAddress || "127.0.0.1"
+            const ipAddress = settings.ipAddress || "127.0.0.1"
+            const port = window.location.port || "8080"
+            ipAddressField.value = `http://${ipAddress}:${port}`
             passwordEnabled = !!settings.passwordEnabled && !!settings.passwordConfigured
             if (!passwordEnabled) {
                 hasSessionAuthorization = true
@@ -485,131 +432,6 @@
             } catch (e) {
                 console.log("Failed to refresh settings", e)
             }
-        }
-
-        function createFaders() {
-
-            for (let i = 0; i < 8; i++) {
-
-                let div = document.createElement("div")
-                div.className = "fader"
-
-                let label = document.createElement("label")
-                label.innerText = "Channel " + (i + 1)
-
-                if (companion) {
-
-                    let slider = document.createElement("input")
-                    slider.type = "range"
-                    slider.min = 0
-                    slider.max = 255
-                    slider.value = 0
-
-                    slider.oninput = function () {
-                        sendArtNet()
-                    }
-
-                    div.appendChild(label)
-                    div.appendChild(slider)
-
-                } else {
-
-                    let input = document.createElement("input")
-                    input.type = "number"
-                    input.min = 0
-                    input.max = 255
-                    input.value = 0
-
-                    input.onchange = function () {
-                        sendArtNet()
-                    }
-
-                    div.appendChild(label)
-                    div.appendChild(input)
-
-                }
-
-                faderContainer.appendChild(div)
-
-            }
-
-        }
-
-        createFaders()
-
-        function getDMXValues() {
-
-            let values = []
-
-            let inputs = faderContainer.querySelectorAll("input")
-
-            inputs.forEach(i => {
-
-                values.push(parseInt(i.value) || 0)
-
-            })
-
-            return values
-
-        }
-
-        document.getElementById("sendDMX").onclick = function () {
-
-            sendArtNet()
-
-        }
-
-        function sendArtNet() {
-
-            const universe = clampValue(parseInt(document.getElementById("testUniverse").value) || 1, 1, 16) - 1
-            const values = getDMXValues()
-
-            const packet = new Uint8Array(18 + 512)
-
-            const header = "Art-Net\0"
-
-            for (let i = 0; i < header.length; i++) {
-                packet[i] = header.charCodeAt(i)
-            }
-
-            packet[8] = 0x00
-            packet[9] = 0x50
-
-            packet[10] = 0x00
-            packet[11] = 0x0e
-
-            packet[12] = 0x00
-            packet[13] = 0x00
-
-            packet[14] = universe & 0xff
-            packet[15] = (universe >> 8) & 0xff
-
-            packet[16] = 2
-            packet[17] = 0
-
-            for (let i = 0; i < values.length; i++) {
-                packet[18 + i] = values[i]
-            }
-
-            sendPacket(packet)
-
-        }
-
-        function sendPacket(packet) {
-
-            if (companion) {
-
-                fetch("/api/sendArtNet", {
-                    method: "POST",
-                    body: packet
-                })
-
-            } else {
-
-                console.log("DMX values updated (local mode)")
-
-            }
-
         }
 
         autoSaveElements.forEach(element => {
