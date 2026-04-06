@@ -112,9 +112,24 @@ public class IapPurchasePanel : MonoBehaviour
 
     public bool IsUnlocked(CapabilityDefinition definition)
     {
+        if (definition != null && definition.IsConsumable)
+        {
+            return false;
+        }
+
         return definition != null
                && CapabilityService.Instance != null
                && definition.IsUnlockedBy(CapabilityService.Instance.Entitlements);
+    }
+
+    public int GetConsumablePurchaseCount(CapabilityDefinition definition)
+    {
+        if (definition == null || !definition.IsConsumable || CapabilityService.Instance == null)
+        {
+            return 0;
+        }
+
+        return CapabilityService.Instance.GetConsumablePurchaseCount(definition.ProductId);
     }
 
     public string GetDisplayPrice(CapabilityDefinition definition)

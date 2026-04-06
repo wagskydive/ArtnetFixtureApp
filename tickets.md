@@ -1304,11 +1304,15 @@ This approach ensures multi-device access, refund/revocation detection, and grac
 
 
 T19.29 - Add a "Consumable" checkmark to the "Capability Definition" Scriptable object and implement the logic that so that when that checkmark is checked. The system doesn't store any entitlement, but does consume the IAP directly. It does store an incremented integer to keep track on the amount of consumables that are purchased. There is no need for checking in witht the validation system.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Added `consumable` to `CapabilityDefinition` and updated runtime unlock checks so consumable capabilities never resolve via entitlement unlock state.
+  - `UnityIapPurchaseGateway` now registers per-product Unity IAP product types (Consumable vs NonConsumable), records consumable purchases as quantity counts, and only triggers server validation flow for non-consumables.
+  - `EntitlementStore` now tracks/persists consumable purchase counts separately (`iap.consumables`) while keeping entitlement storage for non-consumables.
+  - Updated IAP panel UI status to display consumable purchase count and keep consumable purchase buttons available.
 
 T18.3 - rework UI_DpadNavigationController.cs so it works correctly and add a checkbox to allow/disallow horizontal and/or vetical navigation and/or wrapping. Currently Horizontal navigation doesn't work and verticle wrapping is buggy and not reliable.
 - [x] Started

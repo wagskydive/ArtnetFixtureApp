@@ -129,6 +129,37 @@ public class CapabilitySystemTests
     }
 
     [Test]
+    public void EntitlementStore_RecordConsumablePurchase_PersistsAndIncrementsCount()
+    {
+        PlayerPrefs.DeleteKey(SaveLoadSettings.IapConsumablesKey);
+        PlayerPrefs.Save();
+
+        var writableStore = new EntitlementStore(persistLocally: true);
+        int first = writableStore.RecordConsumablePurchase("product.coins.100");
+        int second = writableStore.RecordConsumablePurchase("product.coins.100");
+
+        Assert.That(first, Is.EqualTo(1));
+        Assert.That(second, Is.EqualTo(2));
+        Assert.That(writableStore.GetConsumablePurchaseCount("product.coins.100"), Is.EqualTo(2));
+
+        var reloadedStore = new EntitlementStore(persistLocally: true);
+        Assert.That(reloadedStore.GetConsumablePurchaseCount("product.coins.100"), Is.EqualTo(2));
+    }
+
+    [Test]
+    public void CapabilityDefinition_IsUnlockedBy_ConsumableAlwaysReturnsFalse()
+    {
+        var definition = CreateCapabilityDefinition("capability.coins", CapabilityValueType.Numeric, "product.coins.100", false, 100);
+        SetPrivateField(definition, "consumable", true);
+        var store = new EntitlementStore();
+        store.MarkUnlocked("product.coins.100");
+
+        Assert.That(definition.IsUnlockedBy(store), Is.False);
+
+        GameObject.DestroyImmediate(definition);
+    }
+
+    [Test]
     public void CapabilitySystem_SameProductUnlocksMultipleCapabilities()
     {
         var universeLimit = CreateCapabilityDefinition("capability.universe.max", CapabilityValueType.Numeric, "product.pro.bundle", false, 16);

@@ -16,6 +16,7 @@ public static class SaveLoadSettings
     public const string NetworkWarningEnabledKey = "network.warning.enabled";
     public const string InfoPanelEnabledKey = "info.panel.enabled";
     public const string IapEntitlementsKey = "iap.entitlements";
+    public const string IapConsumablesKey = "iap.consumables";
 
     public static event Action OnSettingsSaved;
 

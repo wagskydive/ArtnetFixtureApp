@@ -63,6 +63,48 @@ public class CapabilityService : MonoBehaviour
         }
     }
 
+    public int RecordConsumablePurchase(string productId)
+    {
+        if (_entitlementStore == null)
+        {
+            return 0;
+        }
+
+        int updatedCount = _entitlementStore.RecordConsumablePurchase(productId);
+        if (updatedCount > 0)
+        {
+            EntitlementsChanged?.Invoke();
+        }
+
+        return updatedCount;
+    }
+
+    public bool TryConsumeProduct(string productId, int amount = 1)
+    {
+        if (_entitlementStore == null)
+        {
+            return false;
+        }
+
+        bool changed = _entitlementStore.TryConsume(productId, amount);
+        if (changed)
+        {
+            EntitlementsChanged?.Invoke();
+        }
+
+        return changed;
+    }
+
+    public int GetConsumablePurchaseCount(string productId)
+    {
+        if (_entitlementStore == null)
+        {
+            return 0;
+        }
+
+        return _entitlementStore.GetConsumablePurchaseCount(productId);
+    }
+
     public void RevokeProduct(string productId)
     {
         if (_entitlementStore == null)
