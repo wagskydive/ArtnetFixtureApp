@@ -21,6 +21,102 @@
 
 ---
 
+
+T20.1 - Add custom gobos. Part 1
+
+Persistent Storage
+Create a folder:
+```csharp
+string folderPath = Path.Combine(Application.persistentDataPath, "CustomGobos");
+if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
+```
+Store images as:
+slot1.png, slot2.png, ..., slot16.png
+Ensure 16-slot limit.
+
+
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+
+T20.2 - Add custom gobos. Part 2 > webui is used to upload and manage the custom gobo files
+
+GET	/images	Returns JSON list of current slots.
+GET	/CustomGobos/<file>	Serves saved PNGs for preview.
+POST	/upload?slot=X	Accepts PNG file upload for slot X.
+Requiere the uploaded file to be a PNG file of 512x512 pixels with an alpha channer
+Validate requirements
+
+
+Web UI (LAN Browser)
+Display 16 slots with current images:
+Slot 1 [Preview] [Upload Button]
+Slot 2 [Preview] [Upload Button]
+...
+Slot 16 [Preview] [Upload Button]
+Upload mechanism:
+Select PNG file → press upload → POST to /upload?slot=X.
+After upload, refresh slot preview.
+Use JavaScript fetch API for requests.
+
+
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+
+
+T20.3 - Add custom gobos. Part 3 > Unity texture usage
+
+Unity Texture Usage
+Load PNGs from Application.persistentDataPath/CustomGobos/slotX.png:
+```csharp
+public Texture2D LoadSlotTexture(int slot)
+{
+    string path = Path.Combine(folderPath, $"slot{slot}.png");
+    if (!File.Exists(path)) return null;
+
+    byte[] data = File.ReadAllBytes(path);
+    Texture2D tex = new Texture2D(2,2);
+    tex.LoadImage(data);
+    return tex;
+}
+```
+
+also ensure the png is usable with the alpha channel.
+
+
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T20.4 - Add custom gobos. Part 4 > Integrate into the MaliSafeMovingHead.shader
+The MaliSafeMovingHead.shader should now look for the saved slots and if they are not empty, use them. Fallback to the default shader should be taken care of. The _PatternType is remains as is, but the shader should use the _Speed parameter to cycle through all the available custom textures.
+
+
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T20.5 - Add custom gobos. Part 5 > Lock the custom gobos behind an IAP. Use the capabity system and entitlements to check if the IAP is owned and use the fallback if its not owned. The IAP will be named "custom.gobos.upgrade"
+
+
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+
 ## 19.1 — in app purchase implementation — create capability data model using ScriptableObjects
 
 ### Goal
