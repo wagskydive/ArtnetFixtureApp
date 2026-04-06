@@ -1638,6 +1638,16 @@ T14.10 - Work on the webui html code.
 * Remove the "Restart Fixture" button. 
 * Fix the IP address text field so it shows the IP address correctly.
 * Add a feedback button that links to "dilarium.es/dmx-projector/feedback"
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Simplified `Assets/WebUI/webui.html` into a single-page settings experience by removing the DMX Test page and top tab navigation.
+  - Removed the Restart Fixture action and added a Feedback button linking to `https://dilarium.es/dmx-projector/feedback`.
+  - Reworked IP display to a read-only text field that always shows a full URL using the current host IP + active port (for clearer copy/share behavior).
+
+T14.11 - Add automated validation for current WebUI HTML UX requirements (single settings page, feedback link, and IP field format) to prevent regressions.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
