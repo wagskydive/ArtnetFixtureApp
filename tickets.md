@@ -35,11 +35,11 @@ slot1.png, slot2.png, ..., slot16.png
 Ensure 16-slot limit.
 
 
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
 
 
 T20.2 - Add custom gobos. Part 2 > webui is used to upload and manage the custom gobo files
@@ -63,11 +63,11 @@ After upload, refresh slot preview.
 Use JavaScript fetch API for requests.
 
 
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
 
 
 
@@ -91,25 +91,32 @@ public Texture2D LoadSlotTexture(int slot)
 also ensure the png is usable with the alpha channel.
 
 
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
 
 T20.4 - Add custom gobos. Part 4 > Integrate into the MaliSafeMovingHead.shader
 The MaliSafeMovingHead.shader should now look for the saved slots and if they are not empty, use them. Fallback to the default shader should be taken care of. The _PatternType is remains as is, but the shader should use the _Speed parameter to cycle through all the available custom textures.
 
 
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
 
 T20.5 - Add custom gobos. Part 5 > Lock the custom gobos behind an IAP. Use the capabity system and entitlements to check if the IAP is owned and use the fallback if its not owned. The IAP will be named "custom.gobos.upgrade"
 
 
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+
+T20.6 - Next run: bind custom gobos capability to locked-feature UI popup when upload endpoints return 403 and validate on-device throughput for repeated 512x512 uploads over LAN.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written

@@ -111,6 +111,40 @@
             font-size: 18px;
             color: #7dd3fc;
         }
+
+        .gobo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+        }
+
+        .gobo-slot {
+            background: #252525;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .gobo-slot img {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: contain;
+            background: #111;
+            border-radius: 6px;
+            border: 1px solid #3a3a3a;
+        }
+
+        .gobo-slot label {
+            margin-top: 8px;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .gobo-slot button {
+            width: 100%;
+            margin-top: 8px;
+            height: 48px;
+            font-size: 18px;
+        }
     </style>
 
 </head>
@@ -177,6 +211,12 @@
                 </a>
                 <p id="settingsStatus" class="status" aria-live="polite"></p>
 
+            </div>
+
+            <div class="section">
+                <h2>Custom Gobos</h2>
+                <p id="goboStatus" class="status">Loading slots…</p>
+                <div id="goboSlots" class="gobo-grid"></div>
             </div>
 
             <div class="section instructions">
@@ -301,6 +341,8 @@
         let isApplyingRemoteState = false
         let lastServerSettingsJson = ""
         let backgroundRefreshInterval = null
+        let goboRefreshInterval = null
+        let goboSlotsInitialized = false
 
         function clampValue(value, min, max) {
             return Math.min(max, Math.max(min, value))
@@ -434,6 +476,98 @@
             }
         }
 
+        function createGoboSlotElement(slotData) {
+            const card = document.createElement("div")
+            card.className = "gobo-slot"
+
+            const title = document.createElement("label")
+            title.textContent = `Slot ${slotData.slot}`
+            card.appendChild(title)
+
+            const preview = document.createElement("img")
+            preview.alt = `Gobo slot ${slotData.slot}`
+            preview.src = slotData.hasImage ? slotData.previewUrl : "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs="
+            card.appendChild(preview)
+
+            const uploadInput = document.createElement("input")
+            uploadInput.type = "file"
+            uploadInput.accept = "image/png"
+            card.appendChild(uploadInput)
+
+            const uploadButton = document.createElement("button")
+            uploadButton.type = "button"
+            uploadButton.textContent = "Upload PNG"
+            uploadButton.onclick = async () => {
+                if (!uploadInput.files || uploadInput.files.length === 0) {
+                    document.getElementById("goboStatus").textContent = `Select a PNG for slot ${slotData.slot}`
+                    return
+                }
+
+                const file = uploadInput.files[0]
+                if (!file.type || !file.type.includes("png")) {
+                    document.getElementById("goboStatus").textContent = "Only PNG files are accepted"
+                    return
+                }
+
+                document.getElementById("goboStatus").textContent = `Uploading slot ${slotData.slot}…`
+                const response = await fetch(`/upload?slot=${slotData.slot}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "image/png" },
+                    body: await file.arrayBuffer()
+                })
+
+                const payload = await response.json()
+                document.getElementById("goboStatus").textContent = payload.message || (payload.success ? "Upload successful" : "Upload failed")
+                if (payload.success) {
+                    await refreshGoboSlots(true)
+                }
+            }
+
+            card.appendChild(uploadButton)
+            return card
+        }
+
+        async function refreshGoboSlots(forceRebuild = false) {
+            try {
+                const response = await fetch("/images")
+                if (!response.ok) {
+                    document.getElementById("goboStatus").textContent = "Unable to load gobo slots"
+                    return
+                }
+
+                const payload = await response.json()
+                const slotsRoot = document.getElementById("goboSlots")
+                if (!payload.unlocked) {
+                    slotsRoot.innerHTML = ""
+                    document.getElementById("goboStatus").textContent = "Custom gobos are locked. Purchase custom.gobos.upgrade to unlock."
+                    return
+                }
+
+                if (!goboSlotsInitialized || forceRebuild) {
+                    slotsRoot.innerHTML = ""
+                    payload.slots.forEach(slotData => {
+                        slotsRoot.appendChild(createGoboSlotElement(slotData))
+                    })
+                    goboSlotsInitialized = true
+                } else {
+                    const cards = Array.from(slotsRoot.querySelectorAll(".gobo-slot"))
+                    payload.slots.forEach((slotData, index) => {
+                        if (!cards[index]) {
+                            return
+                        }
+
+                        const preview = cards[index].querySelector("img")
+                        preview.src = slotData.hasImage ? slotData.previewUrl : "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs="
+                    })
+                }
+
+                document.getElementById("goboStatus").textContent = "Custom gobos ready"
+            } catch (error) {
+                document.getElementById("goboStatus").textContent = "Unable to load gobo slots"
+                console.log("Failed to refresh gobo slots", error)
+            }
+        }
+
         autoSaveElements.forEach(element => {
             element.addEventListener("change", scheduleAutoSave)
             if (element === deviceNameElement) {
@@ -472,6 +606,15 @@
         backgroundRefreshInterval = setInterval(() => {
             refreshSettingsFromServer()
         }, 1000)
+
+        refreshGoboSlots(true)
+        if (goboRefreshInterval !== null) {
+            clearInterval(goboRefreshInterval)
+        }
+
+        goboRefreshInterval = setInterval(() => {
+            refreshGoboSlots(false)
+        }, 5000)
 
     </script>
 
