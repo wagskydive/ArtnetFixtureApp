@@ -10,16 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ce9125eae17d4b538dca2cb9961847ac, type: 3}
-  m_Name: pro-bundle
+  m_Name: buy-me-a-coffee
   m_EditorClassIdentifier: ArtnetFixture.Core::CapabilityDefinition
-  id: pro.bundle
-  valueType: 0
+  id: capability.universe.max
+  valueType: 1
   unlockedBooleanValue: 0
   unlockedNumericValue: 999
-  productId: test.pro.bundle
-  additionalProductIds: []
-  displayTitle: Pro Bundle
-  displayDescription: 'Unlocks everything
+  productId: product.unlimited.universes
+  additionalProductIds:
+  - test.pro.bundle
+  displayTitle: Unlimited universes
+  displayDescription: 'The use of unlimited universes is a premium feature that will
+    allow the use of any universe number to be used.
 
 '
-  editorTestPriceUsd: 19.99
+  editorTestPriceUsd: 4.99

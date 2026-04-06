@@ -18,7 +18,7 @@ MonoBehaviour:
   unlockedNumericValue: 999
   productId: product.advanced.network
   additionalProductIds:
-  - product.pro.bundle
+  - test.pro.bundle
   displayTitle: Advanced Networking
   displayDescription: Advanced networking unlockes sACN and CITP functionality
   editorTestPriceUsd: 4.99
