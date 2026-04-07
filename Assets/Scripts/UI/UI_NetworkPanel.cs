@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UI_NetworkPanel : MonoBehaviour
 {
@@ -8,6 +9,13 @@ public class UI_NetworkPanel : MonoBehaviour
     [SerializeField] private GameObject sAcnSettingsRoot;
     [SerializeField] private NetworkingModeManager networkingModeManager;
     [SerializeField] private LockedCapabilityPanel lockedCapabilityPanel;
+    
+    [SerializeField] private Text networkModeText;
+
+    void OnEnable()
+    {
+        OpenPanel();
+    }
 
     public void OpenPanel()
     {
@@ -50,6 +58,16 @@ public class UI_NetworkPanel : MonoBehaviour
         RefreshModeVisibility();
     }
 
+    public void SetModeToArtNet()
+    {
+        SetNetworkingMode(0);
+    }
+
+    public void SetModeToSAcn()
+    {
+        SetNetworkingMode(1);
+    }
+
     public void RefreshModeVisibility()
     {
         if (sAcnSettingsRoot == null || networkingModeManager == null)
@@ -58,6 +76,15 @@ public class UI_NetworkPanel : MonoBehaviour
         }
 
         sAcnSettingsRoot.SetActive(networkingModeManager.IsSAcnMode);
+        if(networkingModeManager.IsSAcnMode)
+        {
+            networkModeText.text = "sACN";
+        }
+        else
+        {
+            networkModeText.text = "Art-Net";
+        }
+        
     }
 
     private static bool IsAdvancedNetworkingUnlocked()
