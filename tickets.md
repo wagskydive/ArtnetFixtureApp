@@ -76,6 +76,18 @@ Behavior notes:
 - `INetworkReceiver` now includes no-data/data-resumed events so network-warning UI can subscribe to protocol-agnostic receiver state transitions.
 
 T22.7 - Modify the NetworkModeManager so that it doesn't need a serialized field for the arnetReceiver and the sACN receiver and doesn't need the NetworkMode enum. The correct networkReceiver gets added as a component at runtime and the DMX buffer also gets created on awake and when the mode changes, the componenet gets removed and the new component gets added. The DMX buffer gets set at to the receiver when the component gets added.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+
+Behavior notes:
+- `NetworkingModeManager` now owns a runtime `DmxBuffer`, removes the previous receiver component, and adds the selected protocol receiver component on mode changes.
+- Mode storage now uses clamped integer indices (`ArtNetModeIndex`/`SAcnModeIndex`) without a `NetworkingMode` enum or serialized receiver references.
+- `UI_NetworkPanel` now reads manager state via `IsSAcnMode`, and networking mode tests now validate the integer-based mode API.
+
+T22.8 - Next run: add EditMode coverage that asserts receiver component replacement (ArtNet <-> sACN), shared DMX buffer continuity across mode switches, and universe/start-channel migration when switching protocols.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written

@@ -57,7 +57,7 @@ public class UI_NetworkPanel : MonoBehaviour
             return;
         }
 
-        sAcnSettingsRoot.SetActive(networkingModeManager.ActiveMode == NetworkingMode.SAcn);
+        sAcnSettingsRoot.SetActive(networkingModeManager.IsSAcnMode);
     }
 
     private static bool IsAdvancedNetworkingUnlocked()
