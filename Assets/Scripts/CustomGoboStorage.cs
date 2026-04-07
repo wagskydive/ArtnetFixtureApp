@@ -129,6 +129,43 @@ public static class CustomGoboStorage
         return texture;
     }
 
+    public static bool TryDeleteSlotAndCompact(int slot, out string error)
+    {
+        error = null;
+        if (!IsValidSlot(slot))
+        {
+            error = $"Slot must be between 1 and {MaxSlots}.";
+            return false;
+        }
+
+        string slotPath = GetSlotPath(slot);
+        if (!File.Exists(slotPath))
+        {
+            error = "Slot is already empty.";
+            return false;
+        }
+
+        File.Delete(slotPath);
+        for (int currentSlot = slot + 1; currentSlot <= MaxSlots; currentSlot++)
+        {
+            string sourcePath = GetSlotPath(currentSlot);
+            if (!File.Exists(sourcePath))
+            {
+                continue;
+            }
+
+            string targetPath = GetSlotPath(currentSlot - 1);
+            if (File.Exists(targetPath))
+            {
+                File.Delete(targetPath);
+            }
+
+            File.Move(sourcePath, targetPath);
+        }
+
+        return true;
+    }
+
     private static bool LooksLikePng(byte[] bytes)
     {
         return bytes.Length >= 8

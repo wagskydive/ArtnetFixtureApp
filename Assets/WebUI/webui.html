@@ -149,6 +149,11 @@
             white-space: nowrap;
         }
 
+        .gobo-slot button.danger {
+            background: #7f1d1d;
+            border-color: #b91c1c;
+        }
+
         .gobo-actions {
             margin-top: 12px;
             display: flex;
@@ -548,7 +553,40 @@
             }
 
             card.appendChild(uploadButton)
+
+            const removeButton = document.createElement("button")
+            removeButton.type = "button"
+            removeButton.className = "danger"
+            removeButton.textContent = "🗑 Remove"
+            removeButton.style.display = slotData.hasImage ? "block" : "none"
+            removeButton.onclick = async () => {
+                await removeGoboSlot(slotData.slot)
+            }
+
+            card.appendChild(removeButton)
             return card
+        }
+
+        async function removeGoboSlot(slot) {
+            const confirmed = window.confirm(`Remove gobo slot ${slot}? Remaining slots will be reordered.`)
+            if (!confirmed) {
+                return
+            }
+
+            document.getElementById("goboStatus").textContent = `Removing slot ${slot}…`
+            try {
+                const response = await fetch(`/remove?slot=${slot}`, {
+                    method: "POST"
+                })
+                const payload = await response.json()
+                document.getElementById("goboStatus").textContent = payload.message || (payload.success ? "Slot removed" : "Failed to remove slot")
+                if (payload.success) {
+                    await refreshGoboSlots(true)
+                }
+            } catch (error) {
+                document.getElementById("goboStatus").textContent = "Failed to remove slot"
+                console.log("Failed to remove gobo slot", error)
+            }
         }
 
         function getMaxUsedSlot(slots) {
@@ -613,11 +651,18 @@
                         }
 
                         const preview = card.querySelector("img")
+                        const removeButton = card.querySelector("button.danger")
                         if (!preview) {
                             return
                         }
 
                         preview.src = slotData.hasImage ? slotData.previewUrl : "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs="
+                        if (removeButton) {
+                            removeButton.style.display = slotData.hasImage ? "block" : "none"
+                            removeButton.onclick = async () => {
+                                await removeGoboSlot(slotData.slot)
+                            }
+                        }
                     })
 
                     if (cards.length > visibleSlots.length) {
