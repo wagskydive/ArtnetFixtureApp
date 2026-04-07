@@ -18,6 +18,7 @@ MonoBehaviour:
   unlockedNumericValue: 999
   productId: product.unlimited.universes
   additionalProductIds:
+  - product.advanced.network
   - test.pro.bundle
   displayTitle: Unlimited universes
   displayDescription: 'The use of unlimited universes is a premium feature that will

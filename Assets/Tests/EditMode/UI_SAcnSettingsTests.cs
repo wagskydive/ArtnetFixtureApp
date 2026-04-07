@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -133,6 +134,60 @@ public class UI_SAcnSettingsTests
         Assert.That(unicastText.text, Is.EqualTo("10.10.10.5"));
         Assert.That(multicastText.text, Is.EqualTo("239.255.0.50"));
         Assert.That(portText.text, Is.EqualTo("5569"));
+    }
+
+    [Test]
+    public void ExtendedSetters_UpdateUniverseChannelMergeAndSubscriptions()
+    {
+        var manager = _managerGo.GetComponent<NetworkingModeManager>();
+        var settings = _settingsGo.GetComponent<UI_SAcnSettings>();
+        _settingsGo.SetActive(true);
+
+        settings.SetUniverse(42);
+        settings.SetStartChannel(128);
+        settings.SetTimeoutSeconds(3.25f);
+        settings.SetUseLtpMerge(true);
+        settings.SetMulticastUniverseSubscriptionsCsv("2, 5, 5, invalid, 64001");
+
+        var receiver = manager.NetworkReceiver as SAcnReceiver;
+        Assert.That(receiver.GetUniverseForUserInput(), Is.EqualTo(42));
+        Assert.That(receiver.StartChannel, Is.EqualTo(128));
+        Assert.That(receiver.TimeoutSeconds, Is.EqualTo(3.25f).Within(0.01f));
+        Assert.That(receiver.UseLtpMerge, Is.True);
+        Assert.That(receiver.MulticastUniverseSubscriptions, Is.EqualTo(new List<int> { 1, 4, 63999 }));
+    }
+
+    [Test]
+    public void ExtendedLabelRefresh_UpdatesAllAdditionalTexts()
+    {
+        var settings = _settingsGo.GetComponent<UI_SAcnSettings>();
+        var universeText = CreateText("universe");
+        var startChannelText = CreateText("start");
+        var timeoutText = CreateText("timeout");
+        var receiveText = CreateText("receive");
+        var mergeText = CreateText("merge");
+        var multicastUniversesText = CreateText("subs");
+
+        SetPrivateField(settings, "universeText", universeText);
+        SetPrivateField(settings, "startChannelText", startChannelText);
+        SetPrivateField(settings, "timeoutSecondsText", timeoutText);
+        SetPrivateField(settings, "receiveNetworkDataText", receiveText);
+        SetPrivateField(settings, "mergeModeText", mergeText);
+        SetPrivateField(settings, "multicastUniversesText", multicastUniversesText);
+
+        _settingsGo.SetActive(true);
+        settings.SetUniverse(10);
+        settings.SetStartChannel(64);
+        settings.SetTimeoutSeconds(1.5f);
+        settings.SetUseLtpMerge(true);
+        settings.SetMulticastUniverseSubscriptionsCsv("4,8");
+
+        Assert.That(universeText.text, Is.EqualTo("10"));
+        Assert.That(startChannelText.text, Is.EqualTo("64"));
+        Assert.That(timeoutText.text, Is.EqualTo("1.5"));
+        Assert.That(receiveText.text, Is.EqualTo("Disabled"));
+        Assert.That(mergeText.text, Is.EqualTo("LTP"));
+        Assert.That(multicastUniversesText.text, Is.EqualTo("4,8"));
     }
 
     private static Text CreateText(string name)

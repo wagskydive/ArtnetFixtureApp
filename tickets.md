@@ -114,6 +114,21 @@ a clean merging algorithm (HTP/LTP + priority + sync)
 Use highest priority per universe
 
 
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+
+Behavior notes:
+- `SAcnReceiver` now tracks per-universe/per-source state and merges active sources using highest-priority filtering with configurable HTP/LTP merge behavior.
+- Added sACN synchronization buffering support so universe frames with a sync address are staged until a matching sync packet is received.
+- Multicast socket setup now joins the selected universe group plus optional additional universe subscriptions for multi-universe sACN ingest.
+- `unlimited-universes` capability now also unlocks when the `product.advanced.network` entitlement is owned.
+- `UI_SAcnSettings` now exposes handlers for all `SAcnReceiver` runtime settings (universe, start channel, timeout, network on/off, merge mode, transport addresses/port, and multicast universe subscription list).
+
+
+T22.10 - Add EditMode tests for sACN merge arbitration and sync-buffer release behavior (priority winner, HTP/LTP merge mode, and deferred sync apply).
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
