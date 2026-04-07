@@ -6,7 +6,6 @@ using UnityEngine.Video;
 
 public class MediaPlaybackController : MonoBehaviour
 {
-    [SerializeField] private ArtNetReceiver artNetReceiver;
     [SerializeField] private VideoPlayer videoPlayer;
     [SerializeField] private int dmxStartChannel = 9;
     [SerializeField] private string usbMediaDirectory = "/storage/emulated/0/ArtnetFixture/media";
@@ -34,11 +33,6 @@ public class MediaPlaybackController : MonoBehaviour
 
     private void Awake()
     {
-        if (artNetReceiver == null)
-        {
-            artNetReceiver = FindFirstObjectByType<ArtNetReceiver>();
-        }
-
         if (videoPlayer == null)
         {
             videoPlayer = GetComponent<VideoPlayer>();
@@ -57,12 +51,13 @@ public class MediaPlaybackController : MonoBehaviour
 
     private void Update()
     {
-        if (artNetReceiver == null || artNetReceiver.DmxBuffer == null || _playbackBackend == null)
+        INetworkReceiver receiver = NetworkingModeManager.Instance?.NetworkReceiver;
+        if (receiver == null || receiver.DmxBuffer == null || _playbackBackend == null)
         {
             return;
         }
 
-        DmxBuffer dmxBuffer = artNetReceiver.DmxBuffer;
+        DmxBuffer dmxBuffer = receiver.DmxBuffer;
 
         int selectedIndex = ResolveMediaIndex(dmxBuffer.GetChannel1Based(dmxStartChannel));
         if (selectedIndex != _lastSelectedIndex)

@@ -2,8 +2,7 @@ using UnityEngine;
 
 public class ProjectorLightOutput : MonoBehaviour
 {
-    [SerializeField] private ArtNetReceiver artNetReceiver;
-    [SerializeField] private Renderer outputRenderer;
+        [SerializeField] private Renderer outputRenderer;
     [SerializeField] private bool enableThermalProtection = true;
     [SerializeField][Range(0f, 1f)] private float thermalMinimumScale = 0.55f;
     [SerializeField][Range(0.001f, 0.1f)] private float thermalRampPerSecond = 0.02f;
@@ -38,14 +37,15 @@ public class ProjectorLightOutput : MonoBehaviour
 
     void Update()
     {
-        if (artNetReceiver == null || artNetReceiver.DmxBuffer == null || !ResolveOutputMaterial() || !isInMode)
+        INetworkReceiver receiver = NetworkingModeManager.Instance?.NetworkReceiver;
+        if (receiver == null || receiver.DmxBuffer == null || !ResolveOutputMaterial() || !isInMode)
         {
             return;
         }
 
 
-        float dimmer = SurfaceProjectionDmxPersonality.ParseMasterDimmer(artNetReceiver);
-        Color color = SurfaceProjectionDmxPersonality.ParseColor(artNetReceiver);
+        float dimmer = SurfaceProjectionDmxPersonality.ParseMasterDimmer(receiver);
+        Color color = SurfaceProjectionDmxPersonality.ParseColor(receiver);
         float r = color.r;
         float g = color.g;
         float b = color.b;

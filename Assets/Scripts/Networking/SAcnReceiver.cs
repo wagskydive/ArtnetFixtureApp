@@ -6,6 +6,9 @@ using UnityEngine;
 
 public class SAcnReceiver : MonoBehaviour, INetworkReceiver
 {
+    public event Action NoDataReceivedRecently;
+    public event Action DataReceivedAgain;
+
     [Range(0, 63999)]
     public int Universe = 0;
 
@@ -18,6 +21,8 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
 
     [HideInInspector]
     public bool HasReceivedDataRecently = false;
+
+    private bool _hasNoDataEventSent;
 
     public string ProtocolName => "sACN";
 
@@ -75,6 +80,20 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
         }
 
         HasReceivedDataRecently = (Time.time - _lastPacketTime) <= TimeoutSeconds;
+
+        if (!HasReceivedDataRecently)
+        {
+            if (!_hasNoDataEventSent)
+            {
+                NoDataReceivedRecently?.Invoke();
+                _hasNoDataEventSent = true;
+            }
+        }
+        else if (_hasNoDataEventSent)
+        {
+            DataReceivedAgain?.Invoke();
+            _hasNoDataEventSent = false;
+        }
     }
 
     public void SetUniverseFromUserInput(int universe1Based)

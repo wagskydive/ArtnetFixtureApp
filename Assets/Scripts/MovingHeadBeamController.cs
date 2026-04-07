@@ -6,8 +6,7 @@ public class MovingHeadBeamController : MonoBehaviour
 {
     private const string CustomGoboCapabilityId = "capability.custom.gobos";
 
-    [SerializeField] private ArtNetReceiver artNetReceiver;
-    [SerializeField] private Renderer outputRenderer;
+        [SerializeField] private Renderer outputRenderer;
 
     private Material _outputMaterial;
     private Material _activeSharedMaterial;
@@ -42,12 +41,13 @@ public class MovingHeadBeamController : MonoBehaviour
 
     private void Update()
     {
-        if (artNetReceiver == null || artNetReceiver.DmxBuffer == null || !ResolveOutputMaterial() || !isInMode)
+        INetworkReceiver receiver = NetworkingModeManager.Instance?.NetworkReceiver;
+        if (receiver == null || receiver.DmxBuffer == null || !ResolveOutputMaterial() || !isInMode)
         {
             return;
         }
 
-        var snapshot = MovingHeadDmxPersonality.Parse(artNetReceiver, Time.time);
+        var snapshot = MovingHeadDmxPersonality.Parse(receiver, Time.time);
 
         _outputMaterial.SetColor("_BaseColor", snapshot.Color);
         _outputMaterial.SetFloat("_Intensity", snapshot.MasterDimmer);

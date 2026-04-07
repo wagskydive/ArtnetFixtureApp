@@ -13,7 +13,7 @@ public static class SurfaceProjectionDmxPersonality
     public const int CornerPinStartChannel = 9;
     public const int CornerPinChannelCount = 8;
 
-    public static Color ParseColor(ArtNetReceiver receiver)
+    public static Color ParseColor(INetworkReceiver receiver)
     {
         return new Color(
             receiver.GetFixtureChannelValue(RedChannel) / 255f,
@@ -22,7 +22,7 @@ public static class SurfaceProjectionDmxPersonality
             1f);
     }
 
-    public static float ParseMasterDimmer(ArtNetReceiver receiver)
+    public static float ParseMasterDimmer(INetworkReceiver receiver)
     {
         return receiver.GetFixtureChannelValue(MasterDimmerChannel) / 255f;
     }

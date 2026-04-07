@@ -2,8 +2,7 @@ using UnityEngine;
 
 public class PixelMappingOutputController : MonoBehaviour
 {
-    [SerializeField] private ArtNetReceiver artNetReceiver;
-    [SerializeField] private Renderer outputRenderer;
+        [SerializeField] private Renderer outputRenderer;
     [SerializeField] private UI_FixtureModeSelector fixtureModeSelector;
     [SerializeField] private int fallbackRows = 8;
     [SerializeField] private int fallbackColumns = 8;
@@ -50,17 +49,18 @@ public class PixelMappingOutputController : MonoBehaviour
 
     private void Update()
     {
-        if (artNetReceiver == null || artNetReceiver.DmxBuffer == null || !ResolveOutputMaterial() || !isInMode)
+        INetworkReceiver receiver = NetworkingModeManager.Instance?.NetworkReceiver;
+        if (receiver == null || receiver.DmxBuffer == null || !ResolveOutputMaterial() || !isInMode)
         {
             return;
         }
 
         EnsureTexture();
 
-        float master = PixelMappingDmxPersonality.ParseMasterDimmer(artNetReceiver);
-        float strobeGate = PixelMappingDmxPersonality.ParseStrobeGate(artNetReceiver, Time.time);
+        float master = PixelMappingDmxPersonality.ParseMasterDimmer(receiver);
+        float strobeGate = PixelMappingDmxPersonality.ParseStrobeGate(receiver, Time.time);
 
-        PixelMappingDmxPersonality.ParsePixelColors(artNetReceiver, _lastRows, _lastColumns, _pixelBuffer);
+        PixelMappingDmxPersonality.ParsePixelColors(receiver, _lastRows, _lastColumns, _pixelBuffer);
         _pixelDataTexture.SetPixels32(_pixelBuffer);
         _pixelDataTexture.Apply(false, false);
 
