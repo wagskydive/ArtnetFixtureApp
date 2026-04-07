@@ -19,6 +19,13 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
     public bool ReceiveNetworkData = false;
     public float TimeoutSeconds = 2f;
 
+    [Header("sACN Network")]
+    public bool UseMulticast = true;
+    public string MulticastAddress = "239.255.0.1";
+    public string UnicastBindAddress = "0.0.0.0";
+    [Range(1, 65535)]
+    public int ListenPort = 5568;
+
     [HideInInspector]
     public bool HasReceivedDataRecently = false;
 
@@ -44,6 +51,7 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
     {
         Universe = ClampUniverse(Universe);
         StartChannel = ClampStartChannel(StartChannel);
+        LoadNetworkSettings();
 
         if (DmxBuffer == null)
         {
@@ -127,6 +135,42 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
         return DmxBuffer.GetChannel1Based(absoluteChannel);
     }
 
+    public void SetTransportMode(bool useMulticast)
+    {
+        UseMulticast = useMulticast;
+        PersistNetworkSettings();
+    }
+
+    public void SetMulticastAddressFromUserInput(string multicastAddress)
+    {
+        if (!TryParseIpv4(multicastAddress, out IPAddress parsed) || !IsMulticast(parsed))
+        {
+            Debug.LogWarning($"Invalid multicast address: {multicastAddress}");
+            return;
+        }
+
+        MulticastAddress = parsed.ToString();
+        PersistNetworkSettings();
+    }
+
+    public void SetUnicastBindAddressFromUserInput(string bindAddress)
+    {
+        if (!TryParseIpv4(bindAddress, out IPAddress parsed))
+        {
+            Debug.LogWarning($"Invalid unicast bind address: {bindAddress}");
+            return;
+        }
+
+        UnicastBindAddress = parsed.ToString();
+        PersistNetworkSettings();
+    }
+
+    public void SetListenPortFromUserInput(int listenPort)
+    {
+        ListenPort = Mathf.Clamp(listenPort, 1, 65535);
+        PersistNetworkSettings();
+    }
+
     public void StartReceiver()
     {
         if (_running)
@@ -134,9 +178,17 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
             return;
         }
 
-        _udpClient = new UdpClient(5568);
+        IPAddress bindAddress = ResolveBindAddress();
+
+        _udpClient = new UdpClient(AddressFamily.InterNetwork);
         _udpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-        _udpClient.JoinMulticastGroup(IPAddress.Parse("239.255.0.1"));
+        _udpClient.Client.Bind(new IPEndPoint(bindAddress, ListenPort));
+
+        if (UseMulticast && TryParseIpv4(MulticastAddress, out IPAddress multicastIp) && IsMulticast(multicastIp))
+        {
+            _udpClient.JoinMulticastGroup(multicastIp);
+        }
+
         _running = true;
 
         _receiveThread = new Thread(ReceiveLoop) { IsBackground = true };
@@ -212,7 +264,7 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
             return false;
         }
 
-        if (data[125] != 0x00) // first slot is DMX start code
+        if (data[125] != 0x00)
         {
             return false;
         }
@@ -243,5 +295,48 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
         }
 
         return Mathf.Clamp(startChannel1Based, 1, 512);
+    }
+
+    private void LoadNetworkSettings()
+    {
+        UseMulticast = SaveLoadSettings.LoadInt(SaveLoadSettings.SAcnUseMulticastKey, 1) == 1;
+        MulticastAddress = SaveLoadSettings.LoadString(SaveLoadSettings.SAcnMulticastAddressKey, MulticastAddress);
+        UnicastBindAddress = SaveLoadSettings.LoadString(SaveLoadSettings.SAcnUnicastBindAddressKey, UnicastBindAddress);
+        ListenPort = Mathf.Clamp(SaveLoadSettings.LoadInt(SaveLoadSettings.SAcnListenPortKey, ListenPort), 1, 65535);
+    }
+
+    private void PersistNetworkSettings()
+    {
+        SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnUseMulticastKey, UseMulticast ? 1 : 0);
+        SaveLoadSettings.SaveString(SaveLoadSettings.SAcnMulticastAddressKey, MulticastAddress);
+        SaveLoadSettings.SaveString(SaveLoadSettings.SAcnUnicastBindAddressKey, UnicastBindAddress);
+        SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnListenPortKey, ListenPort);
+        SaveLoadSettings.Save();
+    }
+
+    private static bool TryParseIpv4(string value, out IPAddress address)
+    {
+        if (!IPAddress.TryParse(value, out address))
+        {
+            return false;
+        }
+
+        return address.AddressFamily == AddressFamily.InterNetwork;
+    }
+
+    private static bool IsMulticast(IPAddress address)
+    {
+        byte firstOctet = address.GetAddressBytes()[0];
+        return firstOctet >= 224 && firstOctet <= 239;
+    }
+
+    private IPAddress ResolveBindAddress()
+    {
+        if (!UseMulticast && TryParseIpv4(UnicastBindAddress, out IPAddress bindAddress))
+        {
+            return bindAddress;
+        }
+
+        return IPAddress.Any;
     }
 }

@@ -290,3 +290,4 @@ _Progress note: networking mode selection now persists through `SaveLoadSettings
 _Progress note: `NetworkingModeManager` is now singleton-backed and exposes active `INetworkReceiver` access so runtime systems consume protocol-agnostic DMX input through `NetworkingModeManager.Instance.NetworkReceiver` (Art-Net or sACN) instead of hard references to `ArtNetReceiver`._
 
 _Progress note: Networking mode selection now swaps runtime receiver components in `NetworkingModeManager` (Art-Net/sACN) using integer mode indices, with a manager-owned DMX buffer assigned to each newly added receiver._
+_Progress note: `UI_SAcnSettings` now loads and validates the active `NetworkReceiver` on enable (auto-hiding itself unless sACN is active), and exposes dedicated handlers for sACN multicast/unicast transport settings (mode, addresses, listen port) for upcoming panel wiring._
