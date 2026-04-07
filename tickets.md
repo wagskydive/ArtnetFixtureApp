@@ -21,6 +21,18 @@
 
 ---
 T23.1 - Modify the UI_TVKeyboardTextEditor.cs script so it has text validation options. The options for validation modes shoud be: none, ip address, integer within a range, no special character, no spaces and maybe some more common string restrictions. Create an enum for the choise and a range field for the respective modes. Also create a field for a popup that is shown that tells the user what is wrong if the text is not valid.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+
+Behavior notes:
+- `UI_TVKeyboardTextEditor` now supports configurable validation modes (`None`, `IpAddress`, `IntegerRange`, `NoSpecialCharacters`, `NoSpaces`, `AlphanumericOnly`, `LengthRange`) before committing keyboard input.
+- Added integer/length range fields plus validation popup + error text bindings so invalid keyboard input shows user-facing feedback and prevents apply callbacks.
+- Added EditMode coverage for valid integer-range apply flow and invalid-entry rejection flow with popup/error messaging.
+
+T23.2 - Next run: wire `UI_TVKeyboardTextEditor` validation presets into scene prefabs (network/IP/password/name inputs) and verify each input uses the intended mode + range values.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
