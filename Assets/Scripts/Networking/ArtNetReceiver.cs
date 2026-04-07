@@ -7,7 +7,7 @@ using UnityEngine;
 
 
 
-public class ArtNetReceiver : MonoBehaviour
+public class ArtNetReceiver : MonoBehaviour, INetworkReceiver
 {
 
     public event Action NoDataReceivedRecently;
@@ -20,6 +20,16 @@ public class ArtNetReceiver : MonoBehaviour
     public int StartChannel = 1;
     public DmxBuffer DmxBuffer;
     public bool ReceiveNetworkData = true;
+
+    public string ProtocolName => "Art-Net";
+
+
+    int INetworkReceiver.Universe { get => Universe; set => Universe = ClampUniverse(value); }
+    int INetworkReceiver.StartChannel { get => StartChannel; set => StartChannel = ClampStartChannel(value); }
+    DmxBuffer INetworkReceiver.DmxBuffer { get => DmxBuffer; set => DmxBuffer = value; }
+    bool INetworkReceiver.ReceiveNetworkData { get => ReceiveNetworkData; set => ReceiveNetworkData = value; }
+    bool INetworkReceiver.HasReceivedDataRecently => HasReceivedDataRecently;
+    float INetworkReceiver.TimeoutSeconds { get => TimeoutSeconds; set => TimeoutSeconds = Mathf.Max(0.1f, value); }
 
     private UdpClient _udpClient;
     private Thread _receiveThread;
@@ -128,8 +138,13 @@ public class ArtNetReceiver : MonoBehaviour
         }
     }
 
-    private void StartReceiver()
+    public void StartReceiver()
     {
+        if (_running)
+        {
+            return;
+        }
+
         _udpClient = new UdpClient(6454);
         _running = true;
 
@@ -138,8 +153,13 @@ public class ArtNetReceiver : MonoBehaviour
         _receiveThread.Start();
     }
 
-    private void StopReceiver()
+    public void StopReceiver()
     {
+        if (!_running)
+        {
+            return;
+        }
+
         _running = false;
 
         if (_udpClient != null)
