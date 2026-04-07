@@ -64,6 +64,18 @@ T22.5 - Create a playerprefs entry in the save-load manager that remembers the n
 
 
 T22.6 -  Make the NetworkModeManager a singleton and change evey script that needs a reference to the original "ArtnetReceiver" so it uses the NetworkModeManager.Instance.networkreceiver and works by needing the interface INetworkReceiver instead. This networkreceiver can be changed or loaded inside the networkmodemanager by instantiating it.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+
+Behavior notes:
+- `NetworkingModeManager` is now a singleton (`Instance`) and exposes the active `INetworkReceiver` via `NetworkReceiver`.
+- Runtime DMX consumers (output controllers, personalities, settings bridge/UI, media playback, and editor simulator) now resolve DMX through `NetworkingModeManager.Instance.NetworkReceiver` instead of a direct `ArtNetReceiver` dependency.
+- `INetworkReceiver` now includes no-data/data-resumed events so network-warning UI can subscribe to protocol-agnostic receiver state transitions.
+
+T22.7 - Next run: execute Unity EditMode and scene wiring validation for T22.6 singleton + interface receiver migration (including inspector reference cleanup where direct ArtNetReceiver fields were removed).
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written

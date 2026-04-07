@@ -2,8 +2,7 @@ using UnityEngine;
 
 public class WebUiSettingsBridge : MonoBehaviour
 {
-    [SerializeField] private ArtNetReceiver artNetReceiver;
-    [SerializeField] private UI_FixtureMeshManager fixtureMeshManager;
+        [SerializeField] private UI_FixtureMeshManager fixtureMeshManager;
     [SerializeField] private UI_FixtureModeSelector fixtureModeSelector;
     [SerializeField] private CapabilityDefinition universeLimitCapability;
 
@@ -62,10 +61,11 @@ public class WebUiSettingsBridge : MonoBehaviour
             return;
         }
 
-        if (artNetReceiver != null)
+        INetworkReceiver receiver = NetworkingModeManager.Instance?.NetworkReceiver;
+        if (receiver != null)
         {
-            artNetReceiver.SetUniverseFromUserInput(data.dmxUniverse);
-            artNetReceiver.SetStartChannelFromUserInput(data.startChannel);
+            receiver.SetUniverseFromUserInput(data.dmxUniverse);
+            receiver.SetStartChannelFromUserInput(data.startChannel);
         }
     }
 

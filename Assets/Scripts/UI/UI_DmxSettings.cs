@@ -24,7 +24,6 @@ public class UI_DmxSettings : MonoBehaviour
     [SerializeField] private Text webUiPasswordResetButtonText;
     [SerializeField] private int currentPatternType = 0; // Pattern type selector (0=Static, 1=Pulse, 2=ColorShift)
     private bool shouldDisplayNetworkWarning;
-    [SerializeField] private ArtNetReceiver artNetReceiver;
     [SerializeField] private UI_FixtureMeshManager fixtureMeshManager;
     [SerializeField] private CapabilityBlockUiTrigger capabilityBlockUiTrigger;
     [SerializeField] private CapabilityDefinition universeLimitCapability;
@@ -34,6 +33,7 @@ public class UI_DmxSettings : MonoBehaviour
     private bool hasLoadedPreferences;
     private bool isLoadingPreferences;
     private bool isApplicationQuitting;
+    private INetworkReceiver _subscribedReceiver;
 
     public IShaderGlobalIntSetter ShaderGlobalIntSetter { get; set; } = new UnityShaderGlobalIntSetter();
 
@@ -85,11 +85,7 @@ public class UI_DmxSettings : MonoBehaviour
 
     private void Awake()
     {
-        if (artNetReceiver != null)
-        {
-            artNetReceiver.NoDataReceivedRecently += ShowNetworkWarning;
-            artNetReceiver.DataReceivedAgain += HideNetworkWarning;
-        }
+        SyncReceiverSubscription();
         LoadPreferences();
         ApplySettingsToReceiver();
         SaveLoadSettings.OnSettingsSaved += LoadSettingsAndUpdateDisplay;
@@ -112,11 +108,17 @@ public class UI_DmxSettings : MonoBehaviour
     {
         SaveLoadSettings.OnSettingsSaved -= LoadSettingsAndUpdateDisplay;
 
-        if (artNetReceiver != null)
+        if (_subscribedReceiver != null)
         {
-            artNetReceiver.NoDataReceivedRecently -= ShowNetworkWarning;
-            artNetReceiver.DataReceivedAgain -= HideNetworkWarning;
+            _subscribedReceiver.NoDataReceivedRecently -= ShowNetworkWarning;
+            _subscribedReceiver.DataReceivedAgain -= HideNetworkWarning;
+            _subscribedReceiver = null;
         }
+    }
+
+    private void Update()
+    {
+        SyncReceiverSubscription();
     }
 
     private void OnDisable()
@@ -220,24 +222,26 @@ public class UI_DmxSettings : MonoBehaviour
 
     private void ApplySettingsToReceiver()
     {
-        if (artNetReceiver == null)
+        INetworkReceiver receiver = NetworkingModeManager.Instance?.NetworkReceiver;
+        if (receiver == null)
         {
             return;
         }
 
-        artNetReceiver.SetStartChannelFromUserInput(CurrentDmxChannel);
-        artNetReceiver.SetUniverseFromUserInput(CurrentDmxUniverse);
+        receiver.SetStartChannelFromUserInput(CurrentDmxChannel);
+        receiver.SetUniverseFromUserInput(CurrentDmxUniverse);
     }
 
     private void SyncValuesFromReceiver()
     {
-        if (artNetReceiver == null)
+        INetworkReceiver receiver = NetworkingModeManager.Instance?.NetworkReceiver;
+        if (receiver == null)
         {
             return;
         }
 
-        currentDmxChannel = Mathf.Clamp(artNetReceiver.StartChannel, 1, 512);
-        currentDmxUniverse = Mathf.Clamp(artNetReceiver.Universe + 1, 1, 16);
+        currentDmxChannel = Mathf.Clamp(receiver.StartChannel, 1, 512);
+        currentDmxUniverse = Mathf.Clamp(receiver.Universe + 1, 1, 16);
         UpdateChannelDisplay();
         UpdateUniverseDisplay();
     }
@@ -504,6 +508,29 @@ public class UI_DmxSettings : MonoBehaviour
         }
 
         capabilityBlockUiTrigger.NotifyBlocked(capabilityId);
+    }
+
+    private void SyncReceiverSubscription()
+    {
+        INetworkReceiver activeReceiver = NetworkingModeManager.Instance?.NetworkReceiver;
+        if (ReferenceEquals(activeReceiver, _subscribedReceiver))
+        {
+            return;
+        }
+
+        if (_subscribedReceiver != null)
+        {
+            _subscribedReceiver.NoDataReceivedRecently -= ShowNetworkWarning;
+            _subscribedReceiver.DataReceivedAgain -= HideNetworkWarning;
+        }
+
+        _subscribedReceiver = activeReceiver;
+
+        if (_subscribedReceiver != null)
+        {
+            _subscribedReceiver.NoDataReceivedRecently += ShowNetworkWarning;
+            _subscribedReceiver.DataReceivedAgain += HideNetworkWarning;
+        }
     }
 
     private static string GetCapabilityId(CapabilityDefinition definition)

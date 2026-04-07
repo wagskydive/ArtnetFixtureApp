@@ -8,19 +8,19 @@ public static class PixelMappingDmxPersonality
     public const int CornerPinChannelCount = 8;
     public const int PixelDataStartChannel = 11;
 
-    public static float ParseMasterDimmer(ArtNetReceiver receiver)
+    public static float ParseMasterDimmer(INetworkReceiver receiver)
     {
         return receiver.GetFixtureChannelValue(MasterDimmerChannel) / 255f;
     }
 
-    public static float ParseStrobeGate(ArtNetReceiver receiver, float timeSeconds)
+    public static float ParseStrobeGate(INetworkReceiver receiver, float timeSeconds)
     {
         float strobe = receiver.GetFixtureChannelValue(StrobeChannel) / 255f;
         float strobeFrequency = Mathf.Lerp(1f, 50f, strobe);
         return (strobe < 0.05f || Mathf.Sin(timeSeconds * strobeFrequency) > 0f) ? 1f : 0f;
     }
 
-    public static void ParsePixelColors(ArtNetReceiver receiver, int rows, int columns, Color32[] destination)
+    public static void ParsePixelColors(INetworkReceiver receiver, int rows, int columns, Color32[] destination)
     {
         int pixelCount = Mathf.Max(0, rows) * Mathf.Max(0, columns);
         int safeCount = Mathf.Min(pixelCount, destination.Length);

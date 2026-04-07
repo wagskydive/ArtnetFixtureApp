@@ -1,5 +1,10 @@
+using System;
+
 public interface INetworkReceiver
 {
+    event Action NoDataReceivedRecently;
+    event Action DataReceivedAgain;
+
     int Universe { get; set; }
     int StartChannel { get; set; }
     DmxBuffer DmxBuffer { get; set; }

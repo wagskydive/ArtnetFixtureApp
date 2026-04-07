@@ -20,7 +20,7 @@ public static class MovingHeadDmxPersonality
         public float StrobeGate;
     }
 
-    public static Snapshot Parse(ArtNetReceiver receiver, float timeSeconds)
+    public static Snapshot Parse(INetworkReceiver receiver, float timeSeconds)
     {
         float masterDimmer = receiver.GetFixtureChannelValue(1) / 255f;
         float red = receiver.GetFixtureChannelValue(2) / 255f;

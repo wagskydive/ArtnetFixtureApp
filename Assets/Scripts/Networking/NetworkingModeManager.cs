@@ -10,16 +10,26 @@ public class NetworkingModeManager : MonoBehaviour
 {
     private const string AdvancedNetworkingCapabilityId = "capability.advanced.networking";
 
-    [SerializeField] private PurchaseValidationManager purchaseValidationManager;
+    public static NetworkingModeManager Instance { get; private set; }
 
+    [SerializeField] private PurchaseValidationManager purchaseValidationManager;
     [SerializeField] private ArtNetReceiver artNetReceiver;
     [SerializeField] private SAcnReceiver sAcnReceiver;
     [SerializeField] private NetworkingMode startupMode = NetworkingMode.ArtNet;
 
     public NetworkingMode ActiveMode { get; private set; }
+    public INetworkReceiver NetworkReceiver { get; private set; }
 
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+
         if (artNetReceiver == null)
         {
             artNetReceiver = FindFirstObjectByType<ArtNetReceiver>();
@@ -59,6 +69,14 @@ public class NetworkingModeManager : MonoBehaviour
         SetMode(initialMode);
     }
 
+    private void OnDestroy()
+    {
+        if (Instance == this)
+        {
+            Instance = null;
+        }
+    }
+
     private void Update()
     {
         if (artNetReceiver == null || sAcnReceiver == null)
@@ -87,6 +105,7 @@ public class NetworkingModeManager : MonoBehaviour
         bool useArtNet = mode == NetworkingMode.ArtNet;
         SetReceiverState(artNetReceiver, useArtNet);
         SetReceiverState(sAcnReceiver, !useArtNet);
+        NetworkReceiver = useArtNet ? artNetReceiver : sAcnReceiver;
     }
 
     private static bool IsAdvancedNetworkingUnlocked()

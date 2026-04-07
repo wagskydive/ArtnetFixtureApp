@@ -3,8 +3,7 @@ using UnityEngine;
 [RequireComponent(typeof(MeshFilter))]
 public class CornerPinDmxWarp : MonoBehaviour
 {
-    [SerializeField] private ArtNetReceiver artNetReceiver;
-    [SerializeField][Range(0.01f, 10f)] private float maxOffset = 0.5f;
+        [SerializeField][Range(0.01f, 10f)] private float maxOffset = 0.5f;
     [SerializeField][Range(1, 64)] private int subdivisionAmount = 8;
     [SerializeField] private DmxModeManager dmxModeManager;
 
@@ -62,7 +61,8 @@ public class CornerPinDmxWarp : MonoBehaviour
 
     private void Update()
     {
-        if (artNetReceiver == null || artNetReceiver.DmxBuffer == null || _runtimeMesh == null)
+        INetworkReceiver receiver = NetworkingModeManager.Instance?.NetworkReceiver;
+        if (receiver == null || receiver.DmxBuffer == null || _runtimeMesh == null)
         {
             return;
         }
@@ -92,13 +92,13 @@ public class CornerPinDmxWarp : MonoBehaviour
             }
         }
 
-        byte[] dmx = artNetReceiver.DmxBuffer.GetRawBuffer();
+        byte[] dmx = receiver.DmxBuffer.GetRawBuffer();
 
         int cornerStartChannel = ResolveCornerPinStartChannel();
 
         for (int corner = 0; corner < 4; corner++)
         {
-            int xChannel = Mathf.Clamp(artNetReceiver.StartChannel + cornerStartChannel - 1 + (corner * 2), 1, 512);
+            int xChannel = Mathf.Clamp(receiver.StartChannel + cornerStartChannel - 1 + (corner * 2), 1, 512);
             int yChannel = Mathf.Clamp(xChannel + 1, 1, 512);
 
             float xLerp = dmx[xChannel - 1] / 255f;

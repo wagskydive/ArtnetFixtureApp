@@ -4,8 +4,7 @@ public class SurfacePatternGenerator : MonoBehaviour
 {
     private const int PatternCount = 20;
 
-    [SerializeField] private ArtNetReceiver artNetReceiver;
-    [SerializeField] private Renderer outputRenderer;
+        [SerializeField] private Renderer outputRenderer;
 
     private Material _outputMaterial;
     private Material _activeSharedMaterial;
@@ -32,17 +31,18 @@ public class SurfacePatternGenerator : MonoBehaviour
 
     void Update()
     {
-        if (artNetReceiver == null || artNetReceiver.DmxBuffer == null || !ResolveOutputMaterial() || !isInMode)
+        INetworkReceiver receiver = NetworkingModeManager.Instance?.NetworkReceiver;
+        if (receiver == null || receiver.DmxBuffer == null || !ResolveOutputMaterial() || !isInMode)
         {
             return;
         }
 
-        int dmxPatternValue = artNetReceiver.GetFixtureChannelValue(5);
+        int dmxPatternValue = receiver.GetFixtureChannelValue(5);
         int patternType = Mathf.Clamp(Mathf.FloorToInt((dmxPatternValue / 256f) * PatternCount), 0, PatternCount - 1);
-        float speed = Mathf.Lerp(0.1f, 8f, artNetReceiver.GetFixtureChannelValue(6) / 255f);
-        float size = Mathf.Lerp(0.5f, 8f, artNetReceiver.GetFixtureChannelValue(7) / 255f);
+        float speed = Mathf.Lerp(0.1f, 8f, receiver.GetFixtureChannelValue(6) / 255f);
+        float size = Mathf.Lerp(0.5f, 8f, receiver.GetFixtureChannelValue(7) / 255f);
 
-        float strobe = artNetReceiver.GetFixtureChannelValue(8) / 255f;
+        float strobe = receiver.GetFixtureChannelValue(8) / 255f;
         float strobeFrequency = Mathf.Lerp(1f, 50f, strobe);
         float strobeGate = (strobe < 0.05f || Mathf.Sin(Time.time * strobeFrequency) > 0f) ? 1f : 0f;
 
