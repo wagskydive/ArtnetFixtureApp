@@ -149,6 +149,8 @@ _Progress note: `UI_DpadNavigationController` now uses Input System actions only
 _Progress note: popup panels now enforce modal D-pad behavior by temporarily disabling non-popup `UI_DpadNavigationController` instances while open, preventing background panel navigation/submit/cancel handling._
 _Progress note: IAP entitlement flow now supports online backend validation with offline cache fallback, including automatic refunded-product revocation via bidirectional entitlement sync._
 _Progress note: revoked purchase responses are now handled gracefully by queueing pending revocations for next startup, then applying removals with a user-facing message instead of immediate mid-session access loss._
+_Progress note: refunded-purchase popup content now always refreshes both title and message text and is generated from the actual revoked product IDs to avoid stale or unrelated capability copy in the dialog._
+_Progress note: WebUI `/api/settings` IP reporting now uses `IpSolver` and preserves `ipAddress` through settings JSON sanitization, fixing `0.0.0.0` display regressions in LAN clients._
 
 ### Goal:
 Enable persistent configuration and easy deployment.

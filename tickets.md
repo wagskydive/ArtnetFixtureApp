@@ -1444,11 +1444,14 @@ T19.30 - Find and fix a bug where the popup that is shown when a purchase is ref
   - Added EditMode coverage in `PopupTests` for the external-hide dismissal path to ensure blocked `UI_DpadNavigationController` instances are restored and settings navigation remains responsive.
 
 T19.31 - Find and fix a bug where the ui shows the wrong popup content after a refund. Currently when i refund the custom gobo IAP, the revocation popup shows correctly, but also the Unlimited universes popup shows, while that IAP is not refunded. After closing the popup, the funcionality for unlimited universes still works, but the popup is not supposed to show with that content.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Updated `PurchaseValidationManager` revocation popup copy to always overwrite both title and body text, preventing stale popup text from previously-opened capability dialogs.
+  - Revocation body text is now built from the actually revoked product IDs (deduped), with capability display-title lookup fallback to product ID for clearer and more accurate user messaging.
+  - Added EditMode coverage for revocation message copy generation (single-item wording + duplicate ID dedupe behavior).
 
 
 T18.3 - rework UI_DpadNavigationController.cs so it works correctly and add a checkbox to allow/disallow horizontal and/or vetical navigation and/or wrapping. Currently Horizontal navigation doesn't work and verticle wrapping is buggy and not reliable.
@@ -1785,6 +1788,23 @@ T14.10 - Work on the webui html code.
   - Reworked IP display to a read-only text field that always shows a full URL using the current host IP + active port (for clearer copy/share behavior).
 
 T14.11 - Fix the IP address inside the webui. The IP address should show the local IP inside the network. Currently it shows 0.0.0.0 but it should retreive the local IP address from the IPSolver.cs script and display that IP address in the webui
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Fixed `WebUiSettingsStore.Sanitize` so `ipAddress` survives JSON serialization/deserialization instead of being reset to the `0.0.0.0` default.
+  - Updated `LocalWebUiServer` to use `IpSolver.ResolveLocalIpv4Address()` directly for `/api/settings` payloads so WebUI IP display is sourced from the shared resolver.
+  - Added EditMode coverage asserting `WebUiSettingsStore.ToJson`/`FromJson` preserve the resolved IP address field.
+
+T19.32 - Next run: validate refunded-product popup content on Android build with real Google Play refund flow and capture UI video proof.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T14.12 - Next run: verify WebUI IP address rendering on LAN clients across Wi-Fi reconnect / DHCP change scenarios.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
