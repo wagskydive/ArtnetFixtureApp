@@ -1435,6 +1435,15 @@ T19.29 - Add a "Consumable" checkmark to the "Capability Definition" Scriptable 
 
 
 T19.30 - Find and fix a bug where the popup that is shown when a purchase is refunded results in the settings ui to become unresponsive when the popup is dismissed. Currently the popup is shown if the system finds out that a purchase is invalid after a refund. When the user presses cancel, the rest of the ui becomes unresponsive. 
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Updated `Popup` lifecycle handling so modal navigation blocking is only applied while the popup is actually open and is automatically released when the popup panel is hidden externally (for example, by a cancel button wired to `SetActive(false)` instead of `Popup.Close()`).
+  - Added EditMode coverage in `PopupTests` for the external-hide dismissal path to ensure blocked `UI_DpadNavigationController` instances are restored and settings navigation remains responsive.
+
+T19.31 - Validate refunded-purchase popup behavior on Android TV hardware and ensure all dismiss paths call `Popup.Close()` consistently from UI buttons/scenes.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
