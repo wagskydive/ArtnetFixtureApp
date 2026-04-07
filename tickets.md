@@ -23,7 +23,19 @@
 
 
 T21.1 - Find performance gaining changes and refactorizations. Currently the moving head mode is a bit stuttering and i think this happened since custom gobos were introduced. 
-- [ ] Start
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+
+Behavior notes:
+- Moving Head custom-gobo selection no longer destroys/reloads all textures every 2 seconds.
+- Slot textures are now only decoded when file timestamps actually change, reducing disk I/O and texture churn in Update-driven playback.
+- Active `_GoboTex` writes are now skipped when the selected texture is unchanged.
+
+T21.2 - Next run: add EditMode tests that cover custom gobo hot-reload behavior (new file, removed file, unchanged file) and verify no texture replacement occurs when slot timestamps are unchanged.
+- [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
 - [ ] Tests Passed
