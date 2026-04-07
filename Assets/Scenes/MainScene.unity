@@ -559,7 +559,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ArtnetFixture.Core::Popup
   panelRoot: {fileID: 19582220}
-  defaultSelection: {fileID: 0}
+  defaultSelection: {fileID: 360804451}
   backAction: {fileID: 7727032971491509709, guid: 289c1b55c9541489481df5cc06664110, type: 3}
   closeOnBackButton: 1
   keepNavigationInsidePopup: 1

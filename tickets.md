@@ -1443,7 +1443,7 @@ T19.30 - Find and fix a bug where the popup that is shown when a purchase is ref
   - Updated `Popup` lifecycle handling so modal navigation blocking is only applied while the popup is actually open and is automatically released when the popup panel is hidden externally (for example, by a cancel button wired to `SetActive(false)` instead of `Popup.Close()`).
   - Added EditMode coverage in `PopupTests` for the external-hide dismissal path to ensure blocked `UI_DpadNavigationController` instances are restored and settings navigation remains responsive.
 
-T19.31 - Validate refunded-purchase popup behavior on Android TV hardware and ensure all dismiss paths call `Popup.Close()` consistently from UI buttons/scenes.
+T19.31 - Find and fix a bug where the ui shows the wrong popup content after a refund. Currently when i refund the custom gobo IAP, the revocation popup shows correctly, but also the Unlimited universes popup shows, while that IAP is not refunded. After closing the popup, the funcionality for unlimited universes still works, but the popup is not supposed to show with that content.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
