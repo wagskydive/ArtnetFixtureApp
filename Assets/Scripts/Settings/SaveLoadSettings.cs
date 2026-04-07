@@ -15,6 +15,10 @@ public static class SaveLoadSettings
     public const string WebUiPasswordEnabledKey = "webui.password.enabled";
     public const string NetworkWarningEnabledKey = "network.warning.enabled";
     public const string NetworkModeKey = "network.mode";
+    public const string SAcnUseMulticastKey = "sacn.use.multicast";
+    public const string SAcnMulticastAddressKey = "sacn.multicast.address";
+    public const string SAcnUnicastBindAddressKey = "sacn.unicast.bind.address";
+    public const string SAcnListenPortKey = "sacn.listen.port";
     public const string InfoPanelEnabledKey = "info.panel.enabled";
     public const string IapEntitlementsKey = "iap.entitlements";
     public const string IapConsumablesKey = "iap.consumables";

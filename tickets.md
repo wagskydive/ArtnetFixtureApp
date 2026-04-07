@@ -88,11 +88,16 @@ Behavior notes:
 - `UI_NetworkPanel` now reads manager state via `IsSAcnMode`, and networking mode tests now validate the integer-based mode API.
 
 T22.8 - Create a UI_SAcnSettings.cs script that can be used to change all settings that are related to sACN networking. It will also have a funcion that loads in the SAcnReceiver.cs that will be called in OnEnable that will do NetworkModeManager.Instance.NetworkReceiver and checks if that is of type SAcnReceiver if that is false it will disable itself. All the other functions in the script will be related to all the settings that can be changed for sACN networking and a UI panel will be build later that will call those functions
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+
+Behavior notes:
+- Added `UI_SAcnSettings` with `OnEnable` receiver discovery that disables the panel if the active protocol is not `SAcnReceiver`.
+- Added reusable UI handlers for sACN transport configuration (multicast/unicast mode, multicast group, unicast bind IP, and listen port) so a future panel can wire buttons directly to these methods.
+- Added EditMode coverage for receiver-type guard behavior, value clamping, and text label refresh flows.
 
 T21.1 - Find performance gaining changes and refactorizations. Currently the moving head mode is a bit stuttering and i think this happened since custom gobos were introduced. 
 - [x] Started
