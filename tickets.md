@@ -63,7 +63,7 @@ T22.5 - Create a playerprefs entry in the save-load manager that remembers the n
 
 
 
-T22.6 - Next run: add EditMode coverage for NetworkingModeManager and SAcn packet parsing edge cases (invalid vectors, non-zero start code, universe mismatch) and verify UI_NetworkPanel lock-state wiring in scene prefabs.
+T22.6 -  Make the NetworkModeManager a singleton and change evey script that needs a reference to the original "ArtnetReceiver" so it uses the NetworkModeManager.Instance.networkreceiver and works by needing the interface INetworkReceiver instead. This networkreceiver can be changed or loaded inside the networkmodemanager by instantiating it.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
