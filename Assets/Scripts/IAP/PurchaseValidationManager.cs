@@ -16,7 +16,6 @@ public class PurchaseValidationManager : MonoBehaviour
     [SerializeField] private Text revocationMessageText;
 
     private const string LastValidationUnixKey = "iap_last_validation_unix";
-    private const string PendingRevocationsKey = "iap_pending_revocations";
     private const string FallbackDeviceIdKey = "iap_device_id";
     private static readonly string[] InvalidDeviceIds = { "unknown", "n/a", "null", "none", "unsupportedIdentifier" };
     private bool _validationInProgress;
@@ -24,9 +23,6 @@ public class PurchaseValidationManager : MonoBehaviour
 
     private void Start()
     {
-        HandleSuspiciousState();
-        ApplyPendingRevocations();
-
         if (validateOnStart)
         {
             TryValidatePurchases();
@@ -126,17 +122,15 @@ public class PurchaseValidationManager : MonoBehaviour
         _validationInProgress = true;
         var validatedProducts = new HashSet<string>(StringComparer.Ordinal);
         var validProducts = new HashSet<string>(StringComparer.Ordinal);
+        var revokedProducts = new HashSet<string>(StringComparer.Ordinal);
 
         IReadOnlyList<UnityIapPurchaseGateway.OwnedProductReceipt> receipts = purchaseGateway.GetOwnedNonConsumableReceipts();
 
         Debug.Log($"Owned receipts count: {receipts.Count}");
 
-        var currentEntitlements = CapabilityService.Instance?.GetAllActiveProducts();
-
-        // 🔥 ADD FALLBACK HERE
-        if (receipts.Count == 0 && currentEntitlements.Count > 0)
+        if (receipts.Count == 0)
         {
-            HandleMissingReceiptsFallback();
+            Debug.Log("Purchase validation skipped reconciliation: no non-consumable receipts found.");
         }
         else
         {
@@ -159,89 +153,28 @@ public class PurchaseValidationManager : MonoBehaviour
 
                 ValidationResult result = ValidationResult.Invalid;
                 yield return ValidateWithServer(receipt.ProductId, purchaseToken, value => result = value);
-                HandleValidationResult(receipt.ProductId, result, validatedProducts, validProducts);
+                HandleValidationResult(receipt.ProductId, result, validatedProducts, validProducts, revokedProducts);
             }
-
-            CapabilityService.Instance?.SyncValidatedEntitlements(validatedProducts, validProducts);
-            SaveValidationTimestamp();
         }
+
+        CapabilityService.Instance?.SyncValidatedEntitlements(validatedProducts, validProducts);
+        if (revokedProducts.Count > 0)
+        {
+            ShowRevocationPopup(new List<string>(revokedProducts));
+        }
+
+        SaveValidationTimestamp();
         _validationInProgress = false;
-    }
-
-    private void HandleMissingReceiptsFallback()
-    {
-        Debug.LogWarning("No receipts found during validation. Checking for stale entitlements...");
-
-        var currentEntitlements = CapabilityService.Instance?.GetAllActiveProducts();
-
-        if (currentEntitlements == null || currentEntitlements.Count == 0)
-        {
-            Debug.Log("No entitlements active → nothing to revoke.");
-            return;
-        }
-
-        Debug.LogWarning($"Found {currentEntitlements.Count} active entitlements but no receipts → marking suspicious.");
-
-        // Instead of immediate revoke → graceful approach
-        MarkSuspiciousState(currentEntitlements);
-    }
-
-    private const string SuspiciousStateKey = "iap_suspicious_state";
-
-    private void MarkSuspiciousState(List<string> products)
-    {
-        SavePendingRevocations(products);
-        SaveLoadSettings.SaveInt(SuspiciousStateKey, 1);
-        SaveLoadSettings.Save();
-    }
-
-    private void HandleSuspiciousState()
-    {
-        int suspicious = SaveLoadSettings.LoadInt(SuspiciousStateKey, 0);
-        if (suspicious == 0)
-        {
-            return;
-        }
-
-        Debug.LogWarning("Suspicious IAP state detected from previous session → revoking.");
-
-        var products = LoadPendingRevocations();
-        for (int i = 0; i < products.Count; i++)
-        {
-            CapabilityService.Instance?.RevokeProduct(products[i]);
-        }
-
-        ClearPendingRevocations();
-        SaveLoadSettings.SaveInt(SuspiciousStateKey, 0);
-        SaveLoadSettings.Save();
-
-        ShowRevocationPopup(products);
-    }
-
-    public void ApplyPendingRevocations()
-    {
-        List<string> pending = LoadPendingRevocations();
-        if (pending.Count == 0)
-        {
-            return;
-        }
-
-        for (int i = 0; i < pending.Count; i++)
-        {
-            CapabilityService.Instance?.RevokeProduct(pending[i]);
-        }
-
-        ClearPendingRevocations();
-        ShowRevocationPopup(pending);
     }
 
     private static void HandleValidationResult(
         string productId,
         ValidationResult result,
         HashSet<string> validatedProducts,
-        HashSet<string> validProducts)
+        HashSet<string> validProducts,
+        HashSet<string> revokedProducts)
     {
-        if (string.IsNullOrWhiteSpace(productId) || validatedProducts == null || validProducts == null)
+        if (string.IsNullOrWhiteSpace(productId) || validatedProducts == null || validProducts == null || revokedProducts == null)
         {
             return;
         }
@@ -251,8 +184,10 @@ public class PurchaseValidationManager : MonoBehaviour
         switch (result)
         {
             case ValidationResult.Valid:
-            case ValidationResult.RevokedPending:
                 validProducts.Add(productId);
+                break;
+            case ValidationResult.Revoked:
+                revokedProducts.Add(productId);
                 break;
         }
     }
@@ -312,8 +247,7 @@ public class PurchaseValidationManager : MonoBehaviour
 
             if (response.revoked)
             {
-                AddPendingRevocation(productId);
-                callback(ValidationResult.RevokedPending);
+                callback(ValidationResult.Revoked);
                 yield break;
             }
 
@@ -349,78 +283,11 @@ public class PurchaseValidationManager : MonoBehaviour
         public List<string> deviceIds;
     }
 
-    [Serializable]
-    private class PendingRevocationsData
-    {
-        public List<string> productIds = new List<string>();
-    }
-
     private enum ValidationResult
     {
         Invalid = 0,
         Valid = 1,
-        RevokedPending = 2
-    }
-
-    private static List<string> LoadPendingRevocations()
-    {
-        string json = SaveLoadSettings.LoadString(PendingRevocationsKey, string.Empty);
-        if (string.IsNullOrWhiteSpace(json))
-        {
-            return new List<string>();
-        }
-
-        PendingRevocationsData data = JsonUtility.FromJson<PendingRevocationsData>(json);
-        if (data == null || data.productIds == null)
-        {
-            return new List<string>();
-        }
-
-        var deduped = new HashSet<string>(StringComparer.Ordinal);
-        for (int i = 0; i < data.productIds.Count; i++)
-        {
-            string productId = data.productIds[i];
-            if (!string.IsNullOrWhiteSpace(productId))
-            {
-                deduped.Add(productId.Trim());
-            }
-        }
-
-        return new List<string>(deduped);
-    }
-
-    private static void AddPendingRevocation(string productId)
-    {
-        if (string.IsNullOrWhiteSpace(productId))
-        {
-            return;
-        }
-
-        List<string> pending = LoadPendingRevocations();
-        if (pending.Contains(productId))
-        {
-            return;
-        }
-
-        pending.Add(productId);
-        SavePendingRevocations(pending);
-    }
-
-    private static void ClearPendingRevocations()
-    {
-        SaveLoadSettings.SaveString(PendingRevocationsKey, string.Empty);
-        SaveLoadSettings.Save();
-    }
-
-    private static void SavePendingRevocations(List<string> productIds)
-    {
-        var data = new PendingRevocationsData
-        {
-            productIds = productIds ?? new List<string>()
-        };
-
-        SaveLoadSettings.SaveString(PendingRevocationsKey, JsonUtility.ToJson(data));
-        SaveLoadSettings.Save();
+        Revoked = 2
     }
 
     private void ShowRevocationPopup(List<string> revokedProducts)

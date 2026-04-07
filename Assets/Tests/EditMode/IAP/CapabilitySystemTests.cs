@@ -256,30 +256,7 @@ public class CapabilitySystemTests
     }
 
     [Test]
-    public void PurchaseValidationManager_ApplyPendingRevocations_RevokesAndClearsQueue()
-    {
-        PlayerPrefs.SetString("iap_pending_revocations", "{\"productIds\":[\"product.revoke\"]}");
-        PlayerPrefs.Save();
-
-        var serviceGo = new GameObject("capability-service");
-        var service = serviceGo.AddComponent<CapabilityService>();
-        InvokeAwake(service);
-        service.UnlockProduct("product.revoke");
-        Assert.That(service.Entitlements.IsUnlocked("product.revoke"), Is.True);
-
-        var validationGo = new GameObject("purchase-validation");
-        var validationManager = validationGo.AddComponent<PurchaseValidationManager>();
-        validationManager.ApplyPendingRevocations();
-
-        Assert.That(service.Entitlements.IsUnlocked("product.revoke"), Is.False);
-        Assert.That(PlayerPrefs.GetString("iap_pending_revocations", string.Empty), Is.EqualTo(string.Empty));
-
-        GameObject.DestroyImmediate(validationGo);
-        GameObject.DestroyImmediate(serviceGo);
-    }
-
-    [Test]
-    public void PurchaseValidationManager_HandleValidationResult_RevokedPending_KeepsProductForCurrentSync()
+    public void PurchaseValidationManager_HandleValidationResult_Revoked_AddsToRevokedSetOnly()
     {
         MethodInfo method = typeof(PurchaseValidationManager).GetMethod(
             "HandleValidationResult",
@@ -287,14 +264,16 @@ public class CapabilitySystemTests
         Type resultType = typeof(PurchaseValidationManager).GetNestedType(
             "ValidationResult",
             BindingFlags.NonPublic);
-        object revokedPending = Enum.Parse(resultType, "RevokedPending");
+        object revoked = Enum.Parse(resultType, "Revoked");
 
         var validatedProducts = new HashSet<string>(StringComparer.Ordinal);
         var validProducts = new HashSet<string>(StringComparer.Ordinal);
-        method.Invoke(null, new object[] { "product.revoke", revokedPending, validatedProducts, validProducts });
+        var revokedProducts = new HashSet<string>(StringComparer.Ordinal);
+        method.Invoke(null, new object[] { "product.revoke", revoked, validatedProducts, validProducts, revokedProducts });
 
-        Assert.That(validProducts.Contains("product.revoke"), Is.True);
+        Assert.That(validProducts.Contains("product.revoke"), Is.False);
         Assert.That(validatedProducts.Contains("product.revoke"), Is.True);
+        Assert.That(revokedProducts.Contains("product.revoke"), Is.True);
     }
 
     [Test]
