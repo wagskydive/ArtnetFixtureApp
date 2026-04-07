@@ -22,6 +22,14 @@
 ---
 
 
+T21.1 - Find performance gaining changes and refactorizations. Currently the moving head mode is a bit stuttering and i think this happened since custom gobos were introduced. 
+- [ ] Start
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+
 T20.1 - Add custom gobos. Part 1
 
 Persistent Storage
