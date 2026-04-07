@@ -288,3 +288,5 @@ _Progress note: networking input is now protocol-swappable via `INetworkReceiver
 _Progress note: networking mode selection now persists through `SaveLoadSettings.NetworkModeKey`, and startup now falls back to Art-Net when a saved non-default mode is not entitled (after triggering purchase validation)._
 
 _Progress note: `NetworkingModeManager` is now singleton-backed and exposes active `INetworkReceiver` access so runtime systems consume protocol-agnostic DMX input through `NetworkingModeManager.Instance.NetworkReceiver` (Art-Net or sACN) instead of hard references to `ArtNetReceiver`._
+
+_Progress note: Networking mode selection now swaps runtime receiver components in `NetworkingModeManager` (Art-Net/sACN) using integer mode indices, with a manager-owned DMX buffer assigned to each newly added receiver._

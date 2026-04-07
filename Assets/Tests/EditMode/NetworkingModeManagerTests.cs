@@ -28,15 +28,15 @@ public class NetworkingModeManagerTests
     [Test]
     public void Awake_RevertsSavedSAcnModeToArtNet_WhenAdvancedNetworkingIsLocked()
     {
-        PlayerPrefs.SetInt(SaveLoadSettings.NetworkModeKey, (int)NetworkingMode.SAcn);
+        PlayerPrefs.SetInt(SaveLoadSettings.NetworkModeKey, NetworkingModeManager.SAcnModeIndex);
         PlayerPrefs.Save();
 
         var manager = _managerGo.AddComponent<NetworkingModeManager>();
 
         manager.SendMessage("Awake");
 
-        Assert.AreEqual(NetworkingMode.ArtNet, manager.ActiveMode);
-        Assert.AreEqual((int)NetworkingMode.ArtNet, PlayerPrefs.GetInt(SaveLoadSettings.NetworkModeKey, -1));
+        Assert.AreEqual(NetworkingModeManager.ArtNetModeIndex, manager.ActiveModeIndex);
+        Assert.AreEqual(NetworkingModeManager.ArtNetModeIndex, PlayerPrefs.GetInt(SaveLoadSettings.NetworkModeKey, -1));
     }
 
     [Test]
@@ -44,8 +44,8 @@ public class NetworkingModeManagerTests
     {
         var manager = _managerGo.AddComponent<NetworkingModeManager>();
 
-        manager.SetMode(NetworkingMode.SAcn);
+        manager.SetModeFromIndex(NetworkingModeManager.SAcnModeIndex);
 
-        Assert.AreEqual((int)NetworkingMode.SAcn, PlayerPrefs.GetInt(SaveLoadSettings.NetworkModeKey, -1));
+        Assert.AreEqual(NetworkingModeManager.SAcnModeIndex, PlayerPrefs.GetInt(SaveLoadSettings.NetworkModeKey, -1));
     }
 }

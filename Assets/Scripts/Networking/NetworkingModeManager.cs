@@ -1,24 +1,22 @@
 using UnityEngine;
 
-public enum NetworkingMode
-{
-    ArtNet = 0,
-    SAcn = 1
-}
-
 public class NetworkingModeManager : MonoBehaviour
 {
     private const string AdvancedNetworkingCapabilityId = "capability.advanced.networking";
 
+    public const int ArtNetModeIndex = 0;
+    public const int SAcnModeIndex = 1;
+
     public static NetworkingModeManager Instance { get; private set; }
 
     [SerializeField] private PurchaseValidationManager purchaseValidationManager;
-    [SerializeField] private ArtNetReceiver artNetReceiver;
-    [SerializeField] private SAcnReceiver sAcnReceiver;
-    [SerializeField] private NetworkingMode startupMode = NetworkingMode.ArtNet;
+    [SerializeField] private int startupModeIndex = ArtNetModeIndex;
 
-    public NetworkingMode ActiveMode { get; private set; }
+    public int ActiveModeIndex { get; private set; }
+    public bool IsSAcnMode => ActiveModeIndex == SAcnModeIndex;
     public INetworkReceiver NetworkReceiver { get; private set; }
+
+    private DmxBuffer _dmxBuffer;
 
     private void Awake()
     {
@@ -29,44 +27,25 @@ public class NetworkingModeManager : MonoBehaviour
         }
 
         Instance = this;
+        _dmxBuffer = new DmxBuffer();
 
-        if (artNetReceiver == null)
-        {
-            artNetReceiver = FindFirstObjectByType<ArtNetReceiver>();
-        }
+        int initialMode = Mathf.Clamp(
+            SaveLoadSettings.LoadInt(SaveLoadSettings.NetworkModeKey, Mathf.Clamp(startupModeIndex, ArtNetModeIndex, SAcnModeIndex)),
+            ArtNetModeIndex,
+            SAcnModeIndex);
 
-        if (sAcnReceiver == null)
-        {
-            sAcnReceiver = FindFirstObjectByType<SAcnReceiver>();
-        }
-
-        if (artNetReceiver != null && sAcnReceiver != null)
-        {
-            if (artNetReceiver.DmxBuffer == null)
-            {
-                artNetReceiver.DmxBuffer = new DmxBuffer();
-            }
-
-            sAcnReceiver.DmxBuffer = artNetReceiver.DmxBuffer;
-            sAcnReceiver.SetUniverseFromUserInput(artNetReceiver.GetUniverseForUserInput());
-            sAcnReceiver.SetStartChannelFromUserInput(artNetReceiver.StartChannel);
-        }
-
-        int savedMode = SaveLoadSettings.LoadInt(SaveLoadSettings.NetworkModeKey, (int)startupMode);
-        NetworkingMode initialMode = (NetworkingMode)Mathf.Clamp(savedMode, 0, 1);
-
-        if (initialMode != NetworkingMode.ArtNet && !IsAdvancedNetworkingUnlocked())
+        if (initialMode != ArtNetModeIndex && !IsAdvancedNetworkingUnlocked())
         {
             purchaseValidationManager ??= FindFirstObjectByType<PurchaseValidationManager>();
             purchaseValidationManager?.TryValidatePurchases();
 
             if (!IsAdvancedNetworkingUnlocked())
             {
-                initialMode = NetworkingMode.ArtNet;
+                initialMode = ArtNetModeIndex;
             }
         }
 
-        SetMode(initialMode);
+        SetModeFromIndex(initialMode);
     }
 
     private void OnDestroy()
@@ -77,60 +56,63 @@ public class NetworkingModeManager : MonoBehaviour
         }
     }
 
-    private void Update()
+    public void SetModeFromIndex(int modeIndex)
     {
-        if (artNetReceiver == null || sAcnReceiver == null)
+        int clampedMode = Mathf.Clamp(modeIndex, ArtNetModeIndex, SAcnModeIndex);
+
+        int currentUniverseForInput = NetworkReceiver?.GetUniverseForUserInput() ?? 1;
+        int currentStartChannel = NetworkReceiver?.StartChannel ?? 1;
+        float currentTimeoutSeconds = NetworkReceiver?.TimeoutSeconds ?? 2f;
+
+        RemoveCurrentReceiverComponent();
+
+        INetworkReceiver nextReceiver = clampedMode == ArtNetModeIndex
+            ? gameObject.AddComponent<ArtNetReceiver>()
+            : gameObject.AddComponent<SAcnReceiver>();
+
+        nextReceiver.DmxBuffer = _dmxBuffer;
+        nextReceiver.ReceiveNetworkData = true;
+        nextReceiver.SetUniverseFromUserInput(currentUniverseForInput);
+        nextReceiver.SetStartChannelFromUserInput(currentStartChannel);
+        nextReceiver.TimeoutSeconds = currentTimeoutSeconds;
+
+        nextReceiver.StartReceiver();
+
+        NetworkReceiver = nextReceiver;
+        ActiveModeIndex = clampedMode;
+
+        SaveLoadSettings.SaveInt(SaveLoadSettings.NetworkModeKey, clampedMode);
+        SaveLoadSettings.Save();
+    }
+
+    private void RemoveCurrentReceiverComponent()
+    {
+        if (NetworkReceiver == null)
         {
             return;
         }
 
-        if (ActiveMode == NetworkingMode.SAcn)
+        NetworkReceiver.ReceiveNetworkData = false;
+        NetworkReceiver.StopReceiver();
+
+        if (NetworkReceiver is MonoBehaviour receiverComponent)
         {
-            sAcnReceiver.SetUniverseFromUserInput(artNetReceiver.GetUniverseForUserInput());
-            sAcnReceiver.SetStartChannelFromUserInput(artNetReceiver.StartChannel);
+            if (Application.isPlaying)
+            {
+                Destroy(receiverComponent);
+            }
+            else
+            {
+                DestroyImmediate(receiverComponent);
+            }
         }
-    }
 
-    public void SetModeFromIndex(int modeIndex)
-    {
-        SetMode((NetworkingMode)Mathf.Clamp(modeIndex, 0, 1));
-    }
-
-    public void SetMode(NetworkingMode mode)
-    {
-        ActiveMode = mode;
-        SaveLoadSettings.SaveInt(SaveLoadSettings.NetworkModeKey, (int)mode);
-        SaveLoadSettings.Save();
-
-        bool useArtNet = mode == NetworkingMode.ArtNet;
-        SetReceiverState(artNetReceiver, useArtNet);
-        SetReceiverState(sAcnReceiver, !useArtNet);
-        NetworkReceiver = useArtNet ? artNetReceiver : sAcnReceiver;
+        NetworkReceiver = null;
     }
 
     private static bool IsAdvancedNetworkingUnlocked()
     {
         return CapabilityService.Instance != null
             && CapabilityService.Instance.ResolveBoolean(AdvancedNetworkingCapabilityId, false);
-    }
-
-    private static void SetReceiverState(INetworkReceiver receiver, bool isEnabled)
-    {
-        if (!(receiver is MonoBehaviour behaviour))
-        {
-            return;
-        }
-
-        if (isEnabled)
-        {
-            receiver.StartReceiver();
-        }
-        else
-        {
-            receiver.StopReceiver();
-        }
-
-        receiver.ReceiveNetworkData = isEnabled;
-        behaviour.enabled = true;
     }
 }
