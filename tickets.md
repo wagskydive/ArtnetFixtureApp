@@ -1797,7 +1797,7 @@ T14.11 - Fix the IP address inside the webui. The IP address should show the loc
   - Updated `LocalWebUiServer` to use `IpSolver.ResolveLocalIpv4Address()` directly for `/api/settings` payloads so WebUI IP display is sourced from the shared resolver.
   - Added EditMode coverage asserting `WebUiSettingsStore.ToJson`/`FromJson` preserve the resolved IP address field.
 
-T19.32 - Next run: validate refunded-product popup content on Android build with real Google Play refund flow and capture UI video proof.
+T19.32 - Find a d fix a bug where the validation logic wrongly finds an IAP to be invalidated when another IP is purchased. Curently after re-buying the Custom Gobo IAP, the popup for Unlimited Universes being locked popup shows up. After a restart of the app ,the Unlimited Universes IAP is validated correctly again. Try to simplify the validation logic and make sure the popup and locking/unlocking system works correctly.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
