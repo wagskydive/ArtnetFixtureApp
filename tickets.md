@@ -1433,6 +1433,15 @@ T19.29 - Add a "Consumable" checkmark to the "Capability Definition" Scriptable 
   - `EntitlementStore` now tracks/persists consumable purchase counts separately (`iap.consumables`) while keeping entitlement storage for non-consumables.
   - Updated IAP panel UI status to display consumable purchase count and keep consumable purchase buttons available.
 
+
+T19.30 - Find and fix a bug where the popup that is shown when a purchase is refunded results in the settings ui to become unresponsive when the popup is dismissed. Currently the popup is shown if the system finds out that a purchase is invalid after a refund. When the user presses cancel, the rest of the ui becomes unresponsive. 
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+
 T18.3 - rework UI_DpadNavigationController.cs so it works correctly and add a checkbox to allow/disallow horizontal and/or vetical navigation and/or wrapping. Currently Horizontal navigation doesn't work and verticle wrapping is buggy and not reliable.
 - [x] Started
 - [x] Behavior Written
