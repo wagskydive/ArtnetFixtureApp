@@ -1838,6 +1838,16 @@ T19.32 - Find a d fix a bug where the validation logic wrongly finds an IAP to b
   - Added EditMode regression coverage proving a single-product validation pass no longer revokes other active entitlements.
 
 T19.33 - Rework the validation system. Currently the IAP validation popup shows and tells incorrectly that certain purchases were refunded, but when the purchase panel is opened the purchases show correctly as unlocked and they also still work. The validation system should be simplified and fixed so that only once validation is really finding refunded IAPs it should show the popup. 
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - Simplified `PurchaseValidationManager` revocation flow to only show revocation popups when the validation endpoint explicitly returns `revoked=true` for a validated product.
+  - Removed startup/pending revocation replay and suspicious no-receipt fallback revocation paths that could surface false-positive revoked popups while entitlements remained valid.
+  - Updated validation result handling to track revoked products separately from currently valid products and added regression coverage for the revised `HandleValidationResult` behavior.
+
+T19.34 - Next run: add EditMode tests for `PurchaseValidationManager.ValidateAllPurchases` covering mixed valid/revoked/invalid responses so popup and entitlement sync behavior is verified end-to-end.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
