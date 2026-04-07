@@ -14,6 +14,7 @@ public static class SaveLoadSettings
     public const string WebUiPasswordKey = "webui.password";
     public const string WebUiPasswordEnabledKey = "webui.password.enabled";
     public const string NetworkWarningEnabledKey = "network.warning.enabled";
+    public const string NetworkModeKey = "network.mode";
     public const string InfoPanelEnabledKey = "info.panel.enabled";
     public const string IapEntitlementsKey = "iap.entitlements";
     public const string IapConsumablesKey = "iap.consumables";

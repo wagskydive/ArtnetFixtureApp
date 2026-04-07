@@ -8,7 +8,9 @@ public enum NetworkingMode
 
 public class NetworkingModeManager : MonoBehaviour
 {
-    private const string NetworkingModeKey = "network.mode";
+    private const string AdvancedNetworkingCapabilityId = "capability.advanced.networking";
+
+    [SerializeField] private PurchaseValidationManager purchaseValidationManager;
 
     [SerializeField] private ArtNetReceiver artNetReceiver;
     [SerializeField] private SAcnReceiver sAcnReceiver;
@@ -40,8 +42,21 @@ public class NetworkingModeManager : MonoBehaviour
             sAcnReceiver.SetStartChannelFromUserInput(artNetReceiver.StartChannel);
         }
 
-        int savedMode = SaveLoadSettings.LoadInt(NetworkingModeKey, (int)startupMode);
-        SetMode((NetworkingMode)Mathf.Clamp(savedMode, 0, 1));
+        int savedMode = SaveLoadSettings.LoadInt(SaveLoadSettings.NetworkModeKey, (int)startupMode);
+        NetworkingMode initialMode = (NetworkingMode)Mathf.Clamp(savedMode, 0, 1);
+
+        if (initialMode != NetworkingMode.ArtNet && !IsAdvancedNetworkingUnlocked())
+        {
+            purchaseValidationManager ??= FindFirstObjectByType<PurchaseValidationManager>();
+            purchaseValidationManager?.TryValidatePurchases();
+
+            if (!IsAdvancedNetworkingUnlocked())
+            {
+                initialMode = NetworkingMode.ArtNet;
+            }
+        }
+
+        SetMode(initialMode);
     }
 
     private void Update()
@@ -66,11 +81,18 @@ public class NetworkingModeManager : MonoBehaviour
     public void SetMode(NetworkingMode mode)
     {
         ActiveMode = mode;
-        SaveLoadSettings.SaveInt(NetworkingModeKey, (int)mode);
+        SaveLoadSettings.SaveInt(SaveLoadSettings.NetworkModeKey, (int)mode);
+        SaveLoadSettings.Save();
 
         bool useArtNet = mode == NetworkingMode.ArtNet;
         SetReceiverState(artNetReceiver, useArtNet);
         SetReceiverState(sAcnReceiver, !useArtNet);
+    }
+
+    private static bool IsAdvancedNetworkingUnlocked()
+    {
+        return CapabilityService.Instance != null
+            && CapabilityService.Instance.ResolveBoolean(AdvancedNetworkingCapabilityId, false);
     }
 
     private static void SetReceiverState(INetworkReceiver receiver, bool isEnabled)
