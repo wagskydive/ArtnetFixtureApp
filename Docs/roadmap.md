@@ -258,6 +258,7 @@ _Progress note: `DmxModeManager.SetFixtureMode` now ignores no-op mode assignmen
 _Progress note: WebUI fixture-name editing now saves on submit (`change`/Enter) instead of per-keystroke autosave, preventing disruptive reload-like updates while typing._
 _Progress note: fixture name + resolved local IPv4 are now surfaced in WebUI (`/api/settings` metadata) and Unity UI display fields for faster device identification on-site._
 _Progress note: WebUI now includes responsive mobile styling for phone-sized screens with larger controls and improved layout density._
+_Progress note: Moving Head custom-gobo runtime now caches slot textures by file timestamp and avoids full 16-slot reload/destruction on every poll cycle, reducing periodic stutter after custom gobo integration._
 _Progress note: WebUI password flow is now active with persisted password storage and `/api/login` validation endpoint for lock/unlock behavior._
 _Progress note: WebUI password protection now uses SHA-256 hashed storage with a Unity UI-managed enable toggle, and browser clients cache successful auth state while still re-locking when protection is enabled/configured._
 _Progress note: WebUI HTML is now settings-only (DMX test page/tabs removed), includes a direct feedback button (`dilarium.es/dmx-projector/feedback`), and shows the resolved access URL in a read-only IP field._

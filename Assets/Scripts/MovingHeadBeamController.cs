@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.IO;
 
 public class MovingHeadBeamController : MonoBehaviour
 {
@@ -11,7 +12,10 @@ public class MovingHeadBeamController : MonoBehaviour
     private Material _outputMaterial;
     private Material _activeSharedMaterial;
     private Texture _fallbackGoboTexture;
-    private readonly List<Texture2D> _customGoboTextures = new List<Texture2D>(CustomGoboStorage.MaxSlots);
+    private Texture _activeGoboTexture;
+    private readonly Texture2D[] _customGoboSlotTextures = new Texture2D[CustomGoboStorage.MaxSlots];
+    private readonly long[] _customGoboSlotWriteTicks = new long[CustomGoboStorage.MaxSlots];
+    private readonly List<Texture2D> _availableCustomGobos = new List<Texture2D>(CustomGoboStorage.MaxSlots);
     private float _nextGoboReloadTime;
     private bool _hasLoadedCustomGobos;
 
@@ -71,6 +75,7 @@ public class MovingHeadBeamController : MonoBehaviour
             _activeSharedMaterial = outputRenderer.sharedMaterial;
             _outputMaterial = outputRenderer.material;
             _fallbackGoboTexture = _outputMaterial != null ? _outputMaterial.GetTexture("_GoboTex") : null;
+            _activeGoboTexture = null;
             _hasLoadedCustomGobos = false;
         }
 
@@ -91,15 +96,15 @@ public class MovingHeadBeamController : MonoBehaviour
             _nextGoboReloadTime = Time.time + 2f;
         }
 
-        if (_customGoboTextures.Count == 0)
+        if (_availableCustomGobos.Count == 0)
         {
             SetFallbackGoboTexture();
             return;
         }
 
         float normalizedSelector = Mathf.Clamp01((speed - 0.1f) / (8f - 0.1f));
-        int index = Mathf.Clamp(Mathf.FloorToInt(normalizedSelector * _customGoboTextures.Count), 0, _customGoboTextures.Count - 1);
-        _outputMaterial.SetTexture("_GoboTex", _customGoboTextures[index]);
+        int index = Mathf.Clamp(Mathf.FloorToInt(normalizedSelector * _availableCustomGobos.Count), 0, _availableCustomGobos.Count - 1);
+        SetGoboTexture(_availableCustomGobos[index]);
     }
 
     private bool IsCustomGoboUnlocked()
@@ -116,20 +121,70 @@ public class MovingHeadBeamController : MonoBehaviour
     {
         if (_outputMaterial != null && _fallbackGoboTexture != null)
         {
-            _outputMaterial.SetTexture("_GoboTex", _fallbackGoboTexture);
+            SetGoboTexture(_fallbackGoboTexture);
         }
     }
 
     private void ReloadCustomGobos()
     {
-        ReleaseCustomGobos();
+        bool listChanged = false;
 
         for (int slot = 1; slot <= CustomGoboStorage.MaxSlots; slot++)
         {
-            Texture2D texture = CustomGoboStorage.LoadSlotTexture(slot);
-            if (texture != null)
+            int index = slot - 1;
+            string path = CustomGoboStorage.GetSlotPath(slot);
+            if (!File.Exists(path))
             {
-                _customGoboTextures.Add(texture);
+                if (_customGoboSlotTextures[index] != null)
+                {
+                    Destroy(_customGoboSlotTextures[index]);
+                    _customGoboSlotTextures[index] = null;
+                    _customGoboSlotWriteTicks[index] = 0;
+                    listChanged = true;
+                }
+
+                continue;
+            }
+
+            long writeTicks = File.GetLastWriteTimeUtc(path).Ticks;
+            if (_customGoboSlotTextures[index] != null && _customGoboSlotWriteTicks[index] == writeTicks)
+            {
+                continue;
+            }
+
+            Texture2D texture = CustomGoboStorage.LoadSlotTexture(slot);
+            if (texture == null)
+            {
+                if (_customGoboSlotTextures[index] != null)
+                {
+                    Destroy(_customGoboSlotTextures[index]);
+                    _customGoboSlotTextures[index] = null;
+                    _customGoboSlotWriteTicks[index] = 0;
+                    listChanged = true;
+                }
+
+                continue;
+            }
+
+            if (_customGoboSlotTextures[index] != null)
+            {
+                Destroy(_customGoboSlotTextures[index]);
+            }
+
+            _customGoboSlotTextures[index] = texture;
+            _customGoboSlotWriteTicks[index] = writeTicks;
+            listChanged = true;
+        }
+
+        if (listChanged || !_hasLoadedCustomGobos)
+        {
+            _availableCustomGobos.Clear();
+            for (int i = 0; i < _customGoboSlotTextures.Length; i++)
+            {
+                if (_customGoboSlotTextures[i] != null)
+                {
+                    _availableCustomGobos.Add(_customGoboSlotTextures[i]);
+                }
             }
         }
 
@@ -138,15 +193,28 @@ public class MovingHeadBeamController : MonoBehaviour
 
     private void ReleaseCustomGobos()
     {
-        for (int i = 0; i < _customGoboTextures.Count; i++)
+        for (int i = 0; i < _customGoboSlotTextures.Length; i++)
         {
-            if (_customGoboTextures[i] != null)
+            if (_customGoboSlotTextures[i] != null)
             {
-                Destroy(_customGoboTextures[i]);
+                Destroy(_customGoboSlotTextures[i]);
+                _customGoboSlotTextures[i] = null;
+                _customGoboSlotWriteTicks[i] = 0;
             }
         }
 
-        _customGoboTextures.Clear();
+        _availableCustomGobos.Clear();
+    }
+
+    private void SetGoboTexture(Texture texture)
+    {
+        if (_outputMaterial == null || texture == null || ReferenceEquals(_activeGoboTexture, texture))
+        {
+            return;
+        }
+
+        _activeGoboTexture = texture;
+        _outputMaterial.SetTexture("_GoboTex", texture);
     }
 
     private void OnDestroy()
