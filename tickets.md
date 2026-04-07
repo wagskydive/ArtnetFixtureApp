@@ -1784,7 +1784,7 @@ T14.10 - Work on the webui html code.
   - Removed the Restart Fixture action and added a Feedback button linking to `https://dilarium.es/dmx-projector/feedback`.
   - Reworked IP display to a read-only text field that always shows a full URL using the current host IP + active port (for clearer copy/share behavior).
 
-T14.11 - Add automated validation for current WebUI HTML UX requirements (single settings page, feedback link, and IP field format) to prevent regressions.
+T14.11 - Fix the IP address inside the webui. The IP address should show the local IP inside the network. Currently it shows 0.0.0.0 but it should retreive the local IP address from the IPSolver.cs script and display that IP address in the webui
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
