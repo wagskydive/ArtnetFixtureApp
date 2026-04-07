@@ -14,6 +14,7 @@ public class Popup : MonoBehaviour
 
     private GameObject _previousSelected;
     private readonly List<UI_DpadNavigationController> _blockedNavigationControllers = new List<UI_DpadNavigationController>();
+    private bool _navigationBlockApplied;
 
     private void Awake()
     {
@@ -26,8 +27,11 @@ public class Popup : MonoBehaviour
     private void OnEnable()
     {
         EnableAction(backAction, OnBackAction);
-        ApplyNavigationBlock();
-        FocusDefaultSelection();
+        if (IsOpen())
+        {
+            ApplyNavigationBlock();
+            FocusDefaultSelection();
+        }
     }
 
     private void OnDisable()
@@ -40,6 +44,12 @@ public class Popup : MonoBehaviour
     {
         if (!IsOpen())
         {
+            if (_navigationBlockApplied)
+            {
+                RestorePreviousSelection();
+                ReleaseNavigationBlock();
+            }
+
             return;
         }
 
@@ -135,6 +145,11 @@ public class Popup : MonoBehaviour
 
     private void ApplyNavigationBlock()
     {
+        if (_navigationBlockApplied)
+        {
+            return;
+        }
+
         _blockedNavigationControllers.Clear();
 
         if (!keepNavigationInsidePopup || panelRoot == null)
@@ -160,6 +175,8 @@ public class Popup : MonoBehaviour
             controller.enabled = false;
             _blockedNavigationControllers.Add(controller);
         }
+
+        _navigationBlockApplied = true;
     }
 
     private void ReleaseNavigationBlock()
@@ -173,6 +190,17 @@ public class Popup : MonoBehaviour
         }
 
         _blockedNavigationControllers.Clear();
+        _navigationBlockApplied = false;
+    }
+
+    private void RestorePreviousSelection()
+    {
+        if (_previousSelected == null || EventSystem.current == null)
+        {
+            return;
+        }
+
+        EventSystem.current.SetSelectedGameObject(_previousSelected);
     }
 
     private static void EnableAction(InputActionReference actionReference, System.Action<InputAction.CallbackContext> callback)

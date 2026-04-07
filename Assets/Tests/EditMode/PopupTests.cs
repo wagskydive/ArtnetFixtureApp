@@ -68,9 +68,41 @@ public class PopupTests
         Object.DestroyImmediate(popupRoot);
     }
 
+    [Test]
+    public void ExternalPanelHide_ReleasesNavigationBlock()
+    {
+        var popupHost = new GameObject("popup-host");
+        var popupRoot = new GameObject("popup-root");
+        popupRoot.transform.SetParent(popupHost.transform);
+        popupRoot.SetActive(false);
+
+        var popup = popupHost.AddComponent<Popup>();
+        SetPrivateField(popup, "panelRoot", popupRoot);
+
+        var backgroundNavGo = new GameObject("background-nav");
+        var backgroundController = backgroundNavGo.AddComponent<UI_DpadNavigationController>();
+
+        popup.Open();
+        Assert.That(backgroundController.enabled, Is.False);
+
+        popupRoot.SetActive(false);
+        InvokePrivateMethod(popup, "Update");
+
+        Assert.That(backgroundController.enabled, Is.True);
+
+        Object.DestroyImmediate(backgroundNavGo);
+        Object.DestroyImmediate(popupHost);
+    }
+
     private static void SetPrivateField(object target, string fieldName, object value)
     {
         var field = target.GetType().GetField(fieldName, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         field.SetValue(target, value);
+    }
+
+    private static void InvokePrivateMethod(object target, string methodName)
+    {
+        var method = target.GetType().GetMethod(methodName, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        method.Invoke(target, null);
     }
 }
