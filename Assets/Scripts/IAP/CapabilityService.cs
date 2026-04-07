@@ -151,6 +151,40 @@ public class CapabilityService : MonoBehaviour
         }
     }
 
+    public void SyncValidatedEntitlements(IReadOnlyCollection<string> validatedProducts, IReadOnlyCollection<string> validProducts)
+    {
+        if (_entitlementStore == null)
+        {
+            return;
+        }
+
+        var validatedProductSet = validatedProducts != null
+            ? new HashSet<string>(validatedProducts, StringComparer.Ordinal)
+            : new HashSet<string>(StringComparer.Ordinal);
+        var validProductSet = validProducts != null
+            ? new HashSet<string>(validProducts, StringComparer.Ordinal)
+            : new HashSet<string>(StringComparer.Ordinal);
+
+        bool changed = false;
+        foreach (string validatedProductId in validatedProductSet)
+        {
+            if (!validProductSet.Contains(validatedProductId))
+            {
+                changed |= _entitlementStore.MarkLocked(validatedProductId);
+            }
+        }
+
+        foreach (string validProductId in validProductSet)
+        {
+            changed |= _entitlementStore.MarkUnlocked(validProductId);
+        }
+
+        if (changed)
+        {
+            EntitlementsChanged?.Invoke();
+        }
+    }
+
     public void ResetEntitlements()
     {
         if (_entitlementStore == null)

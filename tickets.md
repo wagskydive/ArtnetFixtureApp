@@ -1798,6 +1798,16 @@ T14.11 - Fix the IP address inside the webui. The IP address should show the loc
   - Added EditMode coverage asserting `WebUiSettingsStore.ToJson`/`FromJson` preserve the resolved IP address field.
 
 T19.32 - Find a d fix a bug where the validation logic wrongly finds an IAP to be invalidated when another IP is purchased. Curently after re-buying the Custom Gobo IAP, the popup for Unlimited Universes being locked popup shows up. After a restart of the app ,the Unlimited Universes IAP is validated correctly again. Try to simplify the validation logic and make sure the popup and locking/unlocking system works correctly.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - Refactored validation reconciliation so only products actually validated in the current pass are eligible for lock/unlock changes, preventing unrelated entitlements from being revoked when a different purchase is revalidated.
+  - Added `CapabilityService.SyncValidatedEntitlements(...)` and updated `PurchaseValidationManager` to track `validatedProducts` + `validProducts` separately for a safer, simpler sync model.
+  - Added EditMode regression coverage proving a single-product validation pass no longer revokes other active entitlements.
+
+T19.33 - Next run: add explicit validation-result telemetry (validated/valid/revoked counts per pass) and a targeted test for mixed valid+revoked product responses in one server sync.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
