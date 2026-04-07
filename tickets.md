@@ -99,6 +99,29 @@ Behavior notes:
 - Added reusable UI handlers for sACN transport configuration (multicast/unicast mode, multicast group, unicast bind IP, and listen port) so a future panel can wire buttons directly to these methods.
 - Added EditMode coverage for receiver-type guard behavior, value clamping, and text label refresh flows.
 
+
+T22.9 - The advanced networking IAP will automatically unlock unlimited universes, but it needs to cover the following: 
+
+For sACN you’ll need to add:
+
+Multicast socket handling
+Per-universe state tracking
+Source + priority arbitration layer
+(Optional but recommended) sync buffer system
+
+Join multicast groups for selected universes
+a clean merging algorithm (HTP/LTP + priority + sync)
+Use highest priority per universe
+
+
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+
+
 T21.1 - Find performance gaining changes and refactorizations. Currently the moving head mode is a bit stuttering and i think this happened since custom gobos were introduced. 
 - [x] Started
 - [x] Behavior Written
