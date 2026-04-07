@@ -54,7 +54,16 @@ T22.4 - Advanced network implementation part 4: Make the advanced networking sys
 - [x] Documentation Written
 
 
-T22.5 - Next run: add EditMode coverage for NetworkingModeManager and SAcn packet parsing edge cases (invalid vectors, non-zero start code, universe mismatch) and verify UI_NetworkPanel lock-state wiring in scene prefabs.
+T22.5 - Create a playerprefs entry in the save-load manager that remembers the networkmode change. If another mode then the default (Artnet) is in the player prefs and the entitlement is not unlocked, run the validation and if not validated then set it back to the default (Artnet)
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+
+
+T22.6 - Next run: add EditMode coverage for NetworkingModeManager and SAcn packet parsing edge cases (invalid vectors, non-zero start code, universe mismatch) and verify UI_NetworkPanel lock-state wiring in scene prefabs.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
