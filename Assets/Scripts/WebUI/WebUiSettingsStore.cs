@@ -45,6 +45,7 @@ public static class WebUiSettingsStore
         return new WebUiSettingsData
         {
             deviceName = string.IsNullOrWhiteSpace(raw.deviceName) ? "ArtnetFixture" : raw.deviceName.Trim(),
+            ipAddress = string.IsNullOrWhiteSpace(raw.ipAddress) ? "127.0.0.1" : raw.ipAddress.Trim(),
             fixtureMode = NormalizeFixtureMode(raw.fixtureMode),
             dmxUniverse = Mathf.Clamp(raw.dmxUniverse, 1, 16),
             startChannel = Mathf.Clamp(raw.startChannel, 1, 512),

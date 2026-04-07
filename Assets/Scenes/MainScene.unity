@@ -10281,6 +10281,7 @@ MonoBehaviour:
   validationIntervalHours: 0.25
   validateOnStart: 1
   revocationPopup: {fileID: 952136237}
+  revocationTitleText: {fileID: 2039765822}
   revocationMessageText: {fileID: 1206279915}
 --- !u!1 &1306461971
 GameObject:

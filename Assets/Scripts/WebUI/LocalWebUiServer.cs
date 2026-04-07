@@ -507,25 +507,7 @@ public class LocalWebUiServer : MonoBehaviour
 
     private static string GetLocalIpv4Address()
     {
-        try
-        {
-            string hostName = Dns.GetHostName();
-            IPAddress[] addresses = Dns.GetHostAddresses(hostName);
-            for (int i = 0; i < addresses.Length; i++)
-            {
-                IPAddress address = addresses[i];
-                if (address.AddressFamily == AddressFamily.InterNetwork && !IPAddress.IsLoopback(address))
-                {
-                    return address.ToString();
-                }
-            }
-        }
-        catch (Exception)
-        {
-            // Ignore network enumeration errors.
-        }
-
-        return "127.0.0.1";
+        return IpSolver.ResolveLocalIpv4Address();
     }
 
     private void WriteHtml(HttpListenerResponse response)

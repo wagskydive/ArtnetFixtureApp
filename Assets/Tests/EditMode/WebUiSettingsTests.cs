@@ -54,6 +54,27 @@ public class WebUiSettingsTests
     }
 
     [Test]
+    public void ToJson_PreservesResolvedIpAddress()
+    {
+        var data = new WebUiSettingsData
+        {
+            deviceName = "Fixture",
+            ipAddress = "192.168.1.77",
+            fixtureMode = "surface",
+            dmxUniverse = 1,
+            startChannel = 1,
+            fixtureAmount = 1,
+            gridX = 8,
+            gridY = 8
+        };
+
+        string json = WebUiSettingsStore.ToJson(data);
+        WebUiSettingsData parsed = WebUiSettingsStore.FromJson(json);
+
+        Assert.That(parsed.ipAddress, Is.EqualTo("192.168.1.77"));
+    }
+
+    [Test]
     public void ApplySettings_NonSurfaceModeForcesSingleFixtureAndStillAppliesUniverseAndStartChannel()
     {
         var template = GameObject.CreatePrimitive(PrimitiveType.Quad);

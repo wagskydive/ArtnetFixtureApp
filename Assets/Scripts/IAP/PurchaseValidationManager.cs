@@ -12,6 +12,7 @@ public class PurchaseValidationManager : MonoBehaviour
     [SerializeField, Min(0.001f)] private float validationIntervalHours = 24f;
     [SerializeField] private bool validateOnStart = true;
     [SerializeField] private Popup revocationPopup;
+    [SerializeField] private Text revocationTitleText;
     [SerializeField] private Text revocationMessageText;
 
     private const string LastValidationUnixKey = "iap_last_validation_unix";
@@ -421,9 +422,13 @@ public class PurchaseValidationManager : MonoBehaviour
         {
             return;
         }
-        Debug.Log(revokedProducts);
+        string message = BuildRevocationMessage(revokedProducts);
 
-        const string message = "Some purchases were refunded and have been removed.";
+        if (revocationTitleText != null)
+        {
+            revocationTitleText.text = "Purchase revoked";
+        }
+
         if (revocationMessageText != null)
         {
             revocationMessageText.text = message;
@@ -437,6 +442,78 @@ public class PurchaseValidationManager : MonoBehaviour
         }
 
         Debug.LogWarning(message, this);
+    }
+
+    private string BuildRevocationMessage(List<string> revokedProducts)
+    {
+        if (revokedProducts == null || revokedProducts.Count == 0)
+        {
+            return "Some purchases were refunded and have been removed.";
+        }
+
+        var labels = new List<string>();
+        var seenProducts = new HashSet<string>(StringComparer.Ordinal);
+
+        for (int i = 0; i < revokedProducts.Count; i++)
+        {
+            string productId = revokedProducts[i];
+            if (string.IsNullOrWhiteSpace(productId))
+            {
+                continue;
+            }
+
+            string normalized = productId.Trim();
+            if (!seenProducts.Add(normalized))
+            {
+                continue;
+            }
+
+            labels.Add(ResolveProductDisplayName(normalized));
+        }
+
+        if (labels.Count == 0)
+        {
+            return "Some purchases were refunded and have been removed.";
+        }
+
+        return labels.Count == 1
+            ? $"\"{labels[0]}\" was refunded and has been removed."
+            : $"{labels.Count} purchases were refunded and have been removed: {string.Join(", ", labels)}.";
+    }
+
+    private static string ResolveProductDisplayName(string productId)
+    {
+        CapabilityDatabase database = CapabilityDatabase.Instance;
+        if (database == null)
+        {
+            return productId;
+        }
+
+        IReadOnlyList<CapabilityDefinition> definitions = database.CapabilityDefinitions;
+        for (int i = 0; i < definitions.Count; i++)
+        {
+            CapabilityDefinition definition = definitions[i];
+            if (definition == null)
+            {
+                continue;
+            }
+
+            if (string.Equals(definition.ProductId, productId, StringComparison.Ordinal))
+            {
+                return string.IsNullOrWhiteSpace(definition.DisplayTitle) ? productId : definition.DisplayTitle.Trim();
+            }
+
+            IReadOnlyList<string> alternates = definition.AdditionalProductIds;
+            for (int alternateIndex = 0; alternateIndex < alternates.Count; alternateIndex++)
+            {
+                if (string.Equals(alternates[alternateIndex], productId, StringComparison.Ordinal))
+                {
+                    return string.IsNullOrWhiteSpace(definition.DisplayTitle) ? productId : definition.DisplayTitle.Trim();
+                }
+            }
+        }
+
+        return productId;
     }
 
     private string GetOrCreateDeviceId()
