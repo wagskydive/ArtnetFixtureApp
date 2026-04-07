@@ -20,7 +20,12 @@
 3. Use capability in logic
 
 ---
-
+T23.1 - Modify the UI_TVKeyboardTextEditor.cs script so it has text validation options. The options for validation modes shoud be: none, ip address, integer within a range, no special character, no spaces and maybe some more common string restrictions. Create an enum for the choise and a range field for the respective modes. Also create a field for a popup that is shown that tells the user what is wrong if the text is not valid.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
 
 T22.1 - Advanced network implementation part 1: Refactor artnetReveiver so it implements an interface INetworkReceiver that can be swapped out with different network receivers. Rename the folder "Scripts/ArtNet" into "Scripts/Networking"
 - [x] Started
