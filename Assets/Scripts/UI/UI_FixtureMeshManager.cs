@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class UI_FixtureMeshManager : MonoBehaviour
 {
-    [SerializeField] private ArtNetReceiver primaryReceiver;
+    private INetworkReceiver primaryReceiver;
     [SerializeField] private GameObject fixtureTemplate;
     [SerializeField] private Transform fixturesParent;
     [SerializeField] private Text fixtureCountValueText;
@@ -17,6 +17,7 @@ public class UI_FixtureMeshManager : MonoBehaviour
 
     private void Start()
     {
+        primaryReceiver = NetworkingModeManager.Instance.NetworkReceiver;
         RebuildFixtures(1, false);
         if (DmxModeManager.Instance.CurrentMode == DmxModeManager.FixtureMode.Standard)
         {

@@ -87,7 +87,7 @@ Behavior notes:
 - Mode storage now uses clamped integer indices (`ArtNetModeIndex`/`SAcnModeIndex`) without a `NetworkingMode` enum or serialized receiver references.
 - `UI_NetworkPanel` now reads manager state via `IsSAcnMode`, and networking mode tests now validate the integer-based mode API.
 
-T22.8 - Next run: add EditMode coverage that asserts receiver component replacement (ArtNet <-> sACN), shared DMX buffer continuity across mode switches, and universe/start-channel migration when switching protocols.
+T22.8 - Create a UI_SAcnSettings.cs script that can be used to change all settings that are related to sACN networking. It will also have a funcion that loads in the SAcnReceiver.cs that will be called in OnEnable that will do NetworkModeManager.Instance.NetworkReceiver and checks if that is of type SAcnReceiver if that is false it will disable itself. All the other functions in the script will be related to all the settings that can be changed for sACN networking and a UI panel will be build later that will call those functions
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
