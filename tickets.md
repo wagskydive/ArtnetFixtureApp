@@ -22,6 +22,37 @@
 ---
 
 
+T22.1 - Advanced network implementation part 1: Refactor artnetReveiver so it implements an interface INetworkReceiver that can be swapped out with different network receivers. Rename the folder "Scripts/ArtNet" into "Scripts/Networking"
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+
+T22.2 - Advanced network implementation part 2: Add a new script "SAcnReceiver" that implements the INetworkReceiver interface. Write the code that makes the system work with sACN networking.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+
+T22.3 - Advanced network implementation part 3: Add a "NetworkingModeManagar.cs" script that will handle which network protocol will be used. The script should be able to swap out the default ArtnetReceiver.cs with any other script that implements the INetworkReceiver inferface. Also add a "UI_NetworkPanel.cs" script that will be attached to a new panel to change the networking mode and any other network related settings. If sACN is selected through the UI_NetworkPanel, any addidtional settings related to sACN networking will be shown and configurable on the panel by showing or hiding a parent GameObject that is serialized in the UI_NetworkPanel The UI_NetworkPanel will also check if the "Advanced Networking" IAP is owned and if its locked it will not open the panel, but instead show the "LockedCapabilityPanel".
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+
+T22.4 - Advanced network implementation part 4: Make the advanced networking system work so it can use sACN and Artnet.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 T21.1 - Find performance gaining changes and refactorizations. Currently the moving head mode is a bit stuttering and i think this happened since custom gobos were introduced. 
 - [x] Started
 - [x] Behavior Written
