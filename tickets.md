@@ -75,7 +75,7 @@ Behavior notes:
 - Runtime DMX consumers (output controllers, personalities, settings bridge/UI, media playback, and editor simulator) now resolve DMX through `NetworkingModeManager.Instance.NetworkReceiver` instead of a direct `ArtNetReceiver` dependency.
 - `INetworkReceiver` now includes no-data/data-resumed events so network-warning UI can subscribe to protocol-agnostic receiver state transitions.
 
-T22.7 - Next run: execute Unity EditMode and scene wiring validation for T22.6 singleton + interface receiver migration (including inspector reference cleanup where direct ArtNetReceiver fields were removed).
+T22.7 - Modify the NetworkModeManager so that it doesn't need a serialized field for the arnetReceiver and the sACN receiver and doesn't need the NetworkMode enum. The correct networkReceiver gets added as a component at runtime and the DMX buffer also gets created on awake and when the mode changes, the componenet gets removed and the new component gets added. The DMX buffer gets set at to the receiver when the component gets added.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
