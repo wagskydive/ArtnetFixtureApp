@@ -118,19 +118,19 @@ T20.5 - Add custom gobos. Part 5 > Lock the custom gobos behind an IAP. Use the 
 
 
 T20.6 - The custom gobos should be using the "Pattern Speed" different. It should not be switching between gobos at a certain rate. the _Speed fader should just be used as a selector. So when the fader is at zero (0) the first gobo that is available shold show. When there are only 2 gobos available, the fader should show the next gobo at any value above 0.5 (DMX value 128) If there are more gobos available that should be scaled accordingly. So if there are 4 gobos, the value 0-0.25 should show gobo 1, 0.25-0.5 the second gobo. 0.5-0.75 the third and 0.75-1 the fourth.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
 
 
 T20.7 - Fix the webui Custom Gobo part so it scales better on any screen size. Currently the file choosing text is not fully readable. Also when a file is chose it can be uploaded directly. The button that is used to Upload could be used to open the file browser and should be the only button under the slots. Unused slots don't have to be visable when they are not in use. There can be a Plus button to add more gobos/slots up to 16.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
 
 T20.8 - Next run: bind custom gobos capability to locked-feature UI popup when upload endpoints return 403 and validate on-device throughput for repeated 512x512 uploads over LAN.
 - [ ] Started

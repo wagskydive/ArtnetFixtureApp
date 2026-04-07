@@ -97,7 +97,8 @@ public class MovingHeadBeamController : MonoBehaviour
             return;
         }
 
-        int index = Mathf.Abs(Mathf.FloorToInt(Time.time * Mathf.Max(speed, 0.1f))) % _customGoboTextures.Count;
+        float normalizedSelector = Mathf.Clamp01((speed - 0.1f) / (8f - 0.1f));
+        int index = Mathf.Clamp(Mathf.FloorToInt(normalizedSelector * _customGoboTextures.Count), 0, _customGoboTextures.Count - 1);
         _outputMaterial.SetTexture("_GoboTex", _customGoboTextures[index]);
     }
 
