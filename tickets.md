@@ -154,11 +154,11 @@ T20.7 - Fix the webui Custom Gobo part so it scales better on any screen size. C
 
 
 T20.8 - Modify the webui so slots can be removed. add a trash or minus button on each slot and when that button is pressed a confirmation popup gets shown. When confirmed for removal, the slot gets removed and the texture gets deleted from persistantData. The remaining slots get reordered so in the remaining names there are no gaps and the slot numnbers start with slot1. if the last slot gets removed the system should use the default texture again.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
 
 T20.9 - Next run: bind custom gobos capability to locked-feature UI popup when upload endpoints return 403 and validate on-device throughput for repeated 512x512 uploads over LAN.
 - [ ] Started

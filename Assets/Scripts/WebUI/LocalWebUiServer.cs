@@ -237,6 +237,12 @@ public class LocalWebUiServer : MonoBehaviour
             return;
         }
 
+        if (path == "/remove")
+        {
+            HandleRemoveRequest(context.Request, context.Response);
+            return;
+        }
+
         context.Response.StatusCode = 404;
         WriteText(context.Response, "Not found", "text/plain");
     }
@@ -373,6 +379,48 @@ public class LocalWebUiServer : MonoBehaviour
 
         GoboUploadResponse parsed = JsonUtility.FromJson<GoboUploadResponse>(result);
         response.StatusCode = parsed != null && parsed.success ? 200 : 400;
+        WriteJson(response, result);
+    }
+
+    private void HandleRemoveRequest(HttpListenerRequest request, HttpListenerResponse response)
+    {
+        if (!string.Equals(request.HttpMethod, "POST", StringComparison.OrdinalIgnoreCase))
+        {
+            response.StatusCode = 405;
+            WriteJson(response, JsonUtility.ToJson(new GoboUploadResponse
+            {
+                success = false,
+                message = "POST is required.",
+                slot = 0
+            }));
+            return;
+        }
+
+        int slot = ParseSlot(request.QueryString["slot"]);
+        string result = InvokeOnMainThread(() =>
+        {
+            if (!IsCustomGoboUpgradeUnlocked())
+            {
+                return JsonUtility.ToJson(new GoboUploadResponse
+                {
+                    success = false,
+                    message = "Custom gobo upgrade not unlocked.",
+                    slot = slot
+                });
+            }
+
+            bool removed = CustomGoboStorage.TryDeleteSlotAndCompact(slot, out string error);
+            return JsonUtility.ToJson(new GoboUploadResponse
+            {
+                success = removed,
+                message = removed ? "Slot removed." : error,
+                slot = slot
+            });
+        });
+
+        GoboUploadResponse parsed = JsonUtility.FromJson<GoboUploadResponse>(result);
+        bool locked = parsed != null && !parsed.success && parsed.message == "Custom gobo upgrade not unlocked.";
+        response.StatusCode = parsed != null && parsed.success ? 200 : (locked ? 403 : 400);
         WriteJson(response, result);
     }
 

@@ -202,6 +202,23 @@ public class WebUiSettingsTests
         Assert.That(File.Exists(path), Is.True);
     }
 
+    [Test]
+    public void CustomGoboStorage_TryDeleteSlotAndCompact_ReordersRemainingSlotsWithoutGaps()
+    {
+        byte[] validPng = CreatePng(512, 512);
+        Assert.That(CustomGoboStorage.TrySaveSlotPng(1, validPng, out _), Is.True);
+        Assert.That(CustomGoboStorage.TrySaveSlotPng(2, validPng, out _), Is.True);
+        Assert.That(CustomGoboStorage.TrySaveSlotPng(3, validPng, out _), Is.True);
+
+        bool removed = CustomGoboStorage.TryDeleteSlotAndCompact(2, out string error);
+
+        Assert.That(removed, Is.True);
+        Assert.That(error, Is.Null.Or.Empty);
+        Assert.That(File.Exists(CustomGoboStorage.GetSlotPath(1)), Is.True);
+        Assert.That(File.Exists(CustomGoboStorage.GetSlotPath(2)), Is.True);
+        Assert.That(File.Exists(CustomGoboStorage.GetSlotPath(3)), Is.False);
+    }
+
 
 
     private static void SetPrivateField(object target, string fieldName, object value)
