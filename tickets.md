@@ -55,11 +55,11 @@ T22.4 - Advanced network implementation part 4: Make the advanced networking sys
 
 
 T22.5 - Create a playerprefs entry in the save-load manager that remembers the networkmode change. If another mode then the default (Artnet) is in the player prefs and the entitlement is not unlocked, run the validation and if not validated then set it back to the default (Artnet)
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
 
 
 

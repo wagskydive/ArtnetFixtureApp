@@ -284,3 +284,5 @@ _Progress note: Revocation-popup dismissal no longer leaves settings navigation 
 _Progress note: Custom Gobo WebUI now supports per-slot removal with confirmation via new `/remove?slot=X` endpoint, deletes PNGs from persistent storage, and compacts remaining files so slot numbering stays contiguous (`slot1..slotN`) with default shader fallback when no custom gobos remain._
 
 _Progress note: networking input is now protocol-swappable via `INetworkReceiver` + `NetworkingModeManager`, with new `SAcnReceiver` support and advanced-networking-gated `UI_NetworkPanel` mode switching (Art-Net/sACN)._
+
+_Progress note: networking mode selection now persists through `SaveLoadSettings.NetworkModeKey`, and startup now falls back to Art-Net when a saved non-default mode is not entitled (after triggering purchase validation)._
