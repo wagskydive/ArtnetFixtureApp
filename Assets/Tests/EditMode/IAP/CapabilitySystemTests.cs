@@ -219,6 +219,26 @@ public class CapabilitySystemTests
     }
 
     [Test]
+    public void CapabilityService_SyncValidatedEntitlements_OnlyTouchesValidatedProducts()
+    {
+        var serviceGo = new GameObject("capability-service");
+        var service = serviceGo.AddComponent<CapabilityService>();
+        InvokeAwake(service);
+
+        service.UnlockProduct("product.unlimited.universes");
+        service.UnlockProduct("product.custom.gobos");
+
+        service.SyncValidatedEntitlements(
+            new HashSet<string> { "product.custom.gobos" },
+            new HashSet<string> { "product.custom.gobos" });
+
+        Assert.That(service.Entitlements.IsUnlocked("product.custom.gobos"), Is.True);
+        Assert.That(service.Entitlements.IsUnlocked("product.unlimited.universes"), Is.True);
+
+        GameObject.DestroyImmediate(serviceGo);
+    }
+
+    [Test]
     public void GooglePlayReceiptParser_ExtractPurchaseToken_ReturnsToken()
     {
         const string receipt = "{\"Store\":\"GooglePlay\",\"TransactionID\":\"txn-1\",\"Payload\":\"{\\\"json\\\":\\\"{\\\\\\\"purchaseToken\\\\\\\":\\\\\\\"token-123\\\\\\\",\\\\\\\"productId\\\\\\\":\\\\\\\"product.pro.bundle\\\\\\\"}\\\",\\\"signature\\\":\\\"sig\\\"}\"}";
@@ -269,10 +289,12 @@ public class CapabilitySystemTests
             BindingFlags.NonPublic);
         object revokedPending = Enum.Parse(resultType, "RevokedPending");
 
+        var validatedProducts = new HashSet<string>(StringComparer.Ordinal);
         var validProducts = new HashSet<string>(StringComparer.Ordinal);
-        method.Invoke(null, new object[] { "product.revoke", revokedPending, validProducts });
+        method.Invoke(null, new object[] { "product.revoke", revokedPending, validatedProducts, validProducts });
 
         Assert.That(validProducts.Contains("product.revoke"), Is.True);
+        Assert.That(validatedProducts.Contains("product.revoke"), Is.True);
     }
 
     [Test]

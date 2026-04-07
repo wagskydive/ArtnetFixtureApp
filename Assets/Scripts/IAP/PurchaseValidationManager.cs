@@ -124,6 +124,7 @@ public class PurchaseValidationManager : MonoBehaviour
     {
         Debug.Log("Purchase validation coroutine started");
         _validationInProgress = true;
+        var validatedProducts = new HashSet<string>(StringComparer.Ordinal);
         var validProducts = new HashSet<string>(StringComparer.Ordinal);
 
         IReadOnlyList<UnityIapPurchaseGateway.OwnedProductReceipt> receipts = purchaseGateway.GetOwnedNonConsumableReceipts();
@@ -158,10 +159,10 @@ public class PurchaseValidationManager : MonoBehaviour
 
                 ValidationResult result = ValidationResult.Invalid;
                 yield return ValidateWithServer(receipt.ProductId, purchaseToken, value => result = value);
-                HandleValidationResult(receipt.ProductId, result, validProducts);
+                HandleValidationResult(receipt.ProductId, result, validatedProducts, validProducts);
             }
 
-            CapabilityService.Instance?.SyncEntitlements(validProducts);
+            CapabilityService.Instance?.SyncValidatedEntitlements(validatedProducts, validProducts);
             SaveValidationTimestamp();
         }
         _validationInProgress = false;
@@ -234,12 +235,18 @@ public class PurchaseValidationManager : MonoBehaviour
         ShowRevocationPopup(pending);
     }
 
-    private static void HandleValidationResult(string productId, ValidationResult result, HashSet<string> validProducts)
+    private static void HandleValidationResult(
+        string productId,
+        ValidationResult result,
+        HashSet<string> validatedProducts,
+        HashSet<string> validProducts)
     {
-        if (string.IsNullOrWhiteSpace(productId) || validProducts == null)
+        if (string.IsNullOrWhiteSpace(productId) || validatedProducts == null || validProducts == null)
         {
             return;
         }
+
+        validatedProducts.Add(productId);
 
         switch (result)
         {
