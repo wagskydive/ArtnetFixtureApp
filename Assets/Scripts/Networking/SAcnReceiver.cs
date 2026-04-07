@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -25,6 +26,10 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
     public string UnicastBindAddress = "0.0.0.0";
     [Range(1, 65535)]
     public int ListenPort = 5568;
+    [Tooltip("Optional extra 0-based universes to listen to in addition to Universe.")]
+    public List<int> MulticastUniverseSubscriptions = new List<int>();
+    [Tooltip("When enabled, latest value wins after priority filtering. When disabled, highest value per channel wins (HTP).")]
+    public bool UseLtpMerge = false;
 
     [HideInInspector]
     public bool HasReceivedDataRecently = false;
@@ -46,11 +51,15 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
     private volatile bool _receivedPacketThisFrame;
     private float _lastPacketTime;
     private readonly byte[] _packetBuffer = new byte[512];
+    private readonly object _stateLock = new object();
+    private readonly Dictionary<int, UniverseState> _universeStates = new Dictionary<int, UniverseState>();
+    private readonly HashSet<int> _joinedMulticastUniverses = new HashSet<int>();
 
     private void Start()
     {
         Universe = ClampUniverse(Universe);
         StartChannel = ClampStartChannel(StartChannel);
+        ClampMulticastSubscriptions();
         LoadNetworkSettings();
 
         if (DmxBuffer == null)
@@ -107,6 +116,7 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
     public void SetUniverseFromUserInput(int universe1Based)
     {
         Universe = ClampUniverse(universe1Based - 1);
+        ClampMulticastSubscriptions();
     }
 
     public int GetUniverseForUserInput()
@@ -184,9 +194,9 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
         _udpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
         _udpClient.Client.Bind(new IPEndPoint(bindAddress, ListenPort));
 
-        if (UseMulticast && TryParseIpv4(MulticastAddress, out IPAddress multicastIp) && IsMulticast(multicastIp))
+        if (UseMulticast)
         {
-            _udpClient.JoinMulticastGroup(multicastIp);
+            JoinConfiguredMulticastGroups();
         }
 
         _running = true;
@@ -227,18 +237,18 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
             {
                 byte[] data = _udpClient.Receive(ref remoteEndpoint);
 
-                if (!TryParseSacnPacket(data, out int packetUniverse, out int dmxStartIndex, out int dmxLength))
+                if (!TryParseSacnPacket(data, out SacnPacketMetadata metadata))
                 {
                     continue;
                 }
 
-                if (packetUniverse != Universe + 1)
+                if (metadata.IsSynchronizationPacket)
                 {
+                    ApplyPendingSync(metadata.SyncUniverse == 0 ? metadata.Universe : metadata.SyncUniverse);
                     continue;
                 }
 
-                Buffer.BlockCopy(data, dmxStartIndex, _packetBuffer, 0, dmxLength);
-                DmxBuffer.WriteFrame(_packetBuffer, dmxLength);
+                ProcessDataPacket(data, metadata);
                 _receivedPacketThisFrame = true;
             }
             catch (Exception)
@@ -248,11 +258,54 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
         }
     }
 
-    private static bool TryParseSacnPacket(byte[] data, out int universe, out int dmxStartIndex, out int dmxLength)
+    private void ProcessDataPacket(byte[] data, SacnPacketMetadata metadata)
     {
-        universe = 0;
-        dmxStartIndex = 0;
-        dmxLength = 0;
+        if (metadata.Universe <= 0)
+        {
+            return;
+        }
+
+        lock (_stateLock)
+        {
+            if (!_universeStates.TryGetValue(metadata.Universe, out UniverseState universeState))
+            {
+                universeState = new UniverseState();
+                _universeStates[metadata.Universe] = universeState;
+            }
+
+            string sourceKey = BuildSourceKey(metadata.SourceCid);
+            if (!universeState.SourceStates.TryGetValue(sourceKey, out SourceState sourceState))
+            {
+                sourceState = new SourceState();
+                universeState.SourceStates[sourceKey] = sourceState;
+            }
+
+            int copyLength = Mathf.Clamp(metadata.DmxLength, 0, 512);
+            Buffer.BlockCopy(data, metadata.DmxStartIndex, sourceState.CurrentFrame, 0, copyLength);
+            sourceState.FrameLength = copyLength;
+            sourceState.Priority = metadata.Priority;
+            sourceState.LastSeenUtcTicks = DateTime.UtcNow.Ticks;
+            sourceState.HasPendingSync = metadata.SyncUniverse > 0;
+            sourceState.SyncUniverse = metadata.SyncUniverse;
+
+            if (sourceState.HasPendingSync)
+            {
+                Buffer.BlockCopy(sourceState.CurrentFrame, 0, sourceState.PendingFrame, 0, copyLength);
+                sourceState.PendingFrameLength = copyLength;
+                return;
+            }
+
+            byte[] merged = BuildMergedFrameForUniverseLocked(metadata.Universe);
+            if (metadata.Universe == Universe + 1 && merged != null && DmxBuffer != null)
+            {
+                DmxBuffer.WriteFrame(merged, 512);
+            }
+        }
+    }
+
+    private static bool TryParseSacnPacket(byte[] data, out SacnPacketMetadata metadata)
+    {
+        metadata = default;
 
         if (data == null || data.Length < 126)
         {
@@ -269,12 +322,23 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
             return false;
         }
 
-        universe = (data[113] << 8) | data[114];
+        metadata.Universe = (data[113] << 8) | data[114];
+        metadata.Priority = data[108];
+        metadata.SyncUniverse = (data[109] << 8) | data[110];
+        metadata.IsSynchronizationPacket = data[43] == 0x02;
         int propertyValueCount = (data[123] << 8) | data[124];
-        dmxLength = Mathf.Clamp(propertyValueCount - 1, 0, 512);
-        dmxStartIndex = 126;
+        metadata.DmxLength = Mathf.Clamp(propertyValueCount - 1, 0, 512);
+        metadata.DmxStartIndex = 126;
 
-        return data.Length >= dmxStartIndex + dmxLength;
+        if (metadata.IsSynchronizationPacket)
+        {
+            return true;
+        }
+
+        metadata.SourceCid = new byte[16];
+        Buffer.BlockCopy(data, 22, metadata.SourceCid, 0, 16);
+
+        return data.Length >= metadata.DmxStartIndex + metadata.DmxLength;
     }
 
     private static int ClampUniverse(int universe0Based)
@@ -338,5 +402,185 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
         }
 
         return IPAddress.Any;
+    }
+
+    private void ClampMulticastSubscriptions()
+    {
+        if (MulticastUniverseSubscriptions == null)
+        {
+            MulticastUniverseSubscriptions = new List<int>();
+            return;
+        }
+
+        for (int i = 0; i < MulticastUniverseSubscriptions.Count; i++)
+        {
+            MulticastUniverseSubscriptions[i] = ClampUniverse(MulticastUniverseSubscriptions[i]);
+        }
+    }
+
+    private void JoinConfiguredMulticastGroups()
+    {
+        _joinedMulticastUniverses.Clear();
+        JoinUniverseMulticastGroup(Universe + 1);
+
+        if (MulticastUniverseSubscriptions == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < MulticastUniverseSubscriptions.Count; i++)
+        {
+            JoinUniverseMulticastGroup(MulticastUniverseSubscriptions[i] + 1);
+        }
+    }
+
+    private void JoinUniverseMulticastGroup(int universe1Based)
+    {
+        if (universe1Based < 1 || universe1Based > 64000 || _joinedMulticastUniverses.Contains(universe1Based))
+        {
+            return;
+        }
+
+        IPAddress universeMulticast = BuildUniverseMulticastAddress(universe1Based);
+        _udpClient.JoinMulticastGroup(universeMulticast);
+        _joinedMulticastUniverses.Add(universe1Based);
+    }
+
+    private static IPAddress BuildUniverseMulticastAddress(int universe1Based)
+    {
+        int hi = (universe1Based >> 8) & 0xFF;
+        int lo = universe1Based & 0xFF;
+        return IPAddress.Parse($"239.255.{hi}.{lo}");
+    }
+
+    private void ApplyPendingSync(int syncUniverse)
+    {
+        lock (_stateLock)
+        {
+            foreach (KeyValuePair<int, UniverseState> universePair in _universeStates)
+            {
+                UniverseState universeState = universePair.Value;
+                foreach (KeyValuePair<string, SourceState> sourcePair in universeState.SourceStates)
+                {
+                    SourceState state = sourcePair.Value;
+                    if (!state.HasPendingSync || state.SyncUniverse != syncUniverse)
+                    {
+                        continue;
+                    }
+
+                    Buffer.BlockCopy(state.PendingFrame, 0, state.CurrentFrame, 0, state.PendingFrameLength);
+                    state.FrameLength = state.PendingFrameLength;
+                    state.HasPendingSync = false;
+                }
+            }
+
+            if (DmxBuffer != null && _universeStates.ContainsKey(Universe + 1))
+            {
+                byte[] merged = BuildMergedFrameForUniverseLocked(Universe + 1);
+                if (merged != null)
+                {
+                    DmxBuffer.WriteFrame(merged, 512);
+                }
+            }
+        }
+    }
+
+    private byte[] BuildMergedFrameForUniverseLocked(int universe1Based)
+    {
+        if (!_universeStates.TryGetValue(universe1Based, out UniverseState universeState) || universeState.SourceStates.Count == 0)
+        {
+            return null;
+        }
+
+        int highestPriority = int.MinValue;
+        foreach (KeyValuePair<string, SourceState> entry in universeState.SourceStates)
+        {
+            highestPriority = Mathf.Max(highestPriority, entry.Value.Priority);
+        }
+
+        Array.Clear(universeState.MergedFrame, 0, universeState.MergedFrame.Length);
+
+        SourceState ltpWinner = null;
+        if (UseLtpMerge)
+        {
+            long latestTicks = long.MinValue;
+            foreach (KeyValuePair<string, SourceState> entry in universeState.SourceStates)
+            {
+                SourceState candidate = entry.Value;
+                if (candidate.Priority != highestPriority)
+                {
+                    continue;
+                }
+
+                if (candidate.LastSeenUtcTicks > latestTicks)
+                {
+                    latestTicks = candidate.LastSeenUtcTicks;
+                    ltpWinner = candidate;
+                }
+            }
+        }
+
+        foreach (KeyValuePair<string, SourceState> entry in universeState.SourceStates)
+        {
+            SourceState sourceState = entry.Value;
+            if (sourceState.Priority != highestPriority)
+            {
+                continue;
+            }
+
+            if (UseLtpMerge)
+            {
+                if (sourceState == ltpWinner)
+                {
+                    Buffer.BlockCopy(sourceState.CurrentFrame, 0, universeState.MergedFrame, 0, sourceState.FrameLength);
+                }
+                continue;
+            }
+
+            for (int channel = 0; channel < sourceState.FrameLength; channel++)
+            {
+                byte value = sourceState.CurrentFrame[channel];
+                if (value > universeState.MergedFrame[channel])
+                {
+                    universeState.MergedFrame[channel] = value;
+                }
+            }
+        }
+
+        return universeState.MergedFrame;
+    }
+
+    private static string BuildSourceKey(byte[] cid)
+    {
+        return Convert.ToBase64String(cid);
+    }
+
+    private struct SacnPacketMetadata
+    {
+        public int Universe;
+        public int DmxStartIndex;
+        public int DmxLength;
+        public int Priority;
+        public int SyncUniverse;
+        public bool IsSynchronizationPacket;
+        public byte[] SourceCid;
+    }
+
+    private sealed class UniverseState
+    {
+        public readonly Dictionary<string, SourceState> SourceStates = new Dictionary<string, SourceState>();
+        public readonly byte[] MergedFrame = new byte[512];
+    }
+
+    private sealed class SourceState
+    {
+        public readonly byte[] CurrentFrame = new byte[512];
+        public readonly byte[] PendingFrame = new byte[512];
+        public int FrameLength;
+        public int PendingFrameLength;
+        public int Priority;
+        public int SyncUniverse;
+        public bool HasPendingSync;
+        public long LastSeenUtcTicks;
     }
 }
