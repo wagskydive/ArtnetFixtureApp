@@ -42,52 +42,64 @@ public class UI_DmxSettings : MonoBehaviour
     public int CurrentDmxChannel
     {
         get => currentDmxChannel;
-        set
-        {
-            int clampedRequested = Mathf.Clamp(value, 1, 512);
-            currentDmxChannel = clampedRequested;
-            UpdateChannelDisplay();
+    }
 
-            ApplySettingsToReceiver();
-            SavePreferences();
+    public void SetCurrentDmxChannel(int value)
+    {
+        int clampedRequested = Mathf.Clamp(value, 1, 512);
+        currentDmxChannel = clampedRequested;
+        UpdateChannelDisplay();
 
-        }
+        ApplyLoadedSettingsToReceiver();
+    }
+
+    public void SetCurrentDmxChannelFromUserInput(int value)
+    {
+        SetCurrentDmxChannel(value);
+        SavePreferences();
     }
 
     public int CurrentDmxUniverse
     {
         get => currentDmxUniverse;
-        set
+    }
+
+    public void SetUniverse(int value)
+    {
+        int clampedRequested = value;
+        if (NetworkingModeManager.Instance != null)
         {
-            int clampedRequested = value;
-            if (NetworkingModeManager.Instance != null)
+            if (NetworkingModeManager.Instance.IsSAcnMode)
             {
-                if (NetworkingModeManager.Instance.IsSAcnMode)
-                {
-                    clampedRequested = Mathf.Clamp(value, 1, 63999);
-                }
-                else
-                {
-                    clampedRequested = Mathf.Clamp(value, 1, 32768);
-
-                }
+                clampedRequested = Mathf.Clamp(value, 1, 63999);
             }
-
-            int maxSelectableUniverse = GetMaxSelectableUniverse();
-            int resolvedUniverse = Mathf.Clamp(clampedRequested, 1, maxSelectableUniverse);
-
-            if (clampedRequested > maxSelectableUniverse)
+            else
             {
-                TriggerLockedCapability(universeLimitCapability);
-                return;
+                clampedRequested = Mathf.Clamp(value, 1, 32768);
+
             }
-
-            currentDmxUniverse = resolvedUniverse;
-
-            UpdateUniverseDisplay();
-            ApplySettingsToReceiver();
-            SavePreferences();
         }
+
+        int maxSelectableUniverse = GetMaxSelectableUniverse();
+        int resolvedUniverse = Mathf.Clamp(clampedRequested, 1, maxSelectableUniverse);
+
+        if (clampedRequested > maxSelectableUniverse)
+        {
+            TriggerLockedCapability(universeLimitCapability);
+            return;
+        }
+
+        currentDmxUniverse = resolvedUniverse;
+
+        UpdateUniverseDisplay();
+        ApplyLoadedSettingsToReceiver();
+        //SavePreferences();
+    }
+
+    public void SetUniverseFromUserInput(int universeToSet)
+    {
+        SetUniverse(universeToSet);
+        SavePreferences();
     }
 
     // Pattern type selector (0=Static, 1=Pulse, 2=ColorShift)
@@ -112,7 +124,7 @@ public class UI_DmxSettings : MonoBehaviour
         Instance = this;
         SyncReceiverSubscription();
         LoadPreferences();
-        ApplySettingsToReceiver();
+        ApplyLoadedSettingsToReceiver();
         SaveLoadSettings.OnSettingsSaved += LoadSettingsAndUpdateDisplay;
         RefreshPasswordControls();
     }
@@ -171,25 +183,27 @@ public class UI_DmxSettings : MonoBehaviour
 
     public void IncreaseChannel()
     {
-        CurrentDmxChannel = Mathf.Min(512, CurrentDmxChannel + 1);
+        SetCurrentDmxChannelFromUserInput(Mathf.Min(512, CurrentDmxChannel + 1));
+        
         //SavePreferences();
     }
 
     public void DecreaseChannel()
     {
-        CurrentDmxChannel = Mathf.Max(1, CurrentDmxChannel - 1);
+        SetCurrentDmxChannelFromUserInput(Mathf.Max(1, CurrentDmxChannel - 1));
         //SavePreferences();
     }
 
     public void IncreaseUniverse()
     {
-        CurrentDmxUniverse = Mathf.Min(16, CurrentDmxUniverse + 1);
+        SetUniverseFromUserInput(Mathf.Min(63999, CurrentDmxUniverse + 1));
+
         //SavePreferences();
     }
 
     public void DecreaseUniverse()
     {
-        CurrentDmxUniverse = Mathf.Max(1, CurrentDmxUniverse - 1);
+        SetUniverseFromUserInput(Mathf.Max(1, CurrentDmxUniverse - 1));
         //SavePreferences();
     }
 
@@ -227,14 +241,14 @@ public class UI_DmxSettings : MonoBehaviour
     public void LoadPreferences(bool apply)
     {
         isLoadingPreferences = true;
-        CurrentDmxChannel = SaveLoadSettings.LoadInt(SaveLoadSettings.DmxChannelKey, CurrentDmxChannel);
-        CurrentDmxUniverse = SaveLoadSettings.LoadInt(SaveLoadSettings.DmxUniverseKey, CurrentDmxUniverse);
+        SetCurrentDmxChannel(SaveLoadSettings.LoadInt(SaveLoadSettings.DmxChannelKey, CurrentDmxChannel));
+        SetUniverse(SaveLoadSettings.LoadInt(SaveLoadSettings.DmxUniverseKey, CurrentDmxUniverse));
         CurrentPatternType = SaveLoadSettings.LoadInt(SaveLoadSettings.DmxPatternKey, CurrentPatternType);
         isLoadingPreferences = false;
         hasLoadedPreferences = true;
         if (apply)
         {
-            ApplySettingsToReceiver();
+            ApplyLoadedSettingsToReceiver();
         }
 
         UpdateDeviceInfoDisplay();
@@ -243,9 +257,19 @@ public class UI_DmxSettings : MonoBehaviour
         RefreshPasswordControls();
     }
 
+    private void ApplyLoadedSettingsToReceiver()
+    {
+        INetworkReceiver receiver = NetworkingModeManager.Instance?.NetworkReceiver;
+        if (receiver == null)
+        {
+            return;
+        }
 
+        receiver.SetStartChannel(CurrentDmxChannel);
+        receiver.SetUniverse(CurrentDmxUniverse);
+    }
 
-    private void ApplySettingsToReceiver()
+    private void ApplySettingsFromUserInputToReceiver()
     {
         INetworkReceiver receiver = NetworkingModeManager.Instance?.NetworkReceiver;
         if (receiver == null)

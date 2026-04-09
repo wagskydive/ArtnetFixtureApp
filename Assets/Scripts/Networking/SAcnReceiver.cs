@@ -131,10 +131,17 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
 
     public void SetUniverseFromUserInput(int universe1Based)
     {
-        Universe = ClampUniverse(universe1Based - 1);
-        MulticastAddress = SAcnParameters.BuildUniverseMulticastAddress(Universe + 1);
+        SetUniverse(universe1Based);
         SaveNetworkSettings();
     }
+
+    public void SetUniverse(int universe1Based)
+    {
+        Universe = ClampUniverse(universe1Based - 1);
+        MulticastAddress = SAcnParameters.BuildUniverseMulticastAddress(Universe + 1);
+    }
+
+
 
     public int GetUniverseForUserInput()
     {
@@ -143,8 +150,13 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
 
     public void SetStartChannelFromUserInput(int startChannel1Based)
     {
-        StartChannel = ClampStartChannel(startChannel1Based);
+        SetStartChannel(startChannel1Based);
         SaveNetworkSettings();
+    }
+
+    public void SetStartChannel(int startChannel1Based)
+    {
+        StartChannel = ClampStartChannel(startChannel1Based);
     }
 
     public int GetFixtureChannelValue(int relativeChannel)
@@ -455,7 +467,7 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
             multicastAddress = SaveLoadSettings.LoadString(SaveLoadSettings.SAcnMulticastAddressKey, MulticastAddress),
             unicastBindAddress = SaveLoadSettings.LoadString(SaveLoadSettings.SAcnUnicastBindAddressKey, UnicastBindAddress),
             listenPort = SaveLoadSettings.LoadInt(SaveLoadSettings.SAcnListenPortKey, ListenPort),
-            timeoutSeconds = PlayerPrefs.GetFloat(SaveLoadSettings.SAcnTimeoutSecondsKey, TimeoutSeconds),
+            timeoutSeconds = SaveLoadSettings.LoadFloat(SaveLoadSettings.SAcnTimeoutSecondsKey, TimeoutSeconds),
             useLtpMerge = SaveLoadSettings.LoadInt(SaveLoadSettings.SAcnUseLtpMergeKey, UseLtpMerge ? 1 : 0) == 1,
             multicastUniverseSubscriptions = ParseUniverseList(SaveLoadSettings.LoadString(SaveLoadSettings.SAcnMulticastUniversesKey, string.Empty)),
             debugPanelVisible = SaveLoadSettings.LoadInt(SaveLoadSettings.SAcnDebugVisibleKey, 0) == 1
@@ -470,7 +482,7 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
         SaveLoadSettings.SaveString(SaveLoadSettings.SAcnMulticastAddressKey, MulticastAddress);
         SaveLoadSettings.SaveString(SaveLoadSettings.SAcnUnicastBindAddressKey, UnicastBindAddress);
         SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnListenPortKey, ListenPort);
-        PlayerPrefs.SetFloat(SaveLoadSettings.SAcnTimeoutSecondsKey, TimeoutSeconds);
+        SaveLoadSettings.SaveFloat(SaveLoadSettings.SAcnTimeoutSecondsKey, TimeoutSeconds);
         SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnUseLtpMergeKey, UseLtpMerge ? 1 : 0);
         SaveLoadSettings.SaveString(SaveLoadSettings.SAcnMulticastUniversesKey, BuildUniverseListCsv(MulticastUniverseSubscriptions));
         SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnDebugVisibleKey, Parameters.debugPanelVisible ? 1 : 0);
@@ -735,6 +747,7 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
     {
         return Convert.ToBase64String(cid);
     }
+
 
     private struct SacnPacketMetadata
     {

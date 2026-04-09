@@ -39,6 +39,11 @@ public static class SaveLoadSettings
         return PlayerPrefs.GetString(key, defaultValue);
     }
 
+    public static float LoadFloat(string key, float defaultValue)
+    {
+        return PlayerPrefs.GetFloat(key, defaultValue);
+    }
+
     public static long LoadLong(string key, long defaultValue)
     {
         string raw = PlayerPrefs.GetString(key, string.Empty);
@@ -63,6 +68,11 @@ public static class SaveLoadSettings
     public static void SaveLong(string key, long value)
     {
         PlayerPrefs.SetString(key, value.ToString());
+    }
+
+    public static void SaveFloat(string key, float value)
+    {
+        PlayerPrefs.SetFloat(key, value);
     }
 
     public static void Save()

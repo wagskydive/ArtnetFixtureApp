@@ -74,7 +74,7 @@ public class MovingHeadBeamController : MonoBehaviour
         {
             _activeSharedMaterial = outputRenderer.sharedMaterial;
             _outputMaterial = outputRenderer.material;
-            _fallbackGoboTexture = _outputMaterial != null ? _outputMaterial.GetTexture("_GoboTex") : null;
+            _fallbackGoboTexture = _outputMaterial != null && DmxModeManager.Instance.CurrentMode == DmxModeManager.FixtureMode.MovingHead ? _outputMaterial.GetTexture("_GoboTex") : null;
             _activeGoboTexture = null;
             _hasLoadedCustomGobos = false;
         }

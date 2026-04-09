@@ -65,8 +65,16 @@ public class ArtNetReceiver : MonoBehaviour, INetworkReceiver
 
     public void SetUniverseFromUserInput(int universe1Based)
     {
+        SetUniverse(universe1Based);
+        SaveLoadSettings.SaveInt(SaveLoadSettings.DmxUniverseKey, universe1Based);
+    }
+
+    public void SetUniverse(int universe1Based)
+    {
         Universe = ClampUniverse(universe1Based - 1);
     }
+
+
 
     public int GetUniverseForUserInput()
     {
@@ -74,6 +82,12 @@ public class ArtNetReceiver : MonoBehaviour, INetworkReceiver
     }
 
     public void SetStartChannelFromUserInput(int startChannel1Based)
+    {
+        SetStartChannel(startChannel1Based);
+        SaveLoadSettings.SaveInt(SaveLoadSettings.DmxChannelKey,startChannel1Based);
+    }
+
+    public void SetStartChannel(int startChannel1Based)
     {
         StartChannel = ClampStartChannel(startChannel1Based);
     }

@@ -6542,7 +6542,7 @@ MonoBehaviour:
   panelRoot: {fileID: 733940259}
   defaultSelection: {fileID: 0}
   backAction: {fileID: 7727032971491509709, guid: 289c1b55c9541489481df5cc06664110, type: 3}
-  closeOnBackButton: 1
+  closeOnBackButton: 0
   keepNavigationInsidePopup: 1
 --- !u!114 &733940262
 MonoBehaviour:
@@ -16372,6 +16372,7 @@ GameObject:
   - component: {fileID: 1807836855}
   - component: {fileID: 1807836854}
   - component: {fileID: 1807836857}
+  - component: {fileID: 1807836858}
   m_Layer: 5
   m_Name: SettingsPanel
   m_TagString: Untagged
@@ -16517,6 +16518,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &1807836858
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1807836852}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0544647adc4d1664c8cf855b41fcbced, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArtnetFixture.Core::UI_CancelButtonBlocker
 --- !u!1 &1810613168
 GameObject:
   m_ObjectHideFlags: 0
@@ -20868,6 +20881,14 @@ PrefabInstance:
       value: -42.55
       objectReference: {fileID: 0}
     - target: {fileID: 780391781597775863, guid: f107c9e9881c4c04792ce9410507bead, type: 3}
+      propertyPath: canEditOctet3
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 780391781597775863, guid: f107c9e9881c4c04792ce9410507bead, type: 3}
+      propertyPath: canEditOctet4
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 780391781597775863, guid: f107c9e9881c4c04792ce9410507bead, type: 3}
       propertyPath: binding.targetObject
       value: 
       objectReference: {fileID: 1226730715}
@@ -20875,6 +20896,10 @@ PrefabInstance:
       propertyPath: binding.targetComponent
       value: 
       objectReference: {fileID: 1226730720}
+    - target: {fileID: 976760806143211419, guid: f107c9e9881c4c04792ce9410507bead, type: 3}
+      propertyPath: m_Colors.m_DisabledColor.a
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2655012778574211971, guid: f107c9e9881c4c04792ce9410507bead, type: 3}
       propertyPath: validationPopup
       value: 
@@ -20915,6 +20940,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: -20
       objectReference: {fileID: 0}
+    - target: {fileID: 3673217630157581685, guid: f107c9e9881c4c04792ce9410507bead, type: 3}
+      propertyPath: m_Colors.m_DisabledColor.a
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3694213042783238587, guid: f107c9e9881c4c04792ce9410507bead, type: 3}
       propertyPath: validationPopup
       value: 
@@ -20943,6 +20972,10 @@ PrefabInstance:
       propertyPath: validationErrorText
       value: 
       objectReference: {fileID: 1590299636}
+    - target: {fileID: 5137390138152661749, guid: f107c9e9881c4c04792ce9410507bead, type: 3}
+      propertyPath: m_Colors.m_DisabledColor.a
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5204955252662411343, guid: f107c9e9881c4c04792ce9410507bead, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1
@@ -21070,6 +21103,10 @@ PrefabInstance:
     - target: {fileID: 6935720904894565478, guid: f107c9e9881c4c04792ce9410507bead, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: -42.55
+      objectReference: {fileID: 0}
+    - target: {fileID: 7688344468715862539, guid: f107c9e9881c4c04792ce9410507bead, type: 3}
+      propertyPath: m_Colors.m_DisabledColor.a
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8966629227043769245, guid: f107c9e9881c4c04792ce9410507bead, type: 3}
       propertyPath: m_AnchorMax.y

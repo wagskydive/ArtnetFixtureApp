@@ -14,8 +14,10 @@ public interface INetworkReceiver
     string ProtocolName { get; }
 
     void SetUniverseFromUserInput(int universe1Based);
+    void SetUniverse(int universe1Based);
     int GetUniverseForUserInput();
     void SetStartChannelFromUserInput(int startChannel1Based);
+    void SetStartChannel(int startChannel1Based);
     int GetFixtureChannelValue(int relativeChannel);
     void StartReceiver();
     void StopReceiver();

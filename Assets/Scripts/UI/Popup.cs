@@ -3,6 +3,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System;
 
 public class Popup : MonoBehaviour
 {
@@ -15,6 +16,10 @@ public class Popup : MonoBehaviour
     private GameObject _previousSelected;
     private readonly List<UI_DpadNavigationController> _blockedNavigationControllers = new List<UI_DpadNavigationController>();
     private bool _navigationBlockApplied;
+
+    public static event Action<Popup> OnPopupNavigationBlocked;
+
+    public static event Action<Popup> OnPopupNavigationBlockReleased;
 
     private void Awake()
     {
@@ -76,6 +81,7 @@ public class Popup : MonoBehaviour
 
         ApplyNavigationBlock();
         FocusDefaultSelection();
+        
     }
 
     public void Close()
@@ -177,6 +183,7 @@ public class Popup : MonoBehaviour
         }
 
         _navigationBlockApplied = true;
+        OnPopupNavigationBlocked?.Invoke(this);
     }
 
     private void ReleaseNavigationBlock()
@@ -191,6 +198,7 @@ public class Popup : MonoBehaviour
 
         _blockedNavigationControllers.Clear();
         _navigationBlockApplied = false;
+        OnPopupNavigationBlockReleased?.Invoke(this);
     }
 
     private void RestorePreviousSelection()

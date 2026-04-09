@@ -19,7 +19,7 @@ public class UI_DmxSettingsTests
     {
         var (settings, channelText, _, _) = CreateSettings();
 
-        settings.CurrentDmxChannel = 120;
+        settings.SetCurrentDmxChannel(120);
 
         Assert.That(settings.CurrentDmxChannel, Is.EqualTo(120));
         Assert.That(channelText.text, Is.EqualTo("120"));
@@ -30,7 +30,7 @@ public class UI_DmxSettingsTests
     {
         var (settings, _, universeText, _) = CreateSettings();
 
-        settings.CurrentDmxUniverse = 10;
+        settings.SetUniverse(10);
 
         Assert.That(settings.CurrentDmxUniverse, Is.EqualTo(10));
         Assert.That(universeText.text, Is.EqualTo("10"));
@@ -41,11 +41,11 @@ public class UI_DmxSettingsTests
     {
         var (settings, channelText, universeText, _) = CreateSettings();
 
-        settings.CurrentDmxChannel = 20;
-        settings.CurrentDmxUniverse = 2;
+        settings.SetCurrentDmxChannel(20);
+        settings.SetUniverse(2);
 
-        settings.CurrentDmxChannel = 0;
-        settings.CurrentDmxUniverse = 17;
+        settings.SetCurrentDmxChannel(0);
+        settings.SetUniverse(17);
 
         Assert.That(settings.CurrentDmxChannel, Is.EqualTo(20));
         Assert.That(settings.CurrentDmxUniverse, Is.EqualTo(2));
@@ -58,7 +58,7 @@ public class UI_DmxSettingsTests
     {
         var (settings, _, _, _) = CreateSettings();
 
-        settings.CurrentDmxChannel = 255;
+        settings.SetCurrentDmxChannel(255);
         settings.IncreaseChannel();
 
         Assert.That(settings.CurrentDmxChannel, Is.EqualTo(256));
@@ -69,7 +69,7 @@ public class UI_DmxSettingsTests
     {
         var (settings, _, _, _) = CreateSettings();
 
-        settings.CurrentDmxUniverse = 15;
+        settings.SetUniverse(15);
         settings.IncreaseUniverse();
 
         Assert.That(settings.CurrentDmxUniverse, Is.EqualTo(16));
@@ -80,8 +80,8 @@ public class UI_DmxSettingsTests
     {
         var (settings, _, _, _) = CreateSettings();
 
-        settings.CurrentDmxChannel = 1;
-        settings.CurrentDmxUniverse = 1;
+        settings.SetCurrentDmxChannel(1);
+        settings.SetUniverse(1);
         settings.DecreaseChannel();
         settings.DecreaseUniverse();
 
@@ -118,8 +118,8 @@ public class UI_DmxSettingsTests
     {
         var (settings, _, _, receiver) = CreateSettings();
 
-        settings.CurrentDmxChannel = 100;
-        settings.CurrentDmxUniverse = 8;
+        settings.SetCurrentDmxChannel(100);
+        settings.SetUniverse(8);
 
         Assert.That(receiver.StartChannel, Is.EqualTo(100));
         Assert.That(receiver.Universe, Is.EqualTo(7));
@@ -146,8 +146,8 @@ public class UI_DmxSettingsTests
     public void SaveAndLoadPreferences_RestoresValues()
     {
         var (settings, _, _, _) = CreateSettings();
-        settings.CurrentDmxChannel = 200;
-        settings.CurrentDmxUniverse = 12;
+        settings.SetCurrentDmxChannel(200);
+        settings.SetUniverse(12);
         settings.CurrentPatternType = 2;
         settings.SavePreferences();
 

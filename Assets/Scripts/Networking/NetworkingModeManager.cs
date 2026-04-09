@@ -112,7 +112,12 @@ public class NetworkingModeManager : MonoBehaviour
 
     private static bool IsAdvancedNetworkingUnlocked()
     {
+#if UNITY_EDITOR && !UNITY_ANDROID
+        return true;
+#endif
         return CapabilityService.Instance != null
             && CapabilityService.Instance.ResolveBoolean(AdvancedNetworkingCapabilityId, false);
+
+        
     }
 }

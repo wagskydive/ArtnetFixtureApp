@@ -4,6 +4,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using UnityEngine.Events;
+using System.Linq;
 
 public class UI_DpadNavigationController : MonoBehaviour
 {
@@ -22,6 +23,18 @@ public class UI_DpadNavigationController : MonoBehaviour
     private int _currentIndex;
     private int _lastSubmitFrame = -1;
     private int _lastCancelFrame = -1;
+
+    bool cancelButtonBlocked;
+
+    public void SetLastCancelFrame(int frame)
+    {
+        _lastCancelFrame = frame;
+    }
+
+    public void SetCancelButtonBlock(bool block)
+    {
+        cancelButtonBlocked = block;
+    }
 
     private void OnEnable()
     {
@@ -103,9 +116,11 @@ public class UI_DpadNavigationController : MonoBehaviour
         {
             return;
         }
-
         _lastCancelFrame = Time.frameCount;
-        onCancel?.Invoke();
+        if(!cancelButtonBlocked)
+        {
+            onCancel?.Invoke();
+        }        
     }
 
     public void SubmitCurrentSelection()
