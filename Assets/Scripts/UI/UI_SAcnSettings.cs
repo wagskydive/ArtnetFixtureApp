@@ -1,12 +1,13 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System;
 
 public class UI_SAcnSettings : MonoBehaviour
 {
     [SerializeField] private Text transportModeText;
-    [SerializeField] private Text multicastAddressText;
-    [SerializeField] private Text unicastBindAddressText;
+    [SerializeField] private UI_IpField multicastAddress;
+    [SerializeField] private UI_IpField unicastBindAddress;
     [SerializeField] private Text listenPortText;
     [SerializeField] private Text universeText;
     [SerializeField] private Text startChannelText;
@@ -14,6 +15,46 @@ public class UI_SAcnSettings : MonoBehaviour
     [SerializeField] private Text receiveNetworkDataText;
     [SerializeField] private Text mergeModeText;
     [SerializeField] private Text multicastUniversesText;
+
+    public string MulticastAddress { get => GetMulticastAddress(); }
+
+    public string UnicastBindAddress { get => GetUnicastAddress(); }
+
+    private string GetMulticastAddress()
+    {
+        if (_sAcnReceiver != null)
+        {
+            return _sAcnReceiver.MulticastAddress;
+        }
+        else
+        {
+            return "0.0.0.0";
+        }
+    }
+
+    private string GetUnicastAddress()
+    {
+        if (_sAcnReceiver != null)
+        {
+            return _sAcnReceiver.UnicastBindAddress;
+        }
+        else
+        {
+            return "0.0.0.0";
+        }
+    }
+
+    void Awake()
+    {
+        if(multicastAddress != null)
+        {
+            multicastAddress.OnIpSet += SetMulticastAddress;
+        }
+        if(unicastBindAddress != null)
+        {
+            unicastBindAddress.OnIpSet += SetUnicastBindAddress;
+        }
+    }
 
     private SAcnReceiver _sAcnReceiver;
 
@@ -23,6 +64,14 @@ public class UI_SAcnSettings : MonoBehaviour
         RefreshLabels();
     }
 
+    public void RestartSAcnReceiver()
+    {
+        if (_sAcnReceiver != null)
+        {
+            _sAcnReceiver.RestartReceiver();
+        }
+    }
+
     public void LoadSAcnReceiver()
     {
         _sAcnReceiver = NetworkingModeManager.Instance?.NetworkReceiver as SAcnReceiver;
@@ -30,6 +79,21 @@ public class UI_SAcnSettings : MonoBehaviour
         if (_sAcnReceiver == null)
         {
             gameObject.SetActive(false);
+        }
+    }
+
+    public void ChangeTransportMode()
+    {
+        if (_sAcnReceiver != null)
+        {
+            if (_sAcnReceiver.UseMulticast)
+            {
+                SetUnicastMode();
+            }
+            else
+            {
+                SetMulticastMode();
+            }
         }
     }
 
@@ -79,6 +143,14 @@ public class UI_SAcnSettings : MonoBehaviour
         RefreshLabels();
     }
 
+    public void SetListenPort(string listenPortText)
+    {
+        if (int.TryParse(listenPortText, out int result))
+        {
+            SetListenPort(result);
+        }
+    }
+
     public void SetListenPort(int listenPort)
     {
         if (_sAcnReceiver == null)
@@ -91,6 +163,14 @@ public class UI_SAcnSettings : MonoBehaviour
         RefreshLabels();
     }
 
+    public void SetUniverse(string universe1BasedText)
+    {
+        if (int.TryParse(universe1BasedText, out int result))
+        {
+            SetUniverse(result);
+        }
+    }
+
     public void SetUniverse(int universe1Based)
     {
         if (_sAcnReceiver == null)
@@ -98,7 +178,9 @@ public class UI_SAcnSettings : MonoBehaviour
             return;
         }
 
-        _sAcnReceiver.SetUniverseFromUserInput(universe1Based);
+        UI_DmxSettings.Instance.CurrentDmxUniverse = universe1Based;
+
+
         RestartReceiverIfRunning();
         RefreshLabels();
     }
@@ -113,14 +195,23 @@ public class UI_SAcnSettings : MonoBehaviour
         SetUniverse((_sAcnReceiver?.GetUniverseForUserInput() ?? 1) - 1);
     }
 
+    public void SetStartChannel(string startChannel1BasedText)
+    {
+        if (int.TryParse(startChannel1BasedText, out int result))
+        {
+            SetStartChannel(result);
+        }
+    }
+
     public void SetStartChannel(int startChannel1Based)
     {
         if (_sAcnReceiver == null)
         {
             return;
         }
+        UI_DmxSettings.Instance.CurrentDmxChannel = startChannel1Based;
 
-        _sAcnReceiver.SetStartChannelFromUserInput(startChannel1Based);
+
         RefreshLabels();
     }
 
@@ -134,6 +225,14 @@ public class UI_SAcnSettings : MonoBehaviour
         SetStartChannel((_sAcnReceiver?.StartChannel ?? 1) - 1);
     }
 
+    public void SetTimeoutSeconds(string timeoutSecondsText)
+    {
+        if (float.TryParse(timeoutSecondsText, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float result))
+        {
+            SetTimeoutSeconds(result);
+        }
+    }
+
     public void SetTimeoutSeconds(float timeoutSeconds)
     {
         if (_sAcnReceiver == null)
@@ -143,6 +242,11 @@ public class UI_SAcnSettings : MonoBehaviour
 
         _sAcnReceiver.TimeoutSeconds = Mathf.Max(0.1f, timeoutSeconds);
         RefreshLabels();
+    }
+
+    public void ChangeReceiveNetworkData()
+    {
+        SetReceiveNetworkData(!_sAcnReceiver.ReceiveNetworkData);
     }
 
     public void SetReceiveNetworkData(bool receiveNetworkData)
@@ -163,6 +267,11 @@ public class UI_SAcnSettings : MonoBehaviour
         }
 
         RefreshLabels();
+    }
+
+    public void ChangeMergeMode()
+    {
+        SetUseLtpMerge(!_sAcnReceiver.UseLtpMerge);
     }
 
     public void SetUseLtpMerge(bool useLtpMerge)
@@ -241,14 +350,34 @@ public class UI_SAcnSettings : MonoBehaviour
             transportModeText.text = _sAcnReceiver.UseMulticast ? "Multicast" : "Unicast";
         }
 
-        if (multicastAddressText != null)
+        if (multicastAddress != null)
         {
-            multicastAddressText.text = _sAcnReceiver.MulticastAddress;
+            if (_sAcnReceiver.UseMulticast == true)
+            {
+                multicastAddress.transform.parent.gameObject.SetActive(true);
+                multicastAddress.SetIpFromBinding();
+                //multicastAddress.ResetIpFromString(_sAcnReceiver.MulticastAddress);
+            }
+            else
+            {
+                multicastAddress.transform.parent.gameObject.SetActive(false);
+            }
+
         }
 
-        if (unicastBindAddressText != null)
+        if (unicastBindAddress != null)
         {
-            unicastBindAddressText.text = _sAcnReceiver.UnicastBindAddress;
+            if (_sAcnReceiver.UseMulticast == false)
+            {
+                unicastBindAddress.transform.parent.gameObject.SetActive(true);
+                unicastBindAddress.SetIpFromBinding();
+                //unicastBindAddress.ResetIpFromString(_sAcnReceiver.UnicastBindAddress);
+            }
+            else
+            {
+                unicastBindAddress.transform.parent.gameObject.SetActive(false);
+            }
+
         }
 
         if (listenPortText != null)

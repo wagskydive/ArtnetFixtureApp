@@ -55,6 +55,21 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
     private readonly Dictionary<int, UniverseState> _universeStates = new Dictionary<int, UniverseState>();
     private readonly HashSet<int> _joinedMulticastUniverses = new HashSet<int>();
 
+    private AndroidJavaObject multicastLock;
+
+    public static SAcnReceiver Instance { get; private set; }
+
+    void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this);
+            return;
+        }
+
+        Instance = this;
+    }
+
     private void Start()
     {
         Universe = ClampUniverse(Universe);
@@ -181,30 +196,75 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
         PersistNetworkSettings();
     }
 
-    public void StartReceiver()
+    private void AcquireMulticastLock()
     {
-        if (_running)
-        {
-            return;
-        }
-
-        IPAddress bindAddress = ResolveBindAddress();
-
-        _udpClient = new UdpClient(AddressFamily.InterNetwork);
-        _udpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-        _udpClient.Client.Bind(new IPEndPoint(bindAddress, ListenPort));
-
-        if (UseMulticast)
-        {
-            JoinConfiguredMulticastGroups();
-        }
-
-        _running = true;
-
-        _receiveThread = new Thread(ReceiveLoop) { IsBackground = true };
-        _receiveThread.Start();
+#if UNITY_ANDROID && !UNITY_EDITOR
+    using (var unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+    using (var activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity"))
+    using (var wifiManager = activity.Call<AndroidJavaObject>("getSystemService", "wifi"))
+    {
+        multicastLock = wifiManager.Call<AndroidJavaObject>("createMulticastLock", "sACNLock");
+        multicastLock.Call("acquire");
     }
 
+    Debug.Log("[sACN] Multicast lock acquired");
+#endif
+    }
+
+    private void ReleaseMulticastLock()
+    {
+#if UNITY_ANDROID && !UNITY_EDITOR
+    if (multicastLock != null)
+    {
+        multicastLock.Call("release");
+        multicastLock = null;
+        Debug.Log("[sACN] Multicast lock released");
+    }
+#endif
+    }
+
+    public void RestartReceiver()
+    {
+        _running = false;
+        StartReceiver();
+    }
+
+    public void StartReceiver()
+    {
+        if (_running) return;
+
+        Debug.Log("[sACN] Starting receiver...");
+
+        try
+        {
+            _udpClient = new UdpClient(AddressFamily.InterNetwork);
+
+            AcquireMulticastLock();
+
+            _udpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+            _udpClient.Client.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastLoopback, true);
+
+            _udpClient.Client.Bind(new IPEndPoint(IPAddress.Any, ListenPort));
+
+            Debug.Log($"[sACN] Bound to port {ListenPort}");
+
+            if (UseMulticast)
+            {
+                JoinConfiguredMulticastGroups();
+            }
+
+            _running = true;
+
+            _receiveThread = new Thread(ReceiveLoop) { IsBackground = true };
+            _receiveThread.Start();
+
+            Debug.Log("[sACN] Receiver thread started");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[sACN] StartReceiver FAILED: {e}");
+        }
+    }
     public void StopReceiver()
     {
         if (!_running)
@@ -225,11 +285,14 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
             _receiveThread.Abort();
             _receiveThread = null;
         }
+        ReleaseMulticastLock();
     }
 
     private void ReceiveLoop()
     {
         IPEndPoint remoteEndpoint = new IPEndPoint(IPAddress.Any, 0);
+
+        Debug.Log("[sACN] Receive thread running");
 
         while (_running)
         {
@@ -237,29 +300,39 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
             {
                 byte[] data = _udpClient.Receive(ref remoteEndpoint);
 
+                Debug.Log($"[sACN] Packet from {remoteEndpoint} | Size: {data.Length}");
+
                 if (!TryParseSacnPacket(data, out SacnPacketMetadata metadata))
                 {
+                    Debug.Log("[sACN] Packet rejected (not valid sACN)");
                     continue;
                 }
 
+                Debug.Log($"[sACN] Valid sACN | Universe: {metadata.Universe} | Channels: {metadata.DmxLength}");
+
                 if (metadata.IsSynchronizationPacket)
                 {
+                    Debug.Log("[sACN] Sync packet received");
                     ApplyPendingSync(metadata.SyncUniverse == 0 ? metadata.Universe : metadata.SyncUniverse);
                     continue;
                 }
 
                 ProcessDataPacket(data, metadata);
+
                 _receivedPacketThisFrame = true;
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                // silent fail for embedded stability
+                Debug.LogError($"[sACN] ReceiveLoop ERROR: {e}");
             }
         }
+
+        Debug.Log("[sACN] Receive thread stopped");
     }
 
     private void ProcessDataPacket(byte[] data, SacnPacketMetadata metadata)
     {
+        Debug.Log($"[sACN] Processing Universe {metadata.Universe}");
         if (metadata.Universe <= 0)
         {
             return;
@@ -296,8 +369,13 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
             }
 
             byte[] merged = BuildMergedFrameForUniverseLocked(metadata.Universe);
+            Debug.Log("Metadate.Universe: " + metadata.Universe + " Universe: " + Universe);
+            Debug.Log("merged: " + merged.ToString());
+            Debug.Log("DmxBuffer exist is: " + DmxBuffer != null);
+
             if (metadata.Universe == Universe + 1 && merged != null && DmxBuffer != null)
             {
+                Debug.Log("[sACN] Writing merged frame to buffer");
                 DmxBuffer.WriteFrame(merged, 512);
             }
         }
@@ -325,7 +403,19 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
         metadata.Universe = (data[113] << 8) | data[114];
         metadata.Priority = data[108];
         metadata.SyncUniverse = (data[109] << 8) | data[110];
-        metadata.IsSynchronizationPacket = data[43] == 0x02;
+        uint vector = (uint)(
+    (data[40] << 24) |
+    (data[41] << 16) |
+    (data[42] << 8) |
+    data[43]);
+
+        // E1.31 vectors
+        const uint VECTOR_E131_DATA_PACKET = 0x00000002;
+        const uint VECTOR_E131_EXTENDED_SYNCHRONIZATION = 0x00000001;
+
+        metadata.IsSynchronizationPacket = vector == VECTOR_E131_EXTENDED_SYNCHRONIZATION;
+        Debug.Log($"[sACN] Vector: 0x{vector:X8} | Sync: {metadata.IsSynchronizationPacket}");
+        //metadata.IsSynchronizationPacket = data[43] == 0x02;
         int propertyValueCount = (data[123] << 8) | data[124];
         metadata.DmxLength = Mathf.Clamp(propertyValueCount - 1, 0, 512);
         metadata.DmxStartIndex = 126;
@@ -434,16 +524,27 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
         }
     }
 
+
+
     private void JoinUniverseMulticastGroup(int universe1Based)
     {
         if (universe1Based < 1 || universe1Based > 64000 || _joinedMulticastUniverses.Contains(universe1Based))
-        {
             return;
-        }
 
-        IPAddress universeMulticast = BuildUniverseMulticastAddress(universe1Based);
-        _udpClient.JoinMulticastGroup(universeMulticast);
-        _joinedMulticastUniverses.Add(universe1Based);
+        IPAddress multicast = BuildUniverseMulticastAddress(universe1Based);
+
+        try
+        {
+            _udpClient.JoinMulticastGroup(multicast, IPAddress.Any);
+
+            Debug.Log($"[sACN] Joined multicast {multicast} (Universe {universe1Based})");
+
+            _joinedMulticastUniverses.Add(universe1Based);
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[sACN] Failed to join multicast {multicast}: {e}");
+        }
     }
 
     private static IPAddress BuildUniverseMulticastAddress(int universe1Based)

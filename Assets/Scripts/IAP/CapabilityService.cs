@@ -41,7 +41,11 @@ public class CapabilityService : MonoBehaviour
 
     public bool ResolveBoolean(string capabilityId, bool lockedValue = false)
     {
+#if !UNITY_EDITOR
         return _capabilitySystem != null ? _capabilitySystem.ResolveBoolean(capabilityId, lockedValue) : lockedValue;
+        
+#endif
+        return true;
     }
 
     public bool TryGetCapability(string capabilityId, out CapabilityDefinition definition)

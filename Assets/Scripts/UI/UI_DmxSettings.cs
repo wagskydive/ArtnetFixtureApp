@@ -28,6 +28,8 @@ public class UI_DmxSettings : MonoBehaviour
     [SerializeField] private CapabilityBlockUiTrigger capabilityBlockUiTrigger;
     [SerializeField] private CapabilityDefinition universeLimitCapability;
 
+    public static UI_DmxSettings Instance { get; private set; }
+
     private int currentDmxChannel = 1;
     private int currentDmxUniverse = 1;
     private bool hasLoadedPreferences;
@@ -42,13 +44,13 @@ public class UI_DmxSettings : MonoBehaviour
         get => currentDmxChannel;
         set
         {
-            if (value >= 1 && value <= 512)
-            {
-                currentDmxChannel = value;
-                UpdateChannelDisplay();
+            int clampedRequested = Mathf.Clamp(value, 1, 512);
+            currentDmxChannel = clampedRequested;
+            UpdateChannelDisplay();
 
-                ApplySettingsToReceiver();
-            }
+            ApplySettingsToReceiver();
+            SavePreferences();
+
         }
     }
 
@@ -57,18 +59,34 @@ public class UI_DmxSettings : MonoBehaviour
         get => currentDmxUniverse;
         set
         {
-            int clampedRequested = Mathf.Clamp(value, 1, 16);
+            int clampedRequested = value;
+            if (NetworkingModeManager.Instance != null)
+            {
+                if (NetworkingModeManager.Instance.IsSAcnMode)
+                {
+                    clampedRequested = Mathf.Clamp(value, 1, 63999);
+                }
+                else
+                {
+                    clampedRequested = Mathf.Clamp(value, 1, 32768);
+
+                }
+            }
+
             int maxSelectableUniverse = GetMaxSelectableUniverse();
             int resolvedUniverse = Mathf.Clamp(clampedRequested, 1, maxSelectableUniverse);
 
             if (clampedRequested > maxSelectableUniverse)
             {
                 TriggerLockedCapability(universeLimitCapability);
+                return;
             }
 
             currentDmxUniverse = resolvedUniverse;
+
             UpdateUniverseDisplay();
             ApplySettingsToReceiver();
+            SavePreferences();
         }
     }
 
@@ -85,6 +103,13 @@ public class UI_DmxSettings : MonoBehaviour
 
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
         SyncReceiverSubscription();
         LoadPreferences();
         ApplySettingsToReceiver();
@@ -147,25 +172,25 @@ public class UI_DmxSettings : MonoBehaviour
     public void IncreaseChannel()
     {
         CurrentDmxChannel = Mathf.Min(512, CurrentDmxChannel + 1);
-        SavePreferences();
+        //SavePreferences();
     }
 
     public void DecreaseChannel()
     {
         CurrentDmxChannel = Mathf.Max(1, CurrentDmxChannel - 1);
-        SavePreferences();
+        //SavePreferences();
     }
 
     public void IncreaseUniverse()
     {
         CurrentDmxUniverse = Mathf.Min(16, CurrentDmxUniverse + 1);
-        SavePreferences();
+        //SavePreferences();
     }
 
     public void DecreaseUniverse()
     {
         CurrentDmxUniverse = Mathf.Max(1, CurrentDmxUniverse - 1);
-        SavePreferences();
+        //SavePreferences();
     }
 
     public enum PatternType
@@ -413,7 +438,20 @@ public class UI_DmxSettings : MonoBehaviour
 
         if (ipAddressValueText != null)
         {
-            ipAddressValueText.text = ResolveLocalIpv4Address();
+            string networkType = "";
+            if (NetworkingModeManager.Instance != null)
+            {
+                if (NetworkingModeManager.Instance.IsSAcnMode)
+                {
+                    networkType = "sAcn ";
+                }
+                else
+                {
+                    networkType = "Art-Net ";
+                }
+            }
+
+            ipAddressValueText.text = networkType + ResolveLocalIpv4Address();
         }
     }
 
@@ -491,7 +529,16 @@ public class UI_DmxSettings : MonoBehaviour
         }
 
         int maxUniverse = CapabilityService.Instance.ResolveNumeric(capabilityId, 1);
-        return Mathf.Clamp(maxUniverse, 1, 16);
+        if (NetworkingModeManager.Instance.IsSAcnMode)
+        {
+            return Mathf.Clamp(maxUniverse, 1, 63999);
+        }
+        else
+        {
+            return Mathf.Clamp(maxUniverse, 1, 32768);
+
+        }
+
     }
 
     private void TriggerLockedCapability(CapabilityDefinition capabilityDefinition)

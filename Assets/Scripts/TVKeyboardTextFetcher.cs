@@ -10,9 +10,9 @@ public class TVKeyboardTextFetcher : MonoBehaviour
     // Store current keyboard text for Apply logic
     private string keyboardText = "";
 
+    public bool numpad = false;
 
 
-  
     public void RequestAndroidTVKeyboard()
     {
 
@@ -43,6 +43,15 @@ public class TVKeyboardTextFetcher : MonoBehaviour
             {
                 AndroidJavaObject editText = new AndroidJavaObject("android.widget.EditText", activity);
                 editText.Call("setText", initialText);
+                if(numpad)
+                {
+                    using (AndroidJavaClass inputType = new AndroidJavaClass("android.text.InputType"))
+                    {
+                        int TYPE_CLASS_NUMBER = inputType.GetStatic<int>("TYPE_CLASS_NUMBER");
+                        editText.Call("setInputType", TYPE_CLASS_NUMBER);
+                    }
+                    
+                }
 
                 AndroidJavaObject builder = new AndroidJavaObject("android.app.AlertDialog$Builder", activity);
                 builder.Call<AndroidJavaObject>("setView", editText);
