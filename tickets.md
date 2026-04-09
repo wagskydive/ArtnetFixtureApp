@@ -20,6 +20,57 @@
 3. Use capability in logic
 
 ---
+T24.1 - Refactoring: 
+- Add a sACN parameters class to contain all the parameters related to sACN.
+- Modify the sAcnSettings.cs so it uses the data from the sACN parameters. There should be a clear separation between data and functionality.
+- Make sure the parameter data is saved and loaded correctly using the SaveAndLoadSettings script
+- Parameter data is loaded on app start
+- Every change to the parameter data is directly saved into the player prefs
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T24.2 - Fix sAcnSettings.cs so that the universe number changes the multicast IP automatically and vise versa. The correct usage should propagate this. The IP for Universe 1 is supposed to correspond with xxx.xxx.0.1 and universe 256 should correspond with xxx.xxx.1.0 and so on. Also solve the 0base vs 1based universe ambiguity, so that it follows correct conventions for the network mode sACN. 
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+
+T24.3 - Add a Network Debug Script that can be started and accessed by a debug UI panel and by the webui to give the user easy feedback on packets that are being received.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+
+T24.4 - Add a section to the webui for advanced networking.
+This section is only available if the "advanced networking" IAP is owned
+The section exposes the following settings
+[ ] Art-Net or sACN choice
+[ ] Transport mode choice between Multicast or Unicast
+[ ] Multicasting IP (the last 2 octants need to be editable) (only shows when transport mode is Multicast)
+[ ] Unicast Binding IP Address (the full ip needs to be editable) (only shows when transport mode is Unicast)
+[ ] Listen Port
+[ ] Timeout Seconds
+[ ] Merge mode (LTP or HTP)
+[ ] Additional Universes List (the user can add additional universes here that the app will listen too)
+[ ] Show/hide Debug section button (shows a panel that shows the debug info)
+[ ] Create the debug panel that shows live network data (packets received and more)
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+
+
+
+
 T23.1 - Modify the UI_TVKeyboardTextEditor.cs script so it has text validation options. The options for validation modes shoud be: none, ip address, integer within a range, no special character, no spaces and maybe some more common string restrictions. Create an enum for the choise and a range field for the respective modes. Also create a field for a popup that is shown that tells the user what is wrong if the text is not valid.
 - [x] Started
 - [x] Behavior Written
