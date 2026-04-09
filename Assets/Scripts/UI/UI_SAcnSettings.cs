@@ -178,9 +178,7 @@ public class UI_SAcnSettings : MonoBehaviour
             return;
         }
 
-        UI_DmxSettings.Instance.CurrentDmxUniverse = universe1Based;
-
-
+        _sAcnReceiver.SetUniverseFromUserInput(universe1Based);
         RestartReceiverIfRunning();
         RefreshLabels();
     }
@@ -209,8 +207,7 @@ public class UI_SAcnSettings : MonoBehaviour
         {
             return;
         }
-        UI_DmxSettings.Instance.CurrentDmxChannel = startChannel1Based;
-
+        _sAcnReceiver.SetStartChannelFromUserInput(startChannel1Based);
 
         RefreshLabels();
     }
@@ -241,6 +238,7 @@ public class UI_SAcnSettings : MonoBehaviour
         }
 
         _sAcnReceiver.TimeoutSeconds = Mathf.Max(0.1f, timeoutSeconds);
+        _sAcnReceiver.SaveNetworkSettings();
         RefreshLabels();
     }
 
@@ -282,6 +280,7 @@ public class UI_SAcnSettings : MonoBehaviour
         }
 
         _sAcnReceiver.UseLtpMerge = useLtpMerge;
+        _sAcnReceiver.SaveNetworkSettings();
         RefreshLabels();
     }
 
@@ -313,6 +312,7 @@ public class UI_SAcnSettings : MonoBehaviour
         }
 
         _sAcnReceiver.MulticastUniverseSubscriptions = parsedUniverses;
+        _sAcnReceiver.SaveNetworkSettings();
         RestartReceiverIfRunning();
         RefreshLabels();
     }

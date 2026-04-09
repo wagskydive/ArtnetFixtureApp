@@ -11,6 +11,16 @@ public class WebUiSettingsData
     public int fixtureAmount = 1;
     public int gridX = 8;
     public int gridY = 8;
+    public bool advancedNetworkingUnlocked;
+    public int networkMode = NetworkingModeManager.ArtNetModeIndex;
+    public bool useMulticast = true;
+    public string multicastAddress = "239.255.0.1";
+    public string unicastBindAddress = "0.0.0.0";
+    public int listenPort = 5568;
+    public float timeoutSeconds = 2f;
+    public bool useLtpMerge;
+    public string additionalUniverses = string.Empty;
+    public bool showNetworkDebug;
     public bool passwordConfigured;
     public bool passwordEnabled;
 }
@@ -30,6 +40,15 @@ public static class WebUiSettingsStore
             fixtureAmount = Mathf.Clamp(SaveLoadSettings.LoadInt(SaveLoadSettings.FixtureCountKey, 1), 1, 16),
             gridX = ClampPixelDimension(SaveLoadSettings.LoadInt(SaveLoadSettings.PixelColumnsKey, 8)),
             gridY = ClampPixelDimension(SaveLoadSettings.LoadInt(SaveLoadSettings.PixelRowsKey, 8)),
+            networkMode = Mathf.Clamp(SaveLoadSettings.LoadInt(SaveLoadSettings.NetworkModeKey, NetworkingModeManager.ArtNetModeIndex), NetworkingModeManager.ArtNetModeIndex, NetworkingModeManager.SAcnModeIndex),
+            useMulticast = SaveLoadSettings.LoadInt(SaveLoadSettings.SAcnUseMulticastKey, 1) == 1,
+            multicastAddress = SaveLoadSettings.LoadString(SaveLoadSettings.SAcnMulticastAddressKey, "239.255.0.1"),
+            unicastBindAddress = SaveLoadSettings.LoadString(SaveLoadSettings.SAcnUnicastBindAddressKey, "0.0.0.0"),
+            listenPort = Mathf.Clamp(SaveLoadSettings.LoadInt(SaveLoadSettings.SAcnListenPortKey, 5568), 1, 65535),
+            timeoutSeconds = Mathf.Max(0.1f, PlayerPrefs.GetFloat(SaveLoadSettings.SAcnTimeoutSecondsKey, 2f)),
+            useLtpMerge = SaveLoadSettings.LoadInt(SaveLoadSettings.SAcnUseLtpMergeKey, 0) == 1,
+            additionalUniverses = SaveLoadSettings.LoadString(SaveLoadSettings.SAcnMulticastUniversesKey, string.Empty),
+            showNetworkDebug = SaveLoadSettings.LoadInt(SaveLoadSettings.SAcnDebugVisibleKey, 0) == 1,
             passwordConfigured = WebUiPasswordProtection.HasConfiguredPassword(),
             passwordEnabled = WebUiPasswordProtection.IsEnabled()
         };
@@ -52,6 +71,16 @@ public static class WebUiSettingsStore
             fixtureAmount = Mathf.Clamp(raw.fixtureAmount, 1, 16),
             gridX = ClampPixelDimension(raw.gridX),
             gridY = ClampPixelDimension(raw.gridY),
+            advancedNetworkingUnlocked = raw.advancedNetworkingUnlocked,
+            networkMode = Mathf.Clamp(raw.networkMode, NetworkingModeManager.ArtNetModeIndex, NetworkingModeManager.SAcnModeIndex),
+            useMulticast = raw.useMulticast,
+            multicastAddress = string.IsNullOrWhiteSpace(raw.multicastAddress) ? "239.255.0.1" : raw.multicastAddress.Trim(),
+            unicastBindAddress = string.IsNullOrWhiteSpace(raw.unicastBindAddress) ? "0.0.0.0" : raw.unicastBindAddress.Trim(),
+            listenPort = Mathf.Clamp(raw.listenPort, 1, 65535),
+            timeoutSeconds = Mathf.Max(0.1f, raw.timeoutSeconds),
+            useLtpMerge = raw.useLtpMerge,
+            additionalUniverses = string.IsNullOrWhiteSpace(raw.additionalUniverses) ? string.Empty : raw.additionalUniverses.Trim(),
+            showNetworkDebug = raw.showNetworkDebug,
             passwordConfigured = raw.passwordConfigured,
             passwordEnabled = raw.passwordEnabled
         };
@@ -68,6 +97,15 @@ public static class WebUiSettingsStore
         SaveLoadSettings.SaveInt(SaveLoadSettings.FixtureCountKey, data.fixtureAmount);
         SaveLoadSettings.SaveInt(SaveLoadSettings.PixelColumnsKey, data.gridX);
         SaveLoadSettings.SaveInt(SaveLoadSettings.PixelRowsKey, data.gridY);
+        SaveLoadSettings.SaveInt(SaveLoadSettings.NetworkModeKey, data.networkMode);
+        SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnUseMulticastKey, data.useMulticast ? 1 : 0);
+        SaveLoadSettings.SaveString(SaveLoadSettings.SAcnMulticastAddressKey, data.multicastAddress);
+        SaveLoadSettings.SaveString(SaveLoadSettings.SAcnUnicastBindAddressKey, data.unicastBindAddress);
+        SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnListenPortKey, data.listenPort);
+        PlayerPrefs.SetFloat(SaveLoadSettings.SAcnTimeoutSecondsKey, data.timeoutSeconds);
+        SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnUseLtpMergeKey, data.useLtpMerge ? 1 : 0);
+        SaveLoadSettings.SaveString(SaveLoadSettings.SAcnMulticastUniversesKey, data.additionalUniverses);
+        SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnDebugVisibleKey, data.showNetworkDebug ? 1 : 0);
         SaveLoadSettings.Save();
     }
 

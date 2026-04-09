@@ -13,7 +13,9 @@ public class WebUiSettingsBridge : MonoBehaviour
 
     public WebUiSettingsData GetSettings()
     {
-        return WebUiSettingsStore.Load();
+        WebUiSettingsData settings = WebUiSettingsStore.Load();
+        settings.advancedNetworkingUnlocked = IsAdvancedNetworkingUnlocked();
+        return settings;
     }
 
     public string GetSettingsJson()
@@ -34,6 +36,8 @@ public class WebUiSettingsBridge : MonoBehaviour
     {
         WebUiSettingsData data = WebUiSettingsStore.Sanitize(raw);
         data.dmxUniverse = Mathf.Clamp(data.dmxUniverse, 1, GetMaxSelectableUniverse(universeLimitCapability));
+        bool advancedUnlocked = IsAdvancedNetworkingUnlocked();
+        data.advancedNetworkingUnlocked = advancedUnlocked;
         DmxModeManager.FixtureMode selectedMode = ToFixtureMode(data.fixtureMode);
 
         if (fixtureModeSelector != null)
@@ -62,10 +66,34 @@ public class WebUiSettingsBridge : MonoBehaviour
         }
 
         INetworkReceiver receiver = NetworkingModeManager.Instance?.NetworkReceiver;
+        if (advancedUnlocked && NetworkingModeManager.Instance != null)
+        {
+            NetworkingModeManager.Instance.SetModeFromIndex(data.networkMode);
+            receiver = NetworkingModeManager.Instance.NetworkReceiver;
+        }
+
         if (receiver != null)
         {
             receiver.SetUniverseFromUserInput(data.dmxUniverse);
             receiver.SetStartChannelFromUserInput(data.startChannel);
+        }
+
+        if (advancedUnlocked && receiver is SAcnReceiver sacnReceiver)
+        {
+            sacnReceiver.SetTransportMode(data.useMulticast);
+            sacnReceiver.SetMulticastAddressFromUserInput(data.multicastAddress);
+            sacnReceiver.SetUnicastBindAddressFromUserInput(data.unicastBindAddress);
+            sacnReceiver.SetListenPortFromUserInput(data.listenPort);
+            sacnReceiver.TimeoutSeconds = Mathf.Max(0.1f, data.timeoutSeconds);
+            sacnReceiver.UseLtpMerge = data.useLtpMerge;
+            sacnReceiver.MulticastUniverseSubscriptions = ParseUniverseCsv(data.additionalUniverses);
+            sacnReceiver.Parameters.debugPanelVisible = data.showNetworkDebug;
+            sacnReceiver.SaveNetworkSettings();
+        }
+
+        if (advancedUnlocked && NetworkDebugService.Instance != null)
+        {
+            NetworkDebugService.Instance.DebugVisible = data.showNetworkDebug;
         }
     }
 
@@ -93,5 +121,37 @@ public class WebUiSettingsBridge : MonoBehaviour
 
         int maxUniverse = CapabilityService.Instance.ResolveNumeric(capabilityDefinition.Id, 1);
         return Mathf.Clamp(maxUniverse, 1, 16);
+    }
+
+    private static bool IsAdvancedNetworkingUnlocked()
+    {
+        return CapabilityService.Instance != null
+            && CapabilityService.Instance.ResolveBoolean("capability.advanced.networking", false);
+    }
+
+    private static System.Collections.Generic.List<int> ParseUniverseCsv(string csv)
+    {
+        var values = new System.Collections.Generic.List<int>();
+        if (string.IsNullOrWhiteSpace(csv))
+        {
+            return values;
+        }
+
+        string[] entries = csv.Split(',');
+        for (int i = 0; i < entries.Length; i++)
+        {
+            if (!int.TryParse(entries[i].Trim(), out int universe1Based))
+            {
+                continue;
+            }
+
+            int value = Mathf.Clamp(universe1Based, 1, 64000) - 1;
+            if (!values.Contains(value))
+            {
+                values.Add(value);
+            }
+        }
+
+        return values;
     }
 }

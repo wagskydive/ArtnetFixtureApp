@@ -114,13 +114,9 @@ public class UI_SAcnSettingsTests
         var settings = _settingsGo.GetComponent<UI_SAcnSettings>();
 
         var transportText = CreateText("transport");
-        var multicastText = CreateText("multicast");
-        var unicastText = CreateText("unicast");
         var portText = CreateText("port");
 
         SetPrivateField(settings, "transportModeText", transportText);
-        SetPrivateField(settings, "multicastAddressText", multicastText);
-        SetPrivateField(settings, "unicastBindAddressText", unicastText);
         SetPrivateField(settings, "listenPortText", portText);
 
         _settingsGo.SetActive(true);
@@ -131,8 +127,8 @@ public class UI_SAcnSettingsTests
         settings.SetListenPort(5569);
 
         Assert.That(transportText.text, Is.EqualTo("Unicast"));
-        Assert.That(unicastText.text, Is.EqualTo("10.10.10.5"));
-        Assert.That(multicastText.text, Is.EqualTo("239.255.0.50"));
+        Assert.That(settings.UnicastBindAddress, Is.EqualTo("10.10.10.5"));
+        Assert.That(settings.MulticastAddress, Is.EqualTo("239.255.0.50"));
         Assert.That(portText.text, Is.EqualTo("5569"));
     }
 
@@ -188,6 +184,21 @@ public class UI_SAcnSettingsTests
         Assert.That(receiveText.text, Is.EqualTo("Disabled"));
         Assert.That(mergeText.text, Is.EqualTo("LTP"));
         Assert.That(multicastUniversesText.text, Is.EqualTo("4,8"));
+    }
+
+    [Test]
+    public void UniverseAndMulticastAddress_StayInSyncUsingSacnConvention()
+    {
+        var manager = _managerGo.GetComponent<NetworkingModeManager>();
+        var settings = _settingsGo.GetComponent<UI_SAcnSettings>();
+        _settingsGo.SetActive(true);
+
+        var receiver = manager.NetworkReceiver as SAcnReceiver;
+        settings.SetUniverse(256);
+        Assert.That(receiver.MulticastAddress, Is.EqualTo("239.255.1.0"));
+
+        settings.SetMulticastAddress("239.255.0.1");
+        Assert.That(receiver.GetUniverseForUserInput(), Is.EqualTo(1));
     }
 
     private static Text CreateText(string name)

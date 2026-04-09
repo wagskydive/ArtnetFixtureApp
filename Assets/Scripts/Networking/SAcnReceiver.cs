@@ -30,6 +30,7 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
     public List<int> MulticastUniverseSubscriptions = new List<int>();
     [Tooltip("When enabled, latest value wins after priority filtering. When disabled, highest value per channel wins (HTP).")]
     public bool UseLtpMerge = false;
+    public SAcnParameters Parameters { get; private set; } = new SAcnParameters();
 
     [HideInInspector]
     public bool HasReceivedDataRecently = false;
@@ -74,8 +75,8 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
     {
         Universe = ClampUniverse(Universe);
         StartChannel = ClampStartChannel(StartChannel);
-        ClampMulticastSubscriptions();
         LoadNetworkSettings();
+        ApplyParametersToRuntime();
 
         if (DmxBuffer == null)
         {
@@ -131,7 +132,8 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
     public void SetUniverseFromUserInput(int universe1Based)
     {
         Universe = ClampUniverse(universe1Based - 1);
-        ClampMulticastSubscriptions();
+        MulticastAddress = SAcnParameters.BuildUniverseMulticastAddress(Universe + 1);
+        SaveNetworkSettings();
     }
 
     public int GetUniverseForUserInput()
@@ -142,6 +144,7 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
     public void SetStartChannelFromUserInput(int startChannel1Based)
     {
         StartChannel = ClampStartChannel(startChannel1Based);
+        SaveNetworkSettings();
     }
 
     public int GetFixtureChannelValue(int relativeChannel)
@@ -163,7 +166,7 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
     public void SetTransportMode(bool useMulticast)
     {
         UseMulticast = useMulticast;
-        PersistNetworkSettings();
+        SaveNetworkSettings();
     }
 
     public void SetMulticastAddressFromUserInput(string multicastAddress)
@@ -175,7 +178,12 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
         }
 
         MulticastAddress = parsed.ToString();
-        PersistNetworkSettings();
+        if (SAcnParameters.TryParseUniverseFromMulticast(MulticastAddress, out int universe1Based))
+        {
+            Universe = ClampUniverse(universe1Based - 1);
+        }
+
+        SaveNetworkSettings();
     }
 
     public void SetUnicastBindAddressFromUserInput(string bindAddress)
@@ -187,13 +195,13 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
         }
 
         UnicastBindAddress = parsed.ToString();
-        PersistNetworkSettings();
+        SaveNetworkSettings();
     }
 
     public void SetListenPortFromUserInput(int listenPort)
     {
         ListenPort = Mathf.Clamp(listenPort, 1, 65535);
-        PersistNetworkSettings();
+        SaveNetworkSettings();
     }
 
     private void AcquireMulticastLock()
@@ -300,24 +308,19 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
             {
                 byte[] data = _udpClient.Receive(ref remoteEndpoint);
 
-                Debug.Log($"[sACN] Packet from {remoteEndpoint} | Size: {data.Length}");
-
                 if (!TryParseSacnPacket(data, out SacnPacketMetadata metadata))
                 {
-                    Debug.Log("[sACN] Packet rejected (not valid sACN)");
                     continue;
                 }
 
-                Debug.Log($"[sACN] Valid sACN | Universe: {metadata.Universe} | Channels: {metadata.DmxLength}");
-
                 if (metadata.IsSynchronizationPacket)
                 {
-                    Debug.Log("[sACN] Sync packet received");
                     ApplyPendingSync(metadata.SyncUniverse == 0 ? metadata.Universe : metadata.SyncUniverse);
                     continue;
                 }
 
                 ProcessDataPacket(data, metadata);
+                NetworkDebugService.Instance?.RecordPacket(ProtocolName, metadata.Universe, metadata.DmxLength, remoteEndpoint.ToString());
 
                 _receivedPacketThisFrame = true;
             }
@@ -332,7 +335,6 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
 
     private void ProcessDataPacket(byte[] data, SacnPacketMetadata metadata)
     {
-        Debug.Log($"[sACN] Processing Universe {metadata.Universe}");
         if (metadata.Universe <= 0)
         {
             return;
@@ -369,13 +371,9 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
             }
 
             byte[] merged = BuildMergedFrameForUniverseLocked(metadata.Universe);
-            Debug.Log("Metadate.Universe: " + metadata.Universe + " Universe: " + Universe);
-            Debug.Log("merged: " + merged.ToString());
-            Debug.Log("DmxBuffer exist is: " + DmxBuffer != null);
 
             if (metadata.Universe == Universe + 1 && merged != null && DmxBuffer != null)
             {
-                Debug.Log("[sACN] Writing merged frame to buffer");
                 DmxBuffer.WriteFrame(merged, 512);
             }
         }
@@ -414,8 +412,6 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
         const uint VECTOR_E131_EXTENDED_SYNCHRONIZATION = 0x00000001;
 
         metadata.IsSynchronizationPacket = vector == VECTOR_E131_EXTENDED_SYNCHRONIZATION;
-        Debug.Log($"[sACN] Vector: 0x{vector:X8} | Sync: {metadata.IsSynchronizationPacket}");
-        //metadata.IsSynchronizationPacket = data[43] == 0x02;
         int propertyValueCount = (data[123] << 8) | data[124];
         metadata.DmxLength = Mathf.Clamp(propertyValueCount - 1, 0, 512);
         metadata.DmxStartIndex = 126;
@@ -453,19 +449,105 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
 
     private void LoadNetworkSettings()
     {
-        UseMulticast = SaveLoadSettings.LoadInt(SaveLoadSettings.SAcnUseMulticastKey, 1) == 1;
-        MulticastAddress = SaveLoadSettings.LoadString(SaveLoadSettings.SAcnMulticastAddressKey, MulticastAddress);
-        UnicastBindAddress = SaveLoadSettings.LoadString(SaveLoadSettings.SAcnUnicastBindAddressKey, UnicastBindAddress);
-        ListenPort = Mathf.Clamp(SaveLoadSettings.LoadInt(SaveLoadSettings.SAcnListenPortKey, ListenPort), 1, 65535);
+        Parameters = new SAcnParameters
+        {
+            useMulticast = SaveLoadSettings.LoadInt(SaveLoadSettings.SAcnUseMulticastKey, 1) == 1,
+            multicastAddress = SaveLoadSettings.LoadString(SaveLoadSettings.SAcnMulticastAddressKey, MulticastAddress),
+            unicastBindAddress = SaveLoadSettings.LoadString(SaveLoadSettings.SAcnUnicastBindAddressKey, UnicastBindAddress),
+            listenPort = SaveLoadSettings.LoadInt(SaveLoadSettings.SAcnListenPortKey, ListenPort),
+            timeoutSeconds = PlayerPrefs.GetFloat(SaveLoadSettings.SAcnTimeoutSecondsKey, TimeoutSeconds),
+            useLtpMerge = SaveLoadSettings.LoadInt(SaveLoadSettings.SAcnUseLtpMergeKey, UseLtpMerge ? 1 : 0) == 1,
+            multicastUniverseSubscriptions = ParseUniverseList(SaveLoadSettings.LoadString(SaveLoadSettings.SAcnMulticastUniversesKey, string.Empty)),
+            debugPanelVisible = SaveLoadSettings.LoadInt(SaveLoadSettings.SAcnDebugVisibleKey, 0) == 1
+        };
+        Parameters.Clamp();
     }
 
-    private void PersistNetworkSettings()
+    public void SaveNetworkSettings()
     {
+        UpdateParametersFromRuntime();
         SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnUseMulticastKey, UseMulticast ? 1 : 0);
         SaveLoadSettings.SaveString(SaveLoadSettings.SAcnMulticastAddressKey, MulticastAddress);
         SaveLoadSettings.SaveString(SaveLoadSettings.SAcnUnicastBindAddressKey, UnicastBindAddress);
         SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnListenPortKey, ListenPort);
+        PlayerPrefs.SetFloat(SaveLoadSettings.SAcnTimeoutSecondsKey, TimeoutSeconds);
+        SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnUseLtpMergeKey, UseLtpMerge ? 1 : 0);
+        SaveLoadSettings.SaveString(SaveLoadSettings.SAcnMulticastUniversesKey, BuildUniverseListCsv(MulticastUniverseSubscriptions));
+        SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnDebugVisibleKey, Parameters.debugPanelVisible ? 1 : 0);
         SaveLoadSettings.Save();
+    }
+
+    private void ApplyParametersToRuntime()
+    {
+        Parameters.Clamp();
+        UseMulticast = Parameters.useMulticast;
+        MulticastAddress = Parameters.multicastAddress;
+        UnicastBindAddress = Parameters.unicastBindAddress;
+        ListenPort = Parameters.listenPort;
+        TimeoutSeconds = Parameters.timeoutSeconds;
+        UseLtpMerge = Parameters.useLtpMerge;
+        MulticastUniverseSubscriptions = new List<int>(Parameters.multicastUniverseSubscriptions);
+
+        if (SAcnParameters.TryParseUniverseFromMulticast(MulticastAddress, out int multicastUniverse1Based))
+        {
+            Universe = ClampUniverse(multicastUniverse1Based - 1);
+        }
+
+        ClampMulticastSubscriptions();
+    }
+
+    private void UpdateParametersFromRuntime()
+    {
+        Parameters.useMulticast = UseMulticast;
+        Parameters.multicastAddress = MulticastAddress;
+        Parameters.unicastBindAddress = UnicastBindAddress;
+        Parameters.listenPort = ListenPort;
+        Parameters.timeoutSeconds = TimeoutSeconds;
+        Parameters.useLtpMerge = UseLtpMerge;
+        Parameters.multicastUniverseSubscriptions = new List<int>(MulticastUniverseSubscriptions ?? new List<int>());
+        Parameters.Clamp();
+    }
+
+    private static List<int> ParseUniverseList(string csv)
+    {
+        var values = new List<int>();
+        if (string.IsNullOrWhiteSpace(csv))
+        {
+            return values;
+        }
+
+        string[] entries = csv.Split(',');
+        for (int i = 0; i < entries.Length; i++)
+        {
+            if (!int.TryParse(entries[i].Trim(), out int universe1Based))
+            {
+                continue;
+            }
+
+            int value = Mathf.Clamp(universe1Based, 1, 64000) - 1;
+            if (!values.Contains(value))
+            {
+                values.Add(value);
+            }
+        }
+
+        return values;
+    }
+
+    private static string BuildUniverseListCsv(List<int> universes0Based)
+    {
+        if (universes0Based == null || universes0Based.Count == 0)
+        {
+            return string.Empty;
+        }
+
+        string[] values = new string[universes0Based.Count];
+        for (int i = 0; i < universes0Based.Count; i++)
+        {
+            values[i] = (Mathf.Clamp(universes0Based[i], 0, 63999) + 1).ToString();
+        }
+
+        return string.Join(",", values);
     }
 
     private static bool TryParseIpv4(string value, out IPAddress address)
@@ -549,9 +631,7 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
 
     private static IPAddress BuildUniverseMulticastAddress(int universe1Based)
     {
-        int hi = (universe1Based >> 8) & 0xFF;
-        int lo = universe1Based & 0xFF;
-        return IPAddress.Parse($"239.255.{hi}.{lo}");
+        return IPAddress.Parse(SAcnParameters.BuildUniverseMulticastAddress(universe1Based));
     }
 
     private void ApplyPendingSync(int syncUniverse)

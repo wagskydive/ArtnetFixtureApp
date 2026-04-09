@@ -18,6 +18,14 @@ public class WebUiSettingsTests
         PlayerPrefs.DeleteKey("dmx.fixture.count");
         PlayerPrefs.DeleteKey("dmx.pixel.rows");
         PlayerPrefs.DeleteKey("dmx.pixel.columns");
+        PlayerPrefs.DeleteKey(SaveLoadSettings.SAcnUseMulticastKey);
+        PlayerPrefs.DeleteKey(SaveLoadSettings.SAcnMulticastAddressKey);
+        PlayerPrefs.DeleteKey(SaveLoadSettings.SAcnUnicastBindAddressKey);
+        PlayerPrefs.DeleteKey(SaveLoadSettings.SAcnListenPortKey);
+        PlayerPrefs.DeleteKey(SaveLoadSettings.SAcnTimeoutSecondsKey);
+        PlayerPrefs.DeleteKey(SaveLoadSettings.SAcnUseLtpMergeKey);
+        PlayerPrefs.DeleteKey(SaveLoadSettings.SAcnMulticastUniversesKey);
+        PlayerPrefs.DeleteKey(SaveLoadSettings.SAcnDebugVisibleKey);
         PlayerPrefs.DeleteKey(SaveLoadSettings.IapEntitlementsKey);
         string customGoboFolder = Path.Combine(Application.persistentDataPath, "CustomGobos");
         if (Directory.Exists(customGoboFolder))
@@ -37,7 +45,10 @@ public class WebUiSettingsTests
             startChannel = -42,
             fixtureAmount = 50,
             gridX = 31,
-            gridY = 7
+            gridY = 7,
+            networkMode = 5,
+            listenPort = 99999,
+            timeoutSeconds = -10f
         };
 
         WebUiSettingsStore.Save(dirty);
@@ -50,6 +61,9 @@ public class WebUiSettingsTests
         Assert.That(loaded.fixtureAmount, Is.EqualTo(16));
         Assert.That(loaded.gridX, Is.EqualTo(24));
         Assert.That(loaded.gridY, Is.EqualTo(8));
+        Assert.That(loaded.networkMode, Is.EqualTo(NetworkingModeManager.SAcnModeIndex));
+        Assert.That(loaded.listenPort, Is.EqualTo(65535));
+        Assert.That(loaded.timeoutSeconds, Is.EqualTo(0.1f).Within(0.01f));
         Assert.That(loaded.passwordConfigured, Is.False);
     }
 
@@ -121,12 +135,15 @@ public class WebUiSettingsTests
         var serverGo = new GameObject("web-server");
         var server = serverGo.AddComponent<LocalWebUiServer>();
 
-        const string postedJson = "{\"deviceName\":\"Desk Node\",\"fixtureMode\":\"surface\",\"dmxUniverse\":7,\"startChannel\":144,\"fixtureAmount\":3,\"gridX\":32,\"gridY\":24}";
+        const string postedJson = "{\"deviceName\":\"Desk Node\",\"fixtureMode\":\"surface\",\"dmxUniverse\":7,\"startChannel\":144,\"fixtureAmount\":3,\"gridX\":32,\"gridY\":24,\"networkMode\":1,\"useMulticast\":false,\"multicastAddress\":\"239.255.0.42\",\"unicastBindAddress\":\"192.168.1.9\",\"listenPort\":6000,\"timeoutSeconds\":1.7,\"useLtpMerge\":true,\"additionalUniverses\":\"4,8\",\"showNetworkDebug\":true}";
         string postResponse = server.HandleSettingsApiRequestImmediately("POST", postedJson);
         WebUiSettingsData postData = WebUiSettingsStore.FromJson(postResponse);
 
         Assert.That(postData.dmxUniverse, Is.EqualTo(7));
         Assert.That(postData.startChannel, Is.EqualTo(144));
+        Assert.That(postData.networkMode, Is.EqualTo(1));
+        Assert.That(postData.useMulticast, Is.False);
+        Assert.That(postData.listenPort, Is.EqualTo(6000));
         Assert.That(PlayerPrefs.GetInt("dmx.universe", -1), Is.EqualTo(7));
         Assert.That(PlayerPrefs.GetInt("dmx.channel", -1), Is.EqualTo(144));
 
@@ -137,6 +154,8 @@ public class WebUiSettingsTests
         Assert.That(getData.fixtureMode, Is.EqualTo("surface"));
         Assert.That(getData.dmxUniverse, Is.EqualTo(7));
         Assert.That(getData.startChannel, Is.EqualTo(144));
+        Assert.That(getData.unicastBindAddress, Is.EqualTo("192.168.1.9"));
+        Assert.That(getData.additionalUniverses, Is.EqualTo("4,8"));
         Assert.That(string.IsNullOrWhiteSpace(getData.ipAddress), Is.False);
 
         Object.DestroyImmediate(serverGo);
@@ -158,6 +177,23 @@ public class WebUiSettingsTests
         Assert.That(succeeded, Does.Contain("\"authenticated\":true"));
 
         Object.DestroyImmediate(serverGo);
+    }
+
+    [Test]
+    public void LocalWebUiServer_NetworkDebugApi_ReturnsSnapshotPayload()
+    {
+        var serviceGo = new GameObject("network-debug");
+        serviceGo.AddComponent<NetworkDebugService>();
+
+        var serverGo = new GameObject("web-server");
+        var server = serverGo.AddComponent<LocalWebUiServer>();
+
+        string response = server.HandleNetworkDebugApiRequestImmediately("GET");
+        Assert.That(response, Does.Contain("packetsReceived"));
+        Assert.That(response, Does.Contain("recentMessages"));
+
+        Object.DestroyImmediate(serverGo);
+        Object.DestroyImmediate(serviceGo);
     }
 
     [Test]
