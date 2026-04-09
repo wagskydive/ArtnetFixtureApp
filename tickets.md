@@ -86,6 +86,27 @@ Behavior notes:
 - WebUI advanced section now shows only when advanced-network capability is unlocked.
 - Added web debug panel that polls `/api/network-debug` for live packet feedback and logs.
 
+T24.5 - Add a button to the webui to open the Advanced Networking section. The button opens the section only if the iap is owned and if it is not owned it will show a modal about purchasing that IAP
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T24.6 - Make sure the Advanced network settings in the webui sync correctly with the player prefs and with the in app ui.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T24.7 - Make sure the setting for the network mode is recalled correctly from player prefs using the SaveLoadSettings after restarting the app
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 
 
 
