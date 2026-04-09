@@ -163,6 +163,18 @@
         .gobo-actions button {
             min-width: 120px;
         }
+
+        .debug-log {
+            background: #0b0b0b;
+            border-radius: 8px;
+            border: 1px solid #333;
+            padding: 8px;
+            min-height: 80px;
+            max-height: 220px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-size: 14px;
+        }
     </style>
 
 </head>
@@ -221,6 +233,51 @@
 
                 <label>Grid Size Y</label> <input id="gridY" type="number" min="8" max="32" tabindex="7">
 
+            </div>
+
+            <div id="advancedNetworkSection" class="section hidden">
+                <h2>Advanced Networking</h2>
+                <label>Protocol</label>
+                <select id="networkMode">
+                    <option value="0">Art-Net</option>
+                    <option value="1">sACN</option>
+                </select>
+                <label>Transport Mode</label>
+                <select id="useMulticast">
+                    <option value="true">Multicast</option>
+                    <option value="false">Unicast</option>
+                </select>
+                <div id="multicastAddressRow">
+                    <label>Multicast IP</label>
+                    <input id="multicastAddress" type="text">
+                </div>
+                <div id="unicastAddressRow" class="hidden">
+                    <label>Unicast Bind IP</label>
+                    <input id="unicastBindAddress" type="text">
+                </div>
+                <label>Listen Port</label>
+                <input id="listenPort" type="number" min="1" max="65535">
+                <label>Timeout Seconds</label>
+                <input id="timeoutSeconds" type="number" min="0.1" step="0.1">
+                <label>Merge Mode</label>
+                <select id="useLtpMerge">
+                    <option value="false">HTP</option>
+                    <option value="true">LTP</option>
+                </select>
+                <label>Additional Universes (CSV)</label>
+                <input id="additionalUniverses" type="text" placeholder="2,5,8">
+                <label>Show Debug Section</label>
+                <select id="showNetworkDebug">
+                    <option value="false">Hidden</option>
+                    <option value="true">Visible</option>
+                </select>
+                <button id="toggleDebugBtn" type="button" class="secondary">Show/Hide Debug</button>
+            </div>
+
+            <div id="networkDebugSection" class="section hidden">
+                <h2>Network Debug</h2>
+                <p id="networkDebugSummary" class="status">No data yet.</p>
+                <div id="networkDebugLog" class="debug-log"></div>
             </div>
 
             <div class="section">
@@ -322,6 +379,12 @@
         const modeSelect = document.getElementById("fixtureMode")
         const standardSection = document.getElementById("standardSection")
         const pixelSection = document.getElementById("pixelSection")
+        const advancedNetworkSection = document.getElementById("advancedNetworkSection")
+        const networkDebugSection = document.getElementById("networkDebugSection")
+        const multicastAddressRow = document.getElementById("multicastAddressRow")
+        const unicastAddressRow = document.getElementById("unicastAddressRow")
+        const networkModeSelect = document.getElementById("networkMode")
+        const useMulticastSelect = document.getElementById("useMulticast")
 
         modeSelect.addEventListener("change", function () {
 
@@ -350,7 +413,16 @@
             document.getElementById("startChannel"),
             document.getElementById("fixtureAmount"),
             document.getElementById("gridX"),
-            document.getElementById("gridY")
+            document.getElementById("gridY"),
+            document.getElementById("networkMode"),
+            document.getElementById("useMulticast"),
+            document.getElementById("multicastAddress"),
+            document.getElementById("unicastBindAddress"),
+            document.getElementById("listenPort"),
+            document.getElementById("timeoutSeconds"),
+            document.getElementById("useLtpMerge"),
+            document.getElementById("additionalUniverses"),
+            document.getElementById("showNetworkDebug")
         ]
         const deviceNameElement = document.getElementById("deviceName")
         const fixtureNameHeading = document.getElementById("fixtureNameHeading")
@@ -363,6 +435,7 @@
         let lastServerSettingsJson = ""
         let backgroundRefreshInterval = null
         let goboRefreshInterval = null
+        let networkDebugInterval = null
         let goboSlotsInitialized = false
         let goboVisibleSlotCount = 1
 
@@ -378,7 +451,16 @@
                 startChannel: parseInt(document.getElementById("startChannel").value),
                 fixtureAmount: parseInt(document.getElementById("fixtureAmount").value),
                 gridX: parseInt(document.getElementById("gridX").value),
-                gridY: parseInt(document.getElementById("gridY").value)
+                gridY: parseInt(document.getElementById("gridY").value),
+                networkMode: parseInt(document.getElementById("networkMode").value),
+                useMulticast: document.getElementById("useMulticast").value === "true",
+                multicastAddress: document.getElementById("multicastAddress").value,
+                unicastBindAddress: document.getElementById("unicastBindAddress").value,
+                listenPort: parseInt(document.getElementById("listenPort").value),
+                timeoutSeconds: parseFloat(document.getElementById("timeoutSeconds").value),
+                useLtpMerge: document.getElementById("useLtpMerge").value === "true",
+                additionalUniverses: document.getElementById("additionalUniverses").value,
+                showNetworkDebug: document.getElementById("showNetworkDebug").value === "true"
             }
         }
 
@@ -390,6 +472,18 @@
             document.getElementById("fixtureAmount").value = clampValue(parseInt(settings.fixtureAmount) || 1, 1, 16)
             document.getElementById("gridX").value = clampValue(parseInt(settings.gridX) || 8, 8, 32)
             document.getElementById("gridY").value = clampValue(parseInt(settings.gridY) || 8, 8, 32)
+            document.getElementById("networkMode").value = `${clampValue(parseInt(settings.networkMode) || 0, 0, 1)}`
+            document.getElementById("useMulticast").value = settings.useMulticast ? "true" : "false"
+            document.getElementById("multicastAddress").value = settings.multicastAddress || "239.255.0.1"
+            document.getElementById("unicastBindAddress").value = settings.unicastBindAddress || "0.0.0.0"
+            document.getElementById("listenPort").value = clampValue(parseInt(settings.listenPort) || 5568, 1, 65535)
+            document.getElementById("timeoutSeconds").value = Math.max(0.1, Number(settings.timeoutSeconds) || 2).toFixed(1)
+            document.getElementById("useLtpMerge").value = settings.useLtpMerge ? "true" : "false"
+            document.getElementById("additionalUniverses").value = settings.additionalUniverses || ""
+            document.getElementById("showNetworkDebug").value = settings.showNetworkDebug ? "true" : "false"
+            const advancedUnlocked = !!settings.advancedNetworkingUnlocked
+            advancedNetworkSection.classList.toggle("hidden", !advancedUnlocked)
+            networkDebugSection.classList.toggle("hidden", !advancedUnlocked || !settings.showNetworkDebug)
             fixtureNameHeading.textContent = `Fixture: ${settings.deviceName || "ArtnetFixture"}`
             const ipAddress = settings.ipAddress || "127.0.0.1"
             const port = window.location.port || "8080"
@@ -400,6 +494,43 @@
                 writeCachedAuth(false)
             }
             modeSelect.dispatchEvent(new Event("change"))
+            useMulticastSelect.dispatchEvent(new Event("change"))
+        }
+
+        useMulticastSelect.addEventListener("change", function () {
+            const isMulticast = this.value === "true"
+            multicastAddressRow.classList.toggle("hidden", !isMulticast)
+            unicastAddressRow.classList.toggle("hidden", isMulticast)
+        })
+
+        document.getElementById("showNetworkDebug").addEventListener("change", function () {
+            networkDebugSection.classList.toggle("hidden", this.value !== "true")
+        })
+
+        document.getElementById("toggleDebugBtn").addEventListener("click", function () {
+            networkDebugSection.classList.toggle("hidden")
+        })
+
+        async function refreshNetworkDebug() {
+            if (networkDebugSection.classList.contains("hidden")) {
+                return
+            }
+
+            try {
+                const response = await fetch("/api/network-debug")
+                if (!response.ok) {
+                    return
+                }
+
+                const data = await response.json()
+                const summary = document.getElementById("networkDebugSummary")
+                const log = document.getElementById("networkDebugLog")
+                summary.textContent = `${data.protocol || "Unknown"} | U:${data.activeUniverse || 1} | Total:${data.packetsReceived || 0} | PPS:${data.packetsPerSecond || 0}`
+                const recent = Array.isArray(data.recentMessages) ? data.recentMessages : []
+                log.textContent = recent.length ? recent.join("\n") : "Waiting for packets…"
+            } catch (error) {
+                console.log("Failed to load network debug data", error)
+            }
         }
 
         async function saveSettings() {
@@ -730,6 +861,14 @@
         goboRefreshInterval = setInterval(() => {
             refreshGoboSlots(false)
         }, 5000)
+
+        if (networkDebugInterval !== null) {
+            clearInterval(networkDebugInterval)
+        }
+
+        networkDebugInterval = setInterval(() => {
+            refreshNetworkDebug()
+        }, 1000)
 
     </script>
 

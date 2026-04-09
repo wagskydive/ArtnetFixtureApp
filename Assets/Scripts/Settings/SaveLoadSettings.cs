@@ -19,6 +19,10 @@ public static class SaveLoadSettings
     public const string SAcnMulticastAddressKey = "sacn.multicast.address";
     public const string SAcnUnicastBindAddressKey = "sacn.unicast.bind.address";
     public const string SAcnListenPortKey = "sacn.listen.port";
+    public const string SAcnTimeoutSecondsKey = "sacn.timeout.seconds";
+    public const string SAcnUseLtpMergeKey = "sacn.use.ltp.merge";
+    public const string SAcnMulticastUniversesKey = "sacn.multicast.universes";
+    public const string SAcnDebugVisibleKey = "sacn.debug.visible";
     public const string InfoPanelEnabledKey = "info.panel.enabled";
     public const string IapEntitlementsKey = "iap.entitlements";
     public const string IapConsumablesKey = "iap.consumables";

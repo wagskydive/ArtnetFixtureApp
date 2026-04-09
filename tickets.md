@@ -26,11 +26,16 @@ T24.1 - Refactoring:
 - Make sure the parameter data is saved and loaded correctly using the SaveAndLoadSettings script
 - Parameter data is loaded on app start
 - Every change to the parameter data is directly saved into the player prefs
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+
+Behavior notes:
+- Added `SAcnParameters` as a dedicated data container for sACN transport/merge/debug parameters, and centralized save/load mapping in `SAcnReceiver`.
+- sACN parameter mutations now persist immediately via `SaveLoadSettings` + `PlayerPrefs` float storage for timeout seconds.
+- Startup now hydrates sACN parameter data first, then applies runtime state before receiver start.
 
 T24.2 - Fix sAcnSettings.cs so that the universe number changes the multicast IP automatically and vise versa. The correct usage should propagate this. The IP for Universe 1 is supposed to correspond with xxx.xxx.0.1 and universe 256 should correspond with xxx.xxx.1.0 and so on. Also solve the 0base vs 1based universe ambiguity, so that it follows correct conventions for the network mode sACN. 
 - [ ] Started
@@ -39,13 +44,22 @@ T24.2 - Fix sAcnSettings.cs so that the universe number changes the multicast IP
 - [ ] Tests Passed
 - [ ] Documentation Written
 
+Behavior notes:
+- Universe input now auto-derives multicast IP (`239.255.<hi>.<lo>`), and multicast IP edits now auto-derive universe for sACN 1-based conventions.
+- sACN UI now routes universe/start-channel writes directly through `SAcnReceiver` setters to keep convention handling in one place.
+
 
 T24.3 - Add a Network Debug Script that can be started and accessed by a debug UI panel and by the webui to give the user easy feedback on packets that are being received.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+
+Behavior notes:
+- Added `NetworkDebugService` to collect packet counters, packets-per-second, and recent packet log lines.
+- `SAcnReceiver` now reports packet activity into `NetworkDebugService`.
+- Added `/api/network-debug` endpoint on `LocalWebUiServer` for debug polling.
 
 
 T24.4 - Add a section to the webui for advanced networking.
@@ -61,11 +75,16 @@ The section exposes the following settings
 [ ] Additional Universes List (the user can add additional universes here that the app will listen too)
 [ ] Show/hide Debug section button (shows a panel that shows the debug info)
 [ ] Create the debug panel that shows live network data (packets received and more)
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+
+Behavior notes:
+- Added Advanced Networking section to `webui.html` with protocol, transport, address, listen-port, timeout, merge mode, additional universes, and debug visibility controls.
+- WebUI advanced section now shows only when advanced-network capability is unlocked.
+- Added web debug panel that polls `/api/network-debug` for live packet feedback and logs.
 
 
 

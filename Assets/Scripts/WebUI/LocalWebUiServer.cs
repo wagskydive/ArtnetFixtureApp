@@ -218,6 +218,13 @@ public class LocalWebUiServer : MonoBehaviour
             return;
         }
 
+        if (path == "/api/network-debug")
+        {
+            string json = HandleNetworkDebugApiRequest(context.Request.HttpMethod);
+            WriteJson(context.Response, json);
+            return;
+        }
+
         if (path == "/images")
         {
             string json = HandleImagesApiRequest(context.Request.HttpMethod);
@@ -263,6 +270,7 @@ public class LocalWebUiServer : MonoBehaviour
         if (httpMethod == "GET")
         {
             WebUiSettingsData loaded = settingsBridge != null ? settingsBridge.GetSettings() : WebUiSettingsStore.Load();
+            loaded.advancedNetworkingUnlocked = IsAdvancedNetworkingUnlocked();
             loaded.ipAddress = GetLocalIpv4Address();
             loaded.passwordConfigured = WebUiPasswordProtection.HasConfiguredPassword();
             loaded.passwordEnabled = WebUiPasswordProtection.IsEnabled();
@@ -281,6 +289,7 @@ public class LocalWebUiServer : MonoBehaviour
                 WebUiSettingsStore.Save(settings);
             }
 
+            settings.advancedNetworkingUnlocked = IsAdvancedNetworkingUnlocked();
             settings.ipAddress = GetLocalIpv4Address();
             settings.passwordConfigured = WebUiPasswordProtection.HasConfiguredPassword();
             settings.passwordEnabled = WebUiPasswordProtection.IsEnabled();
@@ -308,6 +317,30 @@ public class LocalWebUiServer : MonoBehaviour
     public string HandleImagesApiRequestImmediately(string httpMethod)
     {
         return ExecuteImagesApiActionImmediately(httpMethod);
+    }
+
+    internal string HandleNetworkDebugApiRequest(string httpMethod)
+    {
+        return InvokeOnMainThread(() => ExecuteNetworkDebugApiActionImmediately(httpMethod));
+    }
+
+    public string HandleNetworkDebugApiRequestImmediately(string httpMethod)
+    {
+        return ExecuteNetworkDebugApiActionImmediately(httpMethod);
+    }
+
+    private string ExecuteNetworkDebugApiActionImmediately(string httpMethod)
+    {
+        if (httpMethod != "GET")
+        {
+            return "{}";
+        }
+
+        NetworkDebugService.NetworkDebugSnapshot snapshot = NetworkDebugService.Instance != null
+            ? NetworkDebugService.Instance.BuildSnapshot()
+            : new NetworkDebugService.NetworkDebugSnapshot();
+
+        return JsonUtility.ToJson(snapshot);
     }
 
     private string ExecuteImagesApiActionImmediately(string httpMethod)
@@ -481,6 +514,12 @@ public class LocalWebUiServer : MonoBehaviour
 
         return CapabilityService.Instance.Entitlements != null
                && CapabilityService.Instance.Entitlements.IsUnlocked(CustomGoboProductId);
+    }
+
+    private static bool IsAdvancedNetworkingUnlocked()
+    {
+        return CapabilityService.Instance != null
+            && CapabilityService.Instance.ResolveBoolean("capability.advanced.networking", false);
     }
 
     private static int ParseSlot(string rawSlot)
