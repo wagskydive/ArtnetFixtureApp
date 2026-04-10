@@ -58,21 +58,25 @@ public static class SaveLoadSettings
     public static void SaveInt(string key, int value)
     {
         PlayerPrefs.SetInt(key, value);
+        Save();
     }
 
     public static void SaveString(string key, string value)
     {
         PlayerPrefs.SetString(key, value);
+        Save();
     }
 
     public static void SaveLong(string key, long value)
     {
         PlayerPrefs.SetString(key, value.ToString());
+        Save();
     }
 
     public static void SaveFloat(string key, float value)
     {
         PlayerPrefs.SetFloat(key, value);
+        Save();
     }
 
     public static void Save()

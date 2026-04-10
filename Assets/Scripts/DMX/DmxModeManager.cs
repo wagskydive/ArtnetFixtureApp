@@ -1,7 +1,7 @@
 using UnityEngine;
 using System;
 
-
+[DefaultExecutionOrder(-100)]
 public class DmxModeManager : MonoBehaviour
 {
     [SerializeField] private Renderer targetRenderer;

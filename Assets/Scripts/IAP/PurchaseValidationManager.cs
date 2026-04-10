@@ -377,10 +377,10 @@ public class PurchaseValidationManager : MonoBehaviour
                 return string.IsNullOrWhiteSpace(definition.DisplayTitle) ? productId : definition.DisplayTitle.Trim();
             }
 
-            IReadOnlyList<string> alternates = definition.AdditionalProductIds;
+            IReadOnlyList<CapabilityDefinition> alternates = definition.AdditionalProductIds;
             for (int alternateIndex = 0; alternateIndex < alternates.Count; alternateIndex++)
             {
-                if (string.Equals(alternates[alternateIndex], productId, StringComparison.Ordinal))
+                if (string.Equals(alternates[alternateIndex].ProductId, productId, StringComparison.Ordinal))
                 {
                     return string.IsNullOrWhiteSpace(definition.DisplayTitle) ? productId : definition.DisplayTitle.Trim();
                 }

@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class WebUiSettingsBridge : MonoBehaviour
 {
-        [SerializeField] private UI_FixtureMeshManager fixtureMeshManager;
+    [SerializeField] private UI_FixtureMeshManager fixtureMeshManager;
     [SerializeField] private UI_FixtureModeSelector fixtureModeSelector;
     [SerializeField] private CapabilityDefinition universeLimitCapability;
 
@@ -78,8 +78,9 @@ public class WebUiSettingsBridge : MonoBehaviour
             receiver.SetStartChannelFromUserInput(data.startChannel);
         }
 
-        if (advancedUnlocked && receiver is SAcnReceiver sacnReceiver)
+        if (advancedUnlocked && receiver.GetType() == typeof(SAcnReceiver))
         {
+            SAcnReceiver sacnReceiver = (SAcnReceiver)receiver;
             sacnReceiver.SetTransportMode(data.useMulticast);
             sacnReceiver.SetMulticastAddressFromUserInput(data.multicastAddress);
             sacnReceiver.SetUnicastBindAddressFromUserInput(data.unicastBindAddress);
@@ -88,7 +89,7 @@ public class WebUiSettingsBridge : MonoBehaviour
             sacnReceiver.UseLtpMerge = data.useLtpMerge;
             sacnReceiver.MulticastUniverseSubscriptions = ParseUniverseCsv(data.additionalUniverses);
             sacnReceiver.Parameters.debugPanelVisible = data.showNetworkDebug;
-            sacnReceiver.SaveNetworkSettings();
+            //sacnReceiver.SaveNetworkSettings();
         }
 
         if (advancedUnlocked && NetworkDebugService.Instance != null)
@@ -120,7 +121,7 @@ public class WebUiSettingsBridge : MonoBehaviour
         }
 
         int maxUniverse = CapabilityService.Instance.ResolveNumeric(capabilityDefinition.Id, 1);
-        return Mathf.Clamp(maxUniverse, 1, 16);
+        return Mathf.Clamp(maxUniverse, 1, 63999);
     }
 
     private static bool IsAdvancedNetworkingUnlocked()

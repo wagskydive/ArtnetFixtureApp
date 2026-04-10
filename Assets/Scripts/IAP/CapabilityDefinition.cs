@@ -15,7 +15,7 @@ public class CapabilityDefinition : ScriptableObject
     [SerializeField] private bool unlockedBooleanValue = true;
     [SerializeField] private int unlockedNumericValue = 1;
     [SerializeField] private string productId;
-    [SerializeField] private List<string> additionalProductIds = new List<string>();
+    [SerializeField] private List<CapabilityDefinition> additionalProductIds = new List<CapabilityDefinition>();
     [SerializeField] private bool consumable;
     [SerializeField] private string displayTitle;
     [TextArea]
@@ -28,7 +28,7 @@ public class CapabilityDefinition : ScriptableObject
     public bool UnlockedBooleanValue => unlockedBooleanValue;
     public int UnlockedNumericValue => unlockedNumericValue;
     public string ProductId => productId;
-    public IReadOnlyList<string> AdditionalProductIds => additionalProductIds;
+    public IReadOnlyList<CapabilityDefinition> AdditionalProductIds => additionalProductIds;
     public bool IsConsumable => consumable;
     public string DisplayTitle => displayTitle;
     public string DisplayDescription => displayDescription;
@@ -53,7 +53,7 @@ public class CapabilityDefinition : ScriptableObject
 
         for (int i = 0; i < additionalProductIds.Count; i++)
         {
-            string alternativeProductId = additionalProductIds[i];
+            string alternativeProductId = additionalProductIds[i].ProductId;
             if (!string.IsNullOrWhiteSpace(alternativeProductId) && entitlementStore.IsUnlocked(alternativeProductId))
             {
                 return true;

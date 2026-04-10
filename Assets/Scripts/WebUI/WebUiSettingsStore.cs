@@ -35,7 +35,7 @@ public static class WebUiSettingsStore
         {
             deviceName = SaveLoadSettings.LoadString(SaveLoadSettings.DeviceNetworkKey, "DMX Projector"),
             fixtureMode = ToFixtureModeValue(fixtureMode),
-            dmxUniverse = Mathf.Clamp(SaveLoadSettings.LoadInt(SaveLoadSettings.DmxUniverseKey, 1), 1, 16),
+            dmxUniverse = Mathf.Clamp(SaveLoadSettings.LoadInt(SaveLoadSettings.DmxUniverseKey, 1), 1, 63999),
             startChannel = Mathf.Clamp(SaveLoadSettings.LoadInt(SaveLoadSettings.DmxChannelKey, 1), 1, 512),
             fixtureAmount = Mathf.Clamp(SaveLoadSettings.LoadInt(SaveLoadSettings.FixtureCountKey, 1), 1, 16),
             gridX = ClampPixelDimension(SaveLoadSettings.LoadInt(SaveLoadSettings.PixelColumnsKey, 8)),
@@ -66,7 +66,7 @@ public static class WebUiSettingsStore
             deviceName = string.IsNullOrWhiteSpace(raw.deviceName) ? "ArtnetFixture" : raw.deviceName.Trim(),
             ipAddress = string.IsNullOrWhiteSpace(raw.ipAddress) ? "127.0.0.1" : raw.ipAddress.Trim(),
             fixtureMode = NormalizeFixtureMode(raw.fixtureMode),
-            dmxUniverse = Mathf.Clamp(raw.dmxUniverse, 1, 16),
+            dmxUniverse = Mathf.Clamp(raw.dmxUniverse, 1, 63999),
             startChannel = Mathf.Clamp(raw.startChannel, 1, 512),
             fixtureAmount = Mathf.Clamp(raw.fixtureAmount, 1, 16),
             gridX = ClampPixelDimension(raw.gridX),
@@ -102,7 +102,7 @@ public static class WebUiSettingsStore
         SaveLoadSettings.SaveString(SaveLoadSettings.SAcnMulticastAddressKey, data.multicastAddress);
         SaveLoadSettings.SaveString(SaveLoadSettings.SAcnUnicastBindAddressKey, data.unicastBindAddress);
         SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnListenPortKey, data.listenPort);
-        PlayerPrefs.SetFloat(SaveLoadSettings.SAcnTimeoutSecondsKey, data.timeoutSeconds);
+        SaveLoadSettings.SaveFloat(SaveLoadSettings.SAcnTimeoutSecondsKey, data.timeoutSeconds);
         SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnUseLtpMergeKey, data.useLtpMerge ? 1 : 0);
         SaveLoadSettings.SaveString(SaveLoadSettings.SAcnMulticastUniversesKey, data.additionalUniverses);
         SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnDebugVisibleKey, data.showNetworkDebug ? 1 : 0);

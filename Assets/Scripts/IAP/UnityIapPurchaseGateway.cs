@@ -100,10 +100,10 @@ public class UnityIapPurchaseGateway : MonoBehaviour
 
             ProductType productType = definition.IsConsumable ? ProductType.Consumable : ProductType.NonConsumable;
             RegisterProductId(definition.ProductId, productType, productTypesById);
-            IReadOnlyList<string> additionalIds = definition.AdditionalProductIds;
+            IReadOnlyList<CapabilityDefinition> additionalIds = definition.AdditionalProductIds;
             for (int additionalIndex = 0; additionalIndex < additionalIds.Count; additionalIndex++)
             {
-                RegisterProductId(additionalIds[additionalIndex], productType, productTypesById);
+                RegisterProductId(additionalIds[additionalIndex].ProductId, productType, productTypesById);
             }
         }
 
@@ -405,10 +405,10 @@ public class UnityIapPurchaseGateway : MonoBehaviour
                 return definition.IsConsumable;
             }
 
-            IReadOnlyList<string> additionalProductIds = definition.AdditionalProductIds;
+            IReadOnlyList<CapabilityDefinition> additionalProductIds = definition.AdditionalProductIds;
             for (int additionalIndex = 0; additionalIndex < additionalProductIds.Count; additionalIndex++)
             {
-                if (string.Equals(additionalProductIds[additionalIndex], productId, System.StringComparison.Ordinal))
+                if (string.Equals(additionalProductIds[additionalIndex].ProductId, productId, System.StringComparison.Ordinal))
                 {
                     _consumableByProductId[productId] = definition.IsConsumable;
                     return definition.IsConsumable;
