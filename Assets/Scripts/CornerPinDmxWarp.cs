@@ -3,7 +3,7 @@ using UnityEngine;
 [RequireComponent(typeof(MeshFilter))]
 public class CornerPinDmxWarp : MonoBehaviour
 {
-        [SerializeField][Range(0.01f, 10f)] private float maxOffset = 0.5f;
+    [SerializeField][Range(0.01f, 10f)] private float maxOffset = 0.5f;
     [SerializeField][Range(1, 64)] private int subdivisionAmount = 8;
     [SerializeField] private DmxModeManager dmxModeManager;
 

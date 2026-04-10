@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.IO;
 
-public class MovingHeadBeamController : MonoBehaviour
+public class MovingHeadBeamControllerCopy : MonoBehaviour
 {
     private const string CustomGoboCapabilityId = "capability.custom.gobos";
 
@@ -22,6 +22,11 @@ public class MovingHeadBeamController : MonoBehaviour
 
     bool isInMode;
 
+
+    private void Start()
+    {
+        ReInitialize();
+    }
 
     void OnEnable()
     {

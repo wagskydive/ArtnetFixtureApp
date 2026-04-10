@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class PixelMappingOutputController : MonoBehaviour
 {
-        [SerializeField] private Renderer outputRenderer;
+    [SerializeField] private Renderer outputRenderer;
     [SerializeField] private UI_FixtureModeSelector fixtureModeSelector;
     [SerializeField] private int fallbackRows = 8;
     [SerializeField] private int fallbackColumns = 8;
@@ -15,6 +15,8 @@ public class PixelMappingOutputController : MonoBehaviour
     private int _lastColumns;
 
     bool isInMode;
+
+    bool hasMaterialsResolvedSinceInMode = false;
 
     private void Awake()
     {
@@ -50,9 +52,20 @@ public class PixelMappingOutputController : MonoBehaviour
     private void Update()
     {
         INetworkReceiver receiver = NetworkingModeManager.Instance?.NetworkReceiver;
-        if (receiver == null || receiver.DmxBuffer == null || !ResolveOutputMaterial() || !isInMode)
+
+
+        if (receiver == null || receiver.DmxBuffer == null || !isInMode)
         {
             return;
+        }
+
+        if (!hasMaterialsResolvedSinceInMode && isInMode)
+        {
+            ResolveOutputMaterial();
+            if (!hasMaterialsResolvedSinceInMode)
+            {
+                return;
+            }
         }
 
         EnsureTexture();
@@ -112,7 +125,10 @@ public class PixelMappingOutputController : MonoBehaviour
             _outputMaterial = outputRenderer.material;
         }
 
-        return _outputMaterial != null;
+
+        hasMaterialsResolvedSinceInMode = _outputMaterial != null;
+
+        return hasMaterialsResolvedSinceInMode;
     }
 
 }

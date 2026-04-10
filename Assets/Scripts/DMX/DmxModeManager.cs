@@ -17,6 +17,8 @@ public class DmxModeManager : MonoBehaviour
 
     public static event Action<FixtureMode> OnModeChanged;
 
+    public static event Action Awoken;
+
     public enum FixtureMode
     {
         Standard = 0,
@@ -36,6 +38,15 @@ public class DmxModeManager : MonoBehaviour
         }
 
         Instance = this;
+
+    }
+
+    void Start()
+    {
+        if (Instance != null && Instance == this)
+        {
+            Awoken?.Invoke();
+        }
     }
 
     private FixtureMode currentMode;
@@ -78,7 +89,4 @@ public class DmxModeManager : MonoBehaviour
             targetRenderer.sharedMaterial = standardModeMaterial;
         }
     }
-
-
-
 }

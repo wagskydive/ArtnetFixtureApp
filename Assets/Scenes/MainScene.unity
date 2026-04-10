@@ -6542,7 +6542,7 @@ MonoBehaviour:
   panelRoot: {fileID: 733940259}
   defaultSelection: {fileID: 0}
   backAction: {fileID: 7727032971491509709, guid: 289c1b55c9541489481df5cc06664110, type: 3}
-  closeOnBackButton: 0
+  closeOnBackButton: 1
   keepNavigationInsidePopup: 1
 --- !u!114 &733940262
 MonoBehaviour:
@@ -18975,6 +18975,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1959274206}
   - component: {fileID: 1959274207}
+  - component: {fileID: 1959274208}
   m_Layer: 0
   m_Name: FixturesParent
   m_TagString: Untagged
@@ -19014,6 +19015,18 @@ MonoBehaviour:
   standardModeMaterial: {fileID: 2100000, guid: 31ab56d83b3521647880df0019e3f662, type: 2}
   movingHeadModeMaterial: {fileID: 2100000, guid: d7bc2702078f88a4b87bacecc298c610, type: 2}
   pixelMappingModeMaterial: {fileID: 2100000, guid: f3b390c8831e19f43af282f03b29e466, type: 2}
+--- !u!114 &1959274208
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1959274205}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c57d8f39f2220c4419fa729c0ee7d86e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArtnetFixture.Core::FixtureModeScriptEnabledChecker
 --- !u!1001 &1976344835
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -4,12 +4,14 @@ public class SurfacePatternGenerator : MonoBehaviour
 {
     private const int PatternCount = 20;
 
-        [SerializeField] private Renderer outputRenderer;
+    [SerializeField] private Renderer outputRenderer;
 
     private Material _outputMaterial;
     private Material _activeSharedMaterial;
 
     bool isInMode;
+
+    bool hasMaterialsResolvedSinceInMode = false;
 
     private void Awake()
     {
@@ -32,9 +34,18 @@ public class SurfacePatternGenerator : MonoBehaviour
     void Update()
     {
         INetworkReceiver receiver = NetworkingModeManager.Instance?.NetworkReceiver;
-        if (receiver == null || receiver.DmxBuffer == null || !ResolveOutputMaterial() || !isInMode)
+        if (receiver == null || receiver.DmxBuffer == null || !isInMode)
         {
             return;
+        }
+
+        if (!hasMaterialsResolvedSinceInMode && isInMode)
+        {
+            ResolveOutputMaterial();
+            if (!hasMaterialsResolvedSinceInMode)
+            {
+                return;
+            }
         }
 
         int dmxPatternValue = receiver.GetFixtureChannelValue(5);
@@ -64,7 +75,9 @@ public class SurfacePatternGenerator : MonoBehaviour
             _outputMaterial = outputRenderer.material;
         }
 
-        return _outputMaterial != null;
+        hasMaterialsResolvedSinceInMode = _outputMaterial != null;
+
+        return hasMaterialsResolvedSinceInMode;
     }
 
 }
