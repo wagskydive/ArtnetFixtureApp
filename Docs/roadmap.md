@@ -304,3 +304,4 @@ _Progress note: `PurchaseValidationManager` now includes an Editor-only debug by
 _Progress note: WebUI advanced-networking lock modal now defaults to hidden via `aria-hidden="true"` + `.modal-backdrop.hidden { display: none; }`, ensuring the OK button closes it reliably and it never appears before user interaction._
 
 _Progress note: WebUI section ordering now places the Custom Gobos panel directly below its toggle button, keeps the Feedback action as the final bottom section, and uses a unified button color style across action buttons._
+_Progress note: Editor debug validation now propagates through `CapabilityService` resolution (`debugValidation` + `allIsValidated`), so WebUI IAP-gated controls follow the same forced-valid entitlement state as in-app capability checks._

@@ -239,6 +239,64 @@ public class CapabilitySystemTests
     }
 
     [Test]
+    public void CapabilityService_ResolveBoolean_WithDebugAllValidatedOverride_ReturnsUnlockedValueWithoutEntitlement()
+    {
+        var databaseGo = new GameObject("capability-db");
+        var database = databaseGo.AddComponent<CapabilityDatabase>();
+        var definition = CreateCapabilityDefinition("capability.advanced.networking", CapabilityValueType.Boolean, "product.advanced.network", true, 0);
+        SetPrivateField(database, "capabilityDefinitions", new List<CapabilityDefinition> { definition });
+        database.RebuildLookup();
+
+        var serviceGo = new GameObject("capability-service");
+        var service = serviceGo.AddComponent<CapabilityService>();
+        SetPrivateField(service, "capabilityDatabase", database);
+        InvokeAwake(service);
+
+        var validationGo = new GameObject("purchase-validation");
+        var validationManager = validationGo.AddComponent<PurchaseValidationManager>();
+        validationManager.debugValidation = true;
+        validationManager.allIsValidated = true;
+
+        bool resolved = service.ResolveBoolean("capability.advanced.networking", false);
+
+        Assert.That(resolved, Is.EqualTo(Application.isEditor));
+
+        GameObject.DestroyImmediate(validationGo);
+        GameObject.DestroyImmediate(serviceGo);
+        GameObject.DestroyImmediate(definition);
+        GameObject.DestroyImmediate(databaseGo);
+    }
+
+    [Test]
+    public void CapabilityService_ResolveNumeric_WithDebugAllValidatedOverride_ReturnsUnlockedValueWithoutEntitlement()
+    {
+        var databaseGo = new GameObject("capability-db");
+        var database = databaseGo.AddComponent<CapabilityDatabase>();
+        var definition = CreateCapabilityDefinition("capability.universe.max", CapabilityValueType.Numeric, "product.unlimited.universes", false, 63999);
+        SetPrivateField(database, "capabilityDefinitions", new List<CapabilityDefinition> { definition });
+        database.RebuildLookup();
+
+        var serviceGo = new GameObject("capability-service");
+        var service = serviceGo.AddComponent<CapabilityService>();
+        SetPrivateField(service, "capabilityDatabase", database);
+        InvokeAwake(service);
+
+        var validationGo = new GameObject("purchase-validation");
+        var validationManager = validationGo.AddComponent<PurchaseValidationManager>();
+        validationManager.debugValidation = true;
+        validationManager.allIsValidated = true;
+
+        int resolved = service.ResolveNumeric("capability.universe.max", 1);
+
+        Assert.That(resolved, Is.EqualTo(Application.isEditor ? 63999 : 1));
+
+        GameObject.DestroyImmediate(validationGo);
+        GameObject.DestroyImmediate(serviceGo);
+        GameObject.DestroyImmediate(definition);
+        GameObject.DestroyImmediate(databaseGo);
+    }
+
+    [Test]
     public void GooglePlayReceiptParser_ExtractPurchaseToken_ReturnsToken()
     {
         const string receipt = "{\"Store\":\"GooglePlay\",\"TransactionID\":\"txn-1\",\"Payload\":\"{\\\"json\\\":\\\"{\\\\\\\"purchaseToken\\\\\\\":\\\\\\\"token-123\\\\\\\",\\\\\\\"productId\\\\\\\":\\\\\\\"product.pro.bundle\\\\\\\"}\\\",\\\"signature\\\":\\\"sig\\\"}\"}";
