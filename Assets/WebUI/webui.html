@@ -187,6 +187,11 @@
             padding: 20px;
         }
 
+        .modal-backdrop.hidden {
+            display: none;
+        }
+
+
         .modal-card {
             width: min(560px, 100%);
             background: #1c1c1c;
@@ -347,7 +352,7 @@
     </div>
 
     <div id="advancedNetworkingLockedModal" class="modal-backdrop hidden" role="dialog" aria-modal="true"
-        aria-labelledby="advancedNetworkingLockedTitle">
+        aria-labelledby="advancedNetworkingLockedTitle" aria-hidden="true">
         <div class="modal-card">
             <h2 id="advancedNetworkingLockedTitle">Advanced Networking Locked</h2>
             <p>This feature requires the Advanced Networking upgrade.</p>

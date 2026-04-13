@@ -296,3 +296,5 @@ _Progress note: Networking mode selection now swaps runtime receiver components 
 _Progress note: `UI_SAcnSettings` now loads and validates the active `NetworkReceiver` on enable (auto-hiding itself unless sACN is active), and exposes dedicated handlers for sACN multicast/unicast transport settings (mode, addresses, listen port) for upcoming panel wiring._
 
 _Progress note: `PurchaseValidationManager` now includes an Editor-only debug bypass flag (`debugForceValidInEditor`) that treats owned IAP receipts as valid without backend calls, enabling local IAP UI/entitlement workflow debugging in Unity Editor._
+
+_Progress note: WebUI advanced-networking lock modal now defaults to hidden via `aria-hidden="true"` + `.modal-backdrop.hidden { display: none; }`, ensuring the OK button closes it reliably and it never appears before user interaction._
