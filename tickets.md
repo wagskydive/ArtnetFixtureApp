@@ -2322,6 +2322,13 @@ T99.19 - Find and fix a bug in the webui where when the Universe number value is
   - Kept the locked-feature modal open until explicit OK confirmation by disabling backdrop-click dismissal for this modal.
   - Updated DMX universe input max handling to allow spinner step attempts beyond 1 while locked users are still entitlement-checked and shown the lock modal.
 
+T99.20 - Find and fix a bug where the PurchaseValidationManager debug checkmark and AllIsValid checkmark don't affect the webui. Currently when a button that needs an IAP is pressed in the webui while the checkmark AllIsValid is checked, the `lockedFeatureModal` still shows. 
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode
 - [x] Started
 - [x] Behavior Written
