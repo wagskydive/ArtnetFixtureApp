@@ -431,6 +431,7 @@
         const networkModeSelect = document.getElementById("networkMode")
         const useMulticastSelect = document.getElementById("useMulticast")
         let advancedNetworkingUnlocked = false
+        hideAdvancedNetworkingLockedModal()
 
         modeSelect.addEventListener("change", function () {
 
@@ -485,8 +486,13 @@
         let goboSlotsInitialized = false
         let goboVisibleSlotCount = 1
 
+        function setAdvancedNetworkingLockedModalVisible(isVisible) {
+            advancedNetworkingLockedModal.classList.toggle("hidden", !isVisible)
+            advancedNetworkingLockedModal.setAttribute("aria-hidden", isVisible ? "false" : "true")
+        }
+
         function hideAdvancedNetworkingLockedModal() {
-            advancedNetworkingLockedModal.classList.add("hidden")
+            setAdvancedNetworkingLockedModalVisible(false)
         }
 
         function clampValue(value, min, max) {
@@ -582,7 +588,7 @@
         openAdvancedNetworkingBtn.addEventListener("click", async function () {
             const hasAdvancedNetworking = await refreshAdvancedNetworkingEntitlement()
             if (!hasAdvancedNetworking) {
-                advancedNetworkingLockedModal.classList.remove("hidden")
+                setAdvancedNetworkingLockedModalVisible(true)
                 return
             }
 
@@ -594,8 +600,15 @@
             }
         })
 
-        advancedNetworkingLockedCloseBtn.addEventListener("click", function () {
+        advancedNetworkingLockedCloseBtn.addEventListener("click", function (event) {
+            event.preventDefault()
             hideAdvancedNetworkingLockedModal()
+        })
+
+        advancedNetworkingLockedModal.addEventListener("click", function (event) {
+            if (event.target === advancedNetworkingLockedModal) {
+                hideAdvancedNetworkingLockedModal()
+            }
         })
 
         async function refreshNetworkDebug() {
