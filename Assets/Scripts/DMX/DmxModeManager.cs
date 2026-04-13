@@ -18,6 +18,7 @@ public class DmxModeManager : MonoBehaviour
     public static event Action<FixtureMode> OnModeChanged;
 
     public static event Action Awoken;
+    public static event Action OnManagerReady;
 
     public enum FixtureMode
     {
@@ -38,6 +39,7 @@ public class DmxModeManager : MonoBehaviour
         }
 
         Instance = this;
+        OnManagerReady?.Invoke();
 
     }
 

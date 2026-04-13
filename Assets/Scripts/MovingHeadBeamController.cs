@@ -24,15 +24,13 @@ public class MovingHeadBeamController : MonoBehaviour
 
     void OnEnable()
     {
+        SubscribeToSystemReadyEvents();
         ReInitialize();
     }
 
     private void ReInitialize()
     {
-        DmxModeManager.OnModeChanged -= HandleModeChange;
-        DmxModeManager.OnModeChanged += HandleModeChange;
-
-        if (DmxModeManager.Instance == null)
+        if (DmxModeManager.Instance == null || NetworkingModeManager.Instance == null)
         {
             isInMode = false;
             hasMaterialsResolvedSinceInMode = false;
@@ -255,11 +253,36 @@ public class MovingHeadBeamController : MonoBehaviour
     private void OnDestroy()
     {
         ReleaseCustomGobos();
-        DmxModeManager.OnModeChanged -= HandleModeChange;
+        UnsubscribeFromSystemReadyEvents();
     }
 
     void OnDisable()
     {
+        UnsubscribeFromSystemReadyEvents();
+    }
+
+    private void SubscribeToSystemReadyEvents()
+    {
         DmxModeManager.OnModeChanged -= HandleModeChange;
+        DmxModeManager.OnModeChanged += HandleModeChange;
+        DmxModeManager.OnManagerReady -= HandleSystemReady;
+        DmxModeManager.OnManagerReady += HandleSystemReady;
+        DmxModeManager.Awoken -= HandleSystemReady;
+        DmxModeManager.Awoken += HandleSystemReady;
+        NetworkingModeManager.OnManagerReady -= HandleSystemReady;
+        NetworkingModeManager.OnManagerReady += HandleSystemReady;
+    }
+
+    private void UnsubscribeFromSystemReadyEvents()
+    {
+        DmxModeManager.OnModeChanged -= HandleModeChange;
+        DmxModeManager.OnManagerReady -= HandleSystemReady;
+        DmxModeManager.Awoken -= HandleSystemReady;
+        NetworkingModeManager.OnManagerReady -= HandleSystemReady;
+    }
+
+    private void HandleSystemReady()
+    {
+        ReInitialize();
     }
 }

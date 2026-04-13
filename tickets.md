@@ -2351,6 +2351,16 @@ T99.22 - Verify that network debugging works properly. It looks like the webui d
   - `applySettingsToUi` now keeps the debug section visibility aligned with the saved `showNetworkDebug` setting so `/api/network-debug` polling can continuously render packet totals/messages.
 
 T99.23 - Find and fix a bug MovingHeadController is not initialized correcty. Fix it in a way that ReInitialization happens when other systems are ready. Use static event Actions on related systems that get invoked when these systems are ready and let the MovingHeadController ReInitialize when these events are invoked.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Added static readiness events on `DmxModeManager` and `NetworkingModeManager` that are invoked when each manager finishes initialization.
+  - Updated `MovingHeadBeamController` to subscribe to mode + manager-ready events and rerun `ReInitialize()` when dependencies come online, fixing startup order races without requiring manual component toggling.
+  - Moving head initialization now gates on both DMX mode manager and networking manager availability so material/network reads do not happen before prerequisite systems are ready.
+
+T99.24 - Next run: execute Unity EditMode/PlayMode validation for moving-head startup event re-initialization behavior on a licensed Unity runner.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written

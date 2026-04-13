@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 
 public class NetworkingModeManager : MonoBehaviour
 {
@@ -8,6 +9,7 @@ public class NetworkingModeManager : MonoBehaviour
     public const int SAcnModeIndex = 1;
 
     public static NetworkingModeManager Instance { get; private set; }
+    public static event Action OnManagerReady;
 
     [SerializeField] private PurchaseValidationManager purchaseValidationManager;
     [SerializeField] private int startupModeIndex = ArtNetModeIndex;
@@ -47,6 +49,7 @@ public class NetworkingModeManager : MonoBehaviour
 
         bool shouldPersistStartupSelection = false;
         SetModeFromIndex(initialMode, shouldPersistStartupSelection);
+        OnManagerReady?.Invoke();
     }
 
     private void OnDestroy()
