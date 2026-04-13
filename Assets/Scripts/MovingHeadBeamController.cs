@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.IO;
+using System.Collections;
 
 public class MovingHeadBeamController : MonoBehaviour
 {
@@ -21,6 +22,12 @@ public class MovingHeadBeamController : MonoBehaviour
     private bool hasMaterialsResolvedSinceInMode = false;
     private bool isInMode;
 
+    IEnumerator Start()
+    {
+        // Wait for 2 seconds
+        yield return null;
+        ReInitialize();
+    }
 
     void OnEnable()
     {
@@ -71,7 +78,7 @@ public class MovingHeadBeamController : MonoBehaviour
         if (!hasMaterialsResolvedSinceInMode && isInMode)
         {
             ResolveOutputMaterial();
-            if(!hasMaterialsResolvedSinceInMode)
+            if (!hasMaterialsResolvedSinceInMode)
             {
                 return;
             }
