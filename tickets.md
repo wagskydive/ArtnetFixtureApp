@@ -2262,12 +2262,20 @@ T99.13 - Fix the webui advanced networking modal. Make the OK button hide the mo
   - Added `aria-hidden="true"` to the advanced-networking lock modal markup so the default HTML state is explicitly hidden/accessibility-aligned before JavaScript runs.
   - Verified the existing OK-button handler continues to call `hideAdvancedNetworkingLockedModal()` so modal dismissal remains deterministic.
 
-T99.14 - next run - Add a small WebUI regression check that validates advanced-networking lock modal visibility defaults and OK-button close behavior.
+T99.14 - Refactor the webui modal system to more extendable and make it easy to show the modal with modified texts.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
 - [ ] Tests Passed
 - [ ] Documentation Written
+
+T99.15 - Add another button for "Custom Gobos" to show or hide the custom gobo's section this button click also needs to check for the IAP Custom Gobos and if its not owned it also needs to show a modal that tells the user it is a locked feature that needs an in-app purchase.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 
 T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode
 - [x] Started
