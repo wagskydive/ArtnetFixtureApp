@@ -2302,7 +2302,7 @@ T99.17 - change the PurchaseValidationManager debug checkmark logic, so that the
   - Updated editor debug validation behavior so enabled debug mode resolves all owned IAP receipts as valid/invalid based on `allIsValidated`.
   - Removed editor-only advanced-networking unlock workaround in `CapabilityService.ResolveBoolean`, so entitlement gating now respects validated entitlement state in-editor too.
 
-T99.18 - Next run: execute Unity EditMode suite on a licensed runner to validate purchase debug-validation toggles and advanced-networking entitlement gating end-to-end.
+T99.18 - Add functionallity to the webui so that when the "Unlimited Universes" IAP is not owned and the user presses the plus button on the Universe number or inputs a number higher than 1 into the Universe field, the `lockedFeatureModal` shows with the appropriete text.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
