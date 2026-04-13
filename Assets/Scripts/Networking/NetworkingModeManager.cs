@@ -45,7 +45,8 @@ public class NetworkingModeManager : MonoBehaviour
             }
         }
 
-        SetModeFromIndex(initialMode);
+        bool shouldPersistStartupSelection = false;
+        SetModeFromIndex(initialMode, shouldPersistStartupSelection);
     }
 
     private void OnDestroy()
@@ -57,6 +58,11 @@ public class NetworkingModeManager : MonoBehaviour
     }
 
     public void SetModeFromIndex(int modeIndex)
+    {
+        SetModeFromIndex(modeIndex, true);
+    }
+
+    private void SetModeFromIndex(int modeIndex, bool persistSelectedMode)
     {
         int clampedMode = Mathf.Clamp(modeIndex, ArtNetModeIndex, SAcnModeIndex);
 
@@ -81,8 +87,11 @@ public class NetworkingModeManager : MonoBehaviour
         NetworkReceiver = nextReceiver;
         ActiveModeIndex = clampedMode;
 
-        SaveLoadSettings.SaveInt(SaveLoadSettings.NetworkModeKey, clampedMode);
-        SaveLoadSettings.Save();
+        if (persistSelectedMode)
+        {
+            SaveLoadSettings.SaveInt(SaveLoadSettings.NetworkModeKey, clampedMode);
+            SaveLoadSettings.Save();
+        }
     }
 
     private void RemoveCurrentReceiverComponent()
