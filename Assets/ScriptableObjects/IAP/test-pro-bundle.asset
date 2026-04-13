@@ -18,8 +18,10 @@ MonoBehaviour:
   unlockedNumericValue: 999
   productId: test.pro.bundle
   additionalProductIds: []
+  consumable: 0
+  isAvailableForPurchase: 1
   displayTitle: Pro Bundle
   displayDescription: 'Unlocks everything
 
 '
-  editorTestPriceUsd: 19.99
+  testPriceUsd: 0.99

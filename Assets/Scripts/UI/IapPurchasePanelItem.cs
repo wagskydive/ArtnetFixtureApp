@@ -33,6 +33,7 @@ public class IapPurchasePanelItem : MonoBehaviour
 
         bool unlocked = _panel != null && _panel.IsUnlocked(_definition);
         bool isConsumable = _definition != null && _definition.IsConsumable;
+        
         RefreshPriceText();
         if (statusText != null)
         {
@@ -55,7 +56,15 @@ public class IapPurchasePanelItem : MonoBehaviour
 
     private void HandlePurchaseClicked()
     {
-        _panel?.Purchase(_definition);
+        bool isAvailableForPurchase = _definition != null && _definition.IsAvailableForPurchase;
+        if( isAvailableForPurchase)
+        {
+            _panel?.Purchase(_definition);
+        }
+        else
+        {
+            _panel.ShowNotAvailablePopup();
+        }
     }
 
     public string GetInfoText()

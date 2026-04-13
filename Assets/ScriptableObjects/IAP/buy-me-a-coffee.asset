@@ -19,6 +19,7 @@ MonoBehaviour:
   productId: buy.me.a.coffee
   additionalProductIds: []
   consumable: 1
+  isAvailableForPurchase: 1
   displayTitle: Buy me a coffee
   displayDescription: This IAP is there to support the development
-  editorTestPriceUsd: 1
+  testPriceUsd: 0.99

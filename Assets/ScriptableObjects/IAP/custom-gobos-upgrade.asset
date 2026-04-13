@@ -20,7 +20,8 @@ MonoBehaviour:
   additionalProductIds:
   - {fileID: 11400000, guid: 884c2a9c71251b849a29ca413a84c95b, type: 2}
   consumable: 0
+  isAvailableForPurchase: 1
   displayTitle: Custom Gobos Upgrade
   displayDescription: Unlocks all 16 custom gobo upload slots for Moving Head mode.
     Custom Gobos can be uploaded through the web ui
-  editorTestPriceUsd: 5.99
+  testPriceUsd: 0.99

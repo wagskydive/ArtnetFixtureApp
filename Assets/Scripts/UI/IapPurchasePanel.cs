@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,6 +10,7 @@ public class IapPurchasePanel : MonoBehaviour
     [SerializeField] private UnityIapPurchaseGateway purchaseGateway;
     [SerializeField] private Transform contentRoot;
     [SerializeField] private IapPurchasePanelItem itemPrefab;
+    [SerializeField] private Popup NotAvailablePopup;
 
     private readonly List<IapPurchasePanelItem> _spawnedItems = new List<IapPurchasePanelItem>();
 
@@ -163,5 +165,13 @@ public class IapPurchasePanel : MonoBehaviour
     private void HandleEntitlementsChanged()
     {
         RebuildItems();
+    }
+
+    internal void ShowNotAvailablePopup()
+    {
+        if(NotAvailablePopup != null)
+        {
+            NotAvailablePopup.gameObject.SetActive(true);
+        }
     }
 }

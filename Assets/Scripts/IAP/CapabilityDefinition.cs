@@ -17,11 +17,12 @@ public class CapabilityDefinition : ScriptableObject
     [SerializeField] private string productId;
     [SerializeField] private List<CapabilityDefinition> additionalProductIds = new List<CapabilityDefinition>();
     [SerializeField] private bool consumable;
+    [SerializeField] private bool isAvailableForPurchase;
     [SerializeField] private string displayTitle;
     [TextArea]
     [SerializeField] private string displayDescription;
     [Min(0f)]
-    [SerializeField] private float editorTestPriceUsd = 0.99f;
+    [SerializeField] private float testPriceUsd = 0.99f;
 
     public string Id => id;
     public CapabilityValueType ValueType => valueType;
@@ -30,9 +31,10 @@ public class CapabilityDefinition : ScriptableObject
     public string ProductId => productId;
     public IReadOnlyList<CapabilityDefinition> AdditionalProductIds => additionalProductIds;
     public bool IsConsumable => consumable;
+    public bool IsAvailableForPurchase => isAvailableForPurchase;
     public string DisplayTitle => displayTitle;
     public string DisplayDescription => displayDescription;
-    public float EditorTestPriceUsd => editorTestPriceUsd;
+    public float TestPriceUsd => testPriceUsd;
 
     public bool IsUnlockedBy(EntitlementStore entitlementStore)
     {

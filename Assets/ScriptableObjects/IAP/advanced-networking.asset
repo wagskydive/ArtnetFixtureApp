@@ -20,6 +20,8 @@ MonoBehaviour:
   additionalProductIds:
   - {fileID: 11400000, guid: 884c2a9c71251b849a29ca413a84c95b, type: 2}
   consumable: 0
+  isAvailableForPurchase: 1
   displayTitle: Advanced Networking
-  displayDescription: Advanced networking unlockes sACN and CITP functionality
-  editorTestPriceUsd: 4.99
+  displayDescription: Advanced networking unlocks sACN functionality and includes
+    Unlimited Universes.
+  testPriceUsd: 0.99

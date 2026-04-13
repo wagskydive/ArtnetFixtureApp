@@ -180,12 +180,12 @@ public class UnityIapPurchaseGateway : MonoBehaviour
             return localizedPrice;
         }
 
-#if UNITY_EDITOR
-        if (definition.EditorTestPriceUsd > 0f)
+
+        if (definition.TestPriceUsd > 0f)
         {
-            return string.Format(CultureInfo.InvariantCulture, "${0:0.00}", definition.EditorTestPriceUsd);
+            return string.Format(CultureInfo.InvariantCulture, "${0:0.00}", definition.TestPriceUsd);
         }
-#endif
+
 
         return string.Empty;
     }
