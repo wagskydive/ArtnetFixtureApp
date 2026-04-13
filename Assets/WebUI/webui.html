@@ -316,6 +316,10 @@
             </div>
 
             <div class="section">
+                <button id="openCustomGobosBtn" type="button" class="secondary">Custom Gobos</button>
+            </div>
+
+            <div class="section">
                 <a href="https://dilarium.es/dmx-projector/feedback" target="_blank" rel="noopener noreferrer">
                     <button class="secondary" type="button" id="feedbackButton" tabindex="8">Feedback</button>
                 </a>
@@ -323,7 +327,7 @@
 
             </div>
 
-            <div class="section">
+            <div id="customGobosSection" class="section hidden">
                 <h2>Custom Gobos</h2>
                 <p id="goboStatus" class="status">Loading slots…</p>
                 <div id="goboSlots" class="gobo-grid"></div>
@@ -351,14 +355,13 @@
 
     </div>
 
-    <div id="advancedNetworkingLockedModal" class="modal-backdrop hidden" role="dialog" aria-modal="true"
-        aria-labelledby="advancedNetworkingLockedTitle" aria-hidden="true">
+    <div id="lockedFeatureModal" class="modal-backdrop hidden" role="dialog" aria-modal="true"
+        aria-labelledby="lockedFeatureModalTitle" aria-hidden="true">
         <div class="modal-card">
-            <h2 id="advancedNetworkingLockedTitle">Advanced Networking Locked</h2>
-            <p>This feature requires the Advanced Networking upgrade.</p>
-            <p>Please purchase it in-app to unlock these controls.</p>
+            <h2 id="lockedFeatureModalTitle">Feature Locked</h2>
+            <p id="lockedFeatureModalMessage">This feature requires an in-app purchase.</p>
             <div class="modal-actions">
-                <button id="advancedNetworkingLockedCloseBtn" type="button">OK</button>
+                <button id="lockedFeatureModalCloseBtn" type="button">OK</button>
             </div>
         </div>
     </div>
@@ -427,16 +430,20 @@
         const standardSection = document.getElementById("standardSection")
         const pixelSection = document.getElementById("pixelSection")
         const advancedNetworkSection = document.getElementById("advancedNetworkSection")
+        const customGobosSection = document.getElementById("customGobosSection")
         const openAdvancedNetworkingBtn = document.getElementById("openAdvancedNetworkingBtn")
-        const advancedNetworkingLockedModal = document.getElementById("advancedNetworkingLockedModal")
-        const advancedNetworkingLockedCloseBtn = document.getElementById("advancedNetworkingLockedCloseBtn")
+        const openCustomGobosBtn = document.getElementById("openCustomGobosBtn")
+        const lockedFeatureModal = document.getElementById("lockedFeatureModal")
+        const lockedFeatureModalTitle = document.getElementById("lockedFeatureModalTitle")
+        const lockedFeatureModalMessage = document.getElementById("lockedFeatureModalMessage")
+        const lockedFeatureModalCloseBtn = document.getElementById("lockedFeatureModalCloseBtn")
         const networkDebugSection = document.getElementById("networkDebugSection")
         const multicastAddressRow = document.getElementById("multicastAddressRow")
         const unicastAddressRow = document.getElementById("unicastAddressRow")
         const networkModeSelect = document.getElementById("networkMode")
         const useMulticastSelect = document.getElementById("useMulticast")
         let advancedNetworkingUnlocked = false
-        hideAdvancedNetworkingLockedModal()
+        hideLockedFeatureModal()
 
         modeSelect.addEventListener("change", function () {
 
@@ -491,13 +498,19 @@
         let goboSlotsInitialized = false
         let goboVisibleSlotCount = 1
 
-        function setAdvancedNetworkingLockedModalVisible(isVisible) {
-            advancedNetworkingLockedModal.classList.toggle("hidden", !isVisible)
-            advancedNetworkingLockedModal.setAttribute("aria-hidden", isVisible ? "false" : "true")
+        function setLockedFeatureModalVisible(isVisible) {
+            lockedFeatureModal.classList.toggle("hidden", !isVisible)
+            lockedFeatureModal.setAttribute("aria-hidden", isVisible ? "false" : "true")
         }
 
-        function hideAdvancedNetworkingLockedModal() {
-            setAdvancedNetworkingLockedModalVisible(false)
+        function hideLockedFeatureModal() {
+            setLockedFeatureModalVisible(false)
+        }
+
+        function showLockedFeatureModal(title, message) {
+            lockedFeatureModalTitle.textContent = title
+            lockedFeatureModalMessage.textContent = message
+            setLockedFeatureModalVisible(true)
         }
 
         function clampValue(value, min, max) {
@@ -543,7 +556,7 @@
             document.getElementById("additionalUniverses").value = settings.additionalUniverses || ""
             document.getElementById("showNetworkDebug").value = settings.showNetworkDebug ? "true" : "false"
             advancedNetworkingUnlocked = !!settings.advancedNetworkingUnlocked
-            hideAdvancedNetworkingLockedModal()
+            hideLockedFeatureModal()
             advancedNetworkSection.classList.toggle("hidden", true)
             networkDebugSection.classList.toggle("hidden", true)
             openAdvancedNetworkingBtn.classList.toggle("secondary", !advancedNetworkingUnlocked)
@@ -593,11 +606,14 @@
         openAdvancedNetworkingBtn.addEventListener("click", async function () {
             const hasAdvancedNetworking = await refreshAdvancedNetworkingEntitlement()
             if (!hasAdvancedNetworking) {
-                setAdvancedNetworkingLockedModalVisible(true)
+                showLockedFeatureModal(
+                    "Advanced Networking Locked",
+                    "This feature requires the Advanced Networking upgrade. Please purchase it in-app to unlock these controls."
+                )
                 return
             }
 
-            hideAdvancedNetworkingLockedModal()
+            hideLockedFeatureModal()
             const willShowAdvancedSection = advancedNetworkSection.classList.contains("hidden")
             advancedNetworkSection.classList.toggle("hidden", !willShowAdvancedSection)
             if (!willShowAdvancedSection) {
@@ -605,14 +621,14 @@
             }
         })
 
-        advancedNetworkingLockedCloseBtn.addEventListener("click", function (event) {
+        lockedFeatureModalCloseBtn.addEventListener("click", function (event) {
             event.preventDefault()
-            hideAdvancedNetworkingLockedModal()
+            hideLockedFeatureModal()
         })
 
-        advancedNetworkingLockedModal.addEventListener("click", function (event) {
-            if (event.target === advancedNetworkingLockedModal) {
-                hideAdvancedNetworkingLockedModal()
+        lockedFeatureModal.addEventListener("click", function (event) {
+            if (event.target === lockedFeatureModal) {
+                hideLockedFeatureModal()
             }
         })
 
@@ -853,6 +869,39 @@
             addSlotButton.style.display = payload.unlocked ? "inline-block" : "none"
         }
 
+        async function refreshCustomGoboEntitlement() {
+            try {
+                const response = await fetch("/images")
+                if (!response.ok) {
+                    return false
+                }
+
+                const payload = await response.json()
+                return !!payload.unlocked
+            } catch (error) {
+                console.log("Failed to refresh custom gobo entitlement", error)
+                return false
+            }
+        }
+
+        openCustomGobosBtn.addEventListener("click", async function () {
+            const customGobosUnlocked = await refreshCustomGoboEntitlement()
+            if (!customGobosUnlocked) {
+                showLockedFeatureModal(
+                    "Custom Gobos Locked",
+                    "This feature requires the Custom Gobos Upgrade. Please purchase it in-app to upload custom gobos."
+                )
+                return
+            }
+
+            hideLockedFeatureModal()
+            const willShowCustomGobos = customGobosSection.classList.contains("hidden")
+            customGobosSection.classList.toggle("hidden", !willShowCustomGobos)
+            if (willShowCustomGobos) {
+                await refreshGoboSlots(true)
+            }
+        })
+
         async function refreshGoboSlots(forceRebuild = false) {
             try {
                 const response = await fetch("/images")
@@ -958,7 +1007,6 @@
             await refreshGoboSlots(true)
         })
 
-        refreshGoboSlots(true)
         if (goboRefreshInterval !== null) {
             clearInterval(goboRefreshInterval)
         }
