@@ -2221,12 +2221,21 @@ T99.9 - Find and fix a bug where the network warning still shows after network d
   - Added EditMode coverage for the regression path (show -> hide) and for settings-load behavior so enabling the warning preference no longer forces the panel visible when there is no active warning condition.
 
 
-T99.10 - Next run: execute Unity EditMode suite on a licensed Unity runner to validate T99.9 network-warning regression coverage in-engine
+T99.10 - Find and fix a bug, where the Network Mode setting is not correctly saved or loaded. Currently when the user sets th network mode to sACN and restarts the app, the app opens in Art-Net mode, while it should open in sACN mode if that was the mode before the restart
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
 - [ ] Tests Passed
 - [ ] Documentation Written
+
+
+T99.11 - Fix the webui so that the modal for "advanced networking" not being owned is only shown when the user clicks on the "advanced networking" button. Currently the modal shows when the webui is being opened, while it should only show when the button is pressed. Also, the modal shows currently even if the IAP is owned, while it should only show when it is not owned. 
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 
 T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode
 - [x] Started
