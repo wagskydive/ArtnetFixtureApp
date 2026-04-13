@@ -579,8 +579,7 @@
             document.getElementById("additionalUniverses").value = settings.additionalUniverses || ""
             document.getElementById("showNetworkDebug").value = settings.showNetworkDebug ? "true" : "false"
             advancedNetworkingUnlocked = !!settings.advancedNetworkingUnlocked
-            advancedNetworkSection.classList.toggle("hidden", true)
-            networkDebugSection.classList.toggle("hidden", true)
+            networkDebugSection.classList.toggle("hidden", document.getElementById("showNetworkDebug").value !== "true")
             openAdvancedNetworkingBtn.classList.toggle("secondary", !advancedNetworkingUnlocked)
             fixtureNameHeading.textContent = `Fixture: ${settings.deviceName || "ArtnetFixture"}`
             const ipAddress = settings.ipAddress || "127.0.0.1"

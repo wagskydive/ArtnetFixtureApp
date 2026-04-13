@@ -305,3 +305,5 @@ _Progress note: WebUI advanced-networking lock modal now defaults to hidden via 
 
 _Progress note: WebUI section ordering now places the Custom Gobos panel directly below its toggle button, keeps the Feedback action as the final bottom section, and uses a unified button color style across action buttons._
 _Progress note: Editor debug validation now propagates through `CapabilityService` resolution (`debugValidation` + `allIsValidated`), so WebUI IAP-gated controls follow the same forced-valid entitlement state as in-app capability checks._
+_Progress note: Moving Head startup initialization now re-resolves renderer/material bindings whenever fixture mode changes into Moving Head, preventing stale startup material references that previously required manual component re-toggle in Editor._
+_Progress note: WebUI network debug rendering now remains visible across background `/api/settings` refreshes, so `/api/network-debug` packet totals/log lines continue updating in the debug section._
