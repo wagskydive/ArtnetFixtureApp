@@ -2333,18 +2333,22 @@ T99.20 - Find and fix a bug where the PurchaseValidationManager debug checkmark 
   - Added EditMode coverage to verify boolean and numeric capability resolution both respect the debug-all-validated override path.
 
 T99.21 - Find and fix a bug MovingHeadController is not initialized correcty. Currently when the FixtureMode is MovingHead, the MovingHeadController only works properly when I turn it off and on in the Unity Editor. This can be due to the order of script execution where some fields or properties are not correctly assigned at runtime and may return as null
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Fixed Moving Head startup initialization race by forcing material re-resolution whenever mode changes into Moving Head, instead of reusing a stale Standard-material reference captured earlier in startup.
+  - Hardened `MovingHeadBeamController` lifecycle to handle `DmxModeManager.Instance` not being ready yet and to unsubscribe/re-subscribe cleanly to mode-change events on enable/disable.
 
 T99.22 - Verify that network debugging works properly. It looks like the webui doesn't display the network packets correctly in the Network Debugging section.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Fixed WebUI network debug visibility being reset on every `/api/settings` background refresh, which previously kept collapsing the debug panel before packet output could be observed.
+  - `applySettingsToUi` now keeps the debug section visibility aligned with the saved `showNetworkDebug` setting so `/api/network-debug` polling can continuously render packet totals/messages.
 
 T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode
 - [x] Started

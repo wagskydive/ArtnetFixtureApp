@@ -18,9 +18,8 @@ public class MovingHeadBeamController : MonoBehaviour
     private float _nextGoboReloadTime;
     private bool _hasLoadedCustomGobos;
 
-    bool hasMaterialsResolvedSinceInMode = false;
-
-    bool isInMode;
+    private bool hasMaterialsResolvedSinceInMode = false;
+    private bool isInMode;
 
 
     void OnEnable()
@@ -30,18 +29,36 @@ public class MovingHeadBeamController : MonoBehaviour
 
     private void ReInitialize()
     {
+        DmxModeManager.OnModeChanged -= HandleModeChange;
         DmxModeManager.OnModeChanged += HandleModeChange;
+
+        if (DmxModeManager.Instance == null)
+        {
+            isInMode = false;
+            hasMaterialsResolvedSinceInMode = false;
+            return;
+        }
+
         isInMode = DmxModeManager.Instance.CurrentMode == DmxModeManager.FixtureMode.MovingHead;
-        ResolveOutputMaterial();
+        hasMaterialsResolvedSinceInMode = false;
+        if (isInMode)
+        {
+            ResolveOutputMaterial();
+        }
     }
 
 
     void HandleModeChange(DmxModeManager.FixtureMode mode)
     {
         isInMode = mode == DmxModeManager.FixtureMode.MovingHead;
-        if (!isInMode)
+        hasMaterialsResolvedSinceInMode = false;
+        if (isInMode)
         {
-            hasMaterialsResolvedSinceInMode = false;
+            ResolveOutputMaterial();
+        }
+        else
+        {
+            _activeSharedMaterial = null;
         }
     }
 
@@ -243,6 +260,6 @@ public class MovingHeadBeamController : MonoBehaviour
 
     void OnDisable()
     {
-        return;
+        DmxModeManager.OnModeChanged -= HandleModeChange;
     }
 }
