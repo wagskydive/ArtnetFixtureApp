@@ -485,6 +485,10 @@
         let goboSlotsInitialized = false
         let goboVisibleSlotCount = 1
 
+        function hideAdvancedNetworkingLockedModal() {
+            advancedNetworkingLockedModal.classList.add("hidden")
+        }
+
         function clampValue(value, min, max) {
             return Math.min(max, Math.max(min, value))
         }
@@ -528,6 +532,7 @@
             document.getElementById("additionalUniverses").value = settings.additionalUniverses || ""
             document.getElementById("showNetworkDebug").value = settings.showNetworkDebug ? "true" : "false"
             advancedNetworkingUnlocked = !!settings.advancedNetworkingUnlocked
+            hideAdvancedNetworkingLockedModal()
             advancedNetworkSection.classList.toggle("hidden", true)
             networkDebugSection.classList.toggle("hidden", true)
             openAdvancedNetworkingBtn.classList.toggle("secondary", !advancedNetworkingUnlocked)
@@ -558,12 +563,30 @@
             networkDebugSection.classList.toggle("hidden")
         })
 
-        openAdvancedNetworkingBtn.addEventListener("click", function () {
-            if (!advancedNetworkingUnlocked) {
+        async function refreshAdvancedNetworkingEntitlement() {
+            try {
+                const response = await fetch("/api/settings")
+                if (!response.ok) {
+                    return advancedNetworkingUnlocked
+                }
+
+                const settings = await response.json()
+                advancedNetworkingUnlocked = !!settings.advancedNetworkingUnlocked
+            } catch (error) {
+                console.log("Failed to refresh advanced networking entitlement", error)
+            }
+
+            return advancedNetworkingUnlocked
+        }
+
+        openAdvancedNetworkingBtn.addEventListener("click", async function () {
+            const hasAdvancedNetworking = await refreshAdvancedNetworkingEntitlement()
+            if (!hasAdvancedNetworking) {
                 advancedNetworkingLockedModal.classList.remove("hidden")
                 return
             }
 
+            hideAdvancedNetworkingLockedModal()
             const willShowAdvancedSection = advancedNetworkSection.classList.contains("hidden")
             advancedNetworkSection.classList.toggle("hidden", !willShowAdvancedSection)
             if (!willShowAdvancedSection) {
@@ -572,7 +595,7 @@
         })
 
         advancedNetworkingLockedCloseBtn.addEventListener("click", function () {
-            advancedNetworkingLockedModal.classList.add("hidden")
+            hideAdvancedNetworkingLockedModal()
         })
 
         async function refreshNetworkDebug() {

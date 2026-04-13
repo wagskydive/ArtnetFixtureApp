@@ -2222,14 +2222,27 @@ T99.9 - Find and fix a bug where the network warning still shows after network d
 
 
 T99.10 - Find and fix a bug, where the Network Mode setting is not correctly saved or loaded. Currently when the user sets th network mode to sACN and restarts the app, the app opens in Art-Net mode, while it should open in sACN mode if that was the mode before the restart
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Updated `NetworkingModeManager` startup behavior to avoid persisting forced fallback mode during boot; startup now applies the resolved receiver mode without overwriting the previously saved user preference.
+  - Preserved explicit user mode changes (`SetModeFromIndex`) as persisted writes, while startup hydration remains non-destructive.
+  - Updated `NetworkingModeManagerTests` to assert that locked-startup fallback to Art-Net no longer rewrites the saved sACN preference.
 
 
 T99.11 - Fix the webui so that the modal for "advanced networking" not being owned is only shown when the user clicks on the "advanced networking" button. Currently the modal shows when the webui is being opened, while it should only show when the button is pressed. Also, the modal shows currently even if the IAP is owned, while it should only show when it is not owned. 
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Added explicit modal-hide handling in `webui.html` so the advanced-networking lock modal is always hidden on settings load/refresh unless opened by a user click.
+  - Changed the Advanced Networking button handler to re-fetch `/api/settings` entitlement state at click time and show the lock modal only when entitlement is still locked.
+  - Ensured the lock modal is dismissed automatically when entitlement is valid and advanced settings are opened.
+
+T99.12 - Next run: execute Unity EditMode + WebUI manual validation for T99.10/T99.11 (network-mode persistence restart path and advanced-networking modal gating)
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
