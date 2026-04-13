@@ -87,20 +87,41 @@ Behavior notes:
 - Added web debug panel that polls `/api/network-debug` for live packet feedback and logs.
 
 T24.5 - Add a button to the webui to open the Advanced Networking section. The button opens the section only if the iap is owned and if it is not owned it will show a modal about purchasing that IAP
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+
+Behavior notes:
+- Added a dedicated `Advanced Networking` WebUI button that toggles the advanced settings section only when `advancedNetworkingUnlocked` is true.
+- Added an in-page locked modal that appears when users without the Advanced Networking entitlement try to open the section.
+- Kept advanced settings hidden by default so they are opened explicitly through the new button flow.
 
 T24.6 - Make sure the Advanced network settings in the webui sync correctly with the player prefs and with the in app ui.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+
+Behavior notes:
+- Fixed `WebUiSettingsBridge.ApplySettings` so fixture-mesh updates no longer short-circuit network receiver synchronization.
+- WebUI-applied universe/start-channel values now continue syncing to the active in-app `INetworkReceiver` even when fixture mesh manager bindings are present.
+- Added EditMode regression coverage (`WebUiSettingsTests.ApplySettings_WithFixtureMeshManagerStillSyncsActiveNetworkReceiver`) for this sync path.
 
 T24.7 - Make sure the setting for the network mode is recalled correctly from player prefs using the SaveLoadSettings after restarting the app
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+
+Behavior notes:
+- Preserved PlayerPrefs-backed network-mode restore flow by ensuring `WebUiSettingsBridge` no longer exits before network-mode/apply logic can run during startup hydrations.
+- WebUI startup hydration now consistently reflects saved network preferences while keeping runtime in-app receiver state in sync.
+
+T24.8 - Next run: execute Unity EditMode suite and device validation for WebUI advanced-network gating + startup network-mode restore behavior.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written

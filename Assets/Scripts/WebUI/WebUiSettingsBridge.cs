@@ -62,7 +62,6 @@ public class WebUiSettingsBridge : MonoBehaviour
             fixtureMeshManager.RebuildFixtures(fixtureCount, savePreference: false);
             fixtureMeshManager.SetPrimaryReceiverAddressFromUserInput(data.dmxUniverse, data.startChannel);
             fixtureMeshManager.SyncFixtureAddresses();
-            return;
         }
 
         INetworkReceiver receiver = NetworkingModeManager.Instance?.NetworkReceiver;
@@ -78,9 +77,8 @@ public class WebUiSettingsBridge : MonoBehaviour
             receiver.SetStartChannelFromUserInput(data.startChannel);
         }
 
-        if (advancedUnlocked && receiver.GetType() == typeof(SAcnReceiver))
+        if (advancedUnlocked && receiver is SAcnReceiver sacnReceiver)
         {
-            SAcnReceiver sacnReceiver = (SAcnReceiver)receiver;
             sacnReceiver.SetTransportMode(data.useMulticast);
             sacnReceiver.SetMulticastAddressFromUserInput(data.multicastAddress);
             sacnReceiver.SetUnicastBindAddressFromUserInput(data.unicastBindAddress);
