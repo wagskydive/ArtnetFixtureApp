@@ -2243,6 +2243,16 @@ T99.11 - Fix the webui so that the modal for "advanced networking" not being own
   - Ensured the lock modal is dismissed automatically when entitlement is valid and advanced settings are opened.
 
 T99.12 - Fix the webui so that the advanced-networking lock modal OK button hides the modal and make sure it never shows on refresh and ONLY shows when the advanced networking button is pressed and the entitlement is locked (IAP not owned)
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Added centralized lock-modal visibility helpers in `webui.html` so hide/show state is deterministic, including `aria-hidden` sync for accessibility/state clarity.
+  - Ensured the lock modal is explicitly hidden on page boot and each settings apply/refresh pass, so it never appears from passive reload or polling updates.
+  - Wired the modal OK button (and backdrop click) to close behavior and kept lock-modal opening strictly behind the Advanced Networking button entitlement check.
+
+T99.13 - Next run: add WebUI browser-level regression coverage (or scripted DOM tests) for advanced-network modal visibility transitions (load, locked-click, unlocked-click, and OK-dismiss).
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
