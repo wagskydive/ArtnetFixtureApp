@@ -2303,6 +2303,16 @@ T99.17 - change the PurchaseValidationManager debug checkmark logic, so that the
   - Removed editor-only advanced-networking unlock workaround in `CapabilityService.ResolveBoolean`, so entitlement gating now respects validated entitlement state in-editor too.
 
 T99.18 - Add functionallity to the webui so that when the "Unlimited Universes" IAP is not owned and the user presses the plus button on the Universe number or inputs a number higher than 1 into the Universe field, the `lockedFeatureModal` shows with the appropriete text.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Added WebUI-side universe entitlement gating that listens to DMX universe input edits (including numeric stepper/+ interactions) and shows `lockedFeatureModal` when a locked user requests universe > 1.
+  - Added `maxSelectableUniverse` metadata to WebUI settings payloads so the browser can enforce current entitlement limits before save POST.
+  - Added save-time revalidation in `webui.html` to prevent locked universe values from being posted and to auto-revert the field to 1 when entitlement is missing.
+
+T99.19 - Next run: execute Unity EditMode tests covering WebUI settings payload serialization + universe entitlement clamp behavior.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written

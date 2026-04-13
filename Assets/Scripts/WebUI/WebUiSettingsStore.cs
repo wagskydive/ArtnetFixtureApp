@@ -12,6 +12,7 @@ public class WebUiSettingsData
     public int gridX = 8;
     public int gridY = 8;
     public bool advancedNetworkingUnlocked;
+    public int maxSelectableUniverse = 1;
     public int networkMode = NetworkingModeManager.ArtNetModeIndex;
     public bool useMulticast = true;
     public string multicastAddress = "239.255.0.1";
@@ -72,6 +73,7 @@ public static class WebUiSettingsStore
             gridX = ClampPixelDimension(raw.gridX),
             gridY = ClampPixelDimension(raw.gridY),
             advancedNetworkingUnlocked = raw.advancedNetworkingUnlocked,
+            maxSelectableUniverse = Mathf.Clamp(raw.maxSelectableUniverse, 1, 63999),
             networkMode = Mathf.Clamp(raw.networkMode, NetworkingModeManager.ArtNetModeIndex, NetworkingModeManager.SAcnModeIndex),
             useMulticast = raw.useMulticast,
             multicastAddress = string.IsNullOrWhiteSpace(raw.multicastAddress) ? "239.255.0.1" : raw.multicastAddress.Trim(),
