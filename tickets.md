@@ -2242,7 +2242,7 @@ T99.11 - Fix the webui so that the modal for "advanced networking" not being own
   - Changed the Advanced Networking button handler to re-fetch `/api/settings` entitlement state at click time and show the lock modal only when entitlement is still locked.
   - Ensured the lock modal is dismissed automatically when entitlement is valid and advanced settings are opened.
 
-T99.12 - Next run: execute Unity EditMode + WebUI manual validation for T99.10/T99.11 (network-mode persistence restart path and advanced-networking modal gating)
+T99.12 - Fix the webui so that the advanced-networking lock modal OK button hides the modal and make sure it never shows on refresh and ONLY shows when the advanced networking button is pressed and the entitlement is locked (IAP not owned)
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
