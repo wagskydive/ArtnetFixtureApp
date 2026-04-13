@@ -2283,11 +2283,14 @@ T99.15 - Add another button for "Custom Gobos" to show or hide the custom gobo's
   - When custom gobos are locked, the button now opens the reusable locked-feature modal with Custom Gobos purchase guidance instead of revealing the section.
 
 T99.16 - in the webui, Change the order of the sections and section buttons so that the Custom Gobo section is under the Custom Gobo button and the feedback button is always all the way at the bottom. Also make all the buttons the same color
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Reordered WebUI sections so the `Custom Gobos` content block now appears directly below its toggle button.
+  - Moved the `Feedback` button section to the very bottom of the settings page so it always renders last.
+  - Unified button styling by aligning secondary and custom-gobo remove button colors with the primary button color.
 
 
 T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode

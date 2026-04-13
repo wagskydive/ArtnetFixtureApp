@@ -300,3 +300,5 @@ _Progress note: `UI_SAcnSettings` now loads and validates the active `NetworkRec
 _Progress note: `PurchaseValidationManager` now includes an Editor-only debug bypass flag (`debugForceValidInEditor`) that treats owned IAP receipts as valid without backend calls, enabling local IAP UI/entitlement workflow debugging in Unity Editor._
 
 _Progress note: WebUI advanced-networking lock modal now defaults to hidden via `aria-hidden="true"` + `.modal-backdrop.hidden { display: none; }`, ensuring the OK button closes it reliably and it never appears before user interaction._
+
+_Progress note: WebUI section ordering now places the Custom Gobos panel directly below its toggle button, keeps the Feedback action as the final bottom section, and uses a unified button color style across action buttons._
