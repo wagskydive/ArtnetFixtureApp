@@ -2282,7 +2282,7 @@ T99.15 - Add another button for "Custom Gobos" to show or hide the custom gobo's
   - Added click-time custom-gobo entitlement verification using `/images` response data before opening the section.
   - When custom gobos are locked, the button now opens the reusable locked-feature modal with Custom Gobos purchase guidance instead of revealing the section.
 
-T99.16 - Next run: execute Unity EditMode suite and manual WebUI device validation for locked-feature modal reuse and Custom Gobos button entitlement gating on Android/LAN clients.
+T99.16 - in the webui, Change the order of the sections and section buttons so that the Custom Gobo section is under the Custom Gobo button and the feedback button is always all the way at the bottom. Also make all the buttons the same color
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
