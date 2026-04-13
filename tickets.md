@@ -2252,7 +2252,184 @@ T99.12 - Fix the webui so that the advanced-networking lock modal OK button hide
   - Ensured the lock modal is explicitly hidden on page boot and each settings apply/refresh pass, so it never appears from passive reload or polling updates.
   - Wired the modal OK button (and backdrop click) to close behavior and kept lock-modal opening strictly behind the Advanced Networking button entitlement check.
 
-T99.13 - Next run: add WebUI browser-level regression coverage (or scripted DOM tests) for advanced-network modal visibility transitions (load, locked-click, unlocked-click, and OK-dismiss).
+T99.13 - Fix the webui advanced networking modal. Make the OK button hide the modal and make sure its hidden by default.
+
+Ah — if it shows **before clicking the button**, then the issue is *not* your click handler at all. It’s purely visibility state.
+
+Let’s pinpoint it 👇
+
+---
+
+## 🔍 What *should* happen
+
+Your modal starts as hidden:
+
+```html
+<div id="advancedNetworkingLockedModal" class="modal-backdrop hidden">
+```
+
+And your CSS:
+
+```css
+.hidden {
+    display: none;
+}
+```
+
+So it should NOT be visible unless JS removes `hidden`.
+
+---
+
+## 🔥 The real problem
+
+This line runs immediately:
+
+```js
+hideAdvancedNetworkingLockedModal()
+```
+
+Which calls:
+
+```js
+setAdvancedNetworkingLockedModalVisible(false)
+```
+
+Which does:
+
+```js
+advancedNetworkingLockedModal.classList.toggle("hidden", !isVisible)
+```
+
+👉 With `isVisible = false` → `toggle("hidden", true)`
+
+So far, correct.
+
+---
+
+## ⚠️ But here's the catch
+
+### Your modal CSS overrides `.hidden`
+
+```css
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;   ❗
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+```
+
+👉 `.modal-backdrop` **forces `display: flex`**
+
+So even if `.hidden` sets `display: none`, **CSS order matters**.
+
+---
+
+## 💥 Why it's always visible
+
+If `.modal-backdrop` is defined *after* `.hidden`, then:
+
+```css
+.hidden { display: none; }
+.modal-backdrop { display: flex; }
+```
+
+👉 `.modal-backdrop` wins → modal is visible
+
+---
+
+## ✅ Fix options
+
+### ✅ Option 1 (best): increase `.hidden` priority
+
+```css
+.hidden {
+    display: none !important;
+}
+```
+
+✔ simplest fix
+✔ guarantees hidden always wins
+
+---
+
+### ✅ Option 2: make modal default hidden
+
+Instead of relying on `.hidden`, change:
+
+```css
+.modal-backdrop {
+    display: none;
+}
+```
+
+Then add a visible class:
+
+```css
+.modal-backdrop.visible {
+    display: flex;
+}
+```
+
+And update JS:
+
+```js
+function setAdvancedNetworkingLockedModalVisible(isVisible) {
+    advancedNetworkingLockedModal.classList.toggle("visible", isVisible)
+}
+```
+
+---
+
+### ✅ Option 3: inline style (quick debug)
+
+```js
+advancedNetworkingLockedModal.style.display = "none"
+```
+
+If this fixes it → confirms CSS conflict.
+
+---
+
+## 🧠 Extra sanity check
+
+Also verify you are NOT accidentally calling:
+
+```js
+setAdvancedNetworkingLockedModalVisible(true)
+```
+
+during:
+
+* `applySettingsToUi`
+* `loadSettings`
+* or any interval
+
+(From your code, you aren’t — so CSS is the real issue.)
+
+---
+
+## ✅ Final answer
+
+👉 The modal shows immediately because:
+
+**`.modal-backdrop { display: flex }` overrides `.hidden { display: none }`**
+
+---
+
+## 🚀 Quick fix (do this)
+
+```css
+.hidden {
+    display: none !important;
+}
+```
+
+---
+
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
