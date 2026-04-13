@@ -2292,6 +2292,12 @@ T99.16 - in the webui, Change the order of the sections and section buttons so t
   - Moved the `Feedback` button section to the very bottom of the settings page so it always renders last.
   - Unified button styling by aligning secondary and custom-gobo remove button colors with the primary button color.
 
+T99.17 - change the PurchaseValidationManager debug checkmark logic, so that the checkmark "DebugForceValidInEditor" is instead "DebugValidaion" and another checkmark "AllIsValidated" is added if that checkmark is checked, all iaps act as validated and if it is not checked no IAP is validated. Specifiacally look into the Advanced Networking logic because there might be another Editor workaround, if so, remove it.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
 
 T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode
 - [x] Started
