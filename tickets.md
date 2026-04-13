@@ -2313,11 +2313,14 @@ T99.18 - Add functionallity to the webui so that when the "Unlimited Universes" 
   - Added save-time revalidation in `webui.html` to prevent locked universe values from being posted and to auto-revert the field to 1 when entitlement is missing.
 
 T99.19 - Find and fix a bug in the webui where when the Universe number value is being input over 1 while the Unlimited Universe IAP is not owned, the `lockedFeatureModal` shows only for a very short moment and dissappeares directly. The modal should stay in place until the OK button on the modal is pressed. Also, the  spinner/+ interactions should show the modal.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Removed automatic modal-closing during WebUI settings re-apply so locked-feature prompts are no longer dismissed by background `/api/settings` refreshes.
+  - Kept the locked-feature modal open until explicit OK confirmation by disabling backdrop-click dismissal for this modal.
+  - Updated DMX universe input max handling to allow spinner step attempts beyond 1 while locked users are still entitlement-checked and shown the lock modal.
 
 T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode
 - [x] Started
