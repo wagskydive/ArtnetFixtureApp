@@ -38,14 +38,14 @@ public class PurchaseValidationManagerTests
 
 
     [Test]
-    public void ShouldBypassServerValidationInEditor_DisabledFlag_ReturnsFalse()
+    public void ShouldUseEditorDebugValidation_DisabledFlag_ReturnsFalse()
     {
         var go = new GameObject("validation-manager");
         var manager = go.AddComponent<PurchaseValidationManager>();
-        manager.debugForceValidInEditor = false;
+        manager.debugValidation = false;
 
         bool shouldBypass = (bool)typeof(PurchaseValidationManager)
-            .GetMethod("ShouldBypassServerValidationInEditor", BindingFlags.NonPublic | BindingFlags.Instance)
+            .GetMethod("ShouldUseEditorDebugValidation", BindingFlags.NonPublic | BindingFlags.Instance)
             .Invoke(manager, null);
 
         Assert.That(shouldBypass, Is.False);
@@ -54,14 +54,14 @@ public class PurchaseValidationManagerTests
     }
 
     [Test]
-    public void ShouldBypassServerValidationInEditor_EnabledFlag_ReturnsTrueInEditor()
+    public void ShouldUseEditorDebugValidation_EnabledFlag_ReturnsTrueInEditor()
     {
         var go = new GameObject("validation-manager");
         var manager = go.AddComponent<PurchaseValidationManager>();
-        manager.debugForceValidInEditor = true;
+        manager.debugValidation = true;
 
         bool shouldBypass = (bool)typeof(PurchaseValidationManager)
-            .GetMethod("ShouldBypassServerValidationInEditor", BindingFlags.NonPublic | BindingFlags.Instance)
+            .GetMethod("ShouldUseEditorDebugValidation", BindingFlags.NonPublic | BindingFlags.Instance)
             .Invoke(manager, null);
 
         Assert.That(shouldBypass, Is.EqualTo(Application.isEditor));

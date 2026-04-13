@@ -2293,6 +2293,16 @@ T99.16 - in the webui, Change the order of the sections and section buttons so t
   - Unified button styling by aligning secondary and custom-gobo remove button colors with the primary button color.
 
 T99.17 - change the PurchaseValidationManager debug checkmark logic, so that the checkmark "DebugForceValidInEditor" is instead "DebugValidaion" and another checkmark "AllIsValidated" is added if that checkmark is checked, all iaps act as validated and if it is not checked no IAP is validated. Specifiacally look into the Advanced Networking logic because there might be another Editor workaround, if so, remove it.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Replaced `debugForceValidInEditor` with `debugValidation` plus `allIsValidated` in `PurchaseValidationManager`, including serialized-field migration support via `FormerlySerializedAs`.
+  - Updated editor debug validation behavior so enabled debug mode resolves all owned IAP receipts as valid/invalid based on `allIsValidated`.
+  - Removed editor-only advanced-networking unlock workaround in `CapabilityService.ResolveBoolean`, so entitlement gating now respects validated entitlement state in-editor too.
+
+T99.18 - Next run: execute Unity EditMode suite on a licensed runner to validate purchase debug-validation toggles and advanced-networking entitlement gating end-to-end.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class PurchaseValidationManager : MonoBehaviour
@@ -14,8 +15,11 @@ public class PurchaseValidationManager : MonoBehaviour
     [SerializeField] private Popup revocationPopup;
     [SerializeField] private Text revocationTitleText;
     [SerializeField] private Text revocationMessageText;
-    [Tooltip("Editor-only debug bypass. When enabled in Unity Editor, owned IAP receipts are treated as valid without server validation.")]
-    public bool debugForceValidInEditor;
+    [FormerlySerializedAs("debugForceValidInEditor")]
+    [Tooltip("Editor-only debug validation toggle. When enabled in Unity Editor, server validation is skipped and All Is Validated decides whether IAPs validate or revoke.")]
+    public bool debugValidation;
+    [Tooltip("Used only when Debug Validation is enabled. If checked, all IAP validations return valid; if unchecked, all IAP validations return invalid.")]
+    public bool allIsValidated;
 
     private const string LastValidationUnixKey = "iap_last_validation_unix";
     private const string FallbackDeviceIdKey = "iap_device_id";
@@ -51,9 +55,11 @@ public class PurchaseValidationManager : MonoBehaviour
             return;
         }
 
-        if (ShouldBypassServerValidationInEditor())
+        if (ShouldUseEditorDebugValidation())
         {
-            Debug.Log("Purchase validation: Unity Editor debug bypass enabled; treating owned receipts as valid.", this);
+            Debug.Log(
+                $"Purchase validation: Unity Editor debug validation enabled; all receipts will resolve as {(allIsValidated ? "valid" : "invalid")}.",
+                this);
             StartCoroutine(ValidateAllPurchases());
             return;
         }
@@ -129,7 +135,7 @@ public class PurchaseValidationManager : MonoBehaviour
     {
         Debug.Log("Purchase validation coroutine started");
         _validationInProgress = true;
-        bool bypassServerValidation = ShouldBypassServerValidationInEditor();
+        bool bypassServerValidation = ShouldUseEditorDebugValidation();
         var validatedProducts = new HashSet<string>(StringComparer.Ordinal);
         var validProducts = new HashSet<string>(StringComparer.Ordinal);
         var revokedProducts = new HashSet<string>(StringComparer.Ordinal);
@@ -155,7 +161,8 @@ public class PurchaseValidationManager : MonoBehaviour
 
                 if (bypassServerValidation)
                 {
-                    HandleValidationResult(receipt.ProductId, ValidationResult.Valid, validatedProducts, validProducts, revokedProducts);
+                    ValidationResult debugResult = allIsValidated ? ValidationResult.Valid : ValidationResult.Invalid;
+                    HandleValidationResult(receipt.ProductId, debugResult, validatedProducts, validProducts, revokedProducts);
                     continue;
                 }
 
@@ -213,9 +220,9 @@ public class PurchaseValidationManager : MonoBehaviour
     }
 
 
-    private bool ShouldBypassServerValidationInEditor()
+    private bool ShouldUseEditorDebugValidation()
     {
-        return debugForceValidInEditor && Application.isEditor;
+        return debugValidation && Application.isEditor;
     }
 
     private IEnumerator ValidateWithServer(string productId, string purchaseToken, Action<ValidationResult> callback)
