@@ -2332,6 +2332,13 @@ T99.20 - Find and fix a bug where the PurchaseValidationManager debug checkmark 
   - This makes WebUI entitlement-gated sections (advanced networking, unlimited universes, custom gobos) follow the same debug validation behavior as in-app capability checks.
   - Added EditMode coverage to verify boolean and numeric capability resolution both respect the debug-all-validated override path.
 
+T99.21 - Find and fix a bug MovingHeadController is not initialized correcty. Currently when the FixtureMode is MovingHead, the MovingHeadController only works properly when I turn it off and on in the Unity Editor. This can be due to the order of script execution where some fields or properties are not correctly assigned at runtime and may return as null
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+ 
 T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode
 - [x] Started
 - [x] Behavior Written
