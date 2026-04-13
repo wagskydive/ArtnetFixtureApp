@@ -15,6 +15,7 @@ public class WebUiSettingsBridge : MonoBehaviour
     {
         WebUiSettingsData settings = WebUiSettingsStore.Load();
         settings.advancedNetworkingUnlocked = IsAdvancedNetworkingUnlocked();
+        settings.maxSelectableUniverse = GetMaxSelectableUniverse(universeLimitCapability);
         return settings;
     }
 
@@ -26,7 +27,9 @@ public class WebUiSettingsBridge : MonoBehaviour
     public WebUiSettingsData SaveSettingsFromJson(string json)
     {
         WebUiSettingsData parsed = WebUiSettingsStore.FromJson(json);
-        parsed.dmxUniverse = Mathf.Clamp(parsed.dmxUniverse, 1, GetMaxSelectableUniverse(universeLimitCapability));
+        int maxSelectableUniverse = GetMaxSelectableUniverse(universeLimitCapability);
+        parsed.maxSelectableUniverse = maxSelectableUniverse;
+        parsed.dmxUniverse = Mathf.Clamp(parsed.dmxUniverse, 1, maxSelectableUniverse);
         WebUiSettingsStore.Save(parsed);
         ApplySettings(parsed);
         return parsed;
@@ -35,7 +38,9 @@ public class WebUiSettingsBridge : MonoBehaviour
     public void ApplySettings(WebUiSettingsData raw)
     {
         WebUiSettingsData data = WebUiSettingsStore.Sanitize(raw);
-        data.dmxUniverse = Mathf.Clamp(data.dmxUniverse, 1, GetMaxSelectableUniverse(universeLimitCapability));
+        int maxSelectableUniverse = GetMaxSelectableUniverse(universeLimitCapability);
+        data.maxSelectableUniverse = maxSelectableUniverse;
+        data.dmxUniverse = Mathf.Clamp(data.dmxUniverse, 1, maxSelectableUniverse);
         bool advancedUnlocked = IsAdvancedNetworkingUnlocked();
         data.advancedNetworkingUnlocked = advancedUnlocked;
         DmxModeManager.FixtureMode selectedMode = ToFixtureMode(data.fixtureMode);

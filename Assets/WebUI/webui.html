@@ -441,7 +441,9 @@
         const unicastAddressRow = document.getElementById("unicastAddressRow")
         const networkModeSelect = document.getElementById("networkMode")
         const useMulticastSelect = document.getElementById("useMulticast")
+        const dmxUniverseInput = document.getElementById("dmxUniverse")
         let advancedNetworkingUnlocked = false
+        let maxSelectableUniverse = 1
         hideLockedFeatureModal()
 
         modeSelect.addEventListener("change", function () {
@@ -512,6 +514,26 @@
             setLockedFeatureModalVisible(true)
         }
 
+        function isUnlimitedUniversesUnlocked() {
+            return maxSelectableUniverse > 1
+        }
+
+        function enforceUniverseAccess() {
+            const parsedUniverse = parseInt(dmxUniverseInput.value)
+            const requestedUniverse = Number.isFinite(parsedUniverse) ? parsedUniverse : 1
+
+            if (requestedUniverse <= 1 || isUnlimitedUniversesUnlocked()) {
+                return false
+            }
+
+            dmxUniverseInput.value = "1"
+            showLockedFeatureModal(
+                "Unlimited Universes Locked",
+                "Universe values above 1 require the Unlimited Universes in-app purchase."
+            )
+            return true
+        }
+
         function clampValue(value, min, max) {
             return Math.min(max, Math.max(min, value))
         }
@@ -520,7 +542,7 @@
             return {
                 deviceName: document.getElementById("deviceName").value,
                 fixtureMode: document.getElementById("fixtureMode").value,
-                dmxUniverse: parseInt(document.getElementById("dmxUniverse").value),
+                dmxUniverse: parseInt(dmxUniverseInput.value),
                 startChannel: parseInt(document.getElementById("startChannel").value),
                 fixtureAmount: parseInt(document.getElementById("fixtureAmount").value),
                 gridX: parseInt(document.getElementById("gridX").value),
@@ -540,7 +562,9 @@
         function applySettingsToUi(settings) {
             document.getElementById("deviceName").value = settings.deviceName || "ArtnetFixture"
             document.getElementById("fixtureMode").value = settings.fixtureMode || "surface"
-            document.getElementById("dmxUniverse").value = clampValue(parseInt(settings.dmxUniverse) || 1, 1, 16)
+            maxSelectableUniverse = clampValue(parseInt(settings.maxSelectableUniverse) || 1, 1, 63999)
+            dmxUniverseInput.max = `${maxSelectableUniverse}`
+            dmxUniverseInput.value = clampValue(parseInt(settings.dmxUniverse) || 1, 1, maxSelectableUniverse)
             document.getElementById("startChannel").value = clampValue(parseInt(settings.startChannel) || 1, 1, 512)
             document.getElementById("fixtureAmount").value = clampValue(parseInt(settings.fixtureAmount) || 1, 1, 16)
             document.getElementById("gridX").value = clampValue(parseInt(settings.gridX) || 8, 8, 32)
@@ -580,6 +604,21 @@
 
         document.getElementById("showNetworkDebug").addEventListener("change", function () {
             networkDebugSection.classList.toggle("hidden", this.value !== "true")
+        })
+
+        dmxUniverseInput.addEventListener("input", function () {
+            if (enforceUniverseAccess()) {
+                scheduleAutoSave()
+            }
+        })
+
+        dmxUniverseInput.addEventListener("change", function () {
+            if (enforceUniverseAccess()) {
+                scheduleAutoSave()
+                return
+            }
+
+            scheduleAutoSave()
         })
 
         document.getElementById("toggleDebugBtn").addEventListener("click", function () {
@@ -654,6 +693,11 @@
         }
 
         async function saveSettings() {
+            if (enforceUniverseAccess()) {
+                settingsStatus.textContent = "Locked"
+                return
+            }
+
             const settings = getCurrentSettings()
 
             try {
