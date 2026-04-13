@@ -2312,7 +2312,7 @@ T99.18 - Add functionallity to the webui so that when the "Unlimited Universes" 
   - Added `maxSelectableUniverse` metadata to WebUI settings payloads so the browser can enforce current entitlement limits before save POST.
   - Added save-time revalidation in `webui.html` to prevent locked universe values from being posted and to auto-revert the field to 1 when entitlement is missing.
 
-T99.19 - Next run: execute Unity EditMode tests covering WebUI settings payload serialization + universe entitlement clamp behavior.
+T99.19 - Find and fix a bug in the webui where when the Universe number value is being input over 1 while the Unlimited Universe IAP is not owned, the `lockedFeatureModal` shows only for a very short moment and dissappeares directly. The modal should stay in place until the OK button on the modal is pressed. Also, the  spinner/+ interactions should show the modal.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
