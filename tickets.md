@@ -2350,6 +2350,14 @@ T99.22 - Verify that network debugging works properly. It looks like the webui d
   - Fixed WebUI network debug visibility being reset on every `/api/settings` background refresh, which previously kept collapsing the debug panel before packet output could be observed.
   - `applySettingsToUi` now keeps the debug section visibility aligned with the saved `showNetworkDebug` setting so `/api/network-debug` polling can continuously render packet totals/messages.
 
+T99.23 - Find and fix a bug MovingHeadController is not initialized correcty. Fix it in a way that ReInitialization happens when other systems are ready. Use static event Actions on related systems that get invoked when these systems are ready and let the MovingHeadController ReInitialize when these events are invoked.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+
 T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode
 - [x] Started
 - [x] Behavior Written
