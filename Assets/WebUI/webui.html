@@ -563,7 +563,7 @@
             document.getElementById("deviceName").value = settings.deviceName || "ArtnetFixture"
             document.getElementById("fixtureMode").value = settings.fixtureMode || "surface"
             maxSelectableUniverse = clampValue(parseInt(settings.maxSelectableUniverse) || 1, 1, 63999)
-            dmxUniverseInput.max = `${maxSelectableUniverse}`
+            dmxUniverseInput.max = "63999"
             dmxUniverseInput.value = clampValue(parseInt(settings.dmxUniverse) || 1, 1, maxSelectableUniverse)
             document.getElementById("startChannel").value = clampValue(parseInt(settings.startChannel) || 1, 1, 512)
             document.getElementById("fixtureAmount").value = clampValue(parseInt(settings.fixtureAmount) || 1, 1, 16)
@@ -579,7 +579,6 @@
             document.getElementById("additionalUniverses").value = settings.additionalUniverses || ""
             document.getElementById("showNetworkDebug").value = settings.showNetworkDebug ? "true" : "false"
             advancedNetworkingUnlocked = !!settings.advancedNetworkingUnlocked
-            hideLockedFeatureModal()
             advancedNetworkSection.classList.toggle("hidden", true)
             networkDebugSection.classList.toggle("hidden", true)
             openAdvancedNetworkingBtn.classList.toggle("secondary", !advancedNetworkingUnlocked)
@@ -666,7 +665,7 @@
 
         lockedFeatureModal.addEventListener("click", function (event) {
             if (event.target === lockedFeatureModal) {
-                hideLockedFeatureModal()
+                event.preventDefault()
             }
         })
 
