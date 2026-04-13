@@ -2338,7 +2338,14 @@ T99.21 - Find and fix a bug MovingHeadController is not initialized correcty. Cu
 - [ ] Code Written
 - [ ] Tests Passed
 - [ ] Documentation Written
- 
+
+T99.22 - Verify that network debugging works properly. It looks like the webui doesn't display the network packets correctly in the Network Debugging section.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode
 - [x] Started
 - [x] Behavior Written
