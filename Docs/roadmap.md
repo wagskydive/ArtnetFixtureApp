@@ -294,3 +294,5 @@ _Progress note: `NetworkingModeManager` is now singleton-backed and exposes acti
 
 _Progress note: Networking mode selection now swaps runtime receiver components in `NetworkingModeManager` (Art-Net/sACN) using integer mode indices, with a manager-owned DMX buffer assigned to each newly added receiver._
 _Progress note: `UI_SAcnSettings` now loads and validates the active `NetworkReceiver` on enable (auto-hiding itself unless sACN is active), and exposes dedicated handlers for sACN multicast/unicast transport settings (mode, addresses, listen port) for upcoming panel wiring._
+
+_Progress note: `PurchaseValidationManager` now includes an Editor-only debug bypass flag (`debugForceValidInEditor`) that treats owned IAP receipts as valid without backend calls, enabling local IAP UI/entitlement workflow debugging in Unity Editor._
