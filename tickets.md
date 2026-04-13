@@ -1725,6 +1725,13 @@ T19.31 - Find and fix a bug where the ui shows the wrong popup content after a r
   - Revocation body text is now built from the actually revoked product IDs (deduped), with capability display-title lookup fallback to product ID for clearer and more accurate user messaging.
   - Added EditMode coverage for revocation message copy generation (single-item wording + duplicate ID dedupe behavior).
 
+T19.32 - Create a debugging flag/ (public boolean) in PurchaseValidationManager.cs that validates every IAP as valid  when running the app inside the unity editor. So that it is possible to debug IAP behavior without real validation.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 
 T18.3 - rework UI_DpadNavigationController.cs so it works correctly and add a checkbox to allow/disallow horizontal and/or vetical navigation and/or wrapping. Currently Horizontal navigation doesn't work and verticle wrapping is buggy and not reliable.
 - [x] Started
