@@ -36,6 +36,39 @@ public class PurchaseValidationManagerTests
         Object.DestroyImmediate(go);
     }
 
+
+    [Test]
+    public void ShouldBypassServerValidationInEditor_DisabledFlag_ReturnsFalse()
+    {
+        var go = new GameObject("validation-manager");
+        var manager = go.AddComponent<PurchaseValidationManager>();
+        manager.debugForceValidInEditor = false;
+
+        bool shouldBypass = (bool)typeof(PurchaseValidationManager)
+            .GetMethod("ShouldBypassServerValidationInEditor", BindingFlags.NonPublic | BindingFlags.Instance)
+            .Invoke(manager, null);
+
+        Assert.That(shouldBypass, Is.False);
+
+        Object.DestroyImmediate(go);
+    }
+
+    [Test]
+    public void ShouldBypassServerValidationInEditor_EnabledFlag_ReturnsTrueInEditor()
+    {
+        var go = new GameObject("validation-manager");
+        var manager = go.AddComponent<PurchaseValidationManager>();
+        manager.debugForceValidInEditor = true;
+
+        bool shouldBypass = (bool)typeof(PurchaseValidationManager)
+            .GetMethod("ShouldBypassServerValidationInEditor", BindingFlags.NonPublic | BindingFlags.Instance)
+            .Invoke(manager, null);
+
+        Assert.That(shouldBypass, Is.EqualTo(Application.isEditor));
+
+        Object.DestroyImmediate(go);
+    }
+
     private static string InvokeBuildRevocationMessage(PurchaseValidationManager manager, List<string> revokedProducts)
     {
         MethodInfo method = typeof(PurchaseValidationManager).GetMethod(

@@ -1726,6 +1726,16 @@ T19.31 - Find and fix a bug where the ui shows the wrong popup content after a r
   - Added EditMode coverage for revocation message copy generation (single-item wording + duplicate ID dedupe behavior).
 
 T19.32 - Create a debugging flag/ (public boolean) in PurchaseValidationManager.cs that validates every IAP as valid  when running the app inside the unity editor. So that it is possible to debug IAP behavior without real validation.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Added `debugForceValidInEditor` to `PurchaseValidationManager` and routed validation flow through an editor-only bypass that marks owned receipts as valid without calling the backend when enabled.
+  - Updated `TryValidatePurchases` to allow the debug path to run without online/store-endpoint gating so IAP UI behavior can be debugged locally inside Unity Editor.
+  - Added EditMode coverage for `ShouldBypassServerValidationInEditor` flag behavior.
+
+T19.35 - Next run: execute Unity EditMode tests to verify PurchaseValidationManager editor validation bypass flow and entitlement sync behavior in a licensed Unity runner.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written

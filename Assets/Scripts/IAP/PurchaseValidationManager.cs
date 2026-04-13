@@ -14,6 +14,8 @@ public class PurchaseValidationManager : MonoBehaviour
     [SerializeField] private Popup revocationPopup;
     [SerializeField] private Text revocationTitleText;
     [SerializeField] private Text revocationMessageText;
+    [Tooltip("Editor-only debug bypass. When enabled in Unity Editor, owned IAP receipts are treated as valid without server validation.")]
+    public bool debugForceValidInEditor;
 
     private const string LastValidationUnixKey = "iap_last_validation_unix";
     private const string FallbackDeviceIdKey = "iap_device_id";
@@ -38,6 +40,24 @@ public class PurchaseValidationManager : MonoBehaviour
             return;
         }
 
+        if (purchaseGateway == null)
+        {
+            purchaseGateway = FindFirstObjectByType<UnityIapPurchaseGateway>();
+        }
+
+        if (purchaseGateway == null)
+        {
+            Debug.LogWarning("Purchase validation skipped: UnityIapPurchaseGateway not found.", this);
+            return;
+        }
+
+        if (ShouldBypassServerValidationInEditor())
+        {
+            Debug.Log("Purchase validation: Unity Editor debug bypass enabled; treating owned receipts as valid.", this);
+            StartCoroutine(ValidateAllPurchases());
+            return;
+        }
+
         if (!IsOnline())
         {
             Debug.Log("Trying validation but not online");
@@ -47,17 +67,6 @@ public class PurchaseValidationManager : MonoBehaviour
         if (!ShouldValidate())
         {
             Debug.Log("Trying validation but should not validate");
-            return;
-        }
-
-        if (purchaseGateway == null)
-        {
-            purchaseGateway = FindFirstObjectByType<UnityIapPurchaseGateway>();
-        }
-
-        if (purchaseGateway == null)
-        {
-            Debug.LogWarning("Purchase validation skipped: UnityIapPurchaseGateway not found.", this);
             return;
         }
 
@@ -120,6 +129,7 @@ public class PurchaseValidationManager : MonoBehaviour
     {
         Debug.Log("Purchase validation coroutine started");
         _validationInProgress = true;
+        bool bypassServerValidation = ShouldBypassServerValidationInEditor();
         var validatedProducts = new HashSet<string>(StringComparer.Ordinal);
         var validProducts = new HashSet<string>(StringComparer.Ordinal);
         var revokedProducts = new HashSet<string>(StringComparer.Ordinal);
@@ -138,9 +148,19 @@ public class PurchaseValidationManager : MonoBehaviour
             {
                 UnityIapPurchaseGateway.OwnedProductReceipt receipt = receipts[i];
                 Debug.Log("Purchase validation for receipt: " + receipt.ProductId + " json: " + receipt.ReceiptJson);
-                if (string.IsNullOrWhiteSpace(receipt.ProductId) || string.IsNullOrWhiteSpace(receipt.ReceiptJson))
+                if (string.IsNullOrWhiteSpace(receipt.ProductId))
                 {
+                    continue;
+                }
 
+                if (bypassServerValidation)
+                {
+                    HandleValidationResult(receipt.ProductId, ValidationResult.Valid, validatedProducts, validProducts, revokedProducts);
+                    continue;
+                }
+
+                if (string.IsNullOrWhiteSpace(receipt.ReceiptJson))
+                {
                     continue;
                 }
 
@@ -190,6 +210,12 @@ public class PurchaseValidationManager : MonoBehaviour
                 revokedProducts.Add(productId);
                 break;
         }
+    }
+
+
+    private bool ShouldBypassServerValidationInEditor()
+    {
+        return debugForceValidInEditor && Application.isEditor;
     }
 
     private IEnumerator ValidateWithServer(string productId, string purchaseToken, Action<ValidationResult> callback)
