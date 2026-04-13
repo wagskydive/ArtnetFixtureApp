@@ -162,6 +162,48 @@ public class WebUiSettingsTests
     }
 
     [Test]
+    public void ApplySettings_WithFixtureMeshManagerStillSyncsActiveNetworkReceiver()
+    {
+        var networkingGo = new GameObject("networking-mode-manager");
+        var networkingModeManager = networkingGo.AddComponent<NetworkingModeManager>();
+        networkingModeManager.SendMessage("Awake");
+
+        var template = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        template.name = "FixtureTemplate";
+        var primaryReceiver = template.AddComponent<ArtNetReceiver>();
+        primaryReceiver.ReceiveNetworkData = false;
+        primaryReceiver.DmxBuffer = new DmxBuffer();
+
+        var managerGo = new GameObject("fixture-manager");
+        var fixtureMeshManager = managerGo.AddComponent<UI_FixtureMeshManager>();
+        SetPrivateField(fixtureMeshManager, "primaryReceiver", primaryReceiver);
+        SetPrivateField(fixtureMeshManager, "fixtureTemplate", template);
+        fixtureMeshManager.RebuildFixtures(2);
+
+        var bridgeGo = new GameObject("bridge");
+        var bridge = bridgeGo.AddComponent<WebUiSettingsBridge>();
+        SetPrivateField(bridge, "fixtureMeshManager", fixtureMeshManager);
+
+        bridge.ApplySettings(new WebUiSettingsData
+        {
+            fixtureMode = "surface",
+            dmxUniverse = 11,
+            startChannel = 77,
+            fixtureAmount = 2,
+            networkMode = NetworkingModeManager.ArtNetModeIndex
+        });
+
+        Assert.That(networkingModeManager.NetworkReceiver, Is.Not.Null);
+        Assert.That(networkingModeManager.NetworkReceiver.GetUniverseForUserInput(), Is.EqualTo(11));
+        Assert.That(networkingModeManager.NetworkReceiver.StartChannel, Is.EqualTo(77));
+
+        Object.DestroyImmediate(bridgeGo);
+        Object.DestroyImmediate(managerGo);
+        Object.DestroyImmediate(template);
+        Object.DestroyImmediate(networkingGo);
+    }
+
+    [Test]
     public void LocalWebUiServer_LoginApi_ValidatesConfiguredPassword()
     {
         WebUiPasswordProtection.SetPassword("secret");

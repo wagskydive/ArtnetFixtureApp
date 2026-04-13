@@ -175,6 +175,32 @@
             white-space: pre-wrap;
             font-size: 14px;
         }
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-card {
+            width: min(560px, 100%);
+            background: #1c1c1c;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #333;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 12px;
+        }
     </style>
 
 </head>
@@ -233,6 +259,10 @@
 
                 <label>Grid Size Y</label> <input id="gridY" type="number" min="8" max="32" tabindex="7">
 
+            </div>
+
+            <div class="section">
+                <button id="openAdvancedNetworkingBtn" type="button" class="secondary">Advanced Networking</button>
             </div>
 
             <div id="advancedNetworkSection" class="section hidden">
@@ -316,6 +346,18 @@
 
     </div>
 
+    <div id="advancedNetworkingLockedModal" class="modal-backdrop hidden" role="dialog" aria-modal="true"
+        aria-labelledby="advancedNetworkingLockedTitle">
+        <div class="modal-card">
+            <h2 id="advancedNetworkingLockedTitle">Advanced Networking Locked</h2>
+            <p>This feature requires the Advanced Networking upgrade.</p>
+            <p>Please purchase it in-app to unlock these controls.</p>
+            <div class="modal-actions">
+                <button id="advancedNetworkingLockedCloseBtn" type="button">OK</button>
+            </div>
+        </div>
+    </div>
+
     <script>
 
         const params = new URLSearchParams(window.location.search)
@@ -380,11 +422,15 @@
         const standardSection = document.getElementById("standardSection")
         const pixelSection = document.getElementById("pixelSection")
         const advancedNetworkSection = document.getElementById("advancedNetworkSection")
+        const openAdvancedNetworkingBtn = document.getElementById("openAdvancedNetworkingBtn")
+        const advancedNetworkingLockedModal = document.getElementById("advancedNetworkingLockedModal")
+        const advancedNetworkingLockedCloseBtn = document.getElementById("advancedNetworkingLockedCloseBtn")
         const networkDebugSection = document.getElementById("networkDebugSection")
         const multicastAddressRow = document.getElementById("multicastAddressRow")
         const unicastAddressRow = document.getElementById("unicastAddressRow")
         const networkModeSelect = document.getElementById("networkMode")
         const useMulticastSelect = document.getElementById("useMulticast")
+        let advancedNetworkingUnlocked = false
 
         modeSelect.addEventListener("change", function () {
 
@@ -481,9 +527,10 @@
             document.getElementById("useLtpMerge").value = settings.useLtpMerge ? "true" : "false"
             document.getElementById("additionalUniverses").value = settings.additionalUniverses || ""
             document.getElementById("showNetworkDebug").value = settings.showNetworkDebug ? "true" : "false"
-            const advancedUnlocked = !!settings.advancedNetworkingUnlocked
-            advancedNetworkSection.classList.toggle("hidden", !advancedUnlocked)
-            networkDebugSection.classList.toggle("hidden", !advancedUnlocked || !settings.showNetworkDebug)
+            advancedNetworkingUnlocked = !!settings.advancedNetworkingUnlocked
+            advancedNetworkSection.classList.toggle("hidden", true)
+            networkDebugSection.classList.toggle("hidden", true)
+            openAdvancedNetworkingBtn.classList.toggle("secondary", !advancedNetworkingUnlocked)
             fixtureNameHeading.textContent = `Fixture: ${settings.deviceName || "ArtnetFixture"}`
             const ipAddress = settings.ipAddress || "127.0.0.1"
             const port = window.location.port || "8080"
@@ -509,6 +556,23 @@
 
         document.getElementById("toggleDebugBtn").addEventListener("click", function () {
             networkDebugSection.classList.toggle("hidden")
+        })
+
+        openAdvancedNetworkingBtn.addEventListener("click", function () {
+            if (!advancedNetworkingUnlocked) {
+                advancedNetworkingLockedModal.classList.remove("hidden")
+                return
+            }
+
+            const willShowAdvancedSection = advancedNetworkSection.classList.contains("hidden")
+            advancedNetworkSection.classList.toggle("hidden", !willShowAdvancedSection)
+            if (!willShowAdvancedSection) {
+                networkDebugSection.classList.add("hidden")
+            }
+        })
+
+        advancedNetworkingLockedCloseBtn.addEventListener("click", function () {
+            advancedNetworkingLockedModal.classList.add("hidden")
         })
 
         async function refreshNetworkDebug() {
