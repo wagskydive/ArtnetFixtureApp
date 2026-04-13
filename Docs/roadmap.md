@@ -258,6 +258,8 @@ Add a new mode that makes the app function like a pixel wall.
 _Progress note: `DmxModeManager.SetFixtureMode` now ignores no-op mode assignments to avoid unnecessary material rebinds that caused visible white flashes during settings synchronization._
 _Progress note: WebUI fixture-name editing now saves on submit (`change`/Enter) instead of per-keystroke autosave, preventing disruptive reload-like updates while typing._
 _Progress note: fixture name + resolved local IPv4 are now surfaced in WebUI (`/api/settings` metadata) and Unity UI display fields for faster device identification on-site._
+_Progress note: WebUI locked-feature dialogs are now centralized into a reusable modal API with dynamic title/message text, reducing duplicate modal wiring for gated features._
+_Progress note: WebUI now includes a dedicated `Custom Gobos` toggle button that gates section visibility behind click-time entitlement validation and shows the reusable lock modal when unavailable._
 _Progress note: advanced networking WebUI controls now include protocol/transport/address/merge/universe subscription settings (capability-gated), with `/api/network-debug` live packet telemetry fed by a new `NetworkDebugService`._
 _Progress note: `UI_TVKeyboardTextEditor` now supports configurable input validation modes (IP, numeric range, no spaces/special chars, alphanumeric, length range) with popup-based user error feedback before applying text._
 _Progress note: WebUI now includes responsive mobile styling for phone-sized screens with larger controls and improved layout density._

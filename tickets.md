@@ -2263,13 +2263,26 @@ T99.13 - Fix the webui advanced networking modal. Make the OK button hide the mo
   - Verified the existing OK-button handler continues to call `hideAdvancedNetworkingLockedModal()` so modal dismissal remains deterministic.
 
 T99.14 - Refactor the webui modal system to more extendable and make it easy to show the modal with modified texts.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+  - Refactored WebUI lock dialogs into one reusable `lockedFeatureModal` with `showLockedFeatureModal(title, message)` so locked-feature UX can be reused across multiple sections without duplicated modal markup/handlers.
+  - Replaced advanced-networking-specific modal wiring with generic modal visibility helpers that preserve hidden-by-default behavior and deterministic close handling (OK and backdrop click).
+  - Kept modal text fully dynamic, enabling future feature locks to supply custom title/message copy from a single API.
 
 T99.15 - Add another button for "Custom Gobos" to show or hide the custom gobo's section this button click also needs to check for the IAP Custom Gobos and if its not owned it also needs to show a modal that tells the user it is a locked feature that needs an in-app purchase.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Added a dedicated `Custom Gobos` button that toggles the gobo section visibility so the section is no longer always open on page load.
+  - Added click-time custom-gobo entitlement verification using `/images` response data before opening the section.
+  - When custom gobos are locked, the button now opens the reusable locked-feature modal with Custom Gobos purchase guidance instead of revealing the section.
+
+T99.16 - Next run: execute Unity EditMode suite and manual WebUI device validation for locked-feature modal reuse and Custom Gobos button entitlement gating on Android/LAN clients.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
