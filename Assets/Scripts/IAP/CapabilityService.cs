@@ -36,12 +36,51 @@ public class CapabilityService : MonoBehaviour
 
     public int ResolveNumeric(string capabilityId, int lockedValue = 0)
     {
-        return _capabilitySystem != null ? _capabilitySystem.ResolveNumeric(capabilityId, lockedValue) : lockedValue;
+        if (_capabilitySystem == null)
+        {
+            return lockedValue;
+        }
+
+        if (IsDebugAllValidatedOverrideEnabled()
+            && capabilityDatabase != null
+            && capabilityDatabase.TryGetCapability(capabilityId, out CapabilityDefinition definition)
+            && definition != null
+            && definition.ValueType == CapabilityValueType.Numeric)
+        {
+            return definition.UnlockedNumericValue;
+        }
+
+        return _capabilitySystem.ResolveNumeric(capabilityId, lockedValue);
     }
 
     public bool ResolveBoolean(string capabilityId, bool lockedValue = false)
     {
-        return _capabilitySystem != null ? _capabilitySystem.ResolveBoolean(capabilityId, lockedValue) : lockedValue;
+        if (_capabilitySystem == null)
+        {
+            return lockedValue;
+        }
+
+        if (IsDebugAllValidatedOverrideEnabled()
+            && capabilityDatabase != null
+            && capabilityDatabase.TryGetCapability(capabilityId, out CapabilityDefinition definition)
+            && definition != null
+            && definition.ValueType == CapabilityValueType.Boolean)
+        {
+            return definition.UnlockedBooleanValue;
+        }
+
+        return _capabilitySystem.ResolveBoolean(capabilityId, lockedValue);
+    }
+
+    private static bool IsDebugAllValidatedOverrideEnabled()
+    {
+        if (!Application.isEditor)
+        {
+            return false;
+        }
+
+        PurchaseValidationManager validationManager = FindFirstObjectByType<PurchaseValidationManager>();
+        return validationManager != null && validationManager.debugValidation && validationManager.allIsValidated;
     }
 
     public bool TryGetCapability(string capabilityId, out CapabilityDefinition definition)

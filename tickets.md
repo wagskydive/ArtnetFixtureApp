@@ -2323,11 +2323,14 @@ T99.19 - Find and fix a bug in the webui where when the Universe number value is
   - Updated DMX universe input max handling to allow spinner step attempts beyond 1 while locked users are still entitlement-checked and shown the lock modal.
 
 T99.20 - Find and fix a bug where the PurchaseValidationManager debug checkmark and AllIsValid checkmark don't affect the webui. Currently when a button that needs an IAP is pressed in the webui while the checkmark AllIsValid is checked, the `lockedFeatureModal` still shows. 
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
-- [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [x] Tests Passed
+- [x] Documentation Written
+  - Added a `CapabilityService` debug override path so `PurchaseValidationManager` editor toggles (`debugValidation` + `allIsValidated`) force capability resolution to unlocked values even without store receipts.
+  - This makes WebUI entitlement-gated sections (advanced networking, unlimited universes, custom gobos) follow the same debug validation behavior as in-app capability checks.
+  - Added EditMode coverage to verify boolean and numeric capability resolution both respect the debug-all-validated override path.
 
 T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode
 - [x] Started
