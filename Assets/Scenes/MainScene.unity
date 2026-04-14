@@ -10490,6 +10490,51 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!1 &1067511769
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1067511770}
+  - component: {fileID: 1067511771}
+  m_Layer: 0
+  m_Name: SettingsCache
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1067511770
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1067511769}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 640, y: 360, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1067511771
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1067511769}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f9120a523caade47b4b9d0db27dc88d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArtnetFixture.Core::SettingsCache
+  isDirty: 0
 --- !u!1 &1113228398
 GameObject:
   m_ObjectHideFlags: 0
@@ -12860,7 +12905,7 @@ MonoBehaviour:
   revocationPopup: {fileID: 952136237}
   revocationTitleText: {fileID: 2039765822}
   revocationMessageText: {fileID: 1206279915}
-  debugValidation: 0
+  debugValidation: 1
   allIsValidated: 1
 --- !u!1 &1306461971
 GameObject:
@@ -22503,3 +22548,4 @@ SceneRoots:
   - {fileID: 1306288792}
   - {fileID: 1251370817}
   - {fileID: 1744031080}
+  - {fileID: 1067511770}

@@ -122,7 +122,7 @@ public class UI_DmxSettingsTests
         settings.SetUniverse(8);
 
         Assert.That(receiver.StartChannel, Is.EqualTo(100));
-        Assert.That(receiver.Universe, Is.EqualTo(7));
+        Assert.That(receiver.Universe0Base, Is.EqualTo(7));
     }
 
 
@@ -152,7 +152,7 @@ public class UI_DmxSettingsTests
         settings.SavePreferences();
 
         var (reloadedSettings, _, _, _) = CreateSettings();
-        reloadedSettings.LoadPreferences();
+        reloadedSettings.LoadPreferencesAndApply();
 
         Assert.That(reloadedSettings.CurrentDmxChannel, Is.EqualTo(200));
         Assert.That(reloadedSettings.CurrentDmxUniverse, Is.EqualTo(12));
@@ -196,7 +196,7 @@ public class UI_DmxSettingsTests
 
         SaveLoadSettings.SaveInt(SaveLoadSettings.NetworkWarningEnabledKey, 1);
 
-        settings.LoadPreferences();
+        settings.LoadPreferencesAndApply();
 
         Assert.That(warningToggle.isOn, Is.True);
         Assert.That(warningPanel.activeSelf, Is.False);
@@ -217,7 +217,7 @@ public class UI_DmxSettingsTests
             .GetField("infoPanelToggle", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
             .SetValue(settings, toggle);
 
-        settings.LoadPreferences();
+        settings.LoadPreferencesAndApply();
 
         Assert.That(toggle.isOn, Is.True);
         Assert.That(infoPanel.activeSelf, Is.True);

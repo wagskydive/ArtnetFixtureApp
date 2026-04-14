@@ -31,22 +31,23 @@ public static class SaveLoadSettings
 
     public static int LoadInt(string key, int defaultValue)
     {
-        return PlayerPrefs.GetInt(key, defaultValue);
+        int result = SettingsCache.Instance.GetIntValue(key, defaultValue);
+        return result;
     }
 
     public static string LoadString(string key, string defaultValue)
     {
-        return PlayerPrefs.GetString(key, defaultValue);
+        return SettingsCache.Instance.GetStringValue(key, defaultValue);
     }
 
     public static float LoadFloat(string key, float defaultValue)
     {
-        return PlayerPrefs.GetFloat(key, defaultValue);
+        return SettingsCache.Instance.GetFloatValue(key, defaultValue);
     }
 
     public static long LoadLong(string key, long defaultValue)
     {
-        string raw = PlayerPrefs.GetString(key, string.Empty);
+        string raw = SettingsCache.Instance.GetStringValue(key, string.Empty);
         if (string.IsNullOrWhiteSpace(raw))
         {
             return defaultValue;
@@ -59,29 +60,34 @@ public static class SaveLoadSettings
     {
         PlayerPrefs.SetInt(key, value);
         PlayerPrefs.Save();
+        SettingsCache.Instance?.SetDirty();
     }
 
     public static void SaveString(string key, string value)
     {
         PlayerPrefs.SetString(key, value);
         PlayerPrefs.Save();
+        SettingsCache.Instance?.SetDirty();
     }
 
     public static void SaveLong(string key, long value)
     {
         PlayerPrefs.SetString(key, value.ToString());
         PlayerPrefs.Save();
+        SettingsCache.Instance?.SetDirty();
     }
 
     public static void SaveFloat(string key, float value)
     {
         PlayerPrefs.SetFloat(key, value);
         PlayerPrefs.Save();
+        SettingsCache.Instance?.SetDirty();
     }
 
     public static void SaveAndInvokeEvent()
     {
         PlayerPrefs.Save();
+        SettingsCache.Instance?.SetDirty();
         OnSettingsSaved?.Invoke();
     }
 }

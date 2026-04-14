@@ -14,8 +14,10 @@ public class ArtNetReceiver : MonoBehaviour, INetworkReceiver
 
     public event Action DataReceivedAgain;
 
-    [Range(0, 15)]
-    public int Universe = 0;
+    public int Universe1Base { get => SaveLoadSettings.LoadInt(SaveLoadSettings.DmxUniverseKey, 1); set => SaveLoadSettings.SaveInt(SaveLoadSettings.DmxUniverseKey, value); }
+
+    public int Universe0Base { get => Universe1Base - 1; }
+
     [Range(1, 512)]
     public int StartChannel = 1;
     public DmxBuffer DmxBuffer;
@@ -24,7 +26,7 @@ public class ArtNetReceiver : MonoBehaviour, INetworkReceiver
     public string ProtocolName => "Art-Net";
 
 
-    int INetworkReceiver.Universe { get => Universe; set => Universe = ClampUniverse(value); }
+    int INetworkReceiver.Universe1Based { get => Universe1Base; set => Universe1Base = ClampUniverse(value); }
     int INetworkReceiver.StartChannel { get => StartChannel; set => StartChannel = ClampStartChannel(value); }
     DmxBuffer INetworkReceiver.DmxBuffer { get => DmxBuffer; set => DmxBuffer = value; }
     bool INetworkReceiver.ReceiveNetworkData { get => ReceiveNetworkData; set => ReceiveNetworkData = value; }
@@ -49,9 +51,8 @@ public class ArtNetReceiver : MonoBehaviour, INetworkReceiver
 
     void Start()
     {
-        Universe = ClampUniverse(Universe);
-        StartChannel = ClampStartChannel(StartChannel);
-
+        SetUniverse(SaveLoadSettings.LoadInt(SaveLoadSettings.DmxUniverseKey, Universe0Base + 1));
+        SetStartChannel(SaveLoadSettings.LoadInt(SaveLoadSettings.DmxChannelKey, StartChannel));
         if (DmxBuffer == null)
         {
             DmxBuffer = new DmxBuffer();
@@ -66,25 +67,24 @@ public class ArtNetReceiver : MonoBehaviour, INetworkReceiver
     public void SetUniverseFromUserInput(int universe1Based)
     {
         SetUniverse(universe1Based);
-        SaveLoadSettings.SaveInt(SaveLoadSettings.DmxUniverseKey, universe1Based);
     }
 
     public void SetUniverse(int universe1Based)
     {
-        Universe = ClampUniverse(universe1Based - 1);
+        Universe1Base = ClampUniverse(universe1Based);
     }
 
 
 
     public int GetUniverseForUserInput()
     {
-        return Universe + 1;
+        return Universe1Base;
     }
 
     public void SetStartChannelFromUserInput(int startChannel1Based)
     {
         SetStartChannel(startChannel1Based);
-        SaveLoadSettings.SaveInt(SaveLoadSettings.DmxChannelKey,startChannel1Based);
+        SaveLoadSettings.SaveInt(SaveLoadSettings.DmxChannelKey, startChannel1Based);
     }
 
     public void SetStartChannel(int startChannel1Based)
@@ -207,7 +207,7 @@ public class ArtNetReceiver : MonoBehaviour, INetworkReceiver
                 if (IsArtDmxPacket(data))
                 {
                     int universe = data[14] | (data[15] << 8);
-                    if (universe != Universe) continue;
+                    if (universe != Universe0Base) continue;
 
                     int length = (data[16] << 8) | data[17];
                     if (length > 512) length = 512;
@@ -283,7 +283,7 @@ public class ArtNetReceiver : MonoBehaviour, INetworkReceiver
 
         // Net/Subnet/Universe info
         reply[18] = 0; // Net
-        reply[19] = (byte)Universe;
+        reply[19] = (byte)Universe0Base;
 
         // Short name (18 bytes)
         WriteString(reply, 26, SaveLoadSettings.LoadString(SaveLoadSettings.DeviceNetworkKey, "DMX Projector"));
@@ -304,14 +304,14 @@ public class ArtNetReceiver : MonoBehaviour, INetworkReceiver
         Array.Copy(bytes, 0, buffer, index, Mathf.Min(bytes.Length, buffer.Length - index));
     }
 
-    private static int ClampUniverse(int universe0Based)
+    private static int ClampUniverse(int universe1Based)
     {
-        if (universe0Based < 0 || universe0Based > 32768)
+        if (universe1Based < 1 || universe1Based > 32769)
         {
-            UnityEngine.Debug.LogWarning($"Universe {universe0Based} is invalid. Clamping to 0-15.");
+            UnityEngine.Debug.LogWarning($"Universe {universe1Based} is invalid. Clamping to 0-15.");
         }
 
-        return Mathf.Clamp(universe0Based, 0, 32768);
+        return Mathf.Clamp(universe1Based, 1, 32769);
     }
 
     private static int ClampStartChannel(int startChannel1Based)

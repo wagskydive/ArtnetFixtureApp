@@ -93,7 +93,7 @@ public class UI_FixtureMeshManager : MonoBehaviour
         }
 
         int baseStartChannel = primaryReceiver.StartChannel;
-        int baseUniverse0 = primaryReceiver.Universe;
+        int baseUniverse0 = primaryReceiver.Universe1Based;
 
         for (int i = 0; i < _spawnedFixtures.Count; i++)
         {

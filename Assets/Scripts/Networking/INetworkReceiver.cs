@@ -5,7 +5,7 @@ public interface INetworkReceiver
     event Action NoDataReceivedRecently;
     event Action DataReceivedAgain;
 
-    int Universe { get; set; }
+    int Universe1Based { get; set; }
     int StartChannel { get; set; }
     DmxBuffer DmxBuffer { get; set; }
     bool ReceiveNetworkData { get; set; }

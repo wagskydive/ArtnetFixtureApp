@@ -54,6 +54,7 @@ public class UI_SAcnSettings : MonoBehaviour
         {
             unicastBindAddress.OnIpSet += SetUnicastBindAddress;
         }
+        SAcnReceiver.OnSAcnReceiverStarted += RefreshLabels;
     }
 
     private SAcnReceiver _sAcnReceiver;
@@ -63,6 +64,8 @@ public class UI_SAcnSettings : MonoBehaviour
         LoadSAcnReceiver();
         RefreshLabels();
     }
+
+
 
     public void RestartSAcnReceiver()
     {
@@ -79,6 +82,7 @@ public class UI_SAcnSettings : MonoBehaviour
         if (_sAcnReceiver == null)
         {
             gameObject.SetActive(false);
+
         }
     }
 

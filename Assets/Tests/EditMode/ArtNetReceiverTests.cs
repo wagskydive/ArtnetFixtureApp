@@ -85,7 +85,7 @@ public class ArtNetReceiverTests
         var go = new GameObject("receiver");
         var receiver = go.AddComponent<ArtNetReceiver>();
 
-        Assert.That(receiver.Universe, Is.EqualTo(0));
+        Assert.That(receiver.Universe0Base, Is.EqualTo(0));
         Assert.That(receiver.GetUniverseForUserInput(), Is.EqualTo(1));
 
         Object.DestroyImmediate(go);
@@ -99,7 +99,7 @@ public class ArtNetReceiverTests
 
         receiver.SetUniverseFromUserInput(16);
 
-        Assert.That(receiver.Universe, Is.EqualTo(15));
+        Assert.That(receiver.Universe0Base, Is.EqualTo(15));
         Assert.That(receiver.GetUniverseForUserInput(), Is.EqualTo(16));
 
         Object.DestroyImmediate(go);
