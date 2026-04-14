@@ -2360,7 +2360,7 @@ T99.23 - Find and fix a bug MovingHeadController is not initialized correcty. Fi
   - Updated `MovingHeadBeamController` to subscribe to mode + manager-ready events and rerun `ReInitialize()` when dependencies come online, fixing startup order races without requiring manual component toggling.
   - Moving head initialization now gates on both DMX mode manager and networking manager availability so material/network reads do not happen before prerequisite systems are ready.
 
-T99.24 - Next run: execute Unity EditMode/PlayMode validation for moving-head startup event re-initialization behavior on a licensed Unity runner.
+T99.24 - Find and fix a bug where the Universe number and DMX start channel are not properly saved or loaded anymore. Currently when the app is restarted after the Universe or DMX channel is changed these values values default back to "1" after the restart. While finding and fixing the bug it is good to refactor the code so it will be easier to debug and trace the origin of these kind of problems. Add Debug.Log lines wherever usefull.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
