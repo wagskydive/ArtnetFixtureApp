@@ -359,7 +359,7 @@ public class CapabilitySystemTests
         const string validationKey = "iap_last_validation_unix";
         long nowUnix = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         SaveLoadSettings.SaveLong(validationKey, nowUnix);
-        SaveLoadSettings.Save();
+        SaveLoadSettings.SaveAndInvokeEvent();
 
         var validationGo = new GameObject("purchase-validation");
         var validationManager = validationGo.AddComponent<PurchaseValidationManager>();
@@ -379,7 +379,7 @@ public class CapabilitySystemTests
         const string validationKey = "iap_last_validation_unix";
         long staleUnix = DateTimeOffset.UtcNow.AddHours(-26).ToUnixTimeSeconds();
         SaveLoadSettings.SaveLong(validationKey, staleUnix);
-        SaveLoadSettings.Save();
+        SaveLoadSettings.SaveAndInvokeEvent();
 
         var validationGo = new GameObject("purchase-validation");
         var validationManager = validationGo.AddComponent<PurchaseValidationManager>();

@@ -108,7 +108,7 @@ public static class WebUiSettingsStore
         SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnUseLtpMergeKey, data.useLtpMerge ? 1 : 0);
         SaveLoadSettings.SaveString(SaveLoadSettings.SAcnMulticastUniversesKey, data.additionalUniverses);
         SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnDebugVisibleKey, data.showNetworkDebug ? 1 : 0);
-        SaveLoadSettings.Save();
+        SaveLoadSettings.SaveAndInvokeEvent();
     }
 
     public static string ToJson(WebUiSettingsData data)

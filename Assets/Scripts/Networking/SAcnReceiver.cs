@@ -73,8 +73,8 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
 
     private void Start()
     {
-        Universe = ClampUniverse(Universe);
-        StartChannel = ClampStartChannel(StartChannel);
+        SetUniverse(SaveLoadSettings.LoadInt(SaveLoadSettings.DmxUniverseKey,Universe));
+        SetStartChannel(SaveLoadSettings.LoadInt(SaveLoadSettings.DmxChannelKey,StartChannel));
         LoadNetworkSettings();
         ApplyParametersToRuntime();
 
@@ -486,7 +486,7 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver
         SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnUseLtpMergeKey, UseLtpMerge ? 1 : 0);
         SaveLoadSettings.SaveString(SaveLoadSettings.SAcnMulticastUniversesKey, BuildUniverseListCsv(MulticastUniverseSubscriptions));
         SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnDebugVisibleKey, Parameters.debugPanelVisible ? 1 : 0);
-        SaveLoadSettings.Save();
+        SaveLoadSettings.SaveAndInvokeEvent();
     }
 
     private void ApplyParametersToRuntime()

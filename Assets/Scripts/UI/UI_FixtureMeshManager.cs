@@ -160,7 +160,7 @@ public class UI_FixtureMeshManager : MonoBehaviour
     private void SaveFixtureCountPreference(int count)
     {
         SaveLoadSettings.SaveInt(SaveLoadSettings.FixtureCountKey, count);
-        SaveLoadSettings.Save();
+        SaveLoadSettings.SaveAndInvokeEvent();
         UpdateFixtureCountDisplay(count);
     }
 

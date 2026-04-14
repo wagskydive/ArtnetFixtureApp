@@ -195,7 +195,7 @@ public class EntitlementStore
 
         string consumablesRaw = BuildConsumablesRawString();
         SaveLoadSettings.SaveString(SaveLoadSettings.IapConsumablesKey, consumablesRaw);
-        SaveLoadSettings.Save();
+        SaveLoadSettings.SaveAndInvokeEvent();
     }
 
     private void LoadConsumableCountsFromLocalStorage()

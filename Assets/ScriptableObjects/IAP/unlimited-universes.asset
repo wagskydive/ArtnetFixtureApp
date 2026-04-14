@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: unlimited-universes
   m_EditorClassIdentifier: ArtnetFixture.Core::CapabilityDefinition
   id: capability.universe.max
-  valueType: 1
-  unlockedBooleanValue: 0
+  valueType: 0
+  unlockedBooleanValue: 1
   unlockedNumericValue: 63999
   productId: product.unlimited.universes
   additionalProductIds:

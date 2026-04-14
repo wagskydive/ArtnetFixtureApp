@@ -93,13 +93,13 @@ public class UI_DmxSettings : MonoBehaviour
 
         UpdateUniverseDisplay();
         ApplyLoadedSettingsToReceiver();
-        //SavePreferences();
+        SavePreferences();
     }
 
     public void SetUniverseFromUserInput(int universeToSet)
     {
         SetUniverse(universeToSet);
-        SavePreferences();
+        //SavePreferences();
     }
 
     // Pattern type selector (0=Static, 1=Pulse, 2=ColorShift)
@@ -184,27 +184,27 @@ public class UI_DmxSettings : MonoBehaviour
     public void IncreaseChannel()
     {
         SetCurrentDmxChannelFromUserInput(Mathf.Min(512, CurrentDmxChannel + 1));
-        
-        //SavePreferences();
+
+        SavePreferences();
     }
 
     public void DecreaseChannel()
     {
         SetCurrentDmxChannelFromUserInput(Mathf.Max(1, CurrentDmxChannel - 1));
-        //SavePreferences();
+        SavePreferences();
     }
 
     public void IncreaseUniverse()
     {
         SetUniverseFromUserInput(Mathf.Min(63999, CurrentDmxUniverse + 1));
 
-        //SavePreferences();
+        SavePreferences();
     }
 
     public void DecreaseUniverse()
     {
         SetUniverseFromUserInput(Mathf.Max(1, CurrentDmxUniverse - 1));
-        //SavePreferences();
+        SavePreferences();
     }
 
     public enum PatternType
@@ -225,7 +225,7 @@ public class UI_DmxSettings : MonoBehaviour
         SaveLoadSettings.SaveInt(SaveLoadSettings.DmxChannelKey, CurrentDmxChannel);
         SaveLoadSettings.SaveInt(SaveLoadSettings.DmxUniverseKey, CurrentDmxUniverse);
         SaveLoadSettings.SaveInt(SaveLoadSettings.DmxPatternKey, CurrentPatternType);
-        SaveLoadSettings.Save();
+        SaveLoadSettings.SaveAndInvokeEvent();
     }
 
     void LoadSettingsAndUpdateDisplay()
@@ -290,7 +290,7 @@ public class UI_DmxSettings : MonoBehaviour
         }
 
         currentDmxChannel = Mathf.Clamp(receiver.StartChannel, 1, 512);
-        currentDmxUniverse = Mathf.Clamp(receiver.Universe + 1, 1, 16);
+        currentDmxUniverse = Mathf.Clamp(receiver.Universe + 1, 1, GetMaxSelectableUniverse());
         UpdateChannelDisplay();
         UpdateUniverseDisplay();
     }
@@ -330,7 +330,7 @@ public class UI_DmxSettings : MonoBehaviour
     public void SetNetworkWarning(bool isOn)
     {
         SaveLoadSettings.SaveInt(SaveLoadSettings.NetworkWarningEnabledKey, isOn ? 1 : 0);
-        SaveLoadSettings.Save();
+        SaveLoadSettings.SaveAndInvokeEvent();
         RefreshNetworkWarningVisibility();
     }
 
@@ -374,7 +374,7 @@ public class UI_DmxSettings : MonoBehaviour
     public void SetInfoPanelEnabled(bool isOn)
     {
         SaveLoadSettings.SaveInt(SaveLoadSettings.InfoPanelEnabledKey, isOn ? 1 : 0);
-        SaveLoadSettings.Save();
+        SaveLoadSettings.SaveAndInvokeEvent();
 
         if (infoPanel != null)
         {
@@ -386,7 +386,7 @@ public class UI_DmxSettings : MonoBehaviour
     {
         WebUiPasswordProtection.SetPassword(value);
         RefreshPasswordControls();
-        SaveLoadSettings.Save();
+        SaveLoadSettings.SaveAndInvokeEvent();
     }
 
     public void ApplyWebUiPasswordFromInput()
@@ -402,7 +402,7 @@ public class UI_DmxSettings : MonoBehaviour
 
         if (changed)
         {
-            SaveLoadSettings.Save();
+            SaveLoadSettings.SaveAndInvokeEvent();
         }
     }
 
@@ -443,13 +443,13 @@ public class UI_DmxSettings : MonoBehaviour
     {
         WebUiPasswordProtection.ClearPassword();
         RefreshPasswordControls();
-        SaveLoadSettings.Save();
+        SaveLoadSettings.SaveAndInvokeEvent();
     }
 
     public void SetFixtureName(string fixtureName)
     {
         SaveLoadSettings.SaveString(SaveLoadSettings.DeviceNetworkKey, fixtureName);
-        SaveLoadSettings.Save();
+        SaveLoadSettings.SaveAndInvokeEvent();
         UpdateDeviceInfoDisplay();
     }
 
@@ -552,14 +552,19 @@ public class UI_DmxSettings : MonoBehaviour
             return 1;
         }
 
-        int maxUniverse = CapabilityService.Instance.ResolveNumeric(capabilityId, 1);
-        if (NetworkingModeManager.Instance.IsSAcnMode)
+        bool IsUnlimitedUniverseUnlocked = CapabilityService.Instance.ResolveBoolean(capabilityId);
+        if (!IsUnlimitedUniverseUnlocked)
         {
-            return Mathf.Clamp(maxUniverse, 1, 63999);
+            return 1;
+        }
+
+        if (NetworkingModeManager.Instance != null && NetworkingModeManager.Instance.IsSAcnMode)
+        {
+            return 63999;
         }
         else
         {
-            return Mathf.Clamp(maxUniverse, 1, 32768);
+            return 32768;
 
         }
 

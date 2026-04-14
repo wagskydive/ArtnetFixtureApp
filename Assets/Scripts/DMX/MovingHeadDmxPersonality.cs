@@ -38,9 +38,9 @@ public static class MovingHeadDmxPersonality
         float patternSelect = receiver.GetFixtureChannelValue(9);
         int patternType = Mathf.Clamp(Mathf.FloorToInt((patternSelect / 256f) * PatternCount), 0, PatternCount - 1);
 
-        float speed = Mathf.Lerp(0.1f, 8f, receiver.GetFixtureChannelValue(10) / 255f);
+        float speed = Mathf.Lerp(0f, 8f, receiver.GetFixtureChannelValue(10) / 255f);
         float parameter = receiver.GetFixtureChannelValue(11) / 255f;
-        float size = Mathf.Lerp(0.5f, 8f, parameter);
+        float size = Mathf.Lerp(0.5f, 12f, parameter);
         float beamSoftness = Mathf.Lerp(0.001f, 0.5f, parameter);
 
         float irisScale = Mathf.Lerp(0.05f, 1f, receiver.GetFixtureChannelValue(12) / 255f);

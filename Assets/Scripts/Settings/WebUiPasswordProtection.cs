@@ -23,7 +23,7 @@ public static class WebUiPasswordProtection
     public static void SetEnabled(bool enabled)
     {
         SaveLoadSettings.SaveInt(SaveLoadSettings.WebUiPasswordEnabledKey, enabled ? 1 : 0);
-        SaveLoadSettings.Save();
+        SaveLoadSettings.SaveAndInvokeEvent();
     }
 
     public static bool SetProtectionEnabled(bool enabled)
@@ -49,19 +49,19 @@ public static class WebUiPasswordProtection
         if (string.IsNullOrEmpty(trimmed))
         {
             SaveLoadSettings.SaveString(SaveLoadSettings.WebUiPasswordKey, string.Empty);
-            SaveLoadSettings.Save();
+            SaveLoadSettings.SaveAndInvokeEvent();
             return false;
         }
 
         SaveLoadSettings.SaveString(SaveLoadSettings.WebUiPasswordKey, trimmed);
-        SaveLoadSettings.Save();
+        SaveLoadSettings.SaveAndInvokeEvent();
         return true;
     }
 
     public static void ClearPassword()
     {
         SaveLoadSettings.SaveString(SaveLoadSettings.WebUiPasswordKey, string.Empty);
-        SaveLoadSettings.Save();
+        SaveLoadSettings.SaveAndInvokeEvent();
     }
 
     public static bool VerifyPassword(string providedPassword)

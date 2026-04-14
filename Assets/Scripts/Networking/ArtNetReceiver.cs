@@ -306,12 +306,12 @@ public class ArtNetReceiver : MonoBehaviour, INetworkReceiver
 
     private static int ClampUniverse(int universe0Based)
     {
-        if (universe0Based < 0 || universe0Based > 15)
+        if (universe0Based < 0 || universe0Based > 32768)
         {
             UnityEngine.Debug.LogWarning($"Universe {universe0Based} is invalid. Clamping to 0-15.");
         }
 
-        return Mathf.Clamp(universe0Based, 0, 15);
+        return Mathf.Clamp(universe0Based, 0, 32768);
     }
 
     private static int ClampStartChannel(int startChannel1Based)

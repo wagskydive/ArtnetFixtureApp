@@ -28,7 +28,7 @@ public class NetworkDebugService : MonoBehaviour
         set
         {
             SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnDebugVisibleKey, value ? 1 : 0);
-            SaveLoadSettings.Save();
+            SaveLoadSettings.SaveAndInvokeEvent();
         }
     }
 

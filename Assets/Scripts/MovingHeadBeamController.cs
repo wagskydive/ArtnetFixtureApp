@@ -22,6 +22,9 @@ public class MovingHeadBeamController : MonoBehaviour
     private bool hasMaterialsResolvedSinceInMode = false;
     private bool isInMode;
 
+    bool HasUpdatedOnce = false;
+    bool HasUpdatedTwice = false;
+
     IEnumerator Start()
     {
         // Wait for 2 seconds
@@ -84,11 +87,11 @@ public class MovingHeadBeamController : MonoBehaviour
             }
         }
 
-
         var snapshot = MovingHeadDmxPersonality.Parse(receiver, Time.time);
 
-        _outputMaterial.SetColor("_BaseColor", snapshot.Color);
+        _outputMaterial.SetColor("_Color", snapshot.Color);
         _outputMaterial.SetFloat("_Intensity", snapshot.MasterDimmer);
+
         _outputMaterial.SetInt("_PatternType", snapshot.PatternType);
         _outputMaterial.SetFloat("_Speed", snapshot.PatternSpeed);
         _outputMaterial.SetFloat("_Size", snapshot.PatternSize);
@@ -100,6 +103,8 @@ public class MovingHeadBeamController : MonoBehaviour
         _outputMaterial.SetFloat("_BeamRadius", snapshot.IrisScale);
         _outputMaterial.SetFloat("_BeamRotation", snapshot.RotateRadians);
         ApplyCustomGoboTexture(snapshot.PatternType, snapshot.PatternSpeed);
+
+
     }
     private bool ResolveOutputMaterial()
     {

@@ -93,7 +93,7 @@ public class NetworkingModeManager : MonoBehaviour
         if (persistSelectedMode)
         {
             SaveLoadSettings.SaveInt(SaveLoadSettings.NetworkModeKey, clampedMode);
-            SaveLoadSettings.Save();
+            SaveLoadSettings.SaveAndInvokeEvent();
         }
     }
 

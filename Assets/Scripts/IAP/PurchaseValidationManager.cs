@@ -296,7 +296,7 @@ public class PurchaseValidationManager : MonoBehaviour
         Debug.Log(
             $"Purchase validation: saving last validation time unix={unixSeconds}, utc={savedUtc:O}, nextValidationTimeUtc={nextValidationUtc:O}.");
         SaveLoadSettings.SaveLong(LastValidationUnixKey, unixSeconds);
-        SaveLoadSettings.Save();
+        SaveLoadSettings.SaveAndInvokeEvent();
     }
 
     [Serializable]
@@ -446,7 +446,7 @@ public class PurchaseValidationManager : MonoBehaviour
 
         _resolvedDeviceId = Guid.NewGuid().ToString("N");
         SaveLoadSettings.SaveString(FallbackDeviceIdKey, _resolvedDeviceId);
-        SaveLoadSettings.Save();
+        SaveLoadSettings.SaveAndInvokeEvent();
         Debug.LogWarning("System device identifier unavailable; generated persistent fallback IAP device ID.", this);
         return _resolvedDeviceId;
     }

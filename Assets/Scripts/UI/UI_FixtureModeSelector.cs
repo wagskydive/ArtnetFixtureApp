@@ -136,7 +136,7 @@ public class UI_FixtureModeSelector : MonoBehaviour
         SaveLoadSettings.SaveInt(SaveLoadSettings.FixtureModeKey, (int)dmxModeManager.CurrentMode);
         SaveLoadSettings.SaveInt(SaveLoadSettings.PixelRowsKey, currentPixelRows);
         SaveLoadSettings.SaveInt(SaveLoadSettings.PixelColumnsKey, currentPixelColumns);
-        SaveLoadSettings.Save();
+        SaveLoadSettings.SaveAndInvokeEvent();
     }
 
     public void UpdateDisplayOnSettingsSave()

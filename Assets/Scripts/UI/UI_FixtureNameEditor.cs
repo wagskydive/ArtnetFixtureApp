@@ -39,7 +39,7 @@ public class UI_FixtureNameEditor : MonoBehaviour
     public void ApplyFixtureName(string newName)
     {
         SaveLoadSettings.SaveString(SaveLoadSettings.DeviceNetworkKey, newName);
-        SaveLoadSettings.Save();
+        SaveLoadSettings.SaveAndInvokeEvent();
         Debug.Log("Name changed through in app UI to: "+newName);
 
     }
