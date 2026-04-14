@@ -153,6 +153,7 @@ _Progress note: refunded-purchase popup content now always refreshes both title 
 _Progress note: WebUI `/api/settings` IP reporting now uses `IpSolver` and preserves `ipAddress` through settings JSON sanitization, fixing `0.0.0.0` display regressions in LAN clients._
 _Progress note: sACN ingest now tracks per-universe source state with highest-priority arbitration, supports staged sync-buffer apply, and advanced-networking entitlement now also unlocks unlimited-universe capability._
 _Progress note: WebUI DMX universe edits now enforce unlimited-universe entitlement in-browser, showing the locked-feature modal and reverting to universe 1 when users without the upgrade attempt values above 1._
+_Progress note: startup receiver bootstrap now preserves saved DMX universe/start-channel values by applying PlayerPrefs-backed address settings without re-saving defaults during `NetworkingModeManager` initialization, with added debug logs for persistence tracing._
 
 ### Goal:
 Enable persistent configuration and easy deployment.

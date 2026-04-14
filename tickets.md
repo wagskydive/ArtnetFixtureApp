@@ -2361,6 +2361,17 @@ T99.23 - Find and fix a bug MovingHeadController is not initialized correcty. Fi
   - Moving head initialization now gates on both DMX mode manager and networking manager availability so material/network reads do not happen before prerequisite systems are ready.
 
 T99.24 - Find and fix a bug where the Universe number and DMX start channel are not properly saved or loaded anymore. Currently when the app is restarted after the Universe or DMX channel is changed these values values default back to "1" after the restart. While finding and fixing the bug it is good to refactor the code so it will be easier to debug and trace the origin of these kind of problems. Add Debug.Log lines wherever usefull.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+  - Root cause found in `NetworkingModeManager`: startup receiver creation used `SetUniverseFromUserInput(1)` and `SetStartChannelFromUserInput(1)` when no prior receiver existed, which immediately overwrote PlayerPrefs with defaults during app boot.
+  - Refactored receiver boot/swap setup to use explicit `AddressSettings` resolution (from active receiver or saved prefs) and apply values via non-persisting setters (`SetUniverse` / `SetStartChannel`) before receiver start.
+  - Added startup/swap tracing via `Debug.Log` lines in `NetworkingModeManager` so mode/address persistence flow can be followed in logs.
+  - Added EditMode regression test to verify saved universe/start-channel values are used during initial receiver creation and are not overwritten.
+
+T99.25 - Next run: execute Unity EditMode suite on a licensed runner to validate T99.24 startup receiver address persistence behavior in-engine.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
