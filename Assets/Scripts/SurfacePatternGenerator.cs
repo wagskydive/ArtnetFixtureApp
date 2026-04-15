@@ -1,83 +1,35 @@
 using UnityEngine;
 
-public class SurfacePatternGenerator : MonoBehaviour
+public class SurfacePatternGenerator : BaseDmxMaterialConsumer
 {
     private const int PatternCount = 20;
 
-    [SerializeField] private Renderer outputRenderer;
+    protected override Renderer GetRenderer() => GetComponent<Renderer>();
 
-    private Material _outputMaterial;
-    private Material _activeSharedMaterial;
-
-    bool isInMode;
-
-    bool hasMaterialsResolvedSinceInMode = false;
-
-    private void Awake()
+    protected override bool IsActiveMode()
     {
-        ResolveOutputMaterial();
+        return DmxModeManager.Instance != null &&
+               DmxModeManager.Instance.CurrentMode == DmxModeManager.FixtureMode.Standard;
     }
 
-    private void Start()
+    protected override void OnDmxFrame(DmxFrame frame)
     {
-        DmxModeManager.OnModeChanged += HandleModeChange;
-        isInMode = DmxModeManager.Instance.CurrentMode == DmxModeManager.FixtureMode.Standard;
-
-    }
-
-    void HandleModeChange(DmxModeManager.FixtureMode mode)
-    {
-        isInMode = mode == DmxModeManager.FixtureMode.Standard;
-
-    }
-
-    void Update()
-    {
-        INetworkReceiver receiver = NetworkingModeManager.Instance?.NetworkReceiver;
-        if (receiver == null || receiver.DmxBuffer == null || !isInMode)
-        {
+        if (!ResolveMaterial() || _fixture == null)
             return;
-        }
 
-        if (!hasMaterialsResolvedSinceInMode && isInMode)
-        {
-            ResolveOutputMaterial();
-            if (!hasMaterialsResolvedSinceInMode)
-            {
-                return;
-            }
-        }
-
-        int dmxPatternValue = receiver.GetFixtureChannelValue(5);
+        int dmxPatternValue = _fixture.GetChannelValue(frame,5);
         int patternType = Mathf.Clamp(Mathf.FloorToInt((dmxPatternValue / 256f) * PatternCount), 0, PatternCount - 1);
-        float speed = Mathf.Lerp(0.1f, 8f, receiver.GetFixtureChannelValue(6) / 255f);
-        float size = Mathf.Lerp(0.5f, 8f, receiver.GetFixtureChannelValue(7) / 255f);
+        float speed = Mathf.Lerp(0.1f, 8f, _fixture.GetChannelValue(frame,6) / 255f);
+        float size = Mathf.Lerp(0.5f, 8f, _fixture.GetChannelValue(frame,7) / 255f);
 
-        float strobe = receiver.GetFixtureChannelValue(8) / 255f;
+        float strobe = _fixture.GetChannelValue(frame,8) / 255f;
         float strobeFrequency = Mathf.Lerp(1f, 50f, strobe);
         float strobeGate = (strobe < 0.05f || Mathf.Sin(Time.time * strobeFrequency) > 0f) ? 1f : 0f;
 
-        _outputMaterial.SetInt("_PatternType", patternType);
-        _outputMaterial.SetFloat("_Speed", speed);
-        _outputMaterial.SetFloat("_Size", size);
-        _outputMaterial.SetFloat("_StrobeGate", strobeGate);
-    }
-    private bool ResolveOutputMaterial()
-    {
-        if (outputRenderer == null || outputRenderer.sharedMaterial == null)
-        {
-            return false;
-        }
-
-        if (_outputMaterial == null || _activeSharedMaterial != outputRenderer.sharedMaterial)
-        {
-            _activeSharedMaterial = outputRenderer.sharedMaterial;
-            _outputMaterial = outputRenderer.material;
-        }
-
-        hasMaterialsResolvedSinceInMode = _outputMaterial != null;
-
-        return hasMaterialsResolvedSinceInMode;
+        _material.SetInt("_PatternType", patternType);
+        _material.SetFloat("_Speed", speed);
+        _material.SetFloat("_Size", size);
+        _material.SetFloat("_StrobeGate", strobeGate);
     }
 
 }

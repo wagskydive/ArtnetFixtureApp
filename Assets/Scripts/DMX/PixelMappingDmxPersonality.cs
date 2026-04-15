@@ -8,19 +8,19 @@ public static class PixelMappingDmxPersonality
     public const int CornerPinChannelCount = 8;
     public const int PixelDataStartChannel = 11;
 
-    public static float ParseMasterDimmer(INetworkReceiver receiver)
+    public static float ParseMasterDimmer(DmxFixture dmxFixture, DmxFrame frame)
     {
-        return receiver.GetFixtureChannelValue(MasterDimmerChannel) / 255f;
+        return dmxFixture.GetChannelValue(frame,MasterDimmerChannel) / 255f;
     }
 
-    public static float ParseStrobeGate(INetworkReceiver receiver, float timeSeconds)
+    public static float ParseStrobeGate(DmxFixture dmxFixture, DmxFrame frame,float timeSeconds)
     {
-        float strobe = receiver.GetFixtureChannelValue(StrobeChannel) / 255f;
+        float strobe = dmxFixture.GetChannelValue(frame,StrobeChannel) / 255f;
         float strobeFrequency = Mathf.Lerp(1f, 50f, strobe);
         return (strobe < 0.05f || Mathf.Sin(timeSeconds * strobeFrequency) > 0f) ? 1f : 0f;
     }
 
-    public static void ParsePixelColors(INetworkReceiver receiver, int rows, int columns, Color32[] destination)
+    public static void ParsePixelColors(DmxFixture dmxFixture, DmxFrame frame, int rows, int columns, Color32[] destination)
     {
         int pixelCount = Mathf.Max(0, rows) * Mathf.Max(0, columns);
         int safeCount = Mathf.Min(pixelCount, destination.Length);
@@ -29,9 +29,9 @@ public static class PixelMappingDmxPersonality
         {
             int baseChannel = PixelDataStartChannel + (pixelIndex * 3);
 
-            byte red = (byte)receiver.GetFixtureChannelValue(baseChannel);
-            byte green = (byte)receiver.GetFixtureChannelValue(baseChannel + 1);
-            byte blue = (byte)receiver.GetFixtureChannelValue(baseChannel + 2);
+            byte red = (byte)dmxFixture.GetChannelValue(frame,baseChannel);
+            byte green = (byte)dmxFixture.GetChannelValue(frame,baseChannel + 1);
+            byte blue = (byte)dmxFixture.GetChannelValue(frame,baseChannel + 2);
             destination[pixelIndex] = new Color32(red, green, blue, 255);
         }
 

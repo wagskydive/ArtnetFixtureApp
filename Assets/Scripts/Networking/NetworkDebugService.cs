@@ -68,7 +68,7 @@ public class NetworkDebugService : MonoBehaviour
         var snapshot = new NetworkDebugSnapshot();
         INetworkReceiver receiver = NetworkingModeManager.Instance?.NetworkReceiver;
         snapshot.enabled = DebugVisible;
-        snapshot.activeUniverse = receiver?.GetUniverseForUserInput() ?? 1;
+        snapshot.activeUniverse = DmxSettingsService.Instance.CurrentDmxSettings.Universe1Based;
         snapshot.protocol = receiver?.ProtocolName ?? "Unknown";
 
         lock (_sync)

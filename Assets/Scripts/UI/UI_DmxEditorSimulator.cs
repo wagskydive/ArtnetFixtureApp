@@ -69,7 +69,7 @@ public class UI_DmxEditorSimulator : MonoBehaviour
 
     private void WriteFixtureChannel(INetworkReceiver receiver, int relativeChannel, byte value)
     {
-        int absoluteChannel = receiver.StartChannel + relativeChannel - 1;
+        int absoluteChannel = DmxSettingsService.Instance.CurrentDmxSettings.StartChannel + relativeChannel - 1;
         if (absoluteChannel < 1 || absoluteChannel > _simulatedFrame.Length)
         {
             return;

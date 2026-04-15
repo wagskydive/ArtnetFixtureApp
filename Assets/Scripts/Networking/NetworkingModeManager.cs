@@ -50,9 +50,7 @@ public class NetworkingModeManager : MonoBehaviour
             }
         }
 
-        AddressSettings startupAddress = ResolveStartupAddressSettings();
-        bool shouldPersistStartupSelection = false;
-        SetModeFromIndex(initialMode, shouldPersistStartupSelection, startupAddress);
+        SetModeFromIndex(initialMode);
         OnManagerReady?.Invoke();
     }
 
@@ -64,79 +62,62 @@ public class NetworkingModeManager : MonoBehaviour
         }
     }
 
+
+
     public void SetModeFromIndex(int modeIndex)
     {
-        SetModeFromIndex(modeIndex, true, ResolveStartupAddressSettings());
-    }
-
-    private void SetModeFromIndex(int modeIndex, bool persistSelectedMode, AddressSettings fallbackAddress)
-    {
+        if(ActiveModeIndex == modeIndex)
+        {
+            return;
+        }
         int clampedMode = Mathf.Clamp(modeIndex, ArtNetModeIndex, SAcnModeIndex);
 
-        AddressSettings activeAddress = ResolveAddressFromActiveReceiverOrFallback(fallbackAddress);
+        if(NetworkReceiver != null)
+        {
+            INetworkReceiver lastReceiver = NetworkReceiver;
+            lastReceiver.StopReceiver();
 
+        }
         RemoveCurrentReceiverComponent();
 
-        INetworkReceiver nextReceiver = clampedMode == ArtNetModeIndex
-            ? gameObject.AddComponent<ArtNetReceiver>()
-            : gameObject.AddComponent<SAcnReceiver>();
+        INetworkReceiver nextReceiver;
+        if (clampedMode == ArtNetModeIndex)
+        {
+            nextReceiver = GetComponent<ArtNetReceiver>();
+            if (nextReceiver == null)
+            {
+                nextReceiver = gameObject.AddComponent<ArtNetReceiver>();
+            }
+        }
+        else
+        {
+            nextReceiver = GetComponent<SAcnReceiver>();
+            if (nextReceiver == null)
+            {
+                nextReceiver = gameObject.AddComponent<SAcnReceiver>();
+            }
+        }
 
         nextReceiver.DmxBuffer = _dmxBuffer;
         nextReceiver.ReceiveNetworkData = true;
-        nextReceiver.SetUniverse(activeAddress.UniverseForInput);
-        nextReceiver.SetStartChannel(activeAddress.StartChannel);
-        nextReceiver.TimeoutSeconds = activeAddress.TimeoutSeconds;
 
-        Debug.Log($"[NetworkingModeManager] Activating {(clampedMode == ArtNetModeIndex ? "Art-Net" : "sACN")} mode with universe={activeAddress.UniverseForInput}, startChannel={activeAddress.StartChannel}, timeoutSeconds={activeAddress.TimeoutSeconds:0.###}, persistMode={persistSelectedMode}.");
 
+        DmxSettingsSnapshot dmxSettingsSnapshot = new DmxSettingsSnapshot(clampedMode == SAcnModeIndex, DmxSettingsService.Instance.CurrentDmxSettings);
+        DmxSettingsService.Instance.Save(dmxSettingsSnapshot);
+
+
+        Debug.Log($"[NetworkingModeManager] Activating {(clampedMode == ArtNetModeIndex ? "Art-Net" : "sACN")} mode");
         nextReceiver.StartReceiver();
 
         NetworkReceiver = nextReceiver;
         ActiveModeIndex = clampedMode;
 
-        if (persistSelectedMode)
-        {
-            SaveLoadSettings.SaveInt(SaveLoadSettings.NetworkModeKey, clampedMode);
-            SaveLoadSettings.SaveAndInvokeEvent();
-        }
     }
 
-    private static AddressSettings ResolveStartupAddressSettings()
-    {
-        int savedUniverse = Mathf.Clamp(SaveLoadSettings.LoadInt(SaveLoadSettings.DmxUniverseKey, 1), 1, 63999);
-        int savedStartChannel = Mathf.Clamp(SaveLoadSettings.LoadInt(SaveLoadSettings.DmxChannelKey, 1), 1, 512);
-        float savedTimeoutSeconds = Mathf.Max(0.1f, SaveLoadSettings.LoadFloat(SaveLoadSettings.SAcnTimeoutSecondsKey, 2f));
 
-        Debug.Log($"[NetworkingModeManager] Loaded startup address from prefs: universe={savedUniverse}, startChannel={savedStartChannel}, timeoutSeconds={savedTimeoutSeconds:0.###}.");
-        return new AddressSettings(savedUniverse, savedStartChannel, savedTimeoutSeconds);
-    }
 
-    private AddressSettings ResolveAddressFromActiveReceiverOrFallback(AddressSettings fallback)
-    {
-        if (NetworkReceiver == null)
-        {
-            return fallback;
-        }
 
-        int universeForInput = Mathf.Clamp(NetworkReceiver.GetUniverseForUserInput(), 1, 63999);
-        int startChannel = Mathf.Clamp(NetworkReceiver.StartChannel, 1, 512);
-        float timeoutSeconds = Mathf.Max(0.1f, NetworkReceiver.TimeoutSeconds);
-        return new AddressSettings(universeForInput, startChannel, timeoutSeconds);
-    }
 
-    private readonly struct AddressSettings
-    {
-        public int UniverseForInput { get; }
-        public int StartChannel { get; }
-        public float TimeoutSeconds { get; }
-
-        public AddressSettings(int universeForInput, int startChannel, float timeoutSeconds)
-        {
-            UniverseForInput = universeForInput;
-            StartChannel = startChannel;
-            TimeoutSeconds = timeoutSeconds;
-        }
-    }
 
     private void RemoveCurrentReceiverComponent()
     {
@@ -171,6 +152,6 @@ public class NetworkingModeManager : MonoBehaviour
         return CapabilityService.Instance != null
             && CapabilityService.Instance.ResolveBoolean(AdvancedNetworkingCapabilityId, false);
 
-        
+
     }
 }

@@ -1,37 +1,25 @@
 using UnityEngine;
 
-public class PixelMappingOutputController : MonoBehaviour
+public class PixelMappingOutputController : BaseDmxMaterialConsumer
 {
-    [SerializeField] private Renderer outputRenderer;
     [SerializeField] private UI_FixtureModeSelector fixtureModeSelector;
     [SerializeField] private int fallbackRows = 8;
     [SerializeField] private int fallbackColumns = 8;
 
-    private Material _outputMaterial;
-    private Material _activeSharedMaterial;
     private Texture2D _pixelDataTexture;
     private Color32[] _pixelBuffer;
     private int _lastRows;
     private int _lastColumns;
 
-    bool isInMode;
+    protected override Renderer GetRenderer() => GetComponent<Renderer>();
 
-    bool hasMaterialsResolvedSinceInMode = false;
-
-    private void Awake()
+    protected override bool IsActiveMode()
     {
-        if (outputRenderer != null)
-        {
-            _outputMaterial = outputRenderer.material;
-        }
+        return DmxModeManager.Instance != null &&
+               DmxModeManager.Instance.CurrentMode == DmxModeManager.FixtureMode.PixelMapping;
+    }
 
-        EnsureTexture();
-    }
-    private void Start()
-    {
-        DmxModeManager.OnModeChanged += HandleModeChange;
-        isInMode = DmxModeManager.Instance.CurrentMode == DmxModeManager.FixtureMode.PixelMapping;
-    }
+
 
     private void OnDestroy()
     {
@@ -42,48 +30,6 @@ public class PixelMappingOutputController : MonoBehaviour
         }
     }
 
-    void HandleModeChange(DmxModeManager.FixtureMode mode)
-    {
-        isInMode = mode == DmxModeManager.FixtureMode.PixelMapping;
-
-    }
-
-
-    private void Update()
-    {
-        INetworkReceiver receiver = NetworkingModeManager.Instance?.NetworkReceiver;
-
-
-        if (receiver == null || receiver.DmxBuffer == null || !isInMode)
-        {
-            return;
-        }
-
-        if (!hasMaterialsResolvedSinceInMode && isInMode)
-        {
-            ResolveOutputMaterial();
-            if (!hasMaterialsResolvedSinceInMode)
-            {
-                return;
-            }
-        }
-
-        EnsureTexture();
-
-        float master = PixelMappingDmxPersonality.ParseMasterDimmer(receiver);
-        float strobeGate = PixelMappingDmxPersonality.ParseStrobeGate(receiver, Time.time);
-
-        PixelMappingDmxPersonality.ParsePixelColors(receiver, _lastRows, _lastColumns, _pixelBuffer);
-        _pixelDataTexture.SetPixels32(_pixelBuffer);
-        _pixelDataTexture.Apply(false, false);
-
-        _outputMaterial.SetFloat("_Rows", _lastRows);
-        _outputMaterial.SetFloat("_Columns", _lastColumns);
-        _outputMaterial.SetFloat("_Intensity", master);
-        _outputMaterial.SetFloat("_StrobeGate", strobeGate);
-        _outputMaterial.SetFloat("_UsePixelDataTex", 1f);
-        _outputMaterial.SetTexture("_PixelDataTex", _pixelDataTexture);
-    }
 
     private void EnsureTexture()
     {
@@ -112,23 +58,26 @@ public class PixelMappingOutputController : MonoBehaviour
 
         _pixelBuffer = new Color32[rows * columns];
     }
-    private bool ResolveOutputMaterial()
+
+    protected override void OnDmxFrame(DmxFrame frame)
     {
-        if (outputRenderer == null || outputRenderer.sharedMaterial == null)
-        {
-            return false;
-        }
+        if (!ResolveMaterial() || _fixture == null)
+            return;
 
-        if (_outputMaterial == null || _activeSharedMaterial != outputRenderer.sharedMaterial)
-        {
-            _activeSharedMaterial = outputRenderer.sharedMaterial;
-            _outputMaterial = outputRenderer.material;
-        }
+        EnsureTexture();
 
+        float master = PixelMappingDmxPersonality.ParseMasterDimmer(_fixture, frame);
+        float strobeGate = PixelMappingDmxPersonality.ParseStrobeGate(_fixture, frame, Time.time);
 
-        hasMaterialsResolvedSinceInMode = _outputMaterial != null;
+        PixelMappingDmxPersonality.ParsePixelColors(_fixture, frame, _lastRows, _lastColumns, _pixelBuffer);
+        _pixelDataTexture.SetPixels32(_pixelBuffer);
+        _pixelDataTexture.Apply(false, false);
 
-        return hasMaterialsResolvedSinceInMode;
+        _material.SetFloat("_Rows", _lastRows);
+        _material.SetFloat("_Columns", _lastColumns);
+        _material.SetFloat("_Intensity", master);
+        _material.SetFloat("_StrobeGate", strobeGate);
+        _material.SetFloat("_UsePixelDataTex", 1f);
+        _material.SetTexture("_PixelDataTex", _pixelDataTexture);
     }
-
 }

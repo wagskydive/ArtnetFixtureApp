@@ -1,53 +1,27 @@
 using System.Collections;
 using UnityEngine;
 
-public class RgbDmxController : MonoBehaviour
+public class RgbDmxController : BaseDmxMaterialConsumer
 {
-    [SerializeField] private Renderer outputRenderer;
+    protected override Renderer GetRenderer() => GetComponent<Renderer>();
 
-    private Material _outputMaterial;
-    private Material _activeSharedMaterial;
-
-
-
-
-    private void Awake()
+    protected override bool IsActiveMode()
     {
-        ResolveOutputMaterial();
+        return true;
     }
 
-    private void Update()
+
+    protected override void OnDmxFrame(DmxFrame frame)
     {
+        if (!ResolveMaterial() || _fixture == null)
+            return;
 
-            INetworkReceiver receiver = NetworkingModeManager.Instance?.NetworkReceiver;
-            if (receiver == null || receiver.DmxBuffer == null || !ResolveOutputMaterial())
-            {
-                return;
-            }
+        float dimmer = _fixture.GetChannelValue(frame, 1) / 255f;
+        float red = _fixture.GetChannelValue(frame, 2) / 255f;
+        float green = _fixture.GetChannelValue(frame, 3) / 255f;
+        float blue = _fixture.GetChannelValue(frame, 4) / 255f;
 
-            float dimmer = receiver.GetFixtureChannelValue(1) / 255f;
-            float red = receiver.GetFixtureChannelValue(2) / 255f;
-            float green = receiver.GetFixtureChannelValue(3) / 255f;
-            float blue = receiver.GetFixtureChannelValue(4) / 255f;
-
-            _outputMaterial.SetColor("_Color", new Color(red, green, blue, 1f));
-            _outputMaterial.SetFloat("_Intensity", dimmer);
-
+        _material.SetColor("_Color", new Color(red, green, blue, 1f));
+        _material.SetFloat("_Intensity", dimmer);
     }
-    private bool ResolveOutputMaterial()
-    {
-        if (outputRenderer == null || outputRenderer.sharedMaterial == null)
-        {
-            return false;
-        }
-
-        if (_outputMaterial == null || _activeSharedMaterial != outputRenderer.sharedMaterial)
-        {
-            _activeSharedMaterial = outputRenderer.sharedMaterial;
-            _outputMaterial = outputRenderer.material;
-        }
-
-        return _outputMaterial != null;
-    }
-
 }

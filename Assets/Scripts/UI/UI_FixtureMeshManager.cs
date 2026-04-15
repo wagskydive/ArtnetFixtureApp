@@ -67,7 +67,6 @@ public class UI_FixtureMeshManager : MonoBehaviour
             RemoveLastFixtureInstance();
         }
 
-        SyncFixtureAddresses();
         if (savePreference)
         {
             SaveFixtureCountPreference(clampedCount);
@@ -85,39 +84,9 @@ public class UI_FixtureMeshManager : MonoBehaviour
         RebuildFixtures(savedCount, savePreference: false);
     }
 
-    public void SyncFixtureAddresses()
-    {
-        if (primaryReceiver == null)
-        {
-            return;
-        }
 
-        int baseStartChannel = primaryReceiver.StartChannel;
-        int baseUniverse0 = primaryReceiver.Universe1Based;
 
-        for (int i = 0; i < _spawnedFixtures.Count; i++)
-        {
-            ArtNetReceiver receiver = _spawnedFixtures[i].GetComponent<ArtNetReceiver>();
-            if (receiver == null)
-            {
-                continue;
-            }
 
-            receiver.SetUniverseFromUserInput(baseUniverse0 + 1);
-            receiver.SetStartChannelFromUserInput(baseStartChannel + (i * 16));
-        }
-    }
-
-    public void SetPrimaryReceiverAddressFromUserInput(int universe1Based, int startChannel1Based)
-    {
-        if (primaryReceiver == null)
-        {
-            return;
-        }
-
-        primaryReceiver.SetUniverseFromUserInput(universe1Based);
-        primaryReceiver.SetStartChannelFromUserInput(startChannel1Based);
-    }
 
     private void EnsureFixtureListContainsTemplate()
     {
@@ -136,6 +105,7 @@ public class UI_FixtureMeshManager : MonoBehaviour
         ArtNetReceiver templateReceiver = fixtureTemplate.GetComponent<ArtNetReceiver>();
         ArtNetReceiver instanceReceiver = instance.GetComponent<ArtNetReceiver>();
 
+
         if (templateReceiver != null && instanceReceiver != null)
         {
             instanceReceiver.ReceiveNetworkData = false;
@@ -143,6 +113,17 @@ public class UI_FixtureMeshManager : MonoBehaviour
         }
 
         _spawnedFixtures.Add(instance);
+
+        for(int i = 0; i < _spawnedFixtures.Count; i++)
+        {
+            StartChannelOverride startChannelOverride = _spawnedFixtures[i].GetComponent<StartChannelOverride>();
+            if(startChannelOverride == null)
+            {
+                startChannelOverride = _spawnedFixtures[i].AddComponent<StartChannelOverride>();
+            }
+            startChannelOverride.SetFixtureIndex(i);
+            startChannelOverride.SetFixtureDmxChannelAmount(16);
+        }
     }
 
     private void RemoveLastFixtureInstance()

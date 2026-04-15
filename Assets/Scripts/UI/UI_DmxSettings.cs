@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System.Net;
 using System.Net.Sockets;
 using System.Timers;
+using System;
 
 public class UI_DmxSettings : MonoBehaviour
 {
@@ -36,6 +37,7 @@ public class UI_DmxSettings : MonoBehaviour
     private bool isLoadingPreferences;
     private bool isApplicationQuitting;
     private INetworkReceiver _subscribedReceiver;
+    private DmxSettingsSnapshot _dmxSettings;
 
     public IShaderGlobalIntSetter ShaderGlobalIntSetter { get; set; } = new UnityShaderGlobalIntSetter();
 
@@ -44,38 +46,12 @@ public class UI_DmxSettings : MonoBehaviour
         get => currentDmxChannel;
     }
 
-    public void SetCurrentDmxChannel(int value)
-    {
-        int clampedRequested = Mathf.Clamp(value, 1, 512);
-        SaveLoadSettings.SaveInt(SaveLoadSettings.DmxChannelKey, clampedRequested);
-        UpdateChannelDisplay();
-    }
-
-    public void SetCurrentDmxChannelFromUserInput(int value)
-    {
-        SetCurrentDmxChannel(value);
-        SavePreferences();
-    }
-
     public int CurrentDmxUniverse
     {
         get => currentDmxUniverse;
     }
 
 
-
-    public void SetUniverse(int value)
-    {
-        int clamped = Mathf.Clamp(value, 1, GetMaxSelectableUniverse());
-        SaveLoadSettings.SaveInt(SaveLoadSettings.DmxUniverseKey, clamped);
-        SaveLoadSettings.SaveAndInvokeEvent();
-    }
-
-    public void SetUniverseFromUserInput(int universeToSet)
-    {
-        SetUniverse(universeToSet);
-        //SavePreferences();
-    }
 
     // Pattern type selector (0=Static, 1=Pulse, 2=ColorShift)
     public int CurrentPatternType
@@ -98,8 +74,7 @@ public class UI_DmxSettings : MonoBehaviour
 
         Instance = this;
         SyncReceiverSubscription();
-        LoadPreferencesAndApply();
-        SaveLoadSettings.OnSettingsSaved += UpdateDisplay;
+        //SaveLoadSettings.OnSettingsSaved += UpdateDisplay;
         RefreshPasswordControls();
     }
 
@@ -127,27 +102,22 @@ public class UI_DmxSettings : MonoBehaviour
         }
     }
 
-    private void Update()
+
+    private void OnEnable()
     {
         SyncReceiverSubscription();
+        DmxSettingsBus.OnChanged += HanldeSettingsChange;
     }
 
-    private void OnDisable()
+    void OnDisable()
     {
-        if (!hasLoadedPreferences || isApplicationQuitting)
-        {
-            return;
-        }
-
-        SavePreferences();
+        DmxSettingsBus.OnChanged -= HanldeSettingsChange;
     }
 
-    private void OnApplicationPause(bool pauseStatus)
+    private void HanldeSettingsChange(DmxSettingsSnapshot snapshot)
     {
-        if (pauseStatus)
-        {
-            SavePreferences();
-        }
+        SyncReceiverSubscription();
+        UpdateDisplay();
     }
 
     private void OnApplicationQuit()
@@ -157,28 +127,43 @@ public class UI_DmxSettings : MonoBehaviour
 
     public void IncreaseChannel()
     {
-        SetCurrentDmxChannelFromUserInput(Mathf.Min(512, CurrentDmxChannel + 1));
-
-        SavePreferences();
+        SetDmxStartChannel(Mathf.Min(512, CurrentDmxChannel + 1));
     }
 
     public void DecreaseChannel()
     {
-        SetCurrentDmxChannelFromUserInput(Mathf.Max(1, CurrentDmxChannel - 1));
-        SavePreferences();
+        SetDmxStartChannel(Mathf.Max(1, CurrentDmxChannel - 1));
+    }
+
+    public void SetDmxStartChannel(int newChannel)
+    {
+        if (DmxSettingsService.Instance == null)
+        {
+            return;
+        }
+
+        DmxSettingsService.Instance.Save(new DmxSettingsSnapshot(DmxSettingsService.Instance.CurrentDmxSettings, newChannel));
     }
 
     public void IncreaseUniverse()
     {
-        SetUniverseFromUserInput(Mathf.Min(63999, CurrentDmxUniverse + 1));
-
-        SavePreferences();
+        SetUniverse(CurrentDmxUniverse + 1);
     }
 
     public void DecreaseUniverse()
     {
-        SetUniverseFromUserInput(Mathf.Max(1, CurrentDmxUniverse - 1));
-        SavePreferences();
+        SetUniverse(CurrentDmxUniverse - 1);
+    }
+
+
+    public void SetUniverse(int universe1Based)
+    {
+        if (DmxSettingsService.Instance == null)
+        {
+            return;
+        }
+
+        DmxSettingsService.Instance.Save(new DmxSettingsSnapshot(universe1Based, DmxSettingsService.Instance.CurrentDmxSettings));
     }
 
     public enum PatternType
@@ -188,47 +173,9 @@ public class UI_DmxSettings : MonoBehaviour
         ColorShift
     }
 
-    public void SavePreferences()
-    {
-        if (isLoadingPreferences)
-        {
-            return;
-        }
-        SaveLoadSettings.SaveInt(SaveLoadSettings.DmxChannelKey, CurrentDmxChannel);
-        SaveLoadSettings.SaveInt(SaveLoadSettings.DmxUniverseKey, CurrentDmxUniverse);
-        SaveLoadSettings.SaveInt(SaveLoadSettings.DmxPatternKey, CurrentPatternType);
-        SaveLoadSettings.SaveAndInvokeEvent();
-    }
-
-    void LoadSettingsWithoutApply()
-    {
-        LoadPreferences(false);
-    }
-
-    public void LoadPreferencesAndApply()
-    {
-        LoadPreferences(true);
-    }
 
 
 
-
-    public void LoadPreferences(bool apply)
-    {
-        isLoadingPreferences = true;
-
-        // ❌ DON'T call SetUniverse / SetChannel here
-        // they trigger saves again
-
-        int universe = SaveLoadSettings.LoadInt(SaveLoadSettings.DmxUniverseKey, CurrentDmxUniverse);
-        int channel = SaveLoadSettings.LoadInt(SaveLoadSettings.DmxChannelKey, CurrentDmxChannel);
-
-        // just update UI
-        UpdateDisplay();
-
-        isLoadingPreferences = false;
-        hasLoadedPreferences = true;
-    }
 
     private void UpdateDisplay()
     {
@@ -559,6 +506,7 @@ public class UI_DmxSettings : MonoBehaviour
     {
         return definition != null ? definition.Id : null;
     }
+
 }
 
 public interface IShaderGlobalIntSetter

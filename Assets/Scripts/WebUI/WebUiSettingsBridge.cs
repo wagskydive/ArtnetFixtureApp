@@ -65,8 +65,6 @@ public class WebUiSettingsBridge : MonoBehaviour
         if (fixtureMeshManager != null)
         {
             fixtureMeshManager.RebuildFixtures(fixtureCount, savePreference: false);
-            fixtureMeshManager.SetPrimaryReceiverAddressFromUserInput(data.dmxUniverse, data.startChannel);
-            fixtureMeshManager.SyncFixtureAddresses();
         }
 
         INetworkReceiver receiver = NetworkingModeManager.Instance?.NetworkReceiver;
@@ -76,23 +74,33 @@ public class WebUiSettingsBridge : MonoBehaviour
             receiver = NetworkingModeManager.Instance.NetworkReceiver;
         }
 
-        if (receiver != null)
+        if (DmxSettingsService.Instance != null)
         {
-            receiver.SetUniverseFromUserInput(data.dmxUniverse);
-            receiver.SetStartChannelFromUserInput(data.startChannel);
-        }
+            SAcnParameters sAcnParameters;
+            
 
-        if (advancedUnlocked && receiver is SAcnReceiver sacnReceiver)
-        {
-            sacnReceiver.SetTransportMode(data.useMulticast);
-            sacnReceiver.SetMulticastAddressFromUserInput(data.multicastAddress);
-            sacnReceiver.SetUnicastBindAddressFromUserInput(data.unicastBindAddress);
-            sacnReceiver.SetListenPortFromUserInput(data.listenPort);
-            sacnReceiver.TimeoutSeconds = Mathf.Max(0.1f, data.timeoutSeconds);
-            sacnReceiver.UseLtpMerge = data.useLtpMerge;
-            sacnReceiver.MulticastUniverseSubscriptions = ParseUniverseCsv(data.additionalUniverses);
-            sacnReceiver.Parameters.debugPanelVisible = data.showNetworkDebug;
-            //sacnReceiver.SaveNetworkSettings();
+            if (advancedUnlocked && receiver is SAcnReceiver sacnReceiver)
+            {
+                sAcnParameters = new SAcnParameters
+                {
+                    useMulticast = data.useMulticast,
+                    multicastAddress = data.multicastAddress,
+                    unicastBindAddress = data.unicastBindAddress,
+                    listenPort = data.listenPort,
+                    timeoutSeconds = data.timeoutSeconds,
+                    useLtpMerge = data.useLtpMerge,
+                    multicastUniverseSubscriptions = ParseUniverseCsv(data.additionalUniverses),
+                    debugPanelVisible = data.showNetworkDebug
+                };
+                //sacnReceiver.SaveNetworkSettings();
+            }
+            else
+            {
+                sAcnParameters = SAcnParameters.Clone(DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters);
+            }
+
+            DmxSettingsSnapshot dmxSettingsSnapshot = new DmxSettingsSnapshot(data.dmxUniverse,data.startChannel,data.networkMode == 1,sAcnParameters);
+            DmxSettingsService.Instance.Save(dmxSettingsSnapshot);
         }
 
         if (advancedUnlocked && NetworkDebugService.Instance != null)

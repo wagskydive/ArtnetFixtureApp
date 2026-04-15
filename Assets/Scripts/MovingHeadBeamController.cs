@@ -3,14 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Collections;
 
-public class MovingHeadBeamController : MonoBehaviour
+public class MovingHeadBeamController : BaseDmxMaterialConsumer
 {
     private const string CustomGoboCapabilityId = "capability.custom.gobos";
-
-    [SerializeField] private Renderer outputRenderer;
-
-    private Material _outputMaterial;
-    private Material _activeSharedMaterial;
     private Texture _fallbackGoboTexture;
     private Texture _activeGoboTexture;
     private readonly Texture2D[] _customGoboSlotTextures = new Texture2D[CustomGoboStorage.MaxSlots];
@@ -19,117 +14,17 @@ public class MovingHeadBeamController : MonoBehaviour
     private float _nextGoboReloadTime;
     private bool _hasLoadedCustomGobos;
 
-    private bool hasMaterialsResolvedSinceInMode = false;
-    private bool isInMode;
+    protected override Renderer GetRenderer() => GetComponent<Renderer>();
 
-    bool HasUpdatedOnce = false;
-    bool HasUpdatedTwice = false;
-
-    IEnumerator Start()
+    protected override bool IsActiveMode()
     {
-        // Wait for 2 seconds
-        yield return null;
-        ReInitialize();
-    }
-
-    void OnEnable()
-    {
-        SubscribeToSystemReadyEvents();
-        ReInitialize();
-    }
-
-    private void ReInitialize()
-    {
-        if (DmxModeManager.Instance == null || NetworkingModeManager.Instance == null)
-        {
-            isInMode = false;
-            hasMaterialsResolvedSinceInMode = false;
-            return;
-        }
-
-        isInMode = DmxModeManager.Instance.CurrentMode == DmxModeManager.FixtureMode.MovingHead;
-        hasMaterialsResolvedSinceInMode = false;
-        if (isInMode)
-        {
-            ResolveOutputMaterial();
-        }
-    }
-
-
-    void HandleModeChange(DmxModeManager.FixtureMode mode)
-    {
-        isInMode = mode == DmxModeManager.FixtureMode.MovingHead;
-        hasMaterialsResolvedSinceInMode = false;
-        if (isInMode)
-        {
-            ResolveOutputMaterial();
-        }
-        else
-        {
-            _activeSharedMaterial = null;
-        }
-    }
-
-
-    private void Update()
-    {
-        INetworkReceiver receiver = NetworkingModeManager.Instance?.NetworkReceiver;
-        if (receiver == null || receiver.DmxBuffer == null || !isInMode)
-        {
-            return;
-        }
-        if (!hasMaterialsResolvedSinceInMode && isInMode)
-        {
-            ResolveOutputMaterial();
-            if (!hasMaterialsResolvedSinceInMode)
-            {
-                return;
-            }
-        }
-
-        var snapshot = MovingHeadDmxPersonality.Parse(receiver, Time.time);
-
-        _outputMaterial.SetColor("_Color", snapshot.Color);
-        _outputMaterial.SetFloat("_Intensity", snapshot.MasterDimmer);
-
-        _outputMaterial.SetInt("_PatternType", snapshot.PatternType);
-        _outputMaterial.SetFloat("_Speed", snapshot.PatternSpeed);
-        _outputMaterial.SetFloat("_Size", snapshot.PatternSize);
-        _outputMaterial.SetFloat("_StrobeGate", snapshot.StrobeGate);
-
-        _outputMaterial.SetFloat("_BeamOffsetX", Mathf.Lerp(-1f, 1f, snapshot.PanNormalized));
-        _outputMaterial.SetFloat("_BeamOffsetY", Mathf.Lerp(-1f, 1f, snapshot.TiltNormalized));
-        _outputMaterial.SetFloat("_BeamSoftness", snapshot.BeamSoftness);
-        _outputMaterial.SetFloat("_BeamRadius", snapshot.IrisScale);
-        _outputMaterial.SetFloat("_BeamRotation", snapshot.RotateRadians);
-        ApplyCustomGoboTexture(snapshot.PatternType, snapshot.PatternSpeed);
-
-
-    }
-    private bool ResolveOutputMaterial()
-    {
-        if (outputRenderer == null || outputRenderer.sharedMaterial == null)
-        {
-            return false;
-        }
-
-        if (_outputMaterial == null || _activeSharedMaterial != outputRenderer.sharedMaterial)
-        {
-            _activeSharedMaterial = outputRenderer.sharedMaterial;
-            _outputMaterial = outputRenderer.material;
-            _fallbackGoboTexture = _outputMaterial != null && DmxModeManager.Instance.CurrentMode == DmxModeManager.FixtureMode.MovingHead ? _outputMaterial.GetTexture("_GoboTex") : null;
-            _activeGoboTexture = null;
-            _hasLoadedCustomGobos = false;
-        }
-
-        hasMaterialsResolvedSinceInMode = _outputMaterial != null;
-
-        return hasMaterialsResolvedSinceInMode;
+        return DmxModeManager.Instance != null &&
+               DmxModeManager.Instance.CurrentMode == DmxModeManager.FixtureMode.MovingHead;
     }
 
     private void ApplyCustomGoboTexture(int patternType, float speed)
     {
-        if (_outputMaterial == null || patternType != 1 || !IsCustomGoboUnlocked())
+        if (!ResolveMaterial() || patternType != 1 || !IsCustomGoboUnlocked())
         {
             SetFallbackGoboTexture();
             return;
@@ -164,7 +59,7 @@ public class MovingHeadBeamController : MonoBehaviour
 
     private void SetFallbackGoboTexture()
     {
-        if (_outputMaterial != null && _fallbackGoboTexture != null)
+        if (_material != null && _fallbackGoboTexture != null)
         {
             SetGoboTexture(_fallbackGoboTexture);
         }
@@ -253,48 +148,37 @@ public class MovingHeadBeamController : MonoBehaviour
 
     private void SetGoboTexture(Texture texture)
     {
-        if (_outputMaterial == null || texture == null || ReferenceEquals(_activeGoboTexture, texture))
+        if (_material == null || texture == null || ReferenceEquals(_activeGoboTexture, texture))
         {
             return;
         }
 
         _activeGoboTexture = texture;
-        _outputMaterial.SetTexture("_GoboTex", texture);
+        _material.SetTexture("_GoboTex", texture);
     }
 
-    private void OnDestroy()
-    {
-        ReleaseCustomGobos();
-        UnsubscribeFromSystemReadyEvents();
-    }
 
-    void OnDisable()
-    {
-        UnsubscribeFromSystemReadyEvents();
-    }
 
-    private void SubscribeToSystemReadyEvents()
+    protected override void OnDmxFrame(DmxFrame frame)
     {
-        DmxModeManager.OnModeChanged -= HandleModeChange;
-        DmxModeManager.OnModeChanged += HandleModeChange;
-        DmxModeManager.OnManagerReady -= HandleSystemReady;
-        DmxModeManager.OnManagerReady += HandleSystemReady;
-        DmxModeManager.Awoken -= HandleSystemReady;
-        DmxModeManager.Awoken += HandleSystemReady;
-        NetworkingModeManager.OnManagerReady -= HandleSystemReady;
-        NetworkingModeManager.OnManagerReady += HandleSystemReady;
-    }
+        if (!ResolveMaterial() || _fixture == null)
+            return;
 
-    private void UnsubscribeFromSystemReadyEvents()
-    {
-        DmxModeManager.OnModeChanged -= HandleModeChange;
-        DmxModeManager.OnManagerReady -= HandleSystemReady;
-        DmxModeManager.Awoken -= HandleSystemReady;
-        NetworkingModeManager.OnManagerReady -= HandleSystemReady;
-    }
+        var snapshot = MovingHeadDmxPersonality.Parse(_fixture, frame, Time.time);
 
-    private void HandleSystemReady()
-    {
-        ReInitialize();
+        _material.SetColor("_Color", snapshot.Color);
+        _material.SetFloat("_Intensity", snapshot.MasterDimmer);
+
+        _material.SetInt("_PatternType", snapshot.PatternType);
+        _material.SetFloat("_Speed", snapshot.PatternSpeed);
+        _material.SetFloat("_Size", snapshot.PatternSize);
+        _material.SetFloat("_StrobeGate", snapshot.StrobeGate);
+
+        _material.SetFloat("_BeamOffsetX", Mathf.Lerp(-1f, 1f, snapshot.PanNormalized));
+        _material.SetFloat("_BeamOffsetY", Mathf.Lerp(-1f, 1f, snapshot.TiltNormalized));
+        _material.SetFloat("_BeamSoftness", snapshot.BeamSoftness);
+        _material.SetFloat("_BeamRadius", snapshot.IrisScale);
+        _material.SetFloat("_BeamRotation", snapshot.RotateRadians);
+        ApplyCustomGoboTexture(snapshot.PatternType, snapshot.PatternSpeed);
     }
 }

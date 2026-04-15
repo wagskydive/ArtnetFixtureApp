@@ -1,11 +1,10 @@
 using UnityEngine;
 
 [RequireComponent(typeof(MeshFilter))]
-public class CornerPinDmxWarp : MonoBehaviour
+public class CornerPinDmxWarp : BaseRawDmxConsumer
 {
     [SerializeField][Range(0.01f, 10f)] private float maxOffset = 0.5f;
     [SerializeField][Range(1, 64)] private int subdivisionAmount = 8;
-    [SerializeField] private DmxModeManager dmxModeManager;
 
     private Mesh _runtimeMesh;
     private Vector3[] _expandedCorners = new Vector3[4];
@@ -18,10 +17,10 @@ public class CornerPinDmxWarp : MonoBehaviour
 
     private int _gridResolution;
 
-    bool isInMode;
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         MeshFilter meshFilter = GetComponent<MeshFilter>();
         if (meshFilter == null)
         {
@@ -43,30 +42,19 @@ public class CornerPinDmxWarp : MonoBehaviour
         ApplyWarpedGrid(updateMesh: false);
     }
 
-    private void Start()
-    {
-        DmxModeManager.OnModeChanged += HandleModeChange;
-        isInMode = DmxModeManager.Instance.CurrentMode == DmxModeManager.FixtureMode.PixelMapping || DmxModeManager.Instance.CurrentMode == DmxModeManager.FixtureMode.Standard;
-    }
-
-    void HandleModeChange(DmxModeManager.FixtureMode mode)
-    {
-        isInMode = DmxModeManager.Instance.CurrentMode == DmxModeManager.FixtureMode.PixelMapping || DmxModeManager.Instance.CurrentMode == DmxModeManager.FixtureMode.Standard;
-
-    }
 
     bool fullScreen;
 
-
-
-    private void Update()
+    protected override bool IsActiveMode()
     {
-        INetworkReceiver receiver = NetworkingModeManager.Instance?.NetworkReceiver;
-        if (receiver == null || receiver.DmxBuffer == null || _runtimeMesh == null)
-        {
-            return;
-        }
-        if (!isInMode)
+        return DmxModeManager.Instance != null &&
+               (DmxModeManager.Instance.CurrentMode == DmxModeManager.FixtureMode.Standard || DmxModeManager.Instance.CurrentMode == DmxModeManager.FixtureMode.PixelMapping);
+    }
+
+    protected override void OnDmxFrame(DmxFrame frame)
+    {
+
+        if (!IsActiveMode())
         {
             if (!fullScreen)
             {
@@ -77,10 +65,10 @@ public class CornerPinDmxWarp : MonoBehaviour
                 _warpedCorners[3] = new Vector3(_maxX, _minY, 0);
 
 
-                
+
                 ApplyWarpedGrid();
                 fullScreen = true;
-                
+
             }
             return;
         }
@@ -92,17 +80,16 @@ public class CornerPinDmxWarp : MonoBehaviour
             }
         }
 
-        byte[] dmx = receiver.DmxBuffer.GetRawBuffer();
 
         int cornerStartChannel = ResolveCornerPinStartChannel();
 
         for (int corner = 0; corner < 4; corner++)
         {
-            int xChannel = Mathf.Clamp(receiver.StartChannel + cornerStartChannel - 1 + (corner * 2), 1, 512);
+            int xChannel = Mathf.Clamp(DmxSettingsService.Instance.CurrentDmxSettings.StartChannel + cornerStartChannel - 1 + (corner * 2), 1, 512);
             int yChannel = Mathf.Clamp(xChannel + 1, 1, 512);
 
-            float xLerp = dmx[xChannel - 1] / 255f;
-            float yLerp = dmx[yChannel - 1] / 255f;
+            float xLerp = frame.Buffer[xChannel - 1] / 255f;
+            float yLerp = frame.Buffer[yChannel - 1] / 255f;
 
             _warpedCorners[corner] = new Vector3(
                 Mathf.Lerp(_minX, _maxX, xLerp),
@@ -116,7 +103,7 @@ public class CornerPinDmxWarp : MonoBehaviour
 
     private int ResolveCornerPinStartChannel()
     {
-        if (dmxModeManager != null && dmxModeManager.CurrentMode == DmxModeManager.FixtureMode.PixelMapping)
+        if (DmxModeManager.Instance.CurrentMode == DmxModeManager.FixtureMode.PixelMapping)
         {
             return PixelMappingDmxPersonality.CornerPinStartChannel;
         }

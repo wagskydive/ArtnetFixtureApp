@@ -7,31 +7,30 @@ using UnityEngine;
 
 
 
-public class ArtNetReceiver : MonoBehaviour, INetworkReceiver
+public class ArtNetReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsumer
 {
 
     public event Action NoDataReceivedRecently;
 
     public event Action DataReceivedAgain;
 
-    public int Universe1Base { get => SaveLoadSettings.LoadInt(SaveLoadSettings.DmxUniverseKey, 1); set => SaveLoadSettings.SaveInt(SaveLoadSettings.DmxUniverseKey, value); }
+    //public int Universe1Base { get => SaveLoadSettings.LoadInt(SaveLoadSettings.DmxUniverseKey, 1); set => SaveLoadSettings.SaveInt(SaveLoadSettings.DmxUniverseKey, value); }
 
-    public int Universe0Base { get => Universe1Base - 1; }
+    //public int Universe0Base { get => Universe1Base - 1; }
 
-    [Range(1, 512)]
-    public int StartChannel = 1;
+
     public DmxBuffer DmxBuffer;
     public bool ReceiveNetworkData = true;
 
     public string ProtocolName => "Art-Net";
 
 
-    int INetworkReceiver.Universe1Based { get => Universe1Base; set => Universe1Base = ClampUniverse(value); }
-    int INetworkReceiver.StartChannel { get => StartChannel; set => StartChannel = ClampStartChannel(value); }
+    //int INetworkReceiver.Universe1Based { get => Universe1Base; set => Universe1Base = ClampUniverse(value); }
+
     DmxBuffer INetworkReceiver.DmxBuffer { get => DmxBuffer; set => DmxBuffer = value; }
     bool INetworkReceiver.ReceiveNetworkData { get => ReceiveNetworkData; set => ReceiveNetworkData = value; }
     bool INetworkReceiver.HasReceivedDataRecently => HasReceivedDataRecently;
-    float INetworkReceiver.TimeoutSeconds { get => TimeoutSeconds; set => TimeoutSeconds = Mathf.Max(0.1f, value); }
+    float INetworkReceiver.TimeoutSeconds { get => TimeoutSeconds; }
 
     private UdpClient _udpClient;
     private Thread _receiveThread;
@@ -48,11 +47,24 @@ public class ArtNetReceiver : MonoBehaviour, INetworkReceiver
     public float TimeoutSeconds = 2f; // Show message if no data for 2 seconds
 
     bool HasNotReceivedDataEventSent = false;
+    private DmxSettingsSnapshot _settings;
+
+    public static ArtNetReceiver Instance { get; private set; }
+
+    void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this);
+            return;
+        }
+
+        Instance = this;
+    }
 
     void Start()
     {
-        SetUniverse(SaveLoadSettings.LoadInt(SaveLoadSettings.DmxUniverseKey, Universe0Base + 1));
-        SetStartChannel(SaveLoadSettings.LoadInt(SaveLoadSettings.DmxChannelKey, StartChannel));
+
         if (DmxBuffer == null)
         {
             DmxBuffer = new DmxBuffer();
@@ -64,49 +76,16 @@ public class ArtNetReceiver : MonoBehaviour, INetworkReceiver
         }
     }
 
-    public void SetUniverseFromUserInput(int universe1Based)
+    void OnEnable()
     {
-        SetUniverse(universe1Based);
+        DmxSettingsBus.OnChanged += ApplyDmxSettings;
     }
 
-    public void SetUniverse(int universe1Based)
+    void OnDisable()
     {
-        Universe1Base = ClampUniverse(universe1Based);
+        DmxSettingsBus.OnChanged -= ApplyDmxSettings;
     }
 
-
-
-    public int GetUniverseForUserInput()
-    {
-        return Universe1Base;
-    }
-
-    public void SetStartChannelFromUserInput(int startChannel1Based)
-    {
-        SetStartChannel(startChannel1Based);
-        SaveLoadSettings.SaveInt(SaveLoadSettings.DmxChannelKey, startChannel1Based);
-    }
-
-    public void SetStartChannel(int startChannel1Based)
-    {
-        StartChannel = ClampStartChannel(startChannel1Based);
-    }
-
-    public int GetFixtureChannelValue(int relativeChannel)
-    {
-        if (DmxBuffer == null)
-        {
-            return 0;
-        }
-
-        int absoluteChannel = StartChannel + relativeChannel - 1;
-        if (absoluteChannel < 1 || absoluteChannel > 512)
-        {
-            return 0;
-        }
-
-        return DmxBuffer.GetChannel1Based(absoluteChannel);
-    }
 
     void OnDestroy()
     {
@@ -207,7 +186,7 @@ public class ArtNetReceiver : MonoBehaviour, INetworkReceiver
                 if (IsArtDmxPacket(data))
                 {
                     int universe = data[14] | (data[15] << 8);
-                    if (universe != Universe0Base) continue;
+                    if (universe != _settings.Universe0Based) continue;
 
                     int length = (data[16] << 8) | data[17];
                     if (length > 512) length = 512;
@@ -283,7 +262,7 @@ public class ArtNetReceiver : MonoBehaviour, INetworkReceiver
 
         // Net/Subnet/Universe info
         reply[18] = 0; // Net
-        reply[19] = (byte)Universe0Base;
+        reply[19] = (byte)_settings.Universe0Based;
 
         // Short name (18 bytes)
         WriteString(reply, 26, SaveLoadSettings.LoadString(SaveLoadSettings.DeviceNetworkKey, "DMX Projector"));
@@ -322,5 +301,10 @@ public class ArtNetReceiver : MonoBehaviour, INetworkReceiver
         }
 
         return Mathf.Clamp(startChannel1Based, 1, 512);
+    }
+
+    public void ApplyDmxSettings(DmxSettingsSnapshot settings)
+    {
+        _settings = settings;
     }
 }

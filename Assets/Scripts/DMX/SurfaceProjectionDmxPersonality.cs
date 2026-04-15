@@ -13,17 +13,17 @@ public static class SurfaceProjectionDmxPersonality
     public const int CornerPinStartChannel = 9;
     public const int CornerPinChannelCount = 8;
 
-    public static Color ParseColor(INetworkReceiver receiver)
+    public static Color ParseColor(DmxFixture dmxFixture, DmxFrame frame)
     {
         return new Color(
-            receiver.GetFixtureChannelValue(RedChannel) / 255f,
-            receiver.GetFixtureChannelValue(GreenChannel) / 255f,
-            receiver.GetFixtureChannelValue(BlueChannel) / 255f,
+            dmxFixture.GetChannelValue(frame,RedChannel) / 255f,
+            dmxFixture.GetChannelValue(frame,GreenChannel) / 255f,
+            dmxFixture.GetChannelValue(frame,BlueChannel) / 255f,
             1f);
     }
 
-    public static float ParseMasterDimmer(INetworkReceiver receiver)
+    public static float ParseMasterDimmer(DmxFixture dmxFixture, DmxFrame frame)
     {
-        return receiver.GetFixtureChannelValue(MasterDimmerChannel) / 255f;
+        return dmxFixture.GetChannelValue(frame,MasterDimmerChannel) / 255f;
     }
 }

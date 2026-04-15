@@ -94,20 +94,20 @@ public static class WebUiSettingsStore
 
         SaveLoadSettings.SaveString(SaveLoadSettings.DeviceNetworkKey, data.deviceName);
         SaveLoadSettings.SaveInt(SaveLoadSettings.FixtureModeKey, ToFixtureModeIndex(data.fixtureMode));
-        SaveLoadSettings.SaveInt(SaveLoadSettings.DmxUniverseKey, data.dmxUniverse);
-        SaveLoadSettings.SaveInt(SaveLoadSettings.DmxChannelKey, data.startChannel);
+        //SaveLoadSettings.SaveInt(SaveLoadSettings.DmxUniverseKey, data.dmxUniverse);
+        //SaveLoadSettings.SaveInt(SaveLoadSettings.DmxChannelKey, data.startChannel);
         SaveLoadSettings.SaveInt(SaveLoadSettings.FixtureCountKey, data.fixtureAmount);
         SaveLoadSettings.SaveInt(SaveLoadSettings.PixelColumnsKey, data.gridX);
         SaveLoadSettings.SaveInt(SaveLoadSettings.PixelRowsKey, data.gridY);
-        SaveLoadSettings.SaveInt(SaveLoadSettings.NetworkModeKey, data.networkMode);
-        SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnUseMulticastKey, data.useMulticast ? 1 : 0);
-        SaveLoadSettings.SaveString(SaveLoadSettings.SAcnMulticastAddressKey, data.multicastAddress);
-        SaveLoadSettings.SaveString(SaveLoadSettings.SAcnUnicastBindAddressKey, data.unicastBindAddress);
-        SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnListenPortKey, data.listenPort);
-        SaveLoadSettings.SaveFloat(SaveLoadSettings.SAcnTimeoutSecondsKey, data.timeoutSeconds);
-        SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnUseLtpMergeKey, data.useLtpMerge ? 1 : 0);
-        SaveLoadSettings.SaveString(SaveLoadSettings.SAcnMulticastUniversesKey, data.additionalUniverses);
-        SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnDebugVisibleKey, data.showNetworkDebug ? 1 : 0);
+        //SaveLoadSettings.SaveInt(SaveLoadSettings.NetworkModeKey, data.networkMode);
+        //SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnUseMulticastKey, data.useMulticast ? 1 : 0);
+        //SaveLoadSettings.SaveString(SaveLoadSettings.SAcnMulticastAddressKey, data.multicastAddress);
+        //SaveLoadSettings.SaveString(SaveLoadSettings.SAcnUnicastBindAddressKey, data.unicastBindAddress);
+        //SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnListenPortKey, data.listenPort);
+        //SaveLoadSettings.SaveFloat(SaveLoadSettings.SAcnTimeoutSecondsKey, data.timeoutSeconds);
+        //SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnUseLtpMergeKey, data.useLtpMerge ? 1 : 0);
+        //SaveLoadSettings.SaveString(SaveLoadSettings.SAcnMulticastUniversesKey, data.additionalUniverses);
+        //SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnDebugVisibleKey, data.showNetworkDebug ? 1 : 0);
         SaveLoadSettings.SaveAndInvokeEvent();
     }
 

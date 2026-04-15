@@ -20,33 +20,33 @@ public static class MovingHeadDmxPersonality
         public float StrobeGate;
     }
 
-    public static Snapshot Parse(INetworkReceiver receiver, float timeSeconds)
+    public static Snapshot Parse(DmxFixture dmxFixture, DmxFrame frame,float timeSeconds)
     {
-        float masterDimmer = receiver.GetFixtureChannelValue(1) / 255f;
-        float red = receiver.GetFixtureChannelValue(2) / 255f;
-        float green = receiver.GetFixtureChannelValue(3) / 255f;
-        float blue = receiver.GetFixtureChannelValue(4) / 255f;
+        float masterDimmer = dmxFixture.GetChannelValue(frame,1) / 255f;
+        float red = dmxFixture.GetChannelValue(frame,2) / 255f;
+        float green = dmxFixture.GetChannelValue(frame,3) / 255f;
+        float blue = dmxFixture.GetChannelValue(frame,4) / 255f;
 
         float panNormalized = Parse16BitNormalized(
-            receiver.GetFixtureChannelValue(5),
-            receiver.GetFixtureChannelValue(6));
+            dmxFixture.GetChannelValue(frame,5),
+            dmxFixture.GetChannelValue(frame,6));
 
         float tiltNormalized = Parse16BitNormalized(
-            receiver.GetFixtureChannelValue(7),
-            receiver.GetFixtureChannelValue(8));
+            dmxFixture.GetChannelValue(frame,7),
+            dmxFixture.GetChannelValue(frame,8));
 
-        float patternSelect = receiver.GetFixtureChannelValue(9);
+        float patternSelect = dmxFixture.GetChannelValue(frame,9);
         int patternType = Mathf.Clamp(Mathf.FloorToInt((patternSelect / 256f) * PatternCount), 0, PatternCount - 1);
 
-        float speed = Mathf.Lerp(0f, 8f, receiver.GetFixtureChannelValue(10) / 255f);
-        float parameter = receiver.GetFixtureChannelValue(11) / 255f;
+        float speed = Mathf.Lerp(0f, 8f, dmxFixture.GetChannelValue(frame,10) / 255f);
+        float parameter = dmxFixture.GetChannelValue(frame,11) / 255f;
         float size = Mathf.Lerp(0.5f, 12f, parameter);
         float beamSoftness = Mathf.Lerp(0.001f, 0.5f, parameter);
 
-        float irisScale = Mathf.Lerp(0.05f, 1f, receiver.GetFixtureChannelValue(12) / 255f);
-        float rotateRadians = (receiver.GetFixtureChannelValue(13) / 255f) * Mathf.PI * 2f;
+        float irisScale = Mathf.Lerp(0.05f, 1f, dmxFixture.GetChannelValue(frame,12) / 255f);
+        float rotateRadians = (dmxFixture.GetChannelValue(frame,13) / 255f) * Mathf.PI * 2f;
 
-        float strobeValue = receiver.GetFixtureChannelValue(14) / 255f;
+        float strobeValue = dmxFixture.GetChannelValue(frame,14) / 255f;
         float strobeFrequency = Mathf.Lerp(1f, 50f, strobeValue);
         float strobeGate = (strobeValue < 0.05f || Mathf.Sin(timeSeconds * strobeFrequency) > 0f) ? 1f : 0f;
 

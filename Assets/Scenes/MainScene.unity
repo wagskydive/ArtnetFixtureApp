@@ -4835,12 +4835,13 @@ GameObject:
   - component: {fileID: 454082886}
   - component: {fileID: 454082881}
   - component: {fileID: 454082885}
-  - component: {fileID: 454082879}
   - component: {fileID: 454082878}
   - component: {fileID: 454082884}
   - component: {fileID: 454082889}
   - component: {fileID: 454082888}
   - component: {fileID: 454082887}
+  - component: {fileID: 454082891}
+  - component: {fileID: 454082890}
   m_Layer: 0
   m_Name: FixtureEffect
   m_TagString: Untagged
@@ -4860,19 +4861,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 79c8b0024b24b8b479d7210af16ab69e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ArtnetFixture.Core::PatternGenerator
-  outputRenderer: {fileID: 454082881}
---- !u!114 &454082879
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 454082876}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b514e25ddeda67d46a17ec9b8834bd21, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArtnetFixture.Core::MasterDimmerController
 --- !u!23 &454082881
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -4949,7 +4937,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 523c9d155ac044dbba83bd286e5a2452, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ArtnetFixture.Core::RgbDmxController
-  outputRenderer: {fileID: 454082881}
 --- !u!114 &454082885
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4964,7 +4951,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: ArtnetFixture.Core::CornerPinDmxWarp
   maxOffset: 10
   subdivisionAmount: 16
-  dmxModeManager: {fileID: 1959274207}
 --- !u!33 &454082886
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -5003,7 +4989,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f4b45a40a2948669f489f4738a03bb7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ArtnetFixture.Core::PixelMappingOutputController
-  outputRenderer: {fileID: 454082881}
   fixtureModeSelector: {fileID: 1756910869}
   fallbackRows: 8
   fallbackColumns: 8
@@ -5019,7 +5004,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7157fe5734544cc7935eda97944ebd35, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ArtnetFixture.Core::MovingHeadBeamController
-  outputRenderer: {fileID: 454082881}
+--- !u!114 &454082890
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 454082876}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3abdb8711cf2a0e45b4b620252885f1f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArtnetFixture.Core::StartChannelOverride
+--- !u!114 &454082891
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 454082876}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7ba4f8ed9bbb1143a78f3b66381ce8d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArtnetFixture.Core::DmxFixture
+  startChannel: 1
 --- !u!1 &466800485
 GameObject:
   m_ObjectHideFlags: 0
@@ -10500,8 +10509,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1067511770}
   - component: {fileID: 1067511771}
+  - component: {fileID: 1067511772}
   m_Layer: 0
-  m_Name: SettingsCache
+  m_Name: DmxSettingsService
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10531,10 +10541,21 @@ MonoBehaviour:
   m_GameObject: {fileID: 1067511769}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2f9120a523caade47b4b9d0db27dc88d, type: 3}
+  m_Script: {fileID: 11500000, guid: 910810cd884fa5d4ea2886cc306099cb, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: ArtnetFixture.Core::SettingsCache
-  isDirty: 0
+  m_EditorClassIdentifier: ArtnetFixture.Core::DmxSettingsService
+--- !u!114 &1067511772
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1067511769}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c4151c9c9b8621498d43fd5f4c1185d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArtnetFixture.Core::DmxBootstrap
 --- !u!1 &1113228398
 GameObject:
   m_ObjectHideFlags: 0
@@ -20048,7 +20069,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1959274205}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c57d8f39f2220c4419fa729c0ee7d86e, type: 3}
   m_Name: 
