@@ -18,27 +18,17 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsume
 
     //public int StartChannel = 1;
 
-    public DmxBuffer DmxBuffer;
+    public DmxBuffer Buffer { get; set; }
     public bool ReceiveNetworkData = false;
 
 
-    [HideInInspector]
-    public bool HasReceivedDataRecently = false;
-
-    private bool _hasNoDataEventSent;
-
     public string ProtocolName => "sACN";
 
-    DmxBuffer INetworkReceiver.DmxBuffer { get => DmxBuffer; set => DmxBuffer = value; }
+    //DmxBuffer INetworkReceiver.Buffer { get => DmxBuffer; set => DmxBuffer = value; }
     bool INetworkReceiver.ReceiveNetworkData { get => ReceiveNetworkData; set => ReceiveNetworkData = value; }
-    bool INetworkReceiver.HasReceivedDataRecently => HasReceivedDataRecently;
-    float INetworkReceiver.TimeoutSeconds { get => _settings.CurrentSAcnParameters.TimeoutSeconds; }
-
     private UdpClient _udpClient;
     private Thread _receiveThread;
     private bool _running;
-    private volatile bool _receivedPacketThisFrame;
-    private float _lastPacketTime;
     private readonly byte[] _packetBuffer = new byte[512];
     private readonly object _stateLock = new object();
     private readonly Dictionary<int, UniverseState> _universeStates = new Dictionary<int, UniverseState>();
@@ -76,15 +66,11 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsume
         //SetUniverse(Universe1Base);
         //SetStartChannel(StartChannel);
 
-        if (DmxBuffer == null)
+        if (Buffer == null)
         {
-            DmxBuffer = new DmxBuffer();
+            Buffer = new DmxBuffer();
         }
 
-        if (ReceiveNetworkData)
-        {
-            StartReceiver();
-        }
     }
 
     private void OnDestroy()
@@ -97,47 +83,19 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsume
 
     private void Update()
     {
-        if (DmxBuffer == null)
+        if (Buffer == null)
         {
             return;
         }
 
-        DmxBuffer.SwapIfNewFrame();
-
-        if (_receivedPacketThisFrame)
+        if (Buffer.TrySwap(out var buffer))
         {
-            _lastPacketTime = Time.time;
-            _receivedPacketThisFrame = false;
-            _hasNoDataEventSent = false;
-        }
-
-        HasReceivedDataRecently = (Time.time - _lastPacketTime) <= _settings.CurrentSAcnParameters.TimeoutSeconds;
-
-        if (!HasReceivedDataRecently)
-        {
-            if (!_hasNoDataEventSent)
-            {
-                RaiseNoDataEvent();
-                _hasNoDataEventSent = true;
-            }
-        }
-        else if (_hasNoDataEventSent)
-        {
-            //DataReceivedAgain?.Invoke();
-            RaiseDataBackEvent();
-            _hasNoDataEventSent = false;
+            var frame = new DmxFrame(buffer);
+            DmxDataService.PushFrame(frame);
         }
     }
 
-    void RaiseNoDataEvent()
-    {
-        NetworkDataEvents.RaiseNoDataEvent();
-    }
 
-    void RaiseDataBackEvent()
-    {
-        NetworkDataEvents.RaiseDataBackEvent();
-    }
 
     private void AcquireMulticastLock()
     {
@@ -168,7 +126,7 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsume
 
     public void RestartReceiver()
     {
-        _running = false;
+        StopReceiver();
         StartReceiver();
     }
 
@@ -198,7 +156,12 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsume
 
             _running = true;
 
-            _receiveThread = new Thread(ReceiveLoop) { IsBackground = true };
+            _receiveThread = new Thread(ReceiveLoop)
+            {
+                IsBackground = true,
+                Name = "sACN Receive Thread"
+            };
+
             _receiveThread.Start();
 
             OnSAcnReceiverStarted?.Invoke();
@@ -212,62 +175,110 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsume
     }
     public void StopReceiver()
     {
-        if (!_running)
-        {
-            return;
-        }
+        if (!_running) return;
+
+        Debug.Log("[sACN] Stopping receiver...");
 
         _running = false;
 
+        // Closing socket will unblock Receive()
         if (_udpClient != null)
         {
-            _udpClient.Close();
+            try
+            {
+                _udpClient.Close();
+            }
+            catch { }
             _udpClient = null;
         }
 
-        if (_receiveThread != null && _receiveThread.IsAlive)
+        if (_receiveThread != null)
         {
-            _receiveThread.Abort();
+            if (_receiveThread.IsAlive)
+            {
+                // Wait for thread to exit gracefully
+                if (!_receiveThread.Join(500))
+                {
+                    Debug.LogWarning("[sACN] Receive thread did not exit in time");
+                }
+            }
+
             _receiveThread = null;
         }
-        ReleaseMulticastLock();
-    }
 
+        ReleaseMulticastLock();
+
+        Debug.Log("[sACN] Receiver stopped");
+    }
     private void ReceiveLoop()
     {
+        if (!_settings.IsSAcnMode)
+        {
+            _running = false;
+            return;
+        }
         IPEndPoint remoteEndpoint = new IPEndPoint(IPAddress.Any, 0);
 
         Debug.Log("[sACN] Receive thread running");
 
-        while (_running)
+        try
         {
-            try
+            while (_running)
             {
-                byte[] data = _udpClient.Receive(ref remoteEndpoint);
-
-                if (!TryParseSacnPacket(data, out SacnPacketMetadata metadata))
+                try
                 {
-                    continue;
-                }
+                    if (!_settings.IsSAcnMode)
+                    {
+                        _running = false;
+                        return;
+                    }
+                    byte[] data = _udpClient.Receive(ref remoteEndpoint);
 
-                if (metadata.IsSynchronizationPacket)
+
+                    if (!_running)
+                        break;
+
+                    if (!TryParseSacnPacket(data, out SacnPacketMetadata metadata))
+                        continue;
+
+                    if (metadata.IsSynchronizationPacket)
+                    {
+                        ApplyPendingSync(metadata.SyncUniverse == 0 ? metadata.Universe : metadata.SyncUniverse);
+                        continue;
+                    }
+
+                    ProcessDataPacket(data, metadata);
+
+                    NetworkDebugService.Instance?.RecordPacket(
+                        ProtocolName,
+                        metadata.Universe,
+                        metadata.DmxLength,
+                        remoteEndpoint.ToString()
+                    );
+
+                }
+                catch (SocketException)
                 {
-                    ApplyPendingSync(metadata.SyncUniverse == 0 ? metadata.Universe : metadata.SyncUniverse);
-                    continue;
+                    // Happens when socket is closed → normal shutdown
+                    if (!_running)
+                        break;
                 }
-
-                ProcessDataPacket(data, metadata);
-                NetworkDebugService.Instance?.RecordPacket(ProtocolName, metadata.Universe, metadata.DmxLength, remoteEndpoint.ToString());
-
-                _receivedPacketThisFrame = true;
-            }
-            catch (Exception e)
-            {
-                Debug.LogError($"[sACN] ReceiveLoop ERROR: {e}");
+                catch (ObjectDisposedException)
+                {
+                    // Socket closed → exit loop
+                    break;
+                }
+                catch (Exception e)
+                {
+                    if (_running) // Only log unexpected errors
+                        Debug.LogError($"[sACN] ReceiveLoop ERROR: {e}");
+                }
             }
         }
-
-        Debug.Log("[sACN] Receive thread stopped");
+        finally
+        {
+            Debug.Log("[sACN] Receive thread stopped");
+        }
     }
 
     private void ProcessDataPacket(byte[] data, SacnPacketMetadata metadata)
@@ -293,7 +304,7 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsume
             }
 
             int copyLength = Mathf.Clamp(metadata.DmxLength, 0, 512);
-            Buffer.BlockCopy(data, metadata.DmxStartIndex, sourceState.CurrentFrame, 0, copyLength);
+            System.Buffer.BlockCopy(data, metadata.DmxStartIndex, sourceState.CurrentFrame, 0, copyLength);
             sourceState.FrameLength = copyLength;
             sourceState.Priority = metadata.Priority;
             sourceState.LastSeenUtcTicks = DateTime.UtcNow.Ticks;
@@ -302,16 +313,17 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsume
 
             if (sourceState.HasPendingSync)
             {
-                Buffer.BlockCopy(sourceState.CurrentFrame, 0, sourceState.PendingFrame, 0, copyLength);
+                System.Buffer.BlockCopy(sourceState.CurrentFrame, 0, sourceState.PendingFrame, 0, copyLength);
                 sourceState.PendingFrameLength = copyLength;
                 return;
             }
 
             byte[] merged = BuildMergedFrameForUniverseLocked(metadata.Universe);
 
-            if (metadata.Universe == _settings.Universe1Based && merged != null && DmxBuffer != null)
+            if (metadata.Universe == _settings.Universe1Based && merged != null && Buffer != null)
             {
-                DmxBuffer.WriteFrame(merged, 512);
+                Buffer.WriteFrame(merged, 512);
+                NetworkDmxPacketsHeartbeat.NotifyPacketReceived();
             }
         }
     }
@@ -359,7 +371,7 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsume
         }
 
         metadata.SourceCid = new byte[16];
-        Buffer.BlockCopy(data, 22, metadata.SourceCid, 0, 16);
+        System.Buffer.BlockCopy(data, 22, metadata.SourceCid, 0, 16);
 
         return data.Length >= metadata.DmxStartIndex + metadata.DmxLength;
     }
@@ -486,18 +498,18 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsume
                         continue;
                     }
 
-                    Buffer.BlockCopy(state.PendingFrame, 0, state.CurrentFrame, 0, state.PendingFrameLength);
+                    System.Buffer.BlockCopy(state.PendingFrame, 0, state.CurrentFrame, 0, state.PendingFrameLength);
                     state.FrameLength = state.PendingFrameLength;
                     state.HasPendingSync = false;
                 }
             }
 
-            if (DmxBuffer != null && _universeStates.ContainsKey(_settings.Universe1Based))
+            if (Buffer != null && _universeStates.ContainsKey(_settings.Universe1Based))
             {
                 byte[] merged = BuildMergedFrameForUniverseLocked(_settings.Universe1Based);
                 if (merged != null)
                 {
-                    DmxBuffer.WriteFrame(merged, 512);
+                    Buffer.WriteFrame(merged, 512);
                 }
             }
         }
@@ -550,7 +562,7 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsume
             {
                 if (sourceState == ltpWinner)
                 {
-                    Buffer.BlockCopy(sourceState.CurrentFrame, 0, universeState.MergedFrame, 0, sourceState.FrameLength);
+                    System.Buffer.BlockCopy(sourceState.CurrentFrame, 0, universeState.MergedFrame, 0, sourceState.FrameLength);
                 }
                 continue;
             }
@@ -576,7 +588,15 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsume
     public void ApplyDmxSettings(DmxSettingsSnapshot settings)
     {
         _settings = settings;
-        RestartReceiver();
+
+        if (_running)
+        {
+            RestartReceiver();
+        }
+        else if (ReceiveNetworkData)
+        {
+            StartReceiver();
+        }
     }
 
     private struct SacnPacketMetadata

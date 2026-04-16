@@ -16,7 +16,7 @@ public class ArtNetReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsu
     //public int Universe0Base { get => Universe1Base - 1; }
 
 
-    public DmxBuffer DmxBuffer;
+    public DmxBuffer Buffer { get; set; }
     public bool ReceiveNetworkData = true;
 
     public string ProtocolName => "Art-Net";
@@ -24,10 +24,8 @@ public class ArtNetReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsu
 
     //int INetworkReceiver.Universe1Based { get => Universe1Base; set => Universe1Base = ClampUniverse(value); }
 
-    DmxBuffer INetworkReceiver.DmxBuffer { get => DmxBuffer; set => DmxBuffer = value; }
+    //DmxBuffer INetworkReceiver.Buffer { get => DmxBuffer; set => DmxBuffer = value; }
     bool INetworkReceiver.ReceiveNetworkData { get => ReceiveNetworkData; set => ReceiveNetworkData = value; }
-    bool INetworkReceiver.HasReceivedDataRecently => HasReceivedDataRecently;
-    float INetworkReceiver.TimeoutSeconds { get => TimeoutSeconds; }
 
     private UdpClient _udpClient;
     private Thread _receiveThread;
@@ -35,15 +33,6 @@ public class ArtNetReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsu
 
     private byte[] _packetBuffer = new byte[1024]; // reused buffer
 
-    [HideInInspector]
-    public bool HasReceivedDataRecently = false;
-
-    private volatile bool _receivedPacketThisFrame = false; // set by receive thread
-
-    private float _lastPacketTime = 0f;
-    public float TimeoutSeconds = 2f; // Show message if no data for 2 seconds
-
-    bool HasNotReceivedDataEventSent = false;
     private DmxSettingsSnapshot _settings;
 
     public static ArtNetReceiver Instance { get; private set; }
@@ -62,14 +51,9 @@ public class ArtNetReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsu
     void Start()
     {
 
-        if (DmxBuffer == null)
+        if (Buffer == null)
         {
-            DmxBuffer = new DmxBuffer();
-        }
-
-        if (ReceiveNetworkData)
-        {
-            StartReceiver();
+            Buffer = new DmxBuffer();
         }
     }
 
@@ -94,51 +78,21 @@ public class ArtNetReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsu
 
     void Update()
     {
-        if (DmxBuffer == null)
+        if (Buffer == null)
         {
 
             return;
         }
 
-        DmxBuffer.SwapIfNewFrame();
-
-        if (_receivedPacketThisFrame)
+        if (Buffer.TrySwap(out var buffer))
         {
-            _lastPacketTime = Time.time;
-            _receivedPacketThisFrame = false;
-            HasNotReceivedDataEventSent = false;
-            return;
+            var frame = new DmxFrame(buffer);
+            DmxDataService.PushFrame(frame);
         }
 
-        // Update whether we should show the "waiting for data" message
-        HasReceivedDataRecently = (Time.time - _lastPacketTime) <= TimeoutSeconds;
-        if (!HasReceivedDataRecently)
-        {
-            if (!HasNotReceivedDataEventSent)
-            {
-                RaiseNoDataEvent();
-                HasNotReceivedDataEventSent = true;
-            }
-        }
-        else
-        {
-            if (HasNotReceivedDataEventSent)
-            {
-                RaiseDataBackEvent();
-                HasNotReceivedDataEventSent = false;
-            }
-        }
+
     }
 
-    void RaiseNoDataEvent()
-    {
-        NetworkDataEvents.RaiseNoDataEvent();
-    }
-
-    void RaiseDataBackEvent()
-    {
-        NetworkDataEvents.RaiseDataBackEvent();
-    }
 
     public void StartReceiver()
     {
@@ -179,13 +133,24 @@ public class ArtNetReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsu
 
     private void ReceiveLoop()
     {
+        if (_settings.IsSAcnMode)
+            return;
+
         IPEndPoint remoteEP = new IPEndPoint(IPAddress.Any, 0);
 
         while (_running)
         {
+
             try
             {
+                if (_settings.IsSAcnMode)
+                {
+                    _running = false;
+                    return;
+                }
+
                 byte[] data = _udpClient.Receive(ref remoteEP);
+
 
                 if (IsArtPollPacket(data))
                 {
@@ -200,10 +165,10 @@ public class ArtNetReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsu
                     int length = (data[16] << 8) | data[17];
                     if (length > 512) length = 512;
 
-                    Buffer.BlockCopy(data, 18, _packetBuffer, 0, length);
-                    DmxBuffer.WriteFrame(_packetBuffer, length);
+                    System.Buffer.BlockCopy(data, 18, _packetBuffer, 0, length);
+                    Buffer.WriteFrame(_packetBuffer, length);
+                    NetworkDmxPacketsHeartbeat.NotifyPacketReceived();
 
-                    _receivedPacketThisFrame = true;
                 }
             }
             catch (Exception)
@@ -311,9 +276,18 @@ public class ArtNetReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsu
 
         return Mathf.Clamp(startChannel1Based, 1, 512);
     }
+    public void RestartReceiver()
+    {
+        StopReceiver();
+        StartReceiver();
+    }
 
     public void ApplyDmxSettings(DmxSettingsSnapshot settings)
     {
         _settings = settings;
+        if (ReceiveNetworkData)
+        {
+            RestartReceiver();
+        }
     }
 }

@@ -25,9 +25,9 @@ public class UI_DmxEditorSimulator : MonoBehaviour
             return;
         }
 
-        if (receiver.DmxBuffer == null)
+        if (receiver.Buffer == null)
         {
-            receiver.DmxBuffer = new DmxBuffer();
+            receiver.Buffer = new DmxBuffer();
         }
 
         WriteFixtureChannel(receiver, 1, SliderToByte(masterDimmerSlider));
@@ -39,8 +39,13 @@ public class UI_DmxEditorSimulator : MonoBehaviour
         WriteFixtureChannel(receiver, 7, SliderToByte(sizeSlider));
         WriteFixtureChannel(receiver, 8, SliderToByte(strobeSlider));
 
-        receiver.DmxBuffer.WriteFrame(_simulatedFrame, _simulatedFrame.Length);
-        receiver.DmxBuffer.SwapIfNewFrame();
+        receiver.Buffer.WriteFrame(_simulatedFrame, _simulatedFrame.Length);
+        if (receiver.Buffer.TrySwap(out var buffer))
+        {
+            var frame = new DmxFrame(buffer);
+            DmxDataService.PushFrame(frame);
+        }
+
     }
 
     public void SetChannelValue(int channel, float normalizedValue)
@@ -58,13 +63,17 @@ public class UI_DmxEditorSimulator : MonoBehaviour
 
         WriteFixtureChannel(receiver, channel, (byte)Mathf.RoundToInt(Mathf.Clamp01(normalizedValue) * 255f));
 
-        if (receiver.DmxBuffer == null)
+        if (receiver.Buffer == null)
         {
-            receiver.DmxBuffer = new DmxBuffer();
+            receiver.Buffer = new DmxBuffer();
         }
 
-        receiver.DmxBuffer.WriteFrame(_simulatedFrame, _simulatedFrame.Length);
-        receiver.DmxBuffer.SwapIfNewFrame();
+        receiver.Buffer.WriteFrame(_simulatedFrame, _simulatedFrame.Length);
+        if (receiver.Buffer.TrySwap(out var buffer))
+        {
+            var frame = new DmxFrame(buffer);
+            DmxDataService.PushFrame(frame);
+        }
     }
 
     private void WriteFixtureChannel(INetworkReceiver receiver, int relativeChannel, byte value)

@@ -141,7 +141,8 @@ public class UI_SAcnSettings : MonoBehaviour
 
         SAcnParameters sAcnParameters = SAcnParameters.Clone(DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters);
         sAcnParameters.UseMulticast = useMulticast;
-        SaveLoadSettings.SaveSAcnParameters(sAcnParameters);
+        SaveLoadSettings.SaveDmxSettings(new DmxSettingsSnapshot(sAcnParameters, DmxSettingsService.Instance.CurrentDmxSettings));
+        //SaveLoadSettings.SaveSAcnParameters(sAcnParameters);
         //DmxSettingsService.Instance.Save(new DmxSettingsSnapshot(sAcnParameters, DmxSettingsService.Instance.CurrentDmxSettings));
     }
 
@@ -154,7 +155,8 @@ public class UI_SAcnSettings : MonoBehaviour
 
         SAcnParameters sAcnParameters = SAcnParameters.Clone(DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters);
         sAcnParameters.UnicastBindAddress = bindAddress;
-        SaveLoadSettings.SaveSAcnParameters(sAcnParameters);
+        SaveLoadSettings.SaveDmxSettings(new DmxSettingsSnapshot(sAcnParameters, DmxSettingsService.Instance.CurrentDmxSettings));
+        //SaveLoadSettings.SaveSAcnParameters(sAcnParameters);
         //DmxSettingsService.Instance.Save(new DmxSettingsSnapshot(sAcnParameters, DmxSettingsService.Instance.CurrentDmxSettings));
     }
 
@@ -176,7 +178,8 @@ public class UI_SAcnSettings : MonoBehaviour
 
         SAcnParameters sAcnParameters = SAcnParameters.Clone(DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters);
         sAcnParameters.ListenPort = listenPort;
-        SaveLoadSettings.SaveSAcnParameters(sAcnParameters);//new DmxSettingsSnapshot(sAcnParameters, DmxSettingsService.Instance.CurrentDmxSettings));
+        SaveLoadSettings.SaveDmxSettings(new DmxSettingsSnapshot(sAcnParameters, DmxSettingsService.Instance.CurrentDmxSettings));
+        //SaveLoadSettings.SaveSAcnParameters(sAcnParameters);//new DmxSettingsSnapshot(sAcnParameters, DmxSettingsService.Instance.CurrentDmxSettings));
 
     }
 
@@ -274,13 +277,15 @@ public class UI_SAcnSettings : MonoBehaviour
 
         SAcnParameters sAcnParameters = SAcnParameters.Clone(DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters);
         sAcnParameters.TimeoutSeconds = timeoutSeconds;
-        SaveLoadSettings.SaveSAcnParameters(sAcnParameters);
+        SaveLoadSettings.SaveDmxSettings(new DmxSettingsSnapshot(sAcnParameters, DmxSettingsService.Instance.CurrentDmxSettings));
+        //SaveLoadSettings.SaveSAcnParameters(sAcnParameters);
         //DmxSettingsService.Instance.Save(new DmxSettingsSnapshot(sAcnParameters, DmxSettingsService.Instance.CurrentDmxSettings));
     }
 
     public void ChangeReceiveNetworkData()
     {
         SetReceiveNetworkData(!_sAcnReceiver.ReceiveNetworkData);
+        RefreshLabels();
     }
 
     public void SetReceiveNetworkData(bool receiveNetworkData)
@@ -306,7 +311,7 @@ public class UI_SAcnSettings : MonoBehaviour
     {
         SetUseLtpMerge(!DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters.UseLtpMerge);
 
-
+        RefreshLabels();
     }
 
     public void SetUseLtpMerge(bool useLtpMerge)
@@ -319,7 +324,8 @@ public class UI_SAcnSettings : MonoBehaviour
 
         SAcnParameters sAcnParameters = SAcnParameters.Clone(DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters);
         sAcnParameters.UseLtpMerge = useLtpMerge;
-        SaveLoadSettings.SaveSAcnParameters(sAcnParameters);
+        SaveLoadSettings.SaveDmxSettings(new DmxSettingsSnapshot(sAcnParameters, DmxSettingsService.Instance.CurrentDmxSettings));
+        //SaveLoadSettings.SaveSAcnParameters(sAcnParameters);
         //DmxSettingsService.Instance.Save(new DmxSettingsSnapshot(sAcnParameters, DmxSettingsService.Instance.CurrentDmxSettings));
     }
 
@@ -357,7 +363,8 @@ public class UI_SAcnSettings : MonoBehaviour
 
         SAcnParameters sAcnParameters = SAcnParameters.Clone(DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters);
         sAcnParameters.MulticastUniverseSubscriptions = parsedUniverses;
-        SaveLoadSettings.SaveSAcnParameters(sAcnParameters);
+        //SaveLoadSettings.SaveSAcnParameters(sAcnParameters);
+        SaveLoadSettings.SaveDmxSettings(new DmxSettingsSnapshot(sAcnParameters, DmxSettingsService.Instance.CurrentDmxSettings));
         //DmxSettingsService.Instance.Save(new DmxSettingsSnapshot(sAcnParameters, DmxSettingsService.Instance.CurrentDmxSettings));
     }
 

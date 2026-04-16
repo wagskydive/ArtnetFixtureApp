@@ -114,7 +114,7 @@ public class UI_FixtureMeshManager : MonoBehaviour
         if (templateReceiver != null && instanceReceiver != null)
         {
             instanceReceiver.ReceiveNetworkData = false;
-            instanceReceiver.DmxBuffer = templateReceiver.DmxBuffer;
+            instanceReceiver.Buffer = templateReceiver.Buffer;
         }
 
         _spawnedFixtures.Add(instance);

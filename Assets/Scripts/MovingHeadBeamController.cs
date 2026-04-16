@@ -14,8 +14,6 @@ public class MovingHeadBeamController : BaseDmxMaterialConsumer
     private float _nextGoboReloadTime;
     private bool _hasLoadedCustomGobos;
 
-    protected override Renderer GetRenderer() => GetComponent<Renderer>();
-
     protected override bool IsActiveMode()
     {
         return DmxModeManager.Instance != null &&
@@ -161,8 +159,6 @@ public class MovingHeadBeamController : BaseDmxMaterialConsumer
 
     protected override void OnDmxFrame(DmxFrame frame)
     {
-        if (!ResolveMaterial() || _fixture == null)
-            return;
 
         var snapshot = MovingHeadDmxPersonality.Parse(_fixture, frame, Time.time);
 
@@ -181,4 +177,5 @@ public class MovingHeadBeamController : BaseDmxMaterialConsumer
         _material.SetFloat("_BeamRotation", snapshot.RotateRadians);
         ApplyCustomGoboTexture(snapshot.PatternType, snapshot.PatternSpeed);
     }
+
 }

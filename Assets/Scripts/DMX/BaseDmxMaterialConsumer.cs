@@ -5,15 +5,31 @@ public abstract class BaseDmxMaterialConsumer : BaseRawDmxConsumer
     protected Material _material;
     private Material _lastShared;
 
+    void Start()
+    {
+        ResolveMaterial();
+    }
 
+    protected Renderer GetRenderer()
+    {
+        return GetComponent<Renderer>();
+    }
 
-    protected abstract Renderer GetRenderer();
+    void Update()
+    {
+        if (!IsActiveMode() || _fixture == null)
+            return;
+
+        OnDmxFrame(DmxDataService.LatestFrame);
+    }
 
     protected bool ResolveMaterial()
     {
         var renderer = GetRenderer();
         if (renderer == null || renderer.sharedMaterial == null)
+        {
             return false;
+        }
 
         if (_material == null || _lastShared != renderer.sharedMaterial)
         {
@@ -25,15 +41,11 @@ public abstract class BaseDmxMaterialConsumer : BaseRawDmxConsumer
         return _material != null;
     }
 
-    protected override void HandleFrame(DmxFrame frame)
+    protected abstract void OnDmxFrame(DmxFrame frame);
+
+    protected override void HandleFrameChange(DmxFrame frame)
     {
-        if (!IsActiveMode())
-            return;
-
-        if (!ResolveMaterial())
-            return;
-
-        OnDmxFrame(frame);
+        ResolveMaterial();
     }
 
     protected virtual void OnMaterialChanged() { }

@@ -11,8 +11,6 @@ public class PixelMappingOutputController : BaseDmxMaterialConsumer
     private int _lastRows;
     private int _lastColumns;
 
-    protected override Renderer GetRenderer() => GetComponent<Renderer>();
-
     protected override bool IsActiveMode()
     {
         return DmxModeManager.Instance != null &&
@@ -61,9 +59,6 @@ public class PixelMappingOutputController : BaseDmxMaterialConsumer
 
     protected override void OnDmxFrame(DmxFrame frame)
     {
-        if (!ResolveMaterial() || _fixture == null)
-            return;
-
         EnsureTexture();
 
         float master = PixelMappingDmxPersonality.ParseMasterDimmer(_fixture, frame);
@@ -80,4 +75,5 @@ public class PixelMappingOutputController : BaseDmxMaterialConsumer
         _material.SetFloat("_UsePixelDataTex", 1f);
         _material.SetTexture("_PixelDataTex", _pixelDataTexture);
     }
+
 }

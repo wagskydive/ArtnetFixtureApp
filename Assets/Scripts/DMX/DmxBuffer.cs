@@ -19,17 +19,24 @@ public class DmxBuffer
             _hasNewFrame = true;
         }
     }
-
-    public void SwapIfNewFrame()
+    public bool TrySwap(out byte[] buffer)
     {
-        if (!_hasNewFrame) return;
+        if (!_hasNewFrame)
+        {
+            buffer = null;
+            return false;
+        }
 
         lock (_lock)
         {
             Buffer.BlockCopy(_backBuffer, 0, _frontBuffer, 0, 512);
             _hasNewFrame = false;
+            buffer = _frontBuffer;
+            return true;
         }
     }
+
+
 
     public byte GetChannel1Based(int channel)
     {

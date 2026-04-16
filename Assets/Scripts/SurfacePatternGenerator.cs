@@ -4,7 +4,6 @@ public class SurfacePatternGenerator : BaseDmxMaterialConsumer
 {
     private const int PatternCount = 20;
 
-    protected override Renderer GetRenderer() => GetComponent<Renderer>();
 
     protected override bool IsActiveMode()
     {
@@ -14,9 +13,6 @@ public class SurfacePatternGenerator : BaseDmxMaterialConsumer
 
     protected override void OnDmxFrame(DmxFrame frame)
     {
-        if (!ResolveMaterial() || _fixture == null)
-            return;
-
         int dmxPatternValue = _fixture.GetChannelValue(frame,5);
         int patternType = Mathf.Clamp(Mathf.FloorToInt((dmxPatternValue / 256f) * PatternCount), 0, PatternCount - 1);
         float speed = Mathf.Lerp(0.1f, 8f, _fixture.GetChannelValue(frame,6) / 255f);

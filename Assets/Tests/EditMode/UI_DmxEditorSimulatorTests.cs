@@ -20,14 +20,14 @@ public class UI_DmxEditorSimulatorTests
 
         simulator.PushFrameFromUi();
 
-        Assert.That(receiver.DmxBuffer.GetChannel1Based(1), Is.EqualTo(255));
-        Assert.That(receiver.DmxBuffer.GetChannel1Based(2), Is.EqualTo(128));
-        Assert.That(receiver.DmxBuffer.GetChannel1Based(3), Is.EqualTo(64));
-        Assert.That(receiver.DmxBuffer.GetChannel1Based(4), Is.EqualTo(0));
-        Assert.That(receiver.DmxBuffer.GetChannel1Based(5), Is.EqualTo(191));
-        Assert.That(receiver.DmxBuffer.GetChannel1Based(6), Is.EqualTo(26));
-        Assert.That(receiver.DmxBuffer.GetChannel1Based(7), Is.EqualTo(230));
-        Assert.That(receiver.DmxBuffer.GetChannel1Based(8), Is.EqualTo(84));
+        Assert.That(receiver.Buffer.GetChannel1Based(1), Is.EqualTo(255));
+        Assert.That(receiver.Buffer.GetChannel1Based(2), Is.EqualTo(128));
+        Assert.That(receiver.Buffer.GetChannel1Based(3), Is.EqualTo(64));
+        Assert.That(receiver.Buffer.GetChannel1Based(4), Is.EqualTo(0));
+        Assert.That(receiver.Buffer.GetChannel1Based(5), Is.EqualTo(191));
+        Assert.That(receiver.Buffer.GetChannel1Based(6), Is.EqualTo(26));
+        Assert.That(receiver.Buffer.GetChannel1Based(7), Is.EqualTo(230));
+        Assert.That(receiver.Buffer.GetChannel1Based(8), Is.EqualTo(84));
     }
 
     [Test]
@@ -38,15 +38,15 @@ public class UI_DmxEditorSimulatorTests
         simulator.SetChannelValue(1, 2f);
         simulator.SetChannelValue(2, -1f);
 
-        Assert.That(receiver.DmxBuffer.GetChannel1Based(1), Is.EqualTo(255));
-        Assert.That(receiver.DmxBuffer.GetChannel1Based(2), Is.EqualTo(0));
+        Assert.That(receiver.Buffer.GetChannel1Based(1), Is.EqualTo(255));
+        Assert.That(receiver.Buffer.GetChannel1Based(2), Is.EqualTo(0));
     }
 
     private static (UI_DmxEditorSimulator simulator, ArtNetReceiver receiver) CreateSimulator()
     {
         var root = new GameObject("simulator-root");
         var receiver = root.AddComponent<ArtNetReceiver>();
-        receiver.DmxBuffer = new DmxBuffer();
+        receiver.Buffer = new DmxBuffer();
 
         var simulator = root.AddComponent<UI_DmxEditorSimulator>();
         typeof(UI_DmxEditorSimulator)

@@ -52,12 +52,12 @@ public class MediaPlaybackController : MonoBehaviour
     private void Update()
     {
         INetworkReceiver receiver = NetworkingModeManager.Instance?.NetworkReceiver;
-        if (receiver == null || receiver.DmxBuffer == null || _playbackBackend == null)
+        if (receiver == null || receiver.Buffer == null || _playbackBackend == null)
         {
             return;
         }
 
-        DmxBuffer dmxBuffer = receiver.DmxBuffer;
+        DmxBuffer dmxBuffer = receiver.Buffer;
 
         int selectedIndex = ResolveMediaIndex(dmxBuffer.GetChannel1Based(dmxStartChannel));
         if (selectedIndex != _lastSelectedIndex)

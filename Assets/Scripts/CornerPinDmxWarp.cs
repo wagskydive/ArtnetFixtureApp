@@ -51,7 +51,7 @@ public class CornerPinDmxWarp : BaseRawDmxConsumer
                (DmxModeManager.Instance.CurrentMode == FixtureMode.Standard || DmxModeManager.Instance.CurrentMode == FixtureMode.PixelMapping);
     }
 
-    protected override void OnDmxFrame(DmxFrame frame)
+    protected override void HandleFrameChange(DmxFrame frame)
     {
 
         if (!IsActiveMode())
@@ -214,4 +214,5 @@ public class CornerPinDmxWarp : BaseRawDmxConsumer
         mesh.RecalculateBounds();
         return mesh;
     }
+
 }

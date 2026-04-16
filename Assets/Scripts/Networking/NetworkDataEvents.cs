@@ -2,17 +2,17 @@ using System;
 
 public static class NetworkDataEvents
 {
-    public static event Action NoDataReceivedRecently;
+    public static event Action OnNetworkLost;
 
-    public static event Action DataReceivedAgain;
+    public static event Action OnNetworkRestored;
 
-    public static void RaiseNoDataEvent()
+    public static void RaiseNetworkLostEvent()
     {
-        NoDataReceivedRecently?.Invoke();
+        OnNetworkLost?.Invoke();
     }
 
-    public static void RaiseDataBackEvent()
+    public static void RaiseNetworkRestoredEvent()
     {
-        DataReceivedAgain?.Invoke();
+        OnNetworkRestored?.Invoke();
     }
 }

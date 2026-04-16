@@ -52,12 +52,12 @@ public class ArtNetReceiverTests
     {
         var go = new GameObject("receiver");
         var receiver = go.AddComponent<ArtNetReceiver>();
-        receiver.DmxBuffer = new DmxBuffer();
+        receiver.Buffer = new DmxBuffer();
 
-        receiver.DmxBuffer.WriteFrame(new byte[] { 99 }, 1);
+        receiver.Buffer.WriteFrame(new byte[] { 99 }, 1);
         go.SendMessage("Update");
 
-        Assert.That(receiver.DmxBuffer.GetChannel1Based(1), Is.EqualTo(99));
+        Assert.That(receiver.Buffer.GetChannel1Based(1), Is.EqualTo(99));
 
         Object.DestroyImmediate(go);
     }

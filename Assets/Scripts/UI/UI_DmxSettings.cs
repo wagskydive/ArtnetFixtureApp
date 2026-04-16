@@ -24,7 +24,7 @@ public class UI_DmxSettings : MonoBehaviour
     [SerializeField] private Text webUiPasswordAstrisksText;
     [SerializeField] private Text webUiPasswordResetButtonText;
     [SerializeField] private int currentPatternType = 0; // Pattern type selector (0=Static, 1=Pulse, 2=ColorShift)
-    private bool noDataBeingReveived;
+    private bool networkLost;
     [SerializeField] private UI_FixtureMeshManager fixtureMeshManager;
     [SerializeField] private CapabilityBlockUiTrigger capabilityBlockUiTrigger;
     [SerializeField] private CapabilityDefinition universeLimitCapability;
@@ -74,18 +74,19 @@ public class UI_DmxSettings : MonoBehaviour
 
         Instance = this;
         //SaveLoadSettings.OnSettingsSaved += UpdateDisplay;
+        DmxSettingsService.OnLoaded += HandleSettingsLoaded;
         RefreshPasswordControls();
     }
 
     void ShowNetworkWarning()
     {
-        noDataBeingReveived = true;
+        networkLost = true;
         RefreshNetworkWarningVisibility();
     }
 
     void HideNetworkWarning()
     {
-        noDataBeingReveived = false;
+        networkLost = false;
         RefreshNetworkWarningVisibility();
     }
 
@@ -103,17 +104,17 @@ public class UI_DmxSettings : MonoBehaviour
     private void OnEnable()
     {
         DmxSettingsBus.OnChanged += HandleSettingsChange;
-        DmxSettingsService.OnLoaded += HandleSettingsLoaded;
-        NetworkDataEvents.NoDataReceivedRecently += ShowNetworkWarning;
-        NetworkDataEvents.DataReceivedAgain += HideNetworkWarning;
+
+        NetworkDataEvents.OnNetworkLost += ShowNetworkWarning;
+        NetworkDataEvents.OnNetworkRestored += HideNetworkWarning;
     }
 
     void OnDisable()
     {
         DmxSettingsBus.OnChanged -= HandleSettingsChange;
-        DmxSettingsService.OnLoaded -= HandleSettingsLoaded;
-        NetworkDataEvents.NoDataReceivedRecently -= ShowNetworkWarning;
-        NetworkDataEvents.DataReceivedAgain -= HideNetworkWarning;
+
+        NetworkDataEvents.OnNetworkLost -= ShowNetworkWarning;
+        NetworkDataEvents.OnNetworkRestored -= HideNetworkWarning;
     }
 
     private void HandleSettingsLoaded(DmxSettingsSnapshot snapshot)
@@ -251,7 +252,7 @@ public class UI_DmxSettings : MonoBehaviour
         }
 
         bool warningEnabled = SaveLoadSettings.LoadInt(SaveLoadSettings.NetworkWarningEnabledKey, 1) == 1;
-        networkWarning.SetActive(warningEnabled && noDataBeingReveived);
+        networkWarning.SetActive(warningEnabled && networkLost);
     }
 
     private void UpdateInfoPanelState()

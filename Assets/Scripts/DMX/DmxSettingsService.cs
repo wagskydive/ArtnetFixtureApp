@@ -55,6 +55,7 @@ public class DmxSettingsService : MonoBehaviour
             SAcnParameters.Load()
         );
         OnLoaded?.Invoke(CurrentDmxSettings);
+        DmxSettingsBus.Publish(CurrentDmxSettings);
     }
 
 

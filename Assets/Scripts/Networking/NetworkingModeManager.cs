@@ -19,6 +19,7 @@ public class NetworkingModeManager : MonoBehaviour
     public INetworkReceiver NetworkReceiver { get; private set; }
 
     private DmxBuffer _dmxBuffer;
+    private bool isInitialized = false;
 
     private void Awake()
     {
@@ -29,12 +30,14 @@ public class NetworkingModeManager : MonoBehaviour
         }
 
         Instance = this;
+        DmxSettingsService.OnLoaded += HandleLoaded;
     }
 
-    void Start()
+    private void HandleLoaded(DmxSettingsSnapshot snapshot)
     {
         Initialize();
     }
+
     void Initialize()
     {
         _dmxBuffer = new DmxBuffer();
@@ -59,6 +62,7 @@ public class NetworkingModeManager : MonoBehaviour
         }
 
         ApplyMode(initialMode);
+        isInitialized = true;
         OnManagerReady?.Invoke();
     }
 
@@ -72,14 +76,17 @@ public class NetworkingModeManager : MonoBehaviour
 
     void OnEnable()
     {
-        DmxSettingsBus.OnChanged += HandleSettingSave;
+        DmxSettingsBus.OnChanged += HandleSetting;
+
     }
 
     void OnDisable()
     {
-        DmxSettingsBus.OnChanged -= HandleSettingSave;
+        DmxSettingsBus.OnChanged -= HandleSetting;
+
+
     }
-    private void HandleSettingSave(DmxSettingsSnapshot snapshot)
+    private void HandleSetting(DmxSettingsSnapshot snapshot)
     {
         ApplyMode(snapshot.IsSAcnMode);
     }
@@ -92,7 +99,7 @@ public class NetworkingModeManager : MonoBehaviour
 
     private void ApplyMode(int modeIndex)
     {
-        if (ActiveModeIndex == modeIndex)
+        if (ActiveModeIndex == modeIndex && isInitialized)
         {
             return;
         }
@@ -124,12 +131,13 @@ public class NetworkingModeManager : MonoBehaviour
             }
         }
 
-        nextReceiver.DmxBuffer = _dmxBuffer;
+        nextReceiver.Buffer = _dmxBuffer;
         nextReceiver.ReceiveNetworkData = true;
 
 
         Debug.Log($"[NetworkingModeManager] Activating {(clampedMode == ArtNetModeIndex ? "Art-Net" : "sACN")} mode");
-        nextReceiver.StartReceiver();
+
+        ActivateReceiver(nextReceiver);
 
         NetworkReceiver = nextReceiver;
         ActiveModeIndex = clampedMode;
@@ -137,7 +145,20 @@ public class NetworkingModeManager : MonoBehaviour
     }
 
 
+    void ActivateReceiver(INetworkReceiver receiver)
+    {
+        // 1. Apply current settings FIRST
+        if (receiver is IDmxSettingsConsumer consumer)
+        {
+            consumer.ApplyDmxSettings(DmxSettingsService.Instance.CurrentDmxSettings);
+        }
 
+        // 2. THEN start
+        if (receiver.ReceiveNetworkData)
+        {
+            receiver.StartReceiver();
+        }
+    }
 
 
 

@@ -11,24 +11,15 @@ public abstract class BaseRawDmxConsumer : MonoBehaviour
 
     protected virtual void OnEnable()
     {
-        DmxDataService.OnDmxFrame += HandleFrame;
+        DmxDataService.OnFrameReceived += HandleFrameChange;
     }
 
     protected virtual void OnDisable()
     {
-        DmxDataService.OnDmxFrame -= HandleFrame;
+        DmxDataService.OnFrameReceived -= HandleFrameChange;
     }
 
-    protected virtual void HandleFrame(DmxFrame frame)
-    {
-        if (!IsActiveMode())
-            return;
-
-
-        OnDmxFrame(frame);
-    }
-
-    protected abstract void OnDmxFrame(DmxFrame frame);
+    protected abstract void HandleFrameChange(DmxFrame frame);
 
     protected abstract bool IsActiveMode();
 }

@@ -1,6 +1,14 @@
+using System.Runtime.CompilerServices;
+
 public struct DmxFrame
 {
     public byte[] Buffer;
+
+    public DmxFrame(byte[] buffer)
+    {
+        Buffer = buffer;
+    }
+    
 
     public byte GetChannel(int index1Based)
     {

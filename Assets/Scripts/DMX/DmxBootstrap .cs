@@ -1,9 +1,11 @@
+using System.Collections;
 using UnityEngine;
 
 public class DmxBootstrap : MonoBehaviour
 {
-    void Start()
+    IEnumerator Start()
     {
+        yield return new WaitForSeconds(.2f);
         DmxSettingsService.Instance.Load();
     }
 }
