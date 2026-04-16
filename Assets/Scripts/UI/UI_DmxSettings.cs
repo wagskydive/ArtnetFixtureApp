@@ -24,7 +24,7 @@ public class UI_DmxSettings : MonoBehaviour
     [SerializeField] private Text webUiPasswordAstrisksText;
     [SerializeField] private Text webUiPasswordResetButtonText;
     [SerializeField] private int currentPatternType = 0; // Pattern type selector (0=Static, 1=Pulse, 2=ColorShift)
-    private bool shouldDisplayNetworkWarning;
+    private bool noDataBeingReveived;
     [SerializeField] private UI_FixtureMeshManager fixtureMeshManager;
     [SerializeField] private CapabilityBlockUiTrigger capabilityBlockUiTrigger;
     [SerializeField] private CapabilityDefinition universeLimitCapability;
@@ -73,31 +73,28 @@ public class UI_DmxSettings : MonoBehaviour
         }
 
         Instance = this;
-        SyncReceiverSubscription();
         //SaveLoadSettings.OnSettingsSaved += UpdateDisplay;
         RefreshPasswordControls();
     }
 
     void ShowNetworkWarning()
     {
-        shouldDisplayNetworkWarning = true;
+        noDataBeingReveived = true;
         RefreshNetworkWarningVisibility();
     }
 
     void HideNetworkWarning()
     {
-        shouldDisplayNetworkWarning = false;
+        noDataBeingReveived = false;
         RefreshNetworkWarningVisibility();
     }
 
     private void OnDestroy()
     {
-        SaveLoadSettings.OnSettingsSaved -= UpdateDisplay;
+        //SaveLoadSettings.OnAnySettingsSaved -= UpdateDisplay;
 
         if (_subscribedReceiver != null)
         {
-            _subscribedReceiver.NoDataReceivedRecently -= ShowNetworkWarning;
-            _subscribedReceiver.DataReceivedAgain -= HideNetworkWarning;
             _subscribedReceiver = null;
         }
     }
@@ -105,18 +102,27 @@ public class UI_DmxSettings : MonoBehaviour
 
     private void OnEnable()
     {
-        SyncReceiverSubscription();
-        DmxSettingsBus.OnChanged += HanldeSettingsChange;
+        DmxSettingsBus.OnChanged += HandleSettingsChange;
+        DmxSettingsService.OnLoaded += HandleSettingsLoaded;
+        NetworkDataEvents.NoDataReceivedRecently += ShowNetworkWarning;
+        NetworkDataEvents.DataReceivedAgain += HideNetworkWarning;
     }
 
     void OnDisable()
     {
-        DmxSettingsBus.OnChanged -= HanldeSettingsChange;
+        DmxSettingsBus.OnChanged -= HandleSettingsChange;
+        DmxSettingsService.OnLoaded -= HandleSettingsLoaded;
+        NetworkDataEvents.NoDataReceivedRecently -= ShowNetworkWarning;
+        NetworkDataEvents.DataReceivedAgain -= HideNetworkWarning;
     }
 
-    private void HanldeSettingsChange(DmxSettingsSnapshot snapshot)
+    private void HandleSettingsLoaded(DmxSettingsSnapshot snapshot)
     {
-        SyncReceiverSubscription();
+        UpdateDisplay();
+    }
+
+    private void HandleSettingsChange(DmxSettingsSnapshot snapshot)
+    {
         UpdateDisplay();
     }
 
@@ -142,7 +148,7 @@ public class UI_DmxSettings : MonoBehaviour
             return;
         }
 
-        DmxSettingsService.Instance.Save(new DmxSettingsSnapshot(DmxSettingsService.Instance.CurrentDmxSettings, newChannel));
+        SaveLoadSettings.SaveDmxSettings(new DmxSettingsSnapshot(DmxSettingsService.Instance.CurrentDmxSettings, newChannel));
     }
 
     public void IncreaseUniverse()
@@ -163,7 +169,7 @@ public class UI_DmxSettings : MonoBehaviour
             return;
         }
 
-        DmxSettingsService.Instance.Save(new DmxSettingsSnapshot(universe1Based, DmxSettingsService.Instance.CurrentDmxSettings));
+        SaveLoadSettings.SaveDmxSettings(new DmxSettingsSnapshot(universe1Based, DmxSettingsService.Instance.CurrentDmxSettings));
     }
 
     public enum PatternType
@@ -222,8 +228,7 @@ public class UI_DmxSettings : MonoBehaviour
 
     public void SetNetworkWarning(bool isOn)
     {
-        SaveLoadSettings.SaveInt(SaveLoadSettings.NetworkWarningEnabledKey, isOn ? 1 : 0);
-        SaveLoadSettings.SaveAndInvokeEvent();
+        SaveLoadSettings.SaveNetworkWarningBannerEnabled(isOn);
         RefreshNetworkWarningVisibility();
     }
 
@@ -246,7 +251,7 @@ public class UI_DmxSettings : MonoBehaviour
         }
 
         bool warningEnabled = SaveLoadSettings.LoadInt(SaveLoadSettings.NetworkWarningEnabledKey, 1) == 1;
-        networkWarning.SetActive(warningEnabled && shouldDisplayNetworkWarning);
+        networkWarning.SetActive(warningEnabled && noDataBeingReveived);
     }
 
     private void UpdateInfoPanelState()
@@ -266,8 +271,7 @@ public class UI_DmxSettings : MonoBehaviour
 
     public void SetInfoPanelEnabled(bool isOn)
     {
-        SaveLoadSettings.SaveInt(SaveLoadSettings.InfoPanelEnabledKey, isOn ? 1 : 0);
-        SaveLoadSettings.SaveAndInvokeEvent();
+        SaveLoadSettings.SaveInfoPanelEnabled(isOn);
 
         if (infoPanel != null)
         {
@@ -279,7 +283,6 @@ public class UI_DmxSettings : MonoBehaviour
     {
         WebUiPasswordProtection.SetPassword(value);
         RefreshPasswordControls();
-        SaveLoadSettings.SaveAndInvokeEvent();
     }
 
     public void ApplyWebUiPasswordFromInput()
@@ -292,11 +295,6 @@ public class UI_DmxSettings : MonoBehaviour
     {
         bool changed = WebUiPasswordProtection.SetProtectionEnabled(isOn);
         RefreshPasswordControls();
-
-        if (changed)
-        {
-            SaveLoadSettings.SaveAndInvokeEvent();
-        }
     }
 
     public void ShowPasswordTemporarily()
@@ -336,13 +334,11 @@ public class UI_DmxSettings : MonoBehaviour
     {
         WebUiPasswordProtection.ClearPassword();
         RefreshPasswordControls();
-        SaveLoadSettings.SaveAndInvokeEvent();
     }
 
     public void SetFixtureName(string fixtureName)
     {
-        SaveLoadSettings.SaveString(SaveLoadSettings.DeviceNetworkKey, fixtureName);
-        SaveLoadSettings.SaveAndInvokeEvent();
+        SaveLoadSettings.SaveDeviceNetworkName(fixtureName);
         UpdateDeviceInfoDisplay();
     }
 
@@ -355,18 +351,17 @@ public class UI_DmxSettings : MonoBehaviour
 
         if (ipAddressValueText != null)
         {
-            string networkType = "";
-            if (NetworkingModeManager.Instance != null)
+            string networkType;
+
+            if (DmxSettingsService.Instance.CurrentDmxSettings.IsSAcnMode)
             {
-                if (NetworkingModeManager.Instance.IsSAcnMode)
-                {
-                    networkType = "sAcn ";
-                }
-                else
-                {
-                    networkType = "Art-Net ";
-                }
+                networkType = "sAcn ";
             }
+            else
+            {
+                networkType = "Art-Net ";
+            }
+
 
             ipAddressValueText.text = networkType + ResolveLocalIpv4Address();
         }
@@ -479,28 +474,6 @@ public class UI_DmxSettings : MonoBehaviour
         capabilityBlockUiTrigger.NotifyBlocked(capabilityId);
     }
 
-    private void SyncReceiverSubscription()
-    {
-        INetworkReceiver activeReceiver = NetworkingModeManager.Instance?.NetworkReceiver;
-        if (ReferenceEquals(activeReceiver, _subscribedReceiver))
-        {
-            return;
-        }
-
-        if (_subscribedReceiver != null)
-        {
-            _subscribedReceiver.NoDataReceivedRecently -= ShowNetworkWarning;
-            _subscribedReceiver.DataReceivedAgain -= HideNetworkWarning;
-        }
-
-        _subscribedReceiver = activeReceiver;
-
-        if (_subscribedReceiver != null)
-        {
-            _subscribedReceiver.NoDataReceivedRecently += ShowNetworkWarning;
-            _subscribedReceiver.DataReceivedAgain += HideNetworkWarning;
-        }
-    }
 
     private static string GetCapabilityId(CapabilityDefinition definition)
     {

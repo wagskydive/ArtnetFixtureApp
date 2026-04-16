@@ -25,11 +25,6 @@ public class NetworkDebugService : MonoBehaviour
     public bool DebugVisible
     {
         get => SaveLoadSettings.LoadInt(SaveLoadSettings.SAcnDebugVisibleKey, 0) == 1;
-        set
-        {
-            SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnDebugVisibleKey, value ? 1 : 0);
-            SaveLoadSettings.SaveAndInvokeEvent();
-        }
     }
 
     private void Awake()
@@ -42,6 +37,23 @@ public class NetworkDebugService : MonoBehaviour
 
         Instance = this;
     }
+
+    void OnEnable()
+    {
+        SaveLoadSettings.OnSAcnParametersSaved += HandleParametersSaved;
+    }
+    void OnDisable()
+    {
+        SaveLoadSettings.OnSAcnParametersSaved -= HandleParametersSaved;
+
+    }
+
+    private void HandleParametersSaved(SAcnParameters parameters)
+    {
+        
+    }
+
+
 
     public void RecordPacket(string protocol, int universe1Based, int channels, string source)
     {

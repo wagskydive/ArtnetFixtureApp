@@ -18,35 +18,47 @@ public class UI_FixtureMeshManager : MonoBehaviour
     private void Start()
     {
         primaryReceiver = NetworkingModeManager.Instance.NetworkReceiver;
-        RebuildFixtures(1, false);
-        if (DmxModeManager.Instance.CurrentMode == DmxModeManager.FixtureMode.Standard)
-        {
-            int defaultCount = Mathf.Clamp(minimumFixtures, 1, maximumFixtures);
-            int savedCount = SaveLoadSettings.LoadInt(SaveLoadSettings.FixtureCountKey, defaultCount);
-            int targetCount = Mathf.Clamp(savedCount, minimumFixtures, maximumFixtures);
+        RebuildFixtures();
 
-            RebuildFixtures(targetCount);
-        }
 
     }
 
+    void OnEnable()
+    {
+        SaveLoadSettings.OnFixtureCountSaved += RebuildFixtures;
+    }
+    void OnDisable()
+    {
+        SaveLoadSettings.OnFixtureCountSaved -= RebuildFixtures;
+    }
+
+
     public void IncreaseFixtureCount()
     {
-        RebuildFixtures(Mathf.Min(maximumFixtures, FixtureCount + 1));
+        SaveLoadSettings.SaveFixtureCount(Mathf.Min(maximumFixtures, FixtureCount + 1));
+
     }
 
     public void DecreaseFixtureCount()
     {
-        RebuildFixtures(Mathf.Max(minimumFixtures, FixtureCount - 1));
+        SaveLoadSettings.SaveFixtureCount(Mathf.Max(minimumFixtures, FixtureCount - 1));
     }
 
+
+    public void RebuildFixtures()
+    {
+        int targetCount = 1;
+        if (DmxModeManager.Instance.CurrentMode == FixtureMode.Standard)
+        {
+            int defaultCount = Mathf.Clamp(minimumFixtures, 1, maximumFixtures);
+            int savedCount = SaveLoadSettings.LoadInt(SaveLoadSettings.FixtureCountKey, defaultCount);
+            targetCount = Mathf.Clamp(savedCount, minimumFixtures, maximumFixtures); 
+        }
+        RebuildFixtures(targetCount);
+    }
     public void RebuildFixtures(int targetCount)
     {
-        RebuildFixtures(targetCount, savePreference: true);
-    }
 
-    public void RebuildFixtures(int targetCount, bool savePreference)
-    {
         int clampedCount = Mathf.Clamp(targetCount, minimumFixtures, maximumFixtures);
 
         if (fixtureTemplate == null)
@@ -66,22 +78,15 @@ public class UI_FixtureMeshManager : MonoBehaviour
         {
             RemoveLastFixtureInstance();
         }
+        UpdateFixtureCountDisplay(clampedCount);
 
-        if (savePreference)
-        {
-            SaveFixtureCountPreference(clampedCount);
-        }
-        else
-        {
-            UpdateFixtureCountDisplay(clampedCount);
-        }
     }
 
     public void RestoreSavedFixtureCount()
     {
         int defaultCount = Mathf.Clamp(minimumFixtures, 1, maximumFixtures);
         int savedCount = SaveLoadSettings.LoadInt(SaveLoadSettings.FixtureCountKey, defaultCount);
-        RebuildFixtures(savedCount, savePreference: false);
+        RebuildFixtures(savedCount);
     }
 
 
@@ -114,10 +119,10 @@ public class UI_FixtureMeshManager : MonoBehaviour
 
         _spawnedFixtures.Add(instance);
 
-        for(int i = 0; i < _spawnedFixtures.Count; i++)
+        for (int i = 0; i < _spawnedFixtures.Count; i++)
         {
             StartChannelOverride startChannelOverride = _spawnedFixtures[i].GetComponent<StartChannelOverride>();
-            if(startChannelOverride == null)
+            if (startChannelOverride == null)
             {
                 startChannelOverride = _spawnedFixtures[i].AddComponent<StartChannelOverride>();
             }
@@ -140,9 +145,8 @@ public class UI_FixtureMeshManager : MonoBehaviour
 
     private void SaveFixtureCountPreference(int count)
     {
-        SaveLoadSettings.SaveInt(SaveLoadSettings.FixtureCountKey, count);
-        SaveLoadSettings.SaveAndInvokeEvent();
-        UpdateFixtureCountDisplay(count);
+        SaveLoadSettings.SaveFixtureCount(count);
+
     }
 
     private void UpdateFixtureCountDisplay(int count)

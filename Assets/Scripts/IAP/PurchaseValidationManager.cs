@@ -20,9 +20,6 @@ public class PurchaseValidationManager : MonoBehaviour
     public bool debugValidation;
     [Tooltip("Used only when Debug Validation is enabled. If checked, all IAP validations return valid; if unchecked, all IAP validations return invalid.")]
     public bool allIsValidated;
-
-    private const string LastValidationUnixKey = "iap_last_validation_unix";
-    private const string FallbackDeviceIdKey = "iap_device_id";
     private static readonly string[] InvalidDeviceIds = { "unknown", "n/a", "null", "none", "unsupportedIdentifier" };
     private bool _validationInProgress;
     private string _resolvedDeviceId;
@@ -98,7 +95,7 @@ public class PurchaseValidationManager : MonoBehaviour
 
     private bool ShouldValidate()
     {
-        long lastUnixSeconds = SaveLoadSettings.LoadLong(LastValidationUnixKey, 0L);
+        long lastUnixSeconds = SaveLoadSettings.LoadLong(SaveLoadSettings.LastValidationUnixKey, 0L);
         Debug.Log($"Purchase validation: loaded last validation unix seconds = {lastUnixSeconds}.");
         if (lastUnixSeconds <= 0)
         {
@@ -295,8 +292,7 @@ public class PurchaseValidationManager : MonoBehaviour
         DateTime nextValidationUtc = savedUtc.AddHours(validationIntervalHours);
         Debug.Log(
             $"Purchase validation: saving last validation time unix={unixSeconds}, utc={savedUtc:O}, nextValidationTimeUtc={nextValidationUtc:O}.");
-        SaveLoadSettings.SaveLong(LastValidationUnixKey, unixSeconds);
-        SaveLoadSettings.SaveAndInvokeEvent();
+        SaveLoadSettings.SaveLastValidationUnix(unixSeconds);
     }
 
     [Serializable]
@@ -437,7 +433,7 @@ public class PurchaseValidationManager : MonoBehaviour
             return _resolvedDeviceId;
         }
 
-        string persistedFallbackId = SaveLoadSettings.LoadString(FallbackDeviceIdKey, string.Empty);
+        string persistedFallbackId = SaveLoadSettings.LoadString(SaveLoadSettings.FallbackDeviceIdKey, string.Empty);
         if (!string.IsNullOrWhiteSpace(persistedFallbackId))
         {
             _resolvedDeviceId = persistedFallbackId.Trim();
@@ -445,8 +441,8 @@ public class PurchaseValidationManager : MonoBehaviour
         }
 
         _resolvedDeviceId = Guid.NewGuid().ToString("N");
-        SaveLoadSettings.SaveString(FallbackDeviceIdKey, _resolvedDeviceId);
-        SaveLoadSettings.SaveAndInvokeEvent();
+
+        SaveLoadSettings.SaveFallbackDeviceId(_resolvedDeviceId);
         Debug.LogWarning("System device identifier unavailable; generated persistent fallback IAP device ID.", this);
         return _resolvedDeviceId;
     }

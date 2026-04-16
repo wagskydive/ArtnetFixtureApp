@@ -7,8 +7,8 @@ using UnityEngine;
 
 public class SAcnReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsumer
 {
-    public event Action NoDataReceivedRecently;
-    public event Action DataReceivedAgain;
+    //public static event Action NoDataReceivedRecently;
+    //public static event Action DataReceivedAgain;
 
     public static event Action OnSAcnReceiverStarted;
 
@@ -32,7 +32,7 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsume
     DmxBuffer INetworkReceiver.DmxBuffer { get => DmxBuffer; set => DmxBuffer = value; }
     bool INetworkReceiver.ReceiveNetworkData { get => ReceiveNetworkData; set => ReceiveNetworkData = value; }
     bool INetworkReceiver.HasReceivedDataRecently => HasReceivedDataRecently;
-    float INetworkReceiver.TimeoutSeconds { get => _settings.CurrentSAcnParameters.timeoutSeconds; }
+    float INetworkReceiver.TimeoutSeconds { get => _settings.CurrentSAcnParameters.TimeoutSeconds; }
 
     private UdpClient _udpClient;
     private Thread _receiveThread;
@@ -108,28 +108,36 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsume
         {
             _lastPacketTime = Time.time;
             _receivedPacketThisFrame = false;
+            _hasNoDataEventSent = false;
         }
 
-        HasReceivedDataRecently = (Time.time - _lastPacketTime) <= _settings.CurrentSAcnParameters.timeoutSeconds;
+        HasReceivedDataRecently = (Time.time - _lastPacketTime) <= _settings.CurrentSAcnParameters.TimeoutSeconds;
 
         if (!HasReceivedDataRecently)
         {
             if (!_hasNoDataEventSent)
             {
-                NoDataReceivedRecently?.Invoke();
+                RaiseNoDataEvent();
                 _hasNoDataEventSent = true;
             }
         }
         else if (_hasNoDataEventSent)
         {
-            DataReceivedAgain?.Invoke();
+            //DataReceivedAgain?.Invoke();
+            RaiseDataBackEvent();
             _hasNoDataEventSent = false;
         }
     }
 
+    void RaiseNoDataEvent()
+    {
+        NetworkDataEvents.RaiseNoDataEvent();
+    }
 
-
-
+    void RaiseDataBackEvent()
+    {
+        NetworkDataEvents.RaiseDataBackEvent();
+    }
 
     private void AcquireMulticastLock()
     {
@@ -179,11 +187,11 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsume
             _udpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
             _udpClient.Client.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastLoopback, true);
 
-            _udpClient.Client.Bind(new IPEndPoint(IPAddress.Any, _settings.CurrentSAcnParameters.listenPort));
+            _udpClient.Client.Bind(new IPEndPoint(IPAddress.Any, _settings.CurrentSAcnParameters.ListenPort));
 
-            Debug.Log($"[sACN] Bound to port {_settings.CurrentSAcnParameters.listenPort}");
+            Debug.Log($"[sACN] Bound to port {_settings.CurrentSAcnParameters.ListenPort}");
 
-            if (_settings.CurrentSAcnParameters.useMulticast)
+            if (_settings.CurrentSAcnParameters.UseMulticast)
             {
                 JoinConfiguredMulticastGroups();
             }
@@ -397,7 +405,7 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsume
 
     private IPAddress ResolveBindAddress()
     {
-        if (!_settings.CurrentSAcnParameters.useMulticast && TryParseIpv4(_settings.CurrentSAcnParameters.unicastBindAddress, out IPAddress bindAddress))
+        if (!_settings.CurrentSAcnParameters.UseMulticast && TryParseIpv4(_settings.CurrentSAcnParameters.UnicastBindAddress, out IPAddress bindAddress))
         {
             return bindAddress;
         }
@@ -407,15 +415,15 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsume
 
     private void ClampMulticastSubscriptions()
     {
-        if (_settings.CurrentSAcnParameters.multicastUniverseSubscriptions == null)
+        if (_settings.CurrentSAcnParameters.MulticastUniverseSubscriptions == null)
         {
-            _settings.CurrentSAcnParameters.multicastUniverseSubscriptions = new List<int>();
+            _settings.CurrentSAcnParameters.MulticastUniverseSubscriptions = new List<int>();
             return;
         }
 
-        for (int i = 0; i < _settings.CurrentSAcnParameters.multicastUniverseSubscriptions.Count; i++)
+        for (int i = 0; i < _settings.CurrentSAcnParameters.MulticastUniverseSubscriptions.Count; i++)
         {
-            _settings.CurrentSAcnParameters.multicastUniverseSubscriptions[i] = ClampUniverse(_settings.CurrentSAcnParameters.multicastUniverseSubscriptions[i]);
+            _settings.CurrentSAcnParameters.MulticastUniverseSubscriptions[i] = ClampUniverse(_settings.CurrentSAcnParameters.MulticastUniverseSubscriptions[i]);
         }
     }
 
@@ -424,14 +432,14 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsume
         _joinedMulticastUniverses.Clear();
         JoinUniverseMulticastGroup(_settings.Universe1Based);
 
-        if (_settings.CurrentSAcnParameters.multicastUniverseSubscriptions == null)
+        if (_settings.CurrentSAcnParameters.MulticastUniverseSubscriptions == null)
         {
             return;
         }
 
-        for (int i = 0; i < _settings.CurrentSAcnParameters.multicastUniverseSubscriptions.Count; i++)
+        for (int i = 0; i < _settings.CurrentSAcnParameters.MulticastUniverseSubscriptions.Count; i++)
         {
-            JoinUniverseMulticastGroup(_settings.CurrentSAcnParameters.multicastUniverseSubscriptions[i]);
+            JoinUniverseMulticastGroup(_settings.CurrentSAcnParameters.MulticastUniverseSubscriptions[i]);
         }
     }
 
@@ -511,7 +519,7 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsume
         Array.Clear(universeState.MergedFrame, 0, universeState.MergedFrame.Length);
 
         SourceState ltpWinner = null;
-        if (_settings.CurrentSAcnParameters.useLtpMerge)
+        if (_settings.CurrentSAcnParameters.UseLtpMerge)
         {
             long latestTicks = long.MinValue;
             foreach (KeyValuePair<string, SourceState> entry in universeState.SourceStates)
@@ -538,7 +546,7 @@ public class SAcnReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsume
                 continue;
             }
 
-            if (_settings.CurrentSAcnParameters.useLtpMerge)
+            if (_settings.CurrentSAcnParameters.UseLtpMerge)
             {
                 if (sourceState == ltpWinner)
                 {

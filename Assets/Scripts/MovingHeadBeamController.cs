@@ -19,7 +19,7 @@ public class MovingHeadBeamController : BaseDmxMaterialConsumer
     protected override bool IsActiveMode()
     {
         return DmxModeManager.Instance != null &&
-               DmxModeManager.Instance.CurrentMode == DmxModeManager.FixtureMode.MovingHead;
+               DmxModeManager.Instance.CurrentMode == FixtureMode.MovingHead;
     }
 
     private void ApplyCustomGoboTexture(int patternType, float speed)

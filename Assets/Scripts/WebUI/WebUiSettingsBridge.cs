@@ -6,10 +6,6 @@ public class WebUiSettingsBridge : MonoBehaviour
     [SerializeField] private UI_FixtureModeSelector fixtureModeSelector;
     [SerializeField] private CapabilityDefinition universeLimitCapability;
 
-    private void Start()
-    {
-        ApplySettings(WebUiSettingsStore.Load());
-    }
 
     public WebUiSettingsData GetSettings()
     {
@@ -31,97 +27,24 @@ public class WebUiSettingsBridge : MonoBehaviour
         parsed.maxSelectableUniverse = maxSelectableUniverse;
         parsed.dmxUniverse = Mathf.Clamp(parsed.dmxUniverse, 1, maxSelectableUniverse);
         WebUiSettingsStore.Save(parsed);
-        ApplySettings(parsed);
         return parsed;
     }
 
-    public void ApplySettings(WebUiSettingsData raw)
-    {
-        WebUiSettingsData data = WebUiSettingsStore.Sanitize(raw);
-        int maxSelectableUniverse = GetMaxSelectableUniverse(universeLimitCapability);
-        data.maxSelectableUniverse = maxSelectableUniverse;
-        data.dmxUniverse = Mathf.Clamp(data.dmxUniverse, 1, maxSelectableUniverse);
-        bool advancedUnlocked = IsAdvancedNetworkingUnlocked();
-        data.advancedNetworkingUnlocked = advancedUnlocked;
-        DmxModeManager.FixtureMode selectedMode = ToFixtureMode(data.fixtureMode);
+    
 
-        if (fixtureModeSelector != null)
-        {
-            fixtureModeSelector.SetMode(selectedMode);
-
-            if (fixtureModeSelector.CurrentPixelColumns != data.gridX)
-            {
-                fixtureModeSelector.CurrentPixelColumns = data.gridX;
-            }
-
-            if (fixtureModeSelector.CurrentPixelRows != data.gridY)
-            {
-                fixtureModeSelector.CurrentPixelRows = data.gridY;
-            }
-        }
-
-        int fixtureCount = selectedMode == DmxModeManager.FixtureMode.Standard ? data.fixtureAmount : 1;
-
-        if (fixtureMeshManager != null)
-        {
-            fixtureMeshManager.RebuildFixtures(fixtureCount, savePreference: false);
-        }
-
-        INetworkReceiver receiver = NetworkingModeManager.Instance?.NetworkReceiver;
-        if (advancedUnlocked && NetworkingModeManager.Instance != null)
-        {
-            NetworkingModeManager.Instance.SetModeFromIndex(data.networkMode);
-            receiver = NetworkingModeManager.Instance.NetworkReceiver;
-        }
-
-        if (DmxSettingsService.Instance != null)
-        {
-            SAcnParameters sAcnParameters;
-            
-
-            if (advancedUnlocked && receiver is SAcnReceiver sacnReceiver)
-            {
-                sAcnParameters = new SAcnParameters
-                {
-                    useMulticast = data.useMulticast,
-                    multicastAddress = data.multicastAddress,
-                    unicastBindAddress = data.unicastBindAddress,
-                    listenPort = data.listenPort,
-                    timeoutSeconds = data.timeoutSeconds,
-                    useLtpMerge = data.useLtpMerge,
-                    multicastUniverseSubscriptions = ParseUniverseCsv(data.additionalUniverses),
-                    debugPanelVisible = data.showNetworkDebug
-                };
-                //sacnReceiver.SaveNetworkSettings();
-            }
-            else
-            {
-                sAcnParameters = SAcnParameters.Clone(DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters);
-            }
-
-            DmxSettingsSnapshot dmxSettingsSnapshot = new DmxSettingsSnapshot(data.dmxUniverse,data.startChannel,data.networkMode == 1,sAcnParameters);
-            DmxSettingsService.Instance.Save(dmxSettingsSnapshot);
-        }
-
-        if (advancedUnlocked && NetworkDebugService.Instance != null)
-        {
-            NetworkDebugService.Instance.DebugVisible = data.showNetworkDebug;
-        }
-    }
-
-    private static DmxModeManager.FixtureMode ToFixtureMode(string fixtureMode)
+    private static FixtureMode ToFixtureMode(string fixtureMode)
     {
         if (fixtureMode == "moving")
         {
-            return DmxModeManager.FixtureMode.MovingHead;
+            return FixtureMode.MovingHead;
         }
 
         if (fixtureMode == "pixel")
         {
-            return DmxModeManager.FixtureMode.PixelMapping;
+            return FixtureMode.PixelMapping;
         }
 
-        return DmxModeManager.FixtureMode.Standard;
+        return FixtureMode.Standard;
     }
 
     private static int GetMaxSelectableUniverse(CapabilityDefinition capabilityDefinition)

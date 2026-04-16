@@ -32,7 +32,7 @@ public class UI_InfoPanelController : MonoBehaviour
             webUiText.text = defaultText;
     }
 
-    void HandleModeChange(DmxModeManager.FixtureMode mode)
+    void HandleModeChange(FixtureMode mode)
     {
         SetInfoText();
     }

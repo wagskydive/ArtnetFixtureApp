@@ -6,6 +6,8 @@ public class DmxSettingsService : MonoBehaviour
     public DmxSettingsSnapshot CurrentDmxSettings { get; private set; }
     public static DmxSettingsService Instance;
 
+    public static event Action<DmxSettingsSnapshot> OnLoaded;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -15,6 +17,22 @@ public class DmxSettingsService : MonoBehaviour
         }
 
         Instance = this;
+    }
+
+    void OnEnable()
+    {
+        DmxSettingsBus.OnChanged += HandleDmxSettingsChanged;
+
+    }
+    void OnDsable()
+    {
+        DmxSettingsBus.OnChanged -= HandleDmxSettingsChanged;
+
+    }
+
+    private void HandleDmxSettingsChanged(DmxSettingsSnapshot snapshot)
+    {
+        CurrentDmxSettings = snapshot;
     }
 
     public void Load()
@@ -28,42 +46,18 @@ public class DmxSettingsService : MonoBehaviour
 
         universe = ClampUniverse(universe, isSAcn);
         channel = Mathf.Clamp(channel, 1, 512);
-        SAcnParameters parameters;
 
-        if (isSAcn)
-        {
-            parameters = SAcnParameters.Load();
-            parameters.Clamp();
-        }
-        else
-        {
-            parameters = new SAcnParameters();
-        }
 
         CurrentDmxSettings = new DmxSettingsSnapshot(
             universe,
             channel,
             isSAcn,
-            parameters
+            SAcnParameters.Load()
         );
-        DmxSettingsBus.Publish(CurrentDmxSettings);
+        OnLoaded?.Invoke(CurrentDmxSettings);
     }
 
-    public void Save(DmxSettingsSnapshot snapshot)
-    {
-        CurrentDmxSettings = snapshot;
 
-        SaveLoadSettings.SaveInt(SaveLoadSettings.DmxUniverseKey, snapshot.Universe1Based);
-        SaveLoadSettings.SaveInt(SaveLoadSettings.DmxChannelKey, snapshot.StartChannel);
-
-        SaveLoadSettings.SaveInt(SaveLoadSettings.NetworkModeKey, snapshot.IsSAcnMode ? 1 : 0);
-
-
-        SAcnParameters.Save(snapshot.CurrentSAcnParameters);
-        SaveLoadSettings.SaveAndInvokeEvent();
-
-        DmxSettingsBus.Publish(CurrentDmxSettings);
-    }
 
     public static int ClampUniverse(int value, bool isSAcn)
     {

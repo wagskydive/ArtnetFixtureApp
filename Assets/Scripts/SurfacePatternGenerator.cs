@@ -9,7 +9,7 @@ public class SurfacePatternGenerator : BaseDmxMaterialConsumer
     protected override bool IsActiveMode()
     {
         return DmxModeManager.Instance != null &&
-               DmxModeManager.Instance.CurrentMode == DmxModeManager.FixtureMode.Standard;
+               DmxModeManager.Instance.CurrentMode == FixtureMode.Standard;
     }
 
     protected override void OnDmxFrame(DmxFrame frame)

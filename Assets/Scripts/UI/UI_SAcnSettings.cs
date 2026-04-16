@@ -24,7 +24,7 @@ public class UI_SAcnSettings : MonoBehaviour
     {
         if (DmxSettingsService.Instance != null)
         {
-            return DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters.multicastAddress;
+            return DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters.MulticastAddress;
         }
         else
         {
@@ -36,7 +36,7 @@ public class UI_SAcnSettings : MonoBehaviour
     {
         if (DmxSettingsService.Instance != null)
         {
-            return DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters.unicastBindAddress;
+            return DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters.UnicastBindAddress;
         }
         else
         {
@@ -46,10 +46,6 @@ public class UI_SAcnSettings : MonoBehaviour
 
     void Awake()
     {
-        if (multicastAddress != null)
-        {
-            multicastAddress.OnIpSet += SetMulticastAddress;
-        }
         if (unicastBindAddress != null)
         {
             unicastBindAddress.OnIpSet += SetUnicastBindAddress;
@@ -63,20 +59,31 @@ public class UI_SAcnSettings : MonoBehaviour
     {
         LoadSAcnReceiver();
         RefreshLabels();
-        DmxSettingsBus.OnChanged += HanldeSettingsChange;
+        DmxSettingsBus.OnChanged += HandleSettingsChange;
+        SaveLoadSettings.OnSAcnParametersSaved += HandleParametersSaved;
+    }
+
+    private void HandleParametersSaved(SAcnParameters parameters)
+    {
+        HandleSettingsChange();
     }
 
     void OnDisable()
     {
-        DmxSettingsBus.OnChanged -= HanldeSettingsChange;
+        DmxSettingsBus.OnChanged -= HandleSettingsChange;
+        SaveLoadSettings.OnSAcnParametersSaved -= HandleParametersSaved;
+
     }
 
-
-
-    void HanldeSettingsChange(DmxSettingsSnapshot snapshot)
+    void HandleSettingsChange()
     {
         RestartReceiverIfRunning();
         RefreshLabels();
+    }
+
+    void HandleSettingsChange(DmxSettingsSnapshot snapshot)
+    {
+        HandleSettingsChange();
     }
 
 
@@ -95,7 +102,7 @@ public class UI_SAcnSettings : MonoBehaviour
 
         if (_sAcnReceiver == null)
         {
-            gameObject.SetActive(false);
+            //gameObject.SetActive(false);
 
         }
     }
@@ -104,7 +111,7 @@ public class UI_SAcnSettings : MonoBehaviour
     {
         if (DmxSettingsService.Instance != null)
         {
-            if (DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters.useMulticast)
+            if (DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters.UseMulticast)
             {
                 SetUnicastMode();
             }
@@ -133,22 +140,9 @@ public class UI_SAcnSettings : MonoBehaviour
         }
 
         SAcnParameters sAcnParameters = SAcnParameters.Clone(DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters);
-        sAcnParameters.useMulticast = useMulticast;
-        DmxSettingsService.Instance.Save(new DmxSettingsSnapshot(sAcnParameters, DmxSettingsService.Instance.CurrentDmxSettings));
-    }
-
-    public void SetMulticastAddress(string multicastAddress)
-    {
-        if (DmxSettingsService.Instance == null || string.IsNullOrWhiteSpace(multicastAddress))
-        {
-            return;
-        }
-
-
-        SAcnParameters sAcnParameters = SAcnParameters.Clone(DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters);
-        sAcnParameters.multicastAddress = multicastAddress;
-        DmxSettingsService.Instance.Save(new DmxSettingsSnapshot(sAcnParameters, DmxSettingsService.Instance.CurrentDmxSettings));
-
+        sAcnParameters.UseMulticast = useMulticast;
+        SaveLoadSettings.SaveSAcnParameters(sAcnParameters);
+        //DmxSettingsService.Instance.Save(new DmxSettingsSnapshot(sAcnParameters, DmxSettingsService.Instance.CurrentDmxSettings));
     }
 
     public void SetUnicastBindAddress(string bindAddress)
@@ -159,8 +153,9 @@ public class UI_SAcnSettings : MonoBehaviour
         }
 
         SAcnParameters sAcnParameters = SAcnParameters.Clone(DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters);
-        sAcnParameters.unicastBindAddress = bindAddress;
-        DmxSettingsService.Instance.Save(new DmxSettingsSnapshot(sAcnParameters, DmxSettingsService.Instance.CurrentDmxSettings));
+        sAcnParameters.UnicastBindAddress = bindAddress;
+        SaveLoadSettings.SaveSAcnParameters(sAcnParameters);
+        //DmxSettingsService.Instance.Save(new DmxSettingsSnapshot(sAcnParameters, DmxSettingsService.Instance.CurrentDmxSettings));
     }
 
     public void SetListenPort(string listenPortText)
@@ -180,8 +175,8 @@ public class UI_SAcnSettings : MonoBehaviour
         }
 
         SAcnParameters sAcnParameters = SAcnParameters.Clone(DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters);
-        sAcnParameters.listenPort = listenPort;
-        DmxSettingsService.Instance.Save(new DmxSettingsSnapshot(sAcnParameters, DmxSettingsService.Instance.CurrentDmxSettings));
+        sAcnParameters.ListenPort = listenPort;
+        SaveLoadSettings.SaveSAcnParameters(sAcnParameters);//new DmxSettingsSnapshot(sAcnParameters, DmxSettingsService.Instance.CurrentDmxSettings));
 
     }
 
@@ -199,8 +194,9 @@ public class UI_SAcnSettings : MonoBehaviour
         {
             return;
         }
+        SaveLoadSettings.SaveDmxSettings(new DmxSettingsSnapshot(universe1Based, DmxSettingsService.Instance.CurrentDmxSettings));
 
-        DmxSettingsService.Instance.Save(new DmxSettingsSnapshot(universe1Based, DmxSettingsService.Instance.CurrentDmxSettings));
+        //DmxSettingsService.Instance.Save(new DmxSettingsSnapshot(universe1Based, DmxSettingsService.Instance.CurrentDmxSettings));
     }
 
     public void IncreaseUniverse()
@@ -236,7 +232,7 @@ public class UI_SAcnSettings : MonoBehaviour
             return;
         }
 
-        DmxSettingsService.Instance.Save(new DmxSettingsSnapshot(DmxSettingsService.Instance.CurrentDmxSettings, startChannel1Based));
+        SaveLoadSettings.SaveDmxSettings(new DmxSettingsSnapshot(DmxSettingsService.Instance.CurrentDmxSettings, startChannel1Based));
     }
 
     public void IncreaseStartChannel()
@@ -277,8 +273,9 @@ public class UI_SAcnSettings : MonoBehaviour
         }
 
         SAcnParameters sAcnParameters = SAcnParameters.Clone(DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters);
-        sAcnParameters.timeoutSeconds = timeoutSeconds;
-        DmxSettingsService.Instance.Save(new DmxSettingsSnapshot(sAcnParameters, DmxSettingsService.Instance.CurrentDmxSettings));
+        sAcnParameters.TimeoutSeconds = timeoutSeconds;
+        SaveLoadSettings.SaveSAcnParameters(sAcnParameters);
+        //DmxSettingsService.Instance.Save(new DmxSettingsSnapshot(sAcnParameters, DmxSettingsService.Instance.CurrentDmxSettings));
     }
 
     public void ChangeReceiveNetworkData()
@@ -307,7 +304,7 @@ public class UI_SAcnSettings : MonoBehaviour
 
     public void ChangeMergeMode()
     {
-        SetUseLtpMerge(!DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters.useLtpMerge);
+        SetUseLtpMerge(!DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters.UseLtpMerge);
 
 
     }
@@ -321,8 +318,9 @@ public class UI_SAcnSettings : MonoBehaviour
         }
 
         SAcnParameters sAcnParameters = SAcnParameters.Clone(DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters);
-        sAcnParameters.useLtpMerge = useLtpMerge;
-        DmxSettingsService.Instance.Save(new DmxSettingsSnapshot(sAcnParameters, DmxSettingsService.Instance.CurrentDmxSettings));
+        sAcnParameters.UseLtpMerge = useLtpMerge;
+        SaveLoadSettings.SaveSAcnParameters(sAcnParameters);
+        //DmxSettingsService.Instance.Save(new DmxSettingsSnapshot(sAcnParameters, DmxSettingsService.Instance.CurrentDmxSettings));
     }
 
     public void SetMulticastUniverseSubscriptionsCsv(string csvInput)
@@ -358,18 +356,19 @@ public class UI_SAcnSettings : MonoBehaviour
         }
 
         SAcnParameters sAcnParameters = SAcnParameters.Clone(DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters);
-        sAcnParameters.multicastUniverseSubscriptions = parsedUniverses;
-        DmxSettingsService.Instance.Save(new DmxSettingsSnapshot(sAcnParameters, DmxSettingsService.Instance.CurrentDmxSettings));
+        sAcnParameters.MulticastUniverseSubscriptions = parsedUniverses;
+        SaveLoadSettings.SaveSAcnParameters(sAcnParameters);
+        //DmxSettingsService.Instance.Save(new DmxSettingsSnapshot(sAcnParameters, DmxSettingsService.Instance.CurrentDmxSettings));
     }
 
     public void IncreaseListenPort()
     {
-        SetListenPort(DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters.listenPort + 1);
+        SetListenPort(DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters.ListenPort + 1);
     }
 
     public void DecreaseListenPort()
     {
-        SetListenPort(Mathf.Clamp(DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters.listenPort - 1, 0, 65535));
+        SetListenPort(Mathf.Clamp(DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters.ListenPort - 1, 0, 65535));
     }
 
     private void RestartReceiverIfRunning()
@@ -389,7 +388,7 @@ public class UI_SAcnSettings : MonoBehaviour
         {
             return;
         }
-        bool useMulticast = DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters.useMulticast;
+        bool useMulticast = DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters.UseMulticast;
 
         if (transportModeText != null)
         {
@@ -428,7 +427,7 @@ public class UI_SAcnSettings : MonoBehaviour
 
         if (listenPortText != null)
         {
-            listenPortText.text = DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters.listenPort.ToString();
+            listenPortText.text = DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters.ListenPort.ToString();
         }
 
         if (universeText != null)
@@ -443,22 +442,30 @@ public class UI_SAcnSettings : MonoBehaviour
 
         if (timeoutSecondsText != null)
         {
-            timeoutSecondsText.text = DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters.timeoutSeconds.ToString("0.0");
+            timeoutSecondsText.text = DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters.TimeoutSeconds.ToString("0.0");
         }
 
         if (receiveNetworkDataText != null)
         {
-            receiveNetworkDataText.text = _sAcnReceiver.ReceiveNetworkData ? "Enabled" : "Disabled";
+            if (_sAcnReceiver == null)
+            {
+                LoadSAcnReceiver();
+            }
+            if (_sAcnReceiver != null)
+            {
+                receiveNetworkDataText.text = _sAcnReceiver.ReceiveNetworkData ? "Enabled" : "Disabled";
+            }
+
         }
 
         if (mergeModeText != null)
         {
-            mergeModeText.text = DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters.useLtpMerge ? "LTP" : "HTP";
+            mergeModeText.text = DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters.UseLtpMerge ? "LTP" : "HTP";
         }
 
         if (multicastUniversesText != null)
         {
-            multicastUniversesText.text = BuildUniverseCsvForDisplay(DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters.multicastUniverseSubscriptions);
+            multicastUniversesText.text = BuildUniverseCsvForDisplay(DmxSettingsService.Instance.CurrentDmxSettings.CurrentSAcnParameters.MulticastUniverseSubscriptions);
         }
     }
 

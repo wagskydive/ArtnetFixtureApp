@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -22,122 +23,108 @@ public class UI_FixtureModeSelector : MonoBehaviour
     public int CurrentPixelRows
     {
         get => currentPixelRows;
-        set
-        {
-            int clamped = Mathf.Clamp(value, MinPixelWallSize, MaxPixelWallSize);
-            if (currentPixelRows == clamped)
-            {
-                return;
-            }
-
-            currentPixelRows = clamped;
-            ApplyPixelGridSettings();
-            SyncUiState();
-            SavePreferences();
-        }
     }
 
     public int CurrentPixelColumns
     {
         get => currentPixelColumns;
-        set
-        {
-            int clamped = Mathf.Clamp(value, MinPixelWallSize, MaxPixelWallSize);
-            if (currentPixelColumns == clamped)
-            {
-                return;
-            }
 
-            currentPixelColumns = clamped;
-            ApplyPixelGridSettings();
-            SyncUiState();
-            SavePreferences();
-        }
     }
 
     private void Start()
     {
         LoadPreferences();
         EnforceFixtureCountForMode();
-        
+
         ApplyPixelGridSettings();
         SyncUiState();
-        SaveLoadSettings.OnSettingsSaved += UpdateDisplayOnSettingsSave;
+
         dmxModeManager.ApplyModeMaterials();
     }
 
+    void OnEnable()
+    {
+        SaveLoadSettings.OnFixtureModeSaved += HandleFixtureModeSaved;
+        SaveLoadSettings.OnPixelGridSettingsSaved += HandlePixelGridSettingsSaved;
+    }
+
+
+
     private void OnDisable()
     {
-        SavePreferences();
-    }
+        SaveLoadSettings.OnFixtureModeSaved -= HandleFixtureModeSaved;
+        SaveLoadSettings.OnPixelGridSettingsSaved -= HandlePixelGridSettingsSaved;
 
-    private void OnApplicationPause(bool pauseStatus)
+    }
+    private void HandleFixtureModeSaved(FixtureMode fixtureMode)
     {
-        if (pauseStatus)
-        {
-            SavePreferences();
-        }
+        UpdateDisplayOnSettingsSave();
+        SyncUiState();
+    }
+    private void HandlePixelGridSettingsSaved(PixelGridSettings settings)
+    {
+        ApplyPixelGridSettings();
+        SyncUiState();
     }
 
-    public void SetMode(DmxModeManager.FixtureMode mode)
+
+
+    public void SetMode(FixtureMode mode)
     {
         if (dmxModeManager.CurrentMode == mode)
         {
             return;
         }
 
-        dmxModeManager.SetFixtureMode(mode);
+        SaveLoadSettings.SaveFixtureMode(mode);
         EnforceFixtureCountForMode();
 
         ApplyPixelGridSettings();
         SyncUiState();
-        SavePreferences();
-        
     }
 
     public void IncreaseMode()
     {
-        int modeCount = System.Enum.GetValues(typeof(DmxModeManager.FixtureMode)).Length;
+        int modeCount = System.Enum.GetValues(typeof(FixtureMode)).Length;
         int nextMode = ((int)dmxModeManager.CurrentMode + 1) % modeCount;
-        SetMode((DmxModeManager.FixtureMode)nextMode);
+
+        SetMode((FixtureMode)nextMode);
 
     }
 
     public void DecreaseMode()
     {
-        int modeCount = System.Enum.GetValues(typeof(DmxModeManager.FixtureMode)).Length;
+        int modeCount = System.Enum.GetValues(typeof(FixtureMode)).Length;
         int previousMode = ((int)dmxModeManager.CurrentMode - 1 + modeCount) % modeCount;
-        SetMode((DmxModeManager.FixtureMode)previousMode);
+        SetMode((FixtureMode)previousMode);
 
     }
 
     public void IncreasePixelRows()
     {
-        CurrentPixelRows = currentPixelRows + PixelWallStepSize;
+        int clamped = Mathf.Clamp(currentPixelRows + PixelWallStepSize, MinPixelWallSize, MaxPixelWallSize);
+        SaveLoadSettings.SavePixelGridSettings(new PixelGridSettings(clamped, currentPixelColumns));
+
     }
 
     public void DecreasePixelRows()
     {
-        CurrentPixelRows = currentPixelRows - PixelWallStepSize;
+        int clamped = Mathf.Clamp(currentPixelRows - PixelWallStepSize, MinPixelWallSize, MaxPixelWallSize);
+        SaveLoadSettings.SavePixelGridSettings(new PixelGridSettings(clamped, currentPixelColumns));
     }
 
     public void IncreasePixelColumns()
     {
-        CurrentPixelColumns = currentPixelColumns + PixelWallStepSize;
+        int clamped = Mathf.Clamp(currentPixelColumns + PixelWallStepSize, MinPixelWallSize, MaxPixelWallSize);
+        SaveLoadSettings.SavePixelGridSettings(new PixelGridSettings(currentPixelRows, clamped));
     }
 
     public void DecreasePixelColumns()
     {
-        CurrentPixelColumns = currentPixelColumns - PixelWallStepSize;
+        int clamped = Mathf.Clamp(currentPixelColumns - PixelWallStepSize, MinPixelWallSize, MaxPixelWallSize);
+        SaveLoadSettings.SavePixelGridSettings(new PixelGridSettings(currentPixelRows, clamped));
     }
 
-    public void SavePreferences()
-    {
-        SaveLoadSettings.SaveInt(SaveLoadSettings.FixtureModeKey, (int)dmxModeManager.CurrentMode);
-        SaveLoadSettings.SaveInt(SaveLoadSettings.PixelRowsKey, currentPixelRows);
-        SaveLoadSettings.SaveInt(SaveLoadSettings.PixelColumnsKey, currentPixelColumns);
-        SaveLoadSettings.SaveAndInvokeEvent();
-    }
 
     public void UpdateDisplayOnSettingsSave()
     {
@@ -147,7 +134,7 @@ public class UI_FixtureModeSelector : MonoBehaviour
 
     public void LoadPreferences()
     {
-        dmxModeManager.SetFixtureMode((DmxModeManager.FixtureMode)Mathf.Clamp(SaveLoadSettings.LoadInt(SaveLoadSettings.FixtureModeKey, (int)DmxModeManager.FixtureMode.Standard), 0, (int)DmxModeManager.FixtureMode.PixelMapping));
+        dmxModeManager.SetFixtureMode((FixtureMode)Mathf.Clamp(SaveLoadSettings.LoadInt(SaveLoadSettings.FixtureModeKey, (int)FixtureMode.Standard), 0, (int)FixtureMode.PixelMapping));
         currentPixelRows = Mathf.Clamp(SaveLoadSettings.LoadInt(SaveLoadSettings.PixelRowsKey, currentPixelRows), MinPixelWallSize, MaxPixelWallSize);
         currentPixelColumns = Mathf.Clamp(SaveLoadSettings.LoadInt(SaveLoadSettings.PixelColumnsKey, currentPixelColumns), MinPixelWallSize, MaxPixelWallSize);
     }
@@ -161,12 +148,12 @@ public class UI_FixtureModeSelector : MonoBehaviour
 
         if (pixelGridControlsContainer != null)
         {
-            pixelGridControlsContainer.SetActive(dmxModeManager.CurrentMode == DmxModeManager.FixtureMode.PixelMapping);
+            pixelGridControlsContainer.SetActive(dmxModeManager.CurrentMode == FixtureMode.PixelMapping);
         }
 
         if (fixtureCountControlsContainer != null)
         {
-            fixtureCountControlsContainer.SetActive(dmxModeManager.CurrentMode == DmxModeManager.FixtureMode.Standard);
+            fixtureCountControlsContainer.SetActive(dmxModeManager.CurrentMode == FixtureMode.Standard);
         }
 
         if (pixelRowsValueText != null)
@@ -180,14 +167,14 @@ public class UI_FixtureModeSelector : MonoBehaviour
         }
     }
 
-    private static string GetModeDisplayName(DmxModeManager.FixtureMode mode)
+    private static string GetModeDisplayName(FixtureMode mode)
     {
-        if (mode == DmxModeManager.FixtureMode.MovingHead)
+        if (mode == FixtureMode.MovingHead)
         {
             return "Moving Head";
         }
 
-        if (mode == DmxModeManager.FixtureMode.PixelMapping)
+        if (mode == FixtureMode.PixelMapping)
         {
             return "Pixel Mapping";
         }
@@ -202,7 +189,7 @@ public class UI_FixtureModeSelector : MonoBehaviour
             return;
         }
 
-        if (dmxModeManager.CurrentMode == DmxModeManager.FixtureMode.Standard)
+        if (dmxModeManager.CurrentMode == FixtureMode.Standard)
         {
             fixtureMeshManager.RestoreSavedFixtureCount();
             return;
@@ -210,13 +197,13 @@ public class UI_FixtureModeSelector : MonoBehaviour
 
         if (fixtureMeshManager.FixtureCount != 1)
         {
-            fixtureMeshManager.RebuildFixtures(1, savePreference: false);
+            fixtureMeshManager.RebuildFixtures(1);
         }
     }
 
     private void ApplyPixelGridSettings()
     {
-        
+
         if (dmxModeManager.PixelMappingModeMaterial != null)
         {
             dmxModeManager.PixelMappingModeMaterial.SetFloat("_Rows", currentPixelRows);

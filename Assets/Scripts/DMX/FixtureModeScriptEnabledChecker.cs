@@ -15,17 +15,17 @@ public class FixtureModeScriptEnabledChecker : MonoBehaviour
         EnableScript(DmxModeManager.Instance.CurrentMode);
     }
 
-    private void EnableScript(DmxModeManager.FixtureMode mode)
+    private void EnableScript(FixtureMode mode)
     {
-        if(mode == DmxModeManager.FixtureMode.Standard)
+        if(mode == FixtureMode.Standard)
         {
             EnableSurfacePatternGeneratorScripts();
         }
-        if (mode == DmxModeManager.FixtureMode.MovingHead)
+        if (mode == FixtureMode.MovingHead)
         {
             EnableMovingHeadControllers();
         }
-        if (mode == DmxModeManager.FixtureMode.PixelMapping)
+        if (mode == FixtureMode.PixelMapping)
         {
             EnablePixelControllers();
         }

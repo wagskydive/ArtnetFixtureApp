@@ -191,11 +191,12 @@ public class EntitlementStore
     {
         string raw = string.Join("|", _unlockedProductIds.OrderBy(id => id, StringComparer.Ordinal));
         string encrypted = IapEntitlementCrypto.Encrypt(raw);
-        SaveLoadSettings.SaveString(SaveLoadSettings.IapEntitlementsKey, encrypted);
+
+        SaveLoadSettings.SaveEntitlements(encrypted);
 
         string consumablesRaw = BuildConsumablesRawString();
-        SaveLoadSettings.SaveString(SaveLoadSettings.IapConsumablesKey, consumablesRaw);
-        SaveLoadSettings.SaveAndInvokeEvent();
+
+        SaveLoadSettings.SaveConsumables(consumablesRaw);
     }
 
     private void LoadConsumableCountsFromLocalStorage()

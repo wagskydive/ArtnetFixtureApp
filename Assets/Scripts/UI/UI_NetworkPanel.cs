@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,16 +10,30 @@ public class UI_NetworkPanel : MonoBehaviour
     [SerializeField] private GameObject sAcnSettingsRoot;
     [SerializeField] private NetworkingModeManager networkingModeManager;
     [SerializeField] private LockedCapabilityPanel lockedCapabilityPanel;
-    
+
     [SerializeField] private Text networkModeText;
 
     void OnEnable()
     {
         OpenPanel();
+        DmxSettingsBus.OnChanged += HandleDmxSettingsChanged;
+        DmxSettingsService.OnLoaded += HandleDmxSettingsChanged;
+    }
+    void OnDisable()
+    {
+        DmxSettingsBus.OnChanged -= HandleDmxSettingsChanged;
+        DmxSettingsService.OnLoaded -= HandleDmxSettingsChanged;
+
+    }
+
+    private void HandleDmxSettingsChanged(DmxSettingsSnapshot snapshot)
+    {
+        RefreshModeVisibility();
     }
 
     public void OpenPanel()
     {
+        RefreshModeVisibility();
         if (!IsAdvancedNetworkingUnlocked())
         {
             if (lockedCapabilityPanel != null)
@@ -41,7 +56,7 @@ public class UI_NetworkPanel : MonoBehaviour
             networkPanelRoot.SetActive(true);
         }
 
-        RefreshModeVisibility();
+
     }
 
     public void ClosePanel()
@@ -54,7 +69,8 @@ public class UI_NetworkPanel : MonoBehaviour
 
     public void SetNetworkingMode(int modeIndex)
     {
-        networkingModeManager?.SetModeFromIndex(modeIndex);
+        DmxSettingsSnapshot snapshot = new DmxSettingsSnapshot(modeIndex == 1, DmxSettingsService.Instance.CurrentDmxSettings);
+        SaveLoadSettings.SaveDmxSettings(snapshot);
         RefreshModeVisibility();
     }
 
@@ -74,9 +90,10 @@ public class UI_NetworkPanel : MonoBehaviour
         {
             return;
         }
+        bool isSAcn = DmxSettingsService.Instance.CurrentDmxSettings.IsSAcnMode;
 
-        sAcnSettingsRoot.SetActive(networkingModeManager.IsSAcnMode);
-        if(networkingModeManager.IsSAcnMode)
+        sAcnSettingsRoot.SetActive(isSAcn);
+        if (isSAcn)
         {
             networkModeText.text = "sACN";
         }
@@ -84,7 +101,7 @@ public class UI_NetworkPanel : MonoBehaviour
         {
             networkModeText.text = "Art-Net";
         }
-        
+
     }
 
     private static bool IsAdvancedNetworkingUnlocked()

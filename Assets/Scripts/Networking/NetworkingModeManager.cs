@@ -29,6 +29,14 @@ public class NetworkingModeManager : MonoBehaviour
         }
 
         Instance = this;
+    }
+
+    void Start()
+    {
+        Initialize();
+    }
+    void Initialize()
+    {
         _dmxBuffer = new DmxBuffer();
 
         int initialMode = Mathf.Clamp(
@@ -50,7 +58,7 @@ public class NetworkingModeManager : MonoBehaviour
             }
         }
 
-        SetModeFromIndex(initialMode);
+        ApplyMode(initialMode);
         OnManagerReady?.Invoke();
     }
 
@@ -62,17 +70,35 @@ public class NetworkingModeManager : MonoBehaviour
         }
     }
 
-
-
-    public void SetModeFromIndex(int modeIndex)
+    void OnEnable()
     {
-        if(ActiveModeIndex == modeIndex)
+        DmxSettingsBus.OnChanged += HandleSettingSave;
+    }
+
+    void OnDisable()
+    {
+        DmxSettingsBus.OnChanged -= HandleSettingSave;
+    }
+    private void HandleSettingSave(DmxSettingsSnapshot snapshot)
+    {
+        ApplyMode(snapshot.IsSAcnMode);
+    }
+
+    private void ApplyMode(bool isSAcn)
+    {
+        ApplyMode(isSAcn ? 1 : 0);
+    }
+
+
+    private void ApplyMode(int modeIndex)
+    {
+        if (ActiveModeIndex == modeIndex)
         {
             return;
         }
         int clampedMode = Mathf.Clamp(modeIndex, ArtNetModeIndex, SAcnModeIndex);
 
-        if(NetworkReceiver != null)
+        if (NetworkReceiver != null)
         {
             INetworkReceiver lastReceiver = NetworkReceiver;
             lastReceiver.StopReceiver();
@@ -100,10 +126,6 @@ public class NetworkingModeManager : MonoBehaviour
 
         nextReceiver.DmxBuffer = _dmxBuffer;
         nextReceiver.ReceiveNetworkData = true;
-
-
-        DmxSettingsSnapshot dmxSettingsSnapshot = new DmxSettingsSnapshot(clampedMode == SAcnModeIndex, DmxSettingsService.Instance.CurrentDmxSettings);
-        DmxSettingsService.Instance.Save(dmxSettingsSnapshot);
 
 
         Debug.Log($"[NetworkingModeManager] Activating {(clampedMode == ArtNetModeIndex ? "Art-Net" : "sACN")} mode");

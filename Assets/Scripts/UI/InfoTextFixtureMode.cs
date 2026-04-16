@@ -52,11 +52,11 @@ public class InfoTextFixtureMode : MonoBehaviour, IInfoText
 
         switch (DmxModeManager.Instance.CurrentMode)
         {
-            case DmxModeManager.FixtureMode.Standard:
+            case FixtureMode.Standard:
                 return standardModeText;
-            case DmxModeManager.FixtureMode.MovingHead:
+            case FixtureMode.MovingHead:
                 return movingHeadModeText;
-            case DmxModeManager.FixtureMode.PixelMapping:
+            case FixtureMode.PixelMapping:
                 return pixelMappingModeText;
             default:
                 return "DMX Mode unknown.";

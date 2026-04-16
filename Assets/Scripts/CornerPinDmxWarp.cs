@@ -48,7 +48,7 @@ public class CornerPinDmxWarp : BaseRawDmxConsumer
     protected override bool IsActiveMode()
     {
         return DmxModeManager.Instance != null &&
-               (DmxModeManager.Instance.CurrentMode == DmxModeManager.FixtureMode.Standard || DmxModeManager.Instance.CurrentMode == DmxModeManager.FixtureMode.PixelMapping);
+               (DmxModeManager.Instance.CurrentMode == FixtureMode.Standard || DmxModeManager.Instance.CurrentMode == FixtureMode.PixelMapping);
     }
 
     protected override void OnDmxFrame(DmxFrame frame)
@@ -103,7 +103,7 @@ public class CornerPinDmxWarp : BaseRawDmxConsumer
 
     private int ResolveCornerPinStartChannel()
     {
-        if (DmxModeManager.Instance.CurrentMode == DmxModeManager.FixtureMode.PixelMapping)
+        if (DmxModeManager.Instance.CurrentMode == FixtureMode.PixelMapping)
         {
             return PixelMappingDmxPersonality.CornerPinStartChannel;
         }

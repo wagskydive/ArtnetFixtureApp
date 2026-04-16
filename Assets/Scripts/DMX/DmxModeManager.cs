@@ -1,6 +1,11 @@
 using UnityEngine;
 using System;
-
+public enum FixtureMode
+{
+    Standard = 0,
+    MovingHead = 1,
+    PixelMapping = 2
+}
 [DefaultExecutionOrder(-100)]
 public class DmxModeManager : MonoBehaviour
 {
@@ -20,12 +25,7 @@ public class DmxModeManager : MonoBehaviour
     public static event Action Awoken;
     public static event Action OnManagerReady;
 
-    public enum FixtureMode
-    {
-        Standard = 0,
-        MovingHead = 1,
-        PixelMapping = 2
-    }
+
 
     public static DmxModeManager Instance { get; private set; }
 
@@ -51,6 +51,21 @@ public class DmxModeManager : MonoBehaviour
         }
     }
 
+    void OnEnable()
+    {
+        SaveLoadSettings.OnFixtureModeSaved += HandleModeSaved;
+    }
+
+    private void HandleModeSaved(FixtureMode mode)
+    {
+        //FixtureMode mode = (FixtureMode)SaveLoadSettings.LoadInt(SaveLoadSettings.FixtureModeKey, 0);
+        SetFixtureMode(mode);
+    }
+
+    void OnDisable()
+    {
+        SaveLoadSettings.OnFixtureModeSaved -= HandleModeSaved;
+    }
     private FixtureMode currentMode;
 
     public FixtureMode CurrentMode { get => currentMode; }

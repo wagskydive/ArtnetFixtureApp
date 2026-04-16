@@ -16,7 +16,7 @@ public class PixelMappingOutputController : BaseDmxMaterialConsumer
     protected override bool IsActiveMode()
     {
         return DmxModeManager.Instance != null &&
-               DmxModeManager.Instance.CurrentMode == DmxModeManager.FixtureMode.PixelMapping;
+               DmxModeManager.Instance.CurrentMode == FixtureMode.PixelMapping;
     }
 
 

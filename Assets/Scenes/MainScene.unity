@@ -22075,11 +22075,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 780391781597775863, guid: f107c9e9881c4c04792ce9410507bead, type: 3}
       propertyPath: canEditOctet3
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 780391781597775863, guid: f107c9e9881c4c04792ce9410507bead, type: 3}
       propertyPath: canEditOctet4
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 780391781597775863, guid: f107c9e9881c4c04792ce9410507bead, type: 3}
       propertyPath: binding.targetObject

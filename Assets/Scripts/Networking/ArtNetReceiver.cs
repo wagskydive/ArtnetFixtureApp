@@ -10,9 +10,6 @@ using UnityEngine;
 public class ArtNetReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsumer
 {
 
-    public event Action NoDataReceivedRecently;
-
-    public event Action DataReceivedAgain;
 
     //public int Universe1Base { get => SaveLoadSettings.LoadInt(SaveLoadSettings.DmxUniverseKey, 1); set => SaveLoadSettings.SaveInt(SaveLoadSettings.DmxUniverseKey, value); }
 
@@ -109,6 +106,8 @@ public class ArtNetReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsu
         {
             _lastPacketTime = Time.time;
             _receivedPacketThisFrame = false;
+            HasNotReceivedDataEventSent = false;
+            return;
         }
 
         // Update whether we should show the "waiting for data" message
@@ -117,7 +116,7 @@ public class ArtNetReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsu
         {
             if (!HasNotReceivedDataEventSent)
             {
-                NoDataReceivedRecently?.Invoke();
+                RaiseNoDataEvent();
                 HasNotReceivedDataEventSent = true;
             }
         }
@@ -125,10 +124,20 @@ public class ArtNetReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsu
         {
             if (HasNotReceivedDataEventSent)
             {
-                DataReceivedAgain?.Invoke();
+                RaiseDataBackEvent();
                 HasNotReceivedDataEventSent = false;
             }
         }
+    }
+
+    void RaiseNoDataEvent()
+    {
+        NetworkDataEvents.RaiseNoDataEvent();
+    }
+
+    void RaiseDataBackEvent()
+    {
+        NetworkDataEvents.RaiseDataBackEvent();
     }
 
     public void StartReceiver()

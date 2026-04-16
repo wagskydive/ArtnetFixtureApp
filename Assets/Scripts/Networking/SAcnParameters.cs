@@ -1,45 +1,52 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 [Serializable]
 public class SAcnParameters
 {
-    public bool useMulticast = true;
-    public string multicastAddress = "239.255.0.1";
-    public string unicastBindAddress = "0.0.0.0";
-    public int listenPort = 5568;
-    public float timeoutSeconds = 2f;
-    public bool useLtpMerge = false;
-    public List<int> multicastUniverseSubscriptions = new List<int>();
-    public bool debugPanelVisible = false;
+    public bool UseMulticast = true;
+    public string MulticastAddress { get => GetCurrentMulticastAddress(); }
+
+    public string UnicastBindAddress = "0.0.0.0";
+    public int ListenPort = 5568;
+    public float TimeoutSeconds = 2f;
+    public bool UseLtpMerge = false;
+    public List<int> MulticastUniverseSubscriptions = new List<int>();
+    public bool DebugPanelVisible = false;
+
+    public SAcnParameters(bool useMulticast, string unicastBindAddress, int listenPort, float timeoutSeconds, bool useLtpMerge, List<int> multicastUniverseSubscriptions, bool debugPanelVisible)
+    {
+        UseMulticast = useMulticast;
+        UnicastBindAddress = unicastBindAddress;
+        ListenPort = listenPort;
+        TimeoutSeconds = timeoutSeconds;
+        UseLtpMerge = useLtpMerge;
+        MulticastUniverseSubscriptions = multicastUniverseSubscriptions;
+        DebugPanelVisible = debugPanelVisible;
+    }
 
     public void Clamp()
     {
-        listenPort = Mathf.Clamp(listenPort, 1, 65535);
-        timeoutSeconds = Mathf.Max(0.1f, timeoutSeconds);
+        ListenPort = Mathf.Clamp(ListenPort, 1, 65535);
+        TimeoutSeconds = Mathf.Max(0.1f, TimeoutSeconds);
 
-        if (!TryParseIpv4(multicastAddress, out IPAddress multicast) || !IsMulticast(multicast))
+
+        if (!TryParseIpv4(UnicastBindAddress, out _))
         {
-            multicastAddress = "239.255.0.1";
+            UnicastBindAddress = "0.0.0.0";
         }
 
-        if (!TryParseIpv4(unicastBindAddress, out _))
+        if (MulticastUniverseSubscriptions == null)
         {
-            unicastBindAddress = "0.0.0.0";
-        }
-
-        if (multicastUniverseSubscriptions == null)
-        {
-            multicastUniverseSubscriptions = new List<int>();
+            MulticastUniverseSubscriptions = new List<int>();
             return;
         }
 
-        for (int i = 0; i < multicastUniverseSubscriptions.Count; i++)
+        for (int i = 0; i < MulticastUniverseSubscriptions.Count; i++)
         {
-            multicastUniverseSubscriptions[i] = Mathf.Clamp(multicastUniverseSubscriptions[i], 0, 63999);
+            MulticastUniverseSubscriptions[i] = Mathf.Clamp(MulticastUniverseSubscriptions[i], 0, 63999);
         }
     }
 
@@ -49,6 +56,11 @@ public class SAcnParameters
         int hi = (safeUniverse >> 8) & 0xFF;
         int lo = safeUniverse & 0xFF;
         return $"239.255.{hi}.{lo}";
+    }
+
+    private string GetCurrentMulticastAddress()
+    {
+        return BuildUniverseMulticastAddress(DmxSettingsService.Instance.CurrentDmxSettings.Universe1Based);
     }
 
     public static bool TryParseUniverseFromMulticast(string address, out int universe1Based)
@@ -112,7 +124,7 @@ public class SAcnParameters
         return values;
     }
 
-    private static string BuildUniverseListCsv(List<int> universes1BasedValues)
+    public static string BuildUniverseListCsv(List<int> universes1BasedValues)
     {
         if (universes1BasedValues == null || universes1BasedValues.Count == 0)
         {
@@ -131,34 +143,22 @@ public class SAcnParameters
     public static SAcnParameters Load()
     {
         SAcnParameters parameters = new SAcnParameters
-        {
-            useMulticast = SaveLoadSettings.LoadInt(SaveLoadSettings.SAcnUseMulticastKey, 1) == 1,
-            multicastAddress = SaveLoadSettings.LoadString(SaveLoadSettings.SAcnMulticastAddressKey, "239.255.0.1"),
-            unicastBindAddress = SaveLoadSettings.LoadString(SaveLoadSettings.SAcnUnicastBindAddressKey, "0.0.0.0"),
-            listenPort = SaveLoadSettings.LoadInt(SaveLoadSettings.SAcnListenPortKey, 5568),
-            timeoutSeconds = SaveLoadSettings.LoadFloat(SaveLoadSettings.SAcnTimeoutSecondsKey, 2f),
-            useLtpMerge = SaveLoadSettings.LoadInt(SaveLoadSettings.SAcnUseLtpMergeKey, true ? 1 : 0) == 1,
-            multicastUniverseSubscriptions = SAcnParameters.ParseUniverseList(SaveLoadSettings.LoadString(SaveLoadSettings.SAcnMulticastUniversesKey, string.Empty)),
-            debugPanelVisible = SaveLoadSettings.LoadInt(SaveLoadSettings.SAcnDebugVisibleKey, 0) == 1
-        };
+        (
+            SaveLoadSettings.LoadInt(SaveLoadSettings.SAcnUseMulticastKey, 1) == 1,
+            SaveLoadSettings.LoadString(SaveLoadSettings.SAcnUnicastBindAddressKey, "0.0.0.0"),
+            SaveLoadSettings.LoadInt(SaveLoadSettings.SAcnListenPortKey, 5568),
+            SaveLoadSettings.LoadFloat(SaveLoadSettings.SAcnTimeoutSecondsKey, 2f),
+            SaveLoadSettings.LoadInt(SaveLoadSettings.SAcnUseLtpMergeKey, true ? 1 : 0) == 1,
+            SAcnParameters.ParseUniverseList(SaveLoadSettings.LoadString(SaveLoadSettings.SAcnMulticastUniversesKey, string.Empty)),
+            SaveLoadSettings.LoadInt(SaveLoadSettings.SAcnDebugVisibleKey, 0) == 1
+        );
         parameters.Clamp();
         return parameters;
     }
 
-    public static event Action<SAcnParameters> OnSAcnParametersSaved;
 
-    public static void Save(SAcnParameters p)
-    {
-        SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnUseMulticastKey, p.useMulticast ? 1 : 0);
-        SaveLoadSettings.SaveString(SaveLoadSettings.SAcnMulticastAddressKey, p.multicastAddress);
-        SaveLoadSettings.SaveString(SaveLoadSettings.SAcnUnicastBindAddressKey, p.unicastBindAddress);
-        SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnListenPortKey, p.listenPort);
-        SaveLoadSettings.SaveFloat(SaveLoadSettings.SAcnTimeoutSecondsKey, p.timeoutSeconds);
-        SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnUseLtpMergeKey, p.useLtpMerge ? 1 : 0);
-        SaveLoadSettings.SaveString(SaveLoadSettings.SAcnMulticastUniversesKey, BuildUniverseListCsv(p.multicastUniverseSubscriptions));
-        SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnDebugVisibleKey, p.debugPanelVisible ? 1 : 0);
-        OnSAcnParametersSaved?.Invoke(p);
-    }
+
+
 
     public static SAcnParameters Clone(SAcnParameters p)
     {
@@ -166,33 +166,30 @@ public class SAcnParameters
         {
             return null;
         }
-        SAcnParameters newParameters = new SAcnParameters
-        {
-            useMulticast = p.useMulticast,
-            multicastAddress = p.multicastAddress,
-            unicastBindAddress = p.unicastBindAddress,
-            listenPort = p.listenPort,
-            timeoutSeconds = p.timeoutSeconds,
-            useLtpMerge = p.useLtpMerge,
-            multicastUniverseSubscriptions = p.multicastUniverseSubscriptions,
-            debugPanelVisible = p.debugPanelVisible
-        };
+        SAcnParameters newParameters = new SAcnParameters(
+            p.UseMulticast,
+            p.UnicastBindAddress,
+            p.ListenPort,
+            p.TimeoutSeconds,
+            p.UseLtpMerge,
+            new List<int>(p.MulticastUniverseSubscriptions),
+            p.DebugPanelVisible);
+
         return newParameters;
     }
 
     public static SAcnParameters Default()
     {
         SAcnParameters newParameters = new SAcnParameters
-        {
-            useMulticast = true,
-            multicastAddress = "239.255.0.1",
-            unicastBindAddress = "0.0.0.0",
-            listenPort = 5568,
-            timeoutSeconds = 2f,
-            useLtpMerge = true,
-            multicastUniverseSubscriptions = new List<int>(),
-            debugPanelVisible = false
-        };
+        (
+            true,
+            "0.0.0.0",
+            5568,
+            2f,
+            true,
+            new List<int>(),
+            false
+        );
         return newParameters;
     }
 }
