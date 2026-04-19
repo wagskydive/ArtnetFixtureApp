@@ -96,7 +96,7 @@ Material:
     - _SpecularHighlights: 1
     - _Speed: 1
     - _SrcBlend: 1
-    - _StrobeGate: 1
+    - _StrobeGate: 0
     - _UVSec: 0
     - _UseMediaTex: 0
     - _ZWrite: 1

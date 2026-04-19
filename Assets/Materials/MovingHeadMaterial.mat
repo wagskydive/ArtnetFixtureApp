@@ -78,7 +78,7 @@ Material:
     - _Glossiness: 0.5
     - _GlossyReflections: 1
     - _GoboScale: 1
-    - _Intensity: 0.726
+    - _Intensity: 0
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
@@ -89,11 +89,11 @@ Material:
     - _SpecularHighlights: 1
     - _Speed: 1
     - _SrcBlend: 1
-    - _StrobeGate: 1
+    - _StrobeGate: 0
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:
-    - _Color: {r: 0.6226415, g: 0.23789605, b: 0.23789605, a: 1}
+    - _Color: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
