@@ -442,7 +442,7 @@ MonoBehaviour:
     any device the network owns that feature, all devices will be unlocked.
 
     Press
-    OK to open the settings and navigate to the purchases close this window.
+    OK to open the settings and navigate to the purchases to unlock "Mutiple Devices"
 
 '
 --- !u!222 &18257658
@@ -16272,7 +16272,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ArtnetFixture.Core::NetworkHeartbeat
   port: 7777
-  broadcastInterval: 2
+  broadcastInterval: 1
   licenseManager: {fileID: 1744031078}
 --- !u!114 &1744031078
 MonoBehaviour:
@@ -16286,8 +16286,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 63784d5835df5c14f922349bae89f535, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ArtnetFixture.Core::MultiDeviceLicenseManager
-  deviceTimeout: 10
+  deviceTimeout: 3
   iapStabilityTime: 2
+  leaderStabilityTime: 1.5
 --- !u!114 &1744031079
 MonoBehaviour:
   m_ObjectHideFlags: 0

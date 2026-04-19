@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -13,7 +14,7 @@ public class NetworkHeartbeat : MonoBehaviour
 {
     [Header("Network")]
     public int port = 7777;
-    public float broadcastInterval = 2f;
+    public float broadcastInterval = 1f;
 
     [Header("References")]
     public MultiDeviceLicenseManager licenseManager;
@@ -26,26 +27,56 @@ public class NetworkHeartbeat : MonoBehaviour
 
     private float nextBroadcastTime;
 
+    private readonly Queue<Action> mainThreadQueue = new Queue<Action>();
+
+    private bool isActive = true;
+
+    private void OnApplicationPause(bool pause)
+    {
+        isActive = !pause;
+
+        if (pause)
+        {
+            StopNetworking();
+        }
+        else
+        {
+            StartNetworking();
+        }
+    }
+
     private void Start()
     {
         deviceId = SystemInfo.deviceUniqueIdentifier;
 
-        // Setup sender
+        StartNetworking();
+    }
+
+    private void StartNetworking()
+    {
+        if (sender != null || receiver != null)
+            return;
+
         sender = new UdpClient();
         sender.EnableBroadcast = true;
 
-        // Setup receiver
         receiver = new UdpClient(port);
         receiver.BeginReceive(OnReceive, null);
     }
 
     private void Update()
     {
+        if (!isActive)
+            return;
 
         if (Time.time >= nextBroadcastTime)
         {
             Broadcast();
             nextBroadcastTime = Time.time + broadcastInterval;
+        }
+        while (mainThreadQueue.Count > 0)
+        {
+            mainThreadQueue.Dequeue().Invoke();
         }
     }
 
@@ -69,67 +100,76 @@ public class NetworkHeartbeat : MonoBehaviour
 
     private void OnReceive(IAsyncResult ar)
     {
+        if (receiver == null)
+            return;
         try
         {
             IPEndPoint ep = new IPEndPoint(IPAddress.Any, port);
             byte[] data = receiver.EndReceive(ar, ref ep);
 
             string message = Encoding.UTF8.GetString(data);
+            mainThreadQueue.Enqueue(() => { ParseMessage(message); });
             ParseMessage(message);
 
-            receiver.BeginReceive(OnReceive, null);
+            if (receiver != null)
+                receiver.BeginReceive(OnReceive, null);
         }
         catch { }
     }
 
-   private void ParseMessage(string message)
-{
-    var parts = message.Split('|');
-
-    if (parts.Length == 0)
-        return;
-
-    string type = parts[0];
-
-    if (type == "GOODBYE" && parts.Length >= 2)
+    private void ParseMessage(string message)
     {
-        string remoteId = parts[1];
+        var parts = message.Split('|');
 
-        licenseManager?.ForceRemoveDevice(remoteId);
-        return;
-    }
+        if (parts.Length == 0)
+            return;
 
-    if (type == "HEARTBEAT" && parts.Length >= 3)
-    {
-        string remoteId = parts[1];
-        bool remoteHasIAP = parts[2] == "1";
-        Debug.Log("[MultiDevice] Heartbeat received from: "+remoteId+" Remote has ip is: "+remoteHasIAP);
-        if (remoteId == deviceId)
+        string type = parts[0];
+
+        if (type == "GOODBYE" && parts.Length >= 2)
         {
-            licenseManager?.CleanupDevices();
+            string remoteId = parts[1];
+
+            licenseManager?.ForceRemoveDevice(remoteId);
             return;
         }
-        licenseManager?.UpdateDevice(remoteId, remoteHasIAP);
+
+        if (type == "HEARTBEAT" && parts.Length >= 3)
+        {
+            string remoteId = parts[1];
+            bool remoteHasIAP = parts[2] == "1";
+            Debug.Log("[MultiDevice] Heartbeat received from: " + remoteId + " Remote has ip is: " + remoteHasIAP);
+            licenseManager?.UpdateDevice(remoteId, remoteHasIAP);
+        }
     }
-}
 
     private void SendGoodbye()
-{
-    try
     {
-        string message = $"GOODBYE|{deviceId}";
-        byte[] data = Encoding.UTF8.GetBytes(message);
+        try
+        {
+            string message = $"GOODBYE|{deviceId}";
+            byte[] data = Encoding.UTF8.GetBytes(message);
 
-        IPEndPoint endPoint = new IPEndPoint(IPAddress.Broadcast, port);
-        sender.Send(data, data.Length, endPoint);
+            IPEndPoint endPoint = new IPEndPoint(IPAddress.Broadcast, port);
+            sender.Send(data, data.Length, endPoint);
+        }
+        catch { }
     }
-    catch { }
-}
 
     private void OnApplicationQuit()
     {
+        StopNetworking();
+    }
+
+
+    private void StopNetworking()
+    {
         SendGoodbye();
-        sender?.Close();
-        receiver?.Close();
+
+        try { sender?.Close(); } catch { }
+        try { receiver?.Close(); } catch { }
+
+        sender = null;
+        receiver = null;
     }
 }

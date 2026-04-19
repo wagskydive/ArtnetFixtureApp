@@ -15,13 +15,21 @@ public class MultiDeviceLicenseManager : MonoBehaviour
 
     [Header("Timing")]
     [Tooltip("How long before a device is considered gone (seconds)")]
-    public float deviceTimeout = 8f;
+    public float deviceTimeout = 3f;
 
     [Tooltip("How long an IAP device must be visible before unlocking (seconds)")]
     public float iapStabilityTime = 2f;
 
     public event Action<string> OnDeviceJoinedInternal;
     public event Action<string> OnDeviceLeftInternal;
+
+
+    // Leader tracking
+    private string currentLeaderId;
+    private float leaderLastChangedTime;
+
+    [Tooltip("How long the leader must stay stable before we trust it")]
+    public float leaderStabilityTime = 1.5f;
 
     // =============================
     // INTERNAL STATE
@@ -44,6 +52,13 @@ public class MultiDeviceLicenseManager : MonoBehaviour
 
     // Stability timer
     private float iapDetectedTime = -1f;
+
+
+    private float cleanupInterval = 1f;
+    private float nextCleanupTime;
+
+    private float startupTime;
+    public float startupGracePeriod = 2f;
 
     // =============================
     // PUBLIC API
@@ -71,6 +86,7 @@ public class MultiDeviceLicenseManager : MonoBehaviour
 
     private void Awake()
     {
+        startupTime = Time.time;
         // Generate or fetch persistent device ID
         localDeviceId = SystemInfo.deviceUniqueIdentifier;
 
@@ -78,9 +94,16 @@ public class MultiDeviceLicenseManager : MonoBehaviour
         UpdateDevice(localDeviceId, localHasIAP);
     }
 
+
+
     private void Update()
     {
-        //CleanupDevices();
+        if (Time.time >= nextCleanupTime)
+        {
+            CleanupDevices();
+            nextCleanupTime = Time.time + cleanupInterval;
+        }
+
         EvaluateLicenseState();
     }
 
@@ -117,7 +140,7 @@ public class MultiDeviceLicenseManager : MonoBehaviour
         {
             devices[deviceId] = new DeviceInfo();
             devices[deviceId].deviceId = deviceId;
-            Debug.Log("[MultiDevice] New device found: "+deviceId+" Total amount of devices in list is: "+devices.Count());
+            Debug.Log("[MultiDevice] New device found: " + deviceId + " Total amount of devices in list is: " + devices.Count());
             OnDeviceJoinedInternal?.Invoke(deviceId);
         }
 
@@ -164,8 +187,8 @@ public class MultiDeviceLicenseManager : MonoBehaviour
 
         foreach (var kvp in devices)
         {
-            Debug.Log("[MultiDevice] Checking for timeout of: "+kvp.Key+" Last Seen Time: "+kvp.Value.lastSeenTime+" Current Time: "+now);
-            if(now - kvp.Value.lastSeenTime > deviceTimeout)
+            Debug.Log("[MultiDevice] Checking for timeout of: " + kvp.Key + " Last Seen Time: " + kvp.Value.lastSeenTime + " Current Time: " + now);
+            if (now - kvp.Value.lastSeenTime > deviceTimeout)
             {
                 stringsToRemove.Add(kvp.Key);
             }
@@ -191,12 +214,21 @@ public class MultiDeviceLicenseManager : MonoBehaviour
     /// <summary>
     /// Should you block features right now?
     /// </summary>
-    public bool ShouldBlockFeatures()
+    public bool NeedsBlock()
     {
-        // Only block if:
-        // - More than 1 device
-        // - AND session not unlocked
-        return ActiveDeviceCount > 1 && !sessionUnlocked;
+        // If IAP unlocked → never block
+        if (sessionUnlocked)
+            return false;
+        // ✅ Grace period: never block immediately after launch
+        if (Time.time - startupTime < startupGracePeriod)
+            return false;
+
+        // If only one device → allow
+        if (ActiveDeviceCount <= 1)
+            return false;
+
+        // Only block if NOT the leader
+        return !IsLocalDeviceLeaderStable();
     }
 
     /// <summary>
@@ -215,5 +247,42 @@ public class MultiDeviceLicenseManager : MonoBehaviour
         {
             OnDeviceLeftInternal?.Invoke(deviceId);
         }
+    }
+
+    private string GetCurrentLeaderId()
+    {
+        if (devices.Count == 0)
+            return localDeviceId;
+
+        // Optional: prioritize IAP devices
+        var iapDevices = devices.Values
+            .Where(d => d.hasIAP)
+            .Select(d => d.deviceId)
+            .OrderBy(id => id);
+
+        if (iapDevices.Any())
+            return iapDevices.First();
+
+        // Otherwise pick lowest ID
+        return devices.Keys.OrderBy(id => id).First();
+    }
+
+    public bool IsLocalDeviceLeaderStable()
+    {
+        string newLeader = GetCurrentLeaderId();
+
+        if (newLeader != currentLeaderId)
+        {
+            currentLeaderId = newLeader;
+            leaderLastChangedTime = Time.time;
+        }
+
+        bool isStable = (Time.time - leaderLastChangedTime) >= leaderStabilityTime;
+
+        // ✅ If not stable → assume SAFE (do NOT block)
+        if (!isStable)
+            return true;
+
+        return localDeviceId == currentLeaderId;
     }
 }

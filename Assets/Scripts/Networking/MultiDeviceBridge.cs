@@ -29,8 +29,8 @@ public class MultiDeviceBridge : MonoBehaviour
     public event Action<string> OnDeviceJoined;
     public event Action<string> OnDeviceLeft;
 
-    public event Action OnMultiDeviceBlocked;
-    public event Action OnMultiDeviceAllowed;
+    public event Action OnMultiDeviceStateIsBlocked;
+    public event Action OnMultiDeviceStateIsUnblocked;
 
     // =============================
     // INTERNAL STATE
@@ -141,23 +141,23 @@ public class MultiDeviceBridge : MonoBehaviour
         if (licenseManager == null)
             return;
 
-        bool isBlocked = licenseManager.ShouldBlockFeatures();
+        bool isBlocked = licenseManager.NeedsBlock();
 
         // Only fire on change
-        if (isBlocked == lastBlockedState)
-            return;
+         if (isBlocked == lastBlockedState)
+           return;
 
         lastBlockedState = isBlocked;
 
         if (isBlocked)
         {
             Debug.Log("[MultiDevice] BLOCKED");
-            OnMultiDeviceBlocked?.Invoke();
+            OnMultiDeviceStateIsBlocked?.Invoke();
         }
         else
         {
             Debug.Log("[MultiDevice] ALLOWED");
-            OnMultiDeviceAllowed?.Invoke();
+            OnMultiDeviceStateIsUnblocked?.Invoke();
         }
     }
 
@@ -172,7 +172,7 @@ public class MultiDeviceBridge : MonoBehaviour
 
     public bool ShouldBlockFeatures()
     {
-        return licenseManager != null && licenseManager.ShouldBlockFeatures();
+        return licenseManager != null && licenseManager.NeedsBlock();
     }
 
     public bool IsCurrentlyBlocked()
