@@ -8,8 +8,8 @@ public readonly struct PixelGridSettings
 
     public PixelGridSettings(int rows, int columns)
     {
-        PixelRows = rows;
-        PixelColumns = columns;
+        PixelRows = PixelGridSnapshot.ClampPixelDimension(rows);
+        PixelColumns = PixelGridSnapshot.ClampPixelDimension(columns);
     }
 
 }
@@ -251,4 +251,3 @@ public static class SaveLoadSettings
     }
 
 }
-

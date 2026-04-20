@@ -2419,6 +2419,18 @@ Behavior notes:
 - Updated WebUI pixel-grid row/column numeric inputs to use `step=8`, so browser spinner up/down controls move through the intended 8/16/24/32 values instead of transient step-1 values that sanitized back to 8.
 
 T99.29 - Fix Pixel grid size ui logic. Currently the grid size is set in the in app ui it doesn't work at all and when its set in the webui, it seems to work in reverse, when the row size is at 16, in the app shows as 8 and when increased , the app decreases it. We need to implement a single source of truth similar to the way DmxSettingsSnapshot works. We can make a PixelGridSnapshot and create a singleton class that holds that value and reacts to pixel grid settings being updated or loaded. We can let the FixtureModeSelector use that source of truth and also let the webui use that.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+
+Behavior notes:
+- Added a dedicated pixel-grid single source of truth via `PixelGridSnapshot` + `PixelGridService` singleton that loads PlayerPrefs-backed row/column values and tracks runtime updates from saved settings.
+- Updated `UI_FixtureModeSelector` to subscribe to `PixelGridService` changes and apply/save pixel rows/columns through the service so in-app +/- controls no longer operate on stale values.
+- Updated `WebUiSettingsStore` pixel-grid load/save + sanitization to use `PixelGridService`/`PixelGridSnapshot` so web and in-app UI stay in sync with consistent row/column orientation.
+
+T99.30 - Next run: execute Unity EditMode tests (licensed runner) for pixel-grid single-source synchronization between `UI_FixtureModeSelector` and `WebUiSettingsStore`, including row/column directionality and step-size behavior.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
