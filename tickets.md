@@ -2440,7 +2440,13 @@ T99.30 - Change the webui so the section "DMX info" shows the same info as the i
 Behavior notes:
 - Added mode-specific DMX info payload fields to WebUI settings responses and populated them from the same `InfoTextFixtureMode` source used by the in-app info panel.
 - Updated WebUI `DMX Info` section to render the currently selected fixture mode text (Surface, Moving Head, Pixel Mapping) and refresh immediately when mode selection changes.
-
+  
+T99.31 - Modify the webui logic to make sure that the info panel texts for the "DMX info" section gets parsed correctly so it includes the line endings in the original text. Currently line endings are not in the webui.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
 
 T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode
 - [x] Started
