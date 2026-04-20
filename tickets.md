@@ -2460,11 +2460,18 @@ Behavior notes:
 - Added EditMode regression test coverage (`DmxFixtureTests.GetChannelValue_UsesStartChannelOverrideAddedAfterAwake`) that reproduces the runtime add-order and verifies fixture index 2 reads from channel offset +16.
 
 T99.33 - Find and fix a bug where in artnet mode, the Network warning banner shows sometimes briefly and when the network mode is changed from sACN to artnet , the visuals only show when dmx data is changed. It looks like there is something wrong with the network data being received when it is not changed. Also maybe a grace period needs to be used or lengthened
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+
+Behavior notes:
+- Added mode-switch heartbeat reset metadata (`LastResetTicks`) and now reset heartbeat timing every time `NetworkingModeManager` switches between Art-Net and sACN, so tracker logic no longer treats protocol transition gaps as immediate packet loss.
+- Updated `NetworkDataTracker` to apply an explicit mode-switch grace window plus independent lost/restore debounces (`lostDebounceSeconds`, `restoreDelaySeconds`) to prevent brief warning-banner flashes during transport handovers.
+- Preserved timeout-based lost detection after the grace period so true packet loss still raises `OnNetworkLost` while avoiding false positives immediately after network mode changes.
+- Added Art-Net stale-frame republish fallback in `ArtNetReceiver.Update` that periodically re-emits the last cached DMX frame when no new packet arrives, keeping event-driven DMX consumers synchronized even when senders suppress unchanged frames.
+- Added EditMode regression coverage (`ArtNetReceiverTests.Update_RepublishesLastFrameWhenNoNewPacketArrives`) for the stale-frame republish behavior.
 
 T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode
 - [x] Started

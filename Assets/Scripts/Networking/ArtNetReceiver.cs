@@ -30,8 +30,14 @@ public class ArtNetReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsu
     private UdpClient _udpClient;
     private Thread _receiveThread;
     private bool _running = false;
+    [SerializeField] private float staleFrameRepublishSeconds = 0.25f;
 
     private byte[] _packetBuffer = new byte[1024]; // reused buffer
+    private readonly byte[] _lastReceivedFrame = new byte[512];
+    private readonly byte[] _republishFrame = new byte[512];
+    private readonly object _frameCacheLock = new object();
+    private bool _hasReceivedFrame;
+    private float _nextStaleRepublishTime;
 
     private DmxSettingsSnapshot _settings;
 
@@ -88,8 +94,22 @@ public class ArtNetReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsu
         {
             var frame = new DmxFrame(buffer);
             DmxDataService.PushFrame(frame);
+            _nextStaleRepublishTime = Time.unscaledTime + staleFrameRepublishSeconds;
+            return;
         }
 
+        if (!_hasReceivedFrame || Time.unscaledTime < _nextStaleRepublishTime)
+        {
+            return;
+        }
+
+        lock (_frameCacheLock)
+        {
+            System.Buffer.BlockCopy(_lastReceivedFrame, 0, _republishFrame, 0, 512);
+        }
+
+        DmxDataService.PushFrame(new DmxFrame(_republishFrame));
+        _nextStaleRepublishTime = Time.unscaledTime + staleFrameRepublishSeconds;
 
     }
 
@@ -168,6 +188,7 @@ public class ArtNetReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsu
                     System.Buffer.BlockCopy(data, 18, _packetBuffer, 0, length);
                     Buffer.WriteFrame(_packetBuffer, length);
                     NetworkDmxPacketsHeartbeat.NotifyPacketReceived();
+                    CacheLastReceivedFrame(_packetBuffer, length);
 
                 }
             }
@@ -288,6 +309,17 @@ public class ArtNetReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsu
         if (ReceiveNetworkData)
         {
             RestartReceiver();
+        }
+    }
+
+    private void CacheLastReceivedFrame(byte[] source, int length)
+    {
+        lock (_frameCacheLock)
+        {
+            Array.Clear(_lastReceivedFrame, 0, _lastReceivedFrame.Length);
+            int copyLength = Mathf.Clamp(length, 0, 512);
+            System.Buffer.BlockCopy(source, 0, _lastReceivedFrame, 0, copyLength);
+            _hasReceivedFrame = true;
         }
     }
 }

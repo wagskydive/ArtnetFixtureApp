@@ -103,6 +103,9 @@ public class NetworkingModeManager : MonoBehaviour
         {
             return;
         }
+
+        NetworkDmxPacketsHeartbeat.Initialize();
+
         int clampedMode = Mathf.Clamp(modeIndex, ArtNetModeIndex, SAcnModeIndex);
 
         if (NetworkReceiver != null)

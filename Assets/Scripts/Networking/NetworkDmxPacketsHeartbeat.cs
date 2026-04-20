@@ -3,7 +3,9 @@ using System;
 public static class NetworkDmxPacketsHeartbeat
 {
     private static long _lastPacketTicks;
+    private static long _lastResetTicks;
     public static long LastPacketTicks => _lastPacketTicks;
+    public static long LastResetTicks => _lastResetTicks;
 
     static NetworkDmxPacketsHeartbeat()
     {
@@ -13,7 +15,9 @@ public static class NetworkDmxPacketsHeartbeat
 
     public static void Initialize()
     {
-        _lastPacketTicks = DateTime.UtcNow.Ticks;
+        long nowTicks = DateTime.UtcNow.Ticks;
+        _lastPacketTicks = nowTicks;
+        _lastResetTicks = nowTicks;
     }
 
     public static void NotifyPacketReceived()
