@@ -242,3 +242,50 @@ MonoBehaviour:
   infoPanel: Toggle the info panel on or off.
   infoPanelDefault: Default message shown in the info panel.
   purchases: 'Open the in app purchases menu to unlock premium features '
+  networkModeSAcn: sACN (Streaming Architecture for Control Networks), standardized
+    as ANSI E1.31, is a protocol that transmits DMX lighting data over IP networks
+    using UDP multicast or unicast
+  networkModeArtNet: Art-Net is a communication protocol used to transmit DMX512-A
+    lighting control data and Remote Device Management (RDM) signals over an Ethernet
+    network using the UDP protocol.
+  transportMode: 'sACN (ANSI E1.31) uses UDP as its transport protocol and operates
+    in two primary modes:
+
+    
+
+    Multicast (Default): The most common mode,
+    where data is sent to a multicast IP address (e.g., 239.255.0.1) on UDP port
+    5568.  This allows multiple receivers to subscribe to a specific universe efficiently,
+    reducing network load through IGMP snooping.
+
+    
+
+    Unicast: Data is sent
+    directly to a specific device''s IP address. This mode also uses UDP, with port
+    5568 as the default, though many implementations allow a configurable port. '
+  listenPort: 'The listen port for sACN (ANSI E1.31) depends on the transport mode:
+
+    
+
+    Multicast
+    Mode: Receivers must listen on UDP port 5568.  This port is fixed and cannot
+    be changed for multicast transmission.
+
+    
+
+    Unicast Mode: The listen port
+    is configurable.  While port 5568 is often used by default, the receiver can
+    be set to listen on any available UDP port as specified by the sender and receiver
+    configuration'
+  timeoutSeconds: 'The standard timeout for sACN (ANSI E1.31) is 2.5 seconds.  If
+    a receiver does not receive any valid sACN packets for a specific universe within
+    this period, it considers the source lost. '
+  receiveNetworkData: Toggle the receiver on or off
+  mergeMode: "HTP (Highest Takes Precedence): When multiple sources transmit to the
+    same universe at the same priority, the receiver outputs the highest DMX value
+    for each channel.  This is the standard merge algorithm defined by ANSI E1.31
+    and is suitable for intensity control. \n\r\nLTP (Latest Takes Precedence): When
+    enabled, the receiver outputs the most recently received DMX value for each channel,
+    regardless of its numerical value.  This mode is not part of the ANSI E1.31 standard
+    and is implemented at the receiver level.  It is typically used for non-intensity
+    parameters (e.g., pan, tilt) where the latest command should take effect."

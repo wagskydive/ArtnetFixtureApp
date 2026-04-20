@@ -24,5 +24,14 @@ public class InfoTextsScriptableObject : ScriptableObject
     [TextArea] public string infoPanelDefault;
     [TextArea] public string purchases;
 
+    [TextArea] public string networkModeSAcn;
+    [TextArea] public string networkModeArtNet;
+    [TextArea] public string transportMode;
+    [TextArea] public string listenPort;
+    [TextArea] public string timeoutSeconds;
+    [TextArea] public string receiveNetworkData;
+    [TextArea] public string mergeMode;
+
+
     // Add more entries as needed
 }
