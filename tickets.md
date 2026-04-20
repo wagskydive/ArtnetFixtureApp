@@ -2372,11 +2372,16 @@ T99.24 - Find and fix a bug where the Universe number and DMX start channel are 
   - Added EditMode regression test to verify saved universe/start-channel values are used during initial receiver creation and are not overwritten.
 
 T99.25 - fix the webui so it shows the current advanced networking parameters correctly. The new system uses DmxSettingsService.Instance.CurrentDmxSettings for the most up to date settings and DmxSettingsBus.OnChanged to update the ui. Also the Multicast IP is now read-only and currently timeout seconds shows the network port and not the timeout seconds. So update the webui logic to show the correct values and make sure it uses the new system when settings are changed. The in-app ui settings logic is recently updated so it works with a single source of truth. The webui should use that new system properly
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+
+Behavior notes:
+- Fixed `WebUiSettingsStore.Load` to surface the real sACN timeout value (`TimeoutSeconds`) instead of incorrectly mirroring the listen port.
+- Updated WebUI advanced-networking serialization so the protocol selector reads/writes through `isSAcnMode` and additional universes are posted as an integer array, matching `WebUiSettingsData`.
+- Set WebUI multicast address field to read-only and ensured `WebUiSettingsStore.Save` now persists advanced network changes through `SaveLoadSettings.SaveDmxSettings` (single source of truth).
 
 
 T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode

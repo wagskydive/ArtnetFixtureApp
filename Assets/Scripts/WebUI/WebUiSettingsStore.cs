@@ -49,9 +49,9 @@ public static class WebUiSettingsStore
             multicastAddress = dmxSettingsSnapshot.CurrentSAcnParameters.MulticastAddress,
             unicastBindAddress = dmxSettingsSnapshot.CurrentSAcnParameters.UnicastBindAddress,
             listenPort = dmxSettingsSnapshot.CurrentSAcnParameters.ListenPort,
-            timeoutSeconds = dmxSettingsSnapshot.CurrentSAcnParameters.ListenPort,
+            timeoutSeconds = dmxSettingsSnapshot.CurrentSAcnParameters.TimeoutSeconds,
             useLtpMerge = dmxSettingsSnapshot.CurrentSAcnParameters.UseLtpMerge,
-            additionalUniverses = dmxSettingsSnapshot.CurrentSAcnParameters.MulticastUniverseSubscriptions,
+            additionalUniverses = new List<int>(dmxSettingsSnapshot.CurrentSAcnParameters.MulticastUniverseSubscriptions),
             showNetworkDebug = dmxSettingsSnapshot.CurrentSAcnParameters.DebugPanelVisible,
             passwordConfigured = WebUiPasswordProtection.HasConfiguredPassword(),
             passwordEnabled = WebUiPasswordProtection.IsEnabled()
@@ -84,7 +84,7 @@ public static class WebUiSettingsStore
             listenPort = Mathf.Clamp(raw.listenPort, 1, 65535),
             timeoutSeconds = Mathf.Max(0.1f, raw.timeoutSeconds),
             useLtpMerge = raw.useLtpMerge,
-            additionalUniverses = raw.additionalUniverses,
+            additionalUniverses = raw.additionalUniverses != null ? new List<int>(raw.additionalUniverses) : new List<int>(),
             showNetworkDebug = raw.showNetworkDebug,
             passwordConfigured = raw.passwordConfigured,
             passwordEnabled = raw.passwordEnabled
@@ -125,6 +125,7 @@ public static class WebUiSettingsStore
 
 
         DmxSettingsSnapshot dmxSettingsSnapshot = new DmxSettingsSnapshot(data.dmxUniverse,data.startChannel,data.isSAcnMode,sAcnParameters);
+        SaveLoadSettings.SaveDmxSettings(dmxSettingsSnapshot);
     }
 
     public static string ToJson(WebUiSettingsData data)

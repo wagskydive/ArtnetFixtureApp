@@ -284,7 +284,7 @@
                 </select>
                 <div id="multicastAddressRow">
                     <label>Multicast IP</label>
-                    <input id="multicastAddress" type="text">
+                    <input id="multicastAddress" type="text" readonly>
                 </div>
                 <div id="unicastAddressRow" class="hidden">
                     <label>Unicast Bind IP</label>
@@ -539,6 +539,12 @@
         }
 
         function getCurrentSettings() {
+            const additionalUniversesCsv = document.getElementById("additionalUniverses").value || ""
+            const additionalUniverses = additionalUniversesCsv
+                .split(",")
+                .map((value) => parseInt(value.trim(), 10))
+                .filter((value, index, values) => Number.isFinite(value) && value > 1 && values.indexOf(value) === index)
+
             return {
                 deviceName: document.getElementById("deviceName").value,
                 fixtureMode: document.getElementById("fixtureMode").value,
@@ -547,14 +553,14 @@
                 fixtureAmount: parseInt(document.getElementById("fixtureAmount").value),
                 gridX: parseInt(document.getElementById("gridX").value),
                 gridY: parseInt(document.getElementById("gridY").value),
-                networkMode: parseInt(document.getElementById("networkMode").value),
+                isSAcnMode: parseInt(document.getElementById("networkMode").value, 10) === 1,
                 useMulticast: document.getElementById("useMulticast").value === "true",
                 multicastAddress: document.getElementById("multicastAddress").value,
                 unicastBindAddress: document.getElementById("unicastBindAddress").value,
                 listenPort: parseInt(document.getElementById("listenPort").value),
                 timeoutSeconds: parseFloat(document.getElementById("timeoutSeconds").value),
                 useLtpMerge: document.getElementById("useLtpMerge").value === "true",
-                additionalUniverses: document.getElementById("additionalUniverses").value,
+                additionalUniverses,
                 showNetworkDebug: document.getElementById("showNetworkDebug").value === "true"
             }
         }
@@ -569,14 +575,18 @@
             document.getElementById("fixtureAmount").value = clampValue(parseInt(settings.fixtureAmount) || 1, 1, 16)
             document.getElementById("gridX").value = clampValue(parseInt(settings.gridX) || 8, 8, 32)
             document.getElementById("gridY").value = clampValue(parseInt(settings.gridY) || 8, 8, 32)
-            document.getElementById("networkMode").value = `${clampValue(parseInt(settings.networkMode) || 0, 0, 1)}`
+            const networkModeValue = typeof settings.isSAcnMode === "boolean"
+                ? (settings.isSAcnMode ? 1 : 0)
+                : clampValue(parseInt(settings.networkMode) || 0, 0, 1)
+            document.getElementById("networkMode").value = `${networkModeValue}`
             document.getElementById("useMulticast").value = settings.useMulticast ? "true" : "false"
             document.getElementById("multicastAddress").value = settings.multicastAddress || "239.255.0.1"
             document.getElementById("unicastBindAddress").value = settings.unicastBindAddress || "0.0.0.0"
             document.getElementById("listenPort").value = clampValue(parseInt(settings.listenPort) || 5568, 1, 65535)
             document.getElementById("timeoutSeconds").value = Math.max(0.1, Number(settings.timeoutSeconds) || 2).toFixed(1)
             document.getElementById("useLtpMerge").value = settings.useLtpMerge ? "true" : "false"
-            document.getElementById("additionalUniverses").value = settings.additionalUniverses || ""
+            const additionalUniverses = Array.isArray(settings.additionalUniverses) ? settings.additionalUniverses.join(",") : ""
+            document.getElementById("additionalUniverses").value = additionalUniverses
             document.getElementById("showNetworkDebug").value = settings.showNetworkDebug ? "true" : "false"
             advancedNetworkingUnlocked = !!settings.advancedNetworkingUnlocked
             networkDebugSection.classList.toggle("hidden", document.getElementById("showNetworkDebug").value !== "true")
