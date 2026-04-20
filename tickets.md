@@ -2418,6 +2418,13 @@ T99.28 - Fix the pixel rows and columns fields up and down buttons in the webui.
 Behavior notes:
 - Updated WebUI pixel-grid row/column numeric inputs to use `step=8`, so browser spinner up/down controls move through the intended 8/16/24/32 values instead of transient step-1 values that sanitized back to 8.
 
+T99.29 - Fix Pixel grid size ui logic. Currently the grid size is set in the in app ui it doesn't work at all and when its set in the webui, it seems to work in reverse, when the row size is at 16, in the app shows as 8 and when increased , the app decreases it. We need to implement a single source of truth similar to the way DmxSettingsSnapshot works. We can make a PixelGridSnapshot and create a singleton class that holds that value and reacts to pixel grid settings being updated or loaded. We can let the FixtureModeSelector use that source of truth and also let the webui use that.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 
 T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode
 - [x] Started
