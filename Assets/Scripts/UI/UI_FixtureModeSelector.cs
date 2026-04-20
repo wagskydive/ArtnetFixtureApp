@@ -4,11 +4,6 @@ using UnityEngine.UI;
 
 public class UI_FixtureModeSelector : MonoBehaviour
 {
-    private const int MinPixelWallSize = 8;
-    private const int MaxPixelWallSize = 32;
-    private const int PixelWallStepSize = 8;
-
-
     [SerializeField] private Text modeValueText;
     [SerializeField] private GameObject pixelGridControlsContainer;
     [SerializeField] private Text pixelRowsValueText;
@@ -17,8 +12,8 @@ public class UI_FixtureModeSelector : MonoBehaviour
     [SerializeField] private UI_InfoPanelController infoPanelController;
     [SerializeField] private GameObject fixtureCountControlsContainer;
     [SerializeField] private DmxModeManager dmxModeManager;
-    [SerializeField] private int currentPixelRows = 8;
-    [SerializeField] private int currentPixelColumns = 8;
+    private int currentPixelRows = PixelGridSnapshot.MinPixelWallSize;
+    private int currentPixelColumns = PixelGridSnapshot.MinPixelWallSize;
 
     public int CurrentPixelRows
     {
@@ -45,7 +40,7 @@ public class UI_FixtureModeSelector : MonoBehaviour
     void OnEnable()
     {
         SaveLoadSettings.OnFixtureModeSaved += HandleFixtureModeSaved;
-        SaveLoadSettings.OnPixelGridSettingsSaved += HandlePixelGridSettingsSaved;
+        PixelGridService.Instance.OnChanged += HandlePixelGridSettingsChanged;
     }
 
 
@@ -53,7 +48,7 @@ public class UI_FixtureModeSelector : MonoBehaviour
     private void OnDisable()
     {
         SaveLoadSettings.OnFixtureModeSaved -= HandleFixtureModeSaved;
-        SaveLoadSettings.OnPixelGridSettingsSaved -= HandlePixelGridSettingsSaved;
+        PixelGridService.Instance.OnChanged -= HandlePixelGridSettingsChanged;
 
     }
     private void HandleFixtureModeSaved(FixtureMode fixtureMode)
@@ -61,8 +56,10 @@ public class UI_FixtureModeSelector : MonoBehaviour
         UpdateDisplayOnSettingsSave();
         SyncUiState();
     }
-    private void HandlePixelGridSettingsSaved(PixelGridSettings settings)
+    private void HandlePixelGridSettingsChanged(PixelGridSnapshot snapshot)
     {
+        currentPixelRows = snapshot.Rows;
+        currentPixelColumns = snapshot.Columns;
         ApplyPixelGridSettings();
         SyncUiState();
     }
@@ -102,27 +99,27 @@ public class UI_FixtureModeSelector : MonoBehaviour
 
     public void IncreasePixelRows()
     {
-        int clamped = Mathf.Clamp(currentPixelRows + PixelWallStepSize, MinPixelWallSize, MaxPixelWallSize);
-        SaveLoadSettings.SavePixelGridSettings(new PixelGridSettings(clamped, currentPixelColumns));
+        int clamped = PixelGridSnapshot.ClampPixelDimension(currentPixelRows + PixelGridSnapshot.PixelWallStepSize);
+        PixelGridService.Instance.Save(new PixelGridSnapshot(clamped, currentPixelColumns));
 
     }
 
     public void DecreasePixelRows()
     {
-        int clamped = Mathf.Clamp(currentPixelRows - PixelWallStepSize, MinPixelWallSize, MaxPixelWallSize);
-        SaveLoadSettings.SavePixelGridSettings(new PixelGridSettings(clamped, currentPixelColumns));
+        int clamped = PixelGridSnapshot.ClampPixelDimension(currentPixelRows - PixelGridSnapshot.PixelWallStepSize);
+        PixelGridService.Instance.Save(new PixelGridSnapshot(clamped, currentPixelColumns));
     }
 
     public void IncreasePixelColumns()
     {
-        int clamped = Mathf.Clamp(currentPixelColumns + PixelWallStepSize, MinPixelWallSize, MaxPixelWallSize);
-        SaveLoadSettings.SavePixelGridSettings(new PixelGridSettings(currentPixelRows, clamped));
+        int clamped = PixelGridSnapshot.ClampPixelDimension(currentPixelColumns + PixelGridSnapshot.PixelWallStepSize);
+        PixelGridService.Instance.Save(new PixelGridSnapshot(currentPixelRows, clamped));
     }
 
     public void DecreasePixelColumns()
     {
-        int clamped = Mathf.Clamp(currentPixelColumns - PixelWallStepSize, MinPixelWallSize, MaxPixelWallSize);
-        SaveLoadSettings.SavePixelGridSettings(new PixelGridSettings(currentPixelRows, clamped));
+        int clamped = PixelGridSnapshot.ClampPixelDimension(currentPixelColumns - PixelGridSnapshot.PixelWallStepSize);
+        PixelGridService.Instance.Save(new PixelGridSnapshot(currentPixelRows, clamped));
     }
 
 
@@ -135,8 +132,9 @@ public class UI_FixtureModeSelector : MonoBehaviour
     public void LoadPreferences()
     {
         dmxModeManager.SetFixtureMode((FixtureMode)Mathf.Clamp(SaveLoadSettings.LoadInt(SaveLoadSettings.FixtureModeKey, (int)FixtureMode.Standard), 0, (int)FixtureMode.PixelMapping));
-        currentPixelRows = Mathf.Clamp(SaveLoadSettings.LoadInt(SaveLoadSettings.PixelRowsKey, currentPixelRows), MinPixelWallSize, MaxPixelWallSize);
-        currentPixelColumns = Mathf.Clamp(SaveLoadSettings.LoadInt(SaveLoadSettings.PixelColumnsKey, currentPixelColumns), MinPixelWallSize, MaxPixelWallSize);
+        PixelGridSnapshot pixelGrid = PixelGridService.Instance.CurrentPixelGrid;
+        currentPixelRows = pixelGrid.Rows;
+        currentPixelColumns = pixelGrid.Columns;
     }
 
     private void SyncUiState()

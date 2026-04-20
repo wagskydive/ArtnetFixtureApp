@@ -43,8 +43,8 @@ public static class WebUiSettingsStore
             dmxUniverse = dmxSettingsSnapshot.Universe1Based,
             startChannel = dmxSettingsSnapshot.StartChannel,
             fixtureAmount = Mathf.Clamp(SaveLoadSettings.LoadInt(SaveLoadSettings.FixtureCountKey, 1), 1, 16),
-            gridX = ClampPixelDimension(SaveLoadSettings.LoadInt(SaveLoadSettings.PixelColumnsKey, 8)),
-            gridY = ClampPixelDimension(SaveLoadSettings.LoadInt(SaveLoadSettings.PixelRowsKey, 8)),
+            gridX = PixelGridService.Instance.CurrentPixelGrid.Columns,
+            gridY = PixelGridService.Instance.CurrentPixelGrid.Rows,
             isSAcnMode = dmxSettingsSnapshot.IsSAcnMode,
 
             useMulticast = dmxSettingsSnapshot.CurrentSAcnParameters.UseMulticast,
@@ -76,8 +76,8 @@ public static class WebUiSettingsStore
             dmxUniverse = Mathf.Clamp(raw.dmxUniverse, 1, 63999),
             startChannel = Mathf.Clamp(raw.startChannel, 1, 512),
             fixtureAmount = Mathf.Clamp(raw.fixtureAmount, 1, 16),
-            gridX = ClampPixelDimension(raw.gridX),
-            gridY = ClampPixelDimension(raw.gridY),
+            gridX = PixelGridSnapshot.ClampPixelDimension(raw.gridX),
+            gridY = PixelGridSnapshot.ClampPixelDimension(raw.gridY),
             advancedNetworkingUnlocked = raw.advancedNetworkingUnlocked,
             maxSelectableUniverse = Mathf.Clamp(raw.maxSelectableUniverse, 1, 63999),
             isSAcnMode = raw.isSAcnMode,
@@ -113,7 +113,7 @@ public static class WebUiSettingsStore
 
         //SaveLoadSettings.SaveInt(SaveLoadSettings.PixelRowsKey, data.gridY);
 
-        SaveLoadSettings.SavePixelGridSettings(new PixelGridSettings(data.gridY,data.gridX));
+        PixelGridService.Instance.Save(new PixelGridSnapshot(data.gridY, data.gridX));
         //SaveLoadSettings.SaveInt(SaveLoadSettings.NetworkModeKey, data.networkMode);
         //SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnUseMulticastKey, data.useMulticast ? 1 : 0);
         //SaveLoadSettings.SaveString(SaveLoadSettings.SAcnMulticastAddressKey, data.multicastAddress);
@@ -144,13 +144,6 @@ public static class WebUiSettingsStore
         }
 
         return Sanitize(JsonUtility.FromJson<WebUiSettingsData>(json));
-    }
-
-    private static int ClampPixelDimension(int value)
-    {
-        int clamped = Mathf.Clamp(value, 8, 32);
-        int remainder = clamped % 8;
-        return remainder == 0 ? clamped : clamped - remainder;
     }
 
     private static string NormalizeFixtureMode(string fixtureMode)
