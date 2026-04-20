@@ -2371,7 +2371,7 @@ T99.24 - Find and fix a bug where the Universe number and DMX start channel are 
   - Added startup/swap tracing via `Debug.Log` lines in `NetworkingModeManager` so mode/address persistence flow can be followed in logs.
   - Added EditMode regression test to verify saved universe/start-channel values are used during initial receiver creation and are not overwritten.
 
-T99.25 - Next run: execute Unity EditMode suite on a licensed runner to validate T99.24 startup receiver address persistence behavior in-engine.
+T99.25 - fix the webui so it shows the current advanced networking parameters correctly. The new system uses DmxSettingsService.Instance.CurrentDmxSettings for the most up to date settings and DmxSettingsBus.OnChanged to update the ui. Also the Multicast IP is now read-only and currently timeout seconds shows the network port and not the timeout seconds. So update the webui logic to show the correct values and make sure it uses the new system when settings are changed. The in-app ui settings logic is recently updated so it works with a single source of truth. The webui should use that new system properly
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
