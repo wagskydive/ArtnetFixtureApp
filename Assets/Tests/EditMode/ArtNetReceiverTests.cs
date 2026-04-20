@@ -62,4 +62,30 @@ public class ArtNetReceiverTests
         Object.DestroyImmediate(go);
     }
 
+    [Test]
+    public void Update_RepublishesLastFrameWhenNoNewPacketArrives()
+    {
+        var go = new GameObject("receiver");
+        var receiver = go.AddComponent<ArtNetReceiver>();
+        receiver.Buffer = new DmxBuffer();
+
+        var republishField = typeof(ArtNetReceiver).GetField("staleFrameRepublishSeconds", BindingFlags.NonPublic | BindingFlags.Instance);
+        republishField.SetValue(receiver, 0f);
+
+        var cacheMethod = typeof(ArtNetReceiver).GetMethod("CacheLastReceivedFrame", BindingFlags.NonPublic | BindingFlags.Instance);
+        cacheMethod.Invoke(receiver, new object[] { new byte[] { 77 }, 1 });
+
+        int pushedFrameCount = 0;
+        System.Action<DmxFrame> handler = _ => pushedFrameCount++;
+        DmxDataService.OnFrameReceived += handler;
+
+        go.SendMessage("Update");
+
+        DmxDataService.OnFrameReceived -= handler;
+        Assert.That(pushedFrameCount, Is.EqualTo(1));
+        Assert.That(DmxDataService.LatestFrame.GetChannel(1), Is.EqualTo(77));
+
+        Object.DestroyImmediate(go);
+    }
+
 }
