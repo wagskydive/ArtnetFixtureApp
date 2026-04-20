@@ -2403,6 +2403,13 @@ Universe values above 1 require the Unlimited Universes in-app purchase." But my
 - [ ] Code Written
 - [ ] Tests Passed
 - [ ] Documentation Written
+  
+T99.28 - Fix the pixel rows and columns fields up and down buttons in the webui. Currently when the value is 8 and the up button is pressed it changes back to 8, but it should change to 16, so it should increment by 8 and not find the nearest valid amount.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
 
 
 T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode
