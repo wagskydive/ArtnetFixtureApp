@@ -492,6 +492,8 @@
         let suppressAutoSave = false
         let isSaving = false
         let isApplyingRemoteState = false
+        let isServerReachable = true
+        let activeServerSessionId = ""
         let lastServerSettingsJson = ""
         let backgroundRefreshInterval = null
         let goboRefreshInterval = null
@@ -566,6 +568,7 @@
         }
 
         function applySettingsToUi(settings) {
+            activeServerSessionId = typeof settings.serverSessionId === "string" ? settings.serverSessionId : ""
             document.getElementById("deviceName").value = settings.deviceName || "ArtnetFixture"
             document.getElementById("fixtureMode").value = settings.fixtureMode || "surface"
             maxSelectableUniverse = clampValue(parseInt(settings.maxSelectableUniverse) || 1, 1, 63999)
@@ -600,8 +603,13 @@
                 hasSessionAuthorization = true
                 writeCachedAuth(false)
             }
-            modeSelect.dispatchEvent(new Event("change"))
-            useMulticastSelect.dispatchEvent(new Event("change"))
+            const isSurface = modeSelect.value === "surface"
+            const isPixel = modeSelect.value === "pixel"
+            standardSection.classList.toggle("hidden", !isSurface)
+            pixelSection.classList.toggle("hidden", !isPixel)
+            const isMulticast = useMulticastSelect.value === "true"
+            multicastAddressRow.classList.toggle("hidden", !isMulticast)
+            unicastAddressRow.classList.toggle("hidden", isMulticast)
         }
 
         useMulticastSelect.addEventListener("change", function () {
@@ -701,12 +709,18 @@
         }
 
         async function saveSettings() {
+            if (!isServerReachable || !activeServerSessionId) {
+                settingsStatus.textContent = "Stale - waiting for server sync"
+                return
+            }
+
             if (enforceUniverseAccess()) {
                 settingsStatus.textContent = "Locked"
                 return
             }
 
             const settings = getCurrentSettings()
+            settings.serverSessionId = activeServerSessionId
 
             try {
                 isSaving = true
@@ -755,18 +769,27 @@
             try {
                 const response = await fetch("/api/settings")
                 if (!response.ok) {
+                    isServerReachable = false
+                    activeServerSessionId = ""
+                    settingsStatus.textContent = "Disconnected (stale)"
                     return
                 }
 
                 const settings = await response.json()
                 const settingsJson = JSON.stringify(settings)
                 lastServerSettingsJson = settingsJson
+                isServerReachable = true
+                suppressAutoSave = true
                 applySettingsToUi(settings)
+                suppressAutoSave = false
 
                 hasSessionAuthorization = isLocal || !passwordEnabled || readCachedAuth()
                 settingsStatus.textContent = hasSessionAuthorization ? "Ready" : "Password required"
                 syncAuthUi()
             } catch (e) {
+                isServerReachable = false
+                activeServerSessionId = ""
+                settingsStatus.textContent = "Disconnected (stale)"
                 console.log("Failed to load settings", e)
             }
         }
@@ -779,10 +802,17 @@
             try {
                 const response = await fetch("/api/settings")
                 if (!response.ok) {
+                    isServerReachable = false
+                    activeServerSessionId = ""
+                    settingsStatus.textContent = "Disconnected (stale)"
                     return
                 }
 
                 const settings = await response.json()
+                isServerReachable = true
+                if (activeServerSessionId && settings.serverSessionId && settings.serverSessionId !== activeServerSessionId) {
+                    settingsStatus.textContent = hasSessionAuthorization ? "Server restarted - refreshed" : "Password required"
+                }
                 const settingsJson = JSON.stringify(settings)
                 if (settingsJson === lastServerSettingsJson) {
                     return
@@ -797,6 +827,9 @@
                 settingsStatus.textContent = hasSessionAuthorization ? "Updated" : "Password required"
                 syncAuthUi()
             } catch (e) {
+                isServerReachable = false
+                activeServerSessionId = ""
+                settingsStatus.textContent = "Disconnected (stale)"
                 console.log("Failed to refresh settings", e)
             }
         }

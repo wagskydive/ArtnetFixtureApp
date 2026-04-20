@@ -4,6 +4,7 @@ using UnityEngine;
 [System.Serializable]
 public class WebUiSettingsData
 {
+    public string serverSessionId = string.Empty;
     public string deviceName = "ArtnetFixture";
     public string ipAddress = "0.0.0.0";
     public string fixtureMode = "surface";
@@ -35,6 +36,7 @@ public static class WebUiSettingsStore
         DmxSettingsSnapshot dmxSettingsSnapshot = DmxSettingsService.Instance.CurrentDmxSettings;
         return new WebUiSettingsData
         {
+            serverSessionId = string.Empty,
 
             deviceName = SaveLoadSettings.LoadString(SaveLoadSettings.DeviceNetworkKey, "DMX Projector"),
             fixtureMode = ToFixtureModeValue(fixtureMode),
@@ -67,6 +69,7 @@ public static class WebUiSettingsStore
 
         return new WebUiSettingsData
         {
+            serverSessionId = string.IsNullOrWhiteSpace(raw.serverSessionId) ? string.Empty : raw.serverSessionId.Trim(),
             deviceName = string.IsNullOrWhiteSpace(raw.deviceName) ? "ArtnetFixture" : raw.deviceName.Trim(),
             ipAddress = string.IsNullOrWhiteSpace(raw.ipAddress) ? "127.0.0.1" : raw.ipAddress.Trim(),
             fixtureMode = NormalizeFixtureMode(raw.fixtureMode),
