@@ -26,6 +26,9 @@ public class WebUiSettingsData
     public bool showNetworkDebug;
     public bool passwordConfigured;
     public bool passwordEnabled;
+    public string dmxInfoSurface = string.Empty;
+    public string dmxInfoMovingHead = string.Empty;
+    public string dmxInfoPixelMapping = string.Empty;
 }
 
 public static class WebUiSettingsStore
@@ -90,7 +93,10 @@ public static class WebUiSettingsStore
             additionalUniverses = raw.additionalUniverses != null ? new List<int>(raw.additionalUniverses) : new List<int>(),
             showNetworkDebug = raw.showNetworkDebug,
             passwordConfigured = raw.passwordConfigured,
-            passwordEnabled = raw.passwordEnabled
+            passwordEnabled = raw.passwordEnabled,
+            dmxInfoSurface = raw.dmxInfoSurface ?? string.Empty,
+            dmxInfoMovingHead = raw.dmxInfoMovingHead ?? string.Empty,
+            dmxInfoPixelMapping = raw.dmxInfoPixelMapping ?? string.Empty
         };
     }
 

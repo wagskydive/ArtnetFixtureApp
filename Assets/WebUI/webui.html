@@ -338,8 +338,9 @@
 
                 <p>
                     Fixture modes determine channel mapping.
-                    Detailed mapping information can be displayed here.
+                    Detailed mapping information:
                 </p>
+                <p id="dmxInfoModeText"></p>
 
             </div>
 
@@ -442,6 +443,7 @@
         const networkModeSelect = document.getElementById("networkMode")
         const useMulticastSelect = document.getElementById("useMulticast")
         const dmxUniverseInput = document.getElementById("dmxUniverse")
+        const dmxInfoModeText = document.getElementById("dmxInfoModeText")
         let advancedNetworkingUnlocked = false
         let maxSelectableUniverse = 1
         hideLockedFeatureModal()
@@ -463,7 +465,28 @@
                 pixelSection.classList.add("hidden")
             }
 
+            updateDmxInfoText(getCurrentSettings())
+
         })
+
+        function updateDmxInfoText(settings) {
+            if (!settings || !dmxInfoModeText) {
+                return
+            }
+
+            const mode = settings.fixtureMode || modeSelect.value || "surface"
+            if (mode === "moving") {
+                dmxInfoModeText.textContent = settings.dmxInfoMovingHead || "No Moving Head mode info available."
+                return
+            }
+
+            if (mode === "pixel") {
+                dmxInfoModeText.textContent = settings.dmxInfoPixelMapping || "No Pixel Mapping mode info available."
+                return
+            }
+
+            dmxInfoModeText.textContent = settings.dmxInfoSurface || "No Surface mode info available."
+        }
 
         const settingsStatus = document.getElementById("settingsStatus")
         const autoSaveElements = [
@@ -610,6 +633,7 @@
             const isMulticast = useMulticastSelect.value === "true"
             multicastAddressRow.classList.toggle("hidden", !isMulticast)
             unicastAddressRow.classList.toggle("hidden", isMulticast)
+            updateDmxInfoText(settings)
         }
 
         useMulticastSelect.addEventListener("change", function () {

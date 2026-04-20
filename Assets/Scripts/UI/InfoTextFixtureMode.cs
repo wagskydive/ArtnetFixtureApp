@@ -49,8 +49,13 @@ public class InfoTextFixtureMode : MonoBehaviour, IInfoText
 
     public string GetInfoText()
     {
+        return GetInfoTextForMode(DmxModeManager.Instance.CurrentMode);
+    }
 
-        switch (DmxModeManager.Instance.CurrentMode)
+    public string GetInfoTextForMode(FixtureMode fixtureMode)
+    {
+
+        switch (fixtureMode)
         {
             case FixtureMode.Standard:
                 return standardModeText;
