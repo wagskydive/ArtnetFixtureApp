@@ -176,6 +176,10 @@
             font-size: 14px;
         }
 
+        #dmxInfoModeText {
+            white-space: pre-line;
+        }
+
         .modal-backdrop {
             position: fixed;
             inset: 0;
@@ -474,18 +478,29 @@
                 return
             }
 
+            function parseInfoText(rawText) {
+                const normalized = String(rawText || "")
+                    .replace(/\r\n/g, "\n")
+                    .replace(/\r/g, "\n")
+
+                return normalized
+                    .replace(/\\r\\n/g, "\n")
+                    .replace(/\\n/g, "\n")
+                    .replace(/\\r/g, "\n")
+            }
+
             const mode = settings.fixtureMode || modeSelect.value || "surface"
             if (mode === "moving") {
-                dmxInfoModeText.textContent = settings.dmxInfoMovingHead || "No Moving Head mode info available."
+                dmxInfoModeText.textContent = parseInfoText(settings.dmxInfoMovingHead) || "No Moving Head mode info available."
                 return
             }
 
             if (mode === "pixel") {
-                dmxInfoModeText.textContent = settings.dmxInfoPixelMapping || "No Pixel Mapping mode info available."
+                dmxInfoModeText.textContent = parseInfoText(settings.dmxInfoPixelMapping) || "No Pixel Mapping mode info available."
                 return
             }
 
-            dmxInfoModeText.textContent = settings.dmxInfoSurface || "No Surface mode info available."
+            dmxInfoModeText.textContent = parseInfoText(settings.dmxInfoSurface) || "No Surface mode info available."
         }
 
         const settingsStatus = document.getElementById("settingsStatus")

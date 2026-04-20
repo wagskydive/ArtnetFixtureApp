@@ -2442,11 +2442,15 @@ Behavior notes:
 - Updated WebUI `DMX Info` section to render the currently selected fixture mode text (Surface, Moving Head, Pixel Mapping) and refresh immediately when mode selection changes.
   
 T99.31 - Modify the webui logic to make sure that the info panel texts for the "DMX info" section gets parsed correctly so it includes the line endings in the original text. Currently line endings are not in the webui "DMX info" section.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+
+Behavior notes:
+- Updated WebUI DMX info rendering to preserve multiline formatting by applying `white-space: pre-line` on the mode text element.
+- Added text normalization/parsing in `updateDmxInfoText` to support both real newline characters and escaped newline sequences (`\\n`/`\\r\\n`) from serialized payloads.
 
 T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode
 - [x] Started
