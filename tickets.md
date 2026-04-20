@@ -2384,6 +2384,14 @@ Behavior notes:
 - Set WebUI multicast address field to read-only and ensured `WebUiSettingsStore.Save` now persists advanced network changes through `SaveLoadSettings.SaveDmxSettings` (single source of truth).
 
 
+T99.26 - The webui seems to overwrite the current DMX settings when it is refreshed. Make sure that the webui doesn't do that. Also when the app is stopped i need the webui to know its stale and either refresh itself or in any other way it needs not to remember the last state of the webui, so it can't resend old settings when the app is started again. In other words, the webui should only display the actual state of the app and update when the app stops or when the app changed settings from within the in-app ui
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+
 T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode
 - [x] Started
 - [x] Behavior Written
