@@ -238,6 +238,7 @@ Add a new mode that makes the app function like a pixel wall.
 - [x] Keep fixture amount controls visible only for Standard mode and force single fixture instance for Moving Head + Pixel Mapping modes
 - [x] Fix runtime no-output regression after mode switches by rebinding output controllers to newly assigned renderer materials
 - [x] Persist and restore Standard-mode fixture amount when switching away to non-Standard modes and back
+- [x] Fix Standard/Surface multi-fixture DMX addressing so each spawned surface reads its own 16-channel DMX block via `StartChannelOverride`
 
 
 **Acceptance Criteria:**
