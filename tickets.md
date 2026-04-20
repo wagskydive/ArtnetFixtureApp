@@ -2449,15 +2449,22 @@ T99.31 - Modify the webui logic to make sure that the info panel texts for the "
 - [x] Documentation Written
 
 T99.32 - Fix a bug where the Fixture Amount in Fixture mode Standard/Surface is not working properly. Currently any fixture/surface above number one is not rendered correctly, but the master dimmer and RGB channels of the additional surfaces do influence the first surface. The Surfaces should each act as a seperate fixture and listen to their own dmx channels. Each surface should have their dmx start channel calculated from the start channel of the first channel by adding 16 (because each surface should use their own 16 channels)
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+
+Behavior notes:
+- Fixed `DmxFixture` to resolve `StartChannelOverride` lazily at DMX-read time so fixtures still honor per-fixture channel offsets when the override component is attached after `Awake`.
+- Added EditMode regression test coverage (`DmxFixtureTests.GetChannelValue_UsesStartChannelOverrideAddedAfterAwake`) that reproduces the runtime add-order and verifies fixture index 2 reads from channel offset +16.
+
+T99.33 - Next run: execute Unity EditMode suite on a licensed runner to validate T99.32 fixture-offset behavior in-engine.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
 - [ ] Tests Passed
 - [ ] Documentation Written
-
-Behavior notes:
-- Updated WebUI DMX info rendering to preserve multiline formatting by applying `white-space: pre-line` on the mode text element.
-- Added text normalization/parsing in `updateDmxInfoText` to support both real newline characters and escaped newline sequences (`\\n`/`\\r\\n`) from serialized payloads.
 
 T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode
 - [x] Started

@@ -26,6 +26,7 @@ public class DmxFixture : MonoBehaviour, IDmxSettingsConsumer
         if (frame.Buffer == null)
             return 0;
 
+        EnsureOverrideReference();
         int offset = _override != null ? _override.GetChannelOffset() : 0;
 
         int absoluteChannel = startChannel + offset + relativeChannel - 1;
@@ -39,5 +40,13 @@ public class DmxFixture : MonoBehaviour, IDmxSettingsConsumer
     public void ApplyDmxSettings(DmxSettingsSnapshot snapshot)
     {
         startChannel = snapshot.StartChannel;
+    }
+
+    private void EnsureOverrideReference()
+    {
+        if (_override == null)
+        {
+            _override = GetComponent<StartChannelOverride>();
+        }
     }
 }
