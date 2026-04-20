@@ -2430,7 +2430,7 @@ Behavior notes:
 - Updated `UI_FixtureModeSelector` to subscribe to `PixelGridService` changes and apply/save pixel rows/columns through the service so in-app +/- controls no longer operate on stale values.
 - Updated `WebUiSettingsStore` pixel-grid load/save + sanitization to use `PixelGridService`/`PixelGridSnapshot` so web and in-app UI stay in sync with consistent row/column orientation.
 
-T99.30 - Next run: execute Unity EditMode tests (licensed runner) for pixel-grid single-source synchronization between `UI_FixtureModeSelector` and `WebUiSettingsStore`, including row/column directionality and step-size behavior.
+T99.30 - Change the webui so the section "DMX info" shows the same info as the info panel scriptable object. The info that needs to be shown is the Fixture mode info related to the current mode. (Standard, MovingHead or Pixel)
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
