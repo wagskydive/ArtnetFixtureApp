@@ -40,6 +40,9 @@ public class MultiDeviceLicenseManager : MonoBehaviour
         public string deviceId;
         public bool hasIAP;
         public float lastSeenTime;
+        public float firstSeenTime;
+        public long joinTimestamp;
+
     }
 
     private Dictionary<string, DeviceInfo> devices = new Dictionary<string, DeviceInfo>();
@@ -91,7 +94,7 @@ public class MultiDeviceLicenseManager : MonoBehaviour
         localDeviceId = SystemInfo.deviceUniqueIdentifier;
 
         // Register self immediately
-        UpdateDevice(localDeviceId, localHasIAP);
+        UpdateDevice(localDeviceId, localHasIAP,devices[localDeviceId].joinTimestamp);
     }
 
 
@@ -119,7 +122,7 @@ public class MultiDeviceLicenseManager : MonoBehaviour
         localHasIAP = hasIAP;
 
         // Update self entry
-        UpdateDevice(localDeviceId, localHasIAP);
+        UpdateDevice(localDeviceId, localHasIAP, devices[localDeviceId].joinTimestamp);
     }
 
     // =============================
@@ -129,7 +132,7 @@ public class MultiDeviceLicenseManager : MonoBehaviour
     /// <summary>
     /// Call this whenever you detect or receive a heartbeat from another device
     /// </summary>
-    public void UpdateDevice(string deviceId, bool hasIAP)
+    public void UpdateDevice(string deviceId, bool hasIAP, long joinTimestamp)
     {
         if (string.IsNullOrEmpty(deviceId))
             return;
@@ -140,8 +143,30 @@ public class MultiDeviceLicenseManager : MonoBehaviour
         {
             devices[deviceId] = new DeviceInfo();
             devices[deviceId].deviceId = deviceId;
+
+            devices[deviceId].firstSeenTime = Time.time;
+            devices[deviceId].joinTimestamp = joinTimestamp;
+
+
             Debug.Log("[MultiDevice] New device found: " + deviceId + " Total amount of devices in list is: " + devices.Count());
             OnDeviceJoinedInternal?.Invoke(deviceId);
+
+            RecalculateLeader();
+        }
+        if (!isNew)
+        {
+            float timeSinceLastSeen = Time.time - devices[deviceId].lastSeenTime;
+
+            if (timeSinceLastSeen > deviceTimeout)
+            {
+                // Treat as new session
+                devices[deviceId].firstSeenTime = Time.time;
+            }
+            if (devices[deviceId].joinTimestamp != joinTimestamp)
+            {
+                devices[deviceId].joinTimestamp = joinTimestamp;
+                RecalculateLeader();
+            }
         }
 
         // Ignore self duplicates (optional safety)
@@ -188,6 +213,8 @@ public class MultiDeviceLicenseManager : MonoBehaviour
         foreach (var kvp in devices)
         {
             Debug.Log("[MultiDevice] Checking for timeout of: " + kvp.Key + " Last Seen Time: " + kvp.Value.lastSeenTime + " Current Time: " + now);
+            if (kvp.Key == localDeviceId)
+                continue;
             if (now - kvp.Value.lastSeenTime > deviceTimeout)
             {
                 stringsToRemove.Add(kvp.Key);
@@ -205,6 +232,11 @@ public class MultiDeviceLicenseManager : MonoBehaviour
             // 🔥 Notify via bridge
             OnDeviceLeftInternal?.Invoke(key);
         }
+
+        if (stringsToRemove.Count > 0)
+        {
+            RecalculateLeader(); // ✅ ADD THIS
+        }
     }
 
     // =============================
@@ -216,19 +248,23 @@ public class MultiDeviceLicenseManager : MonoBehaviour
     /// </summary>
     public bool NeedsBlock()
     {
-        // If IAP unlocked → never block
+        RecalculateLeader();
+        Debug.Log($"[MultiDevice] NeedsBlock? devices={ActiveDeviceCount} leader={currentLeaderId} local={localDeviceId}");
         if (sessionUnlocked)
             return false;
-        // ✅ Grace period: never block immediately after launch
+
         if (Time.time - startupTime < startupGracePeriod)
             return false;
 
-        // If only one device → allow
         if (ActiveDeviceCount <= 1)
             return false;
 
-        // Only block if NOT the leader
-        return !IsLocalDeviceLeaderStable();
+        bool isStable = (Time.time - leaderLastChangedTime) >= leaderStabilityTime;
+
+        if (!isStable)
+            return false;
+
+        return localDeviceId != currentLeaderId;
     }
 
     /// <summary>
@@ -239,6 +275,19 @@ public class MultiDeviceLicenseManager : MonoBehaviour
         return $"Devices: {ActiveDeviceCount} | " +
                $"SessionUnlocked: {sessionUnlocked} | " +
                $"AnyIAP: {devices.Values.Any(d => d.hasIAP)}";
+    }
+
+    private void RecalculateLeader()
+    {
+        string newLeader = GetCurrentLeaderId();
+
+        if (newLeader != currentLeaderId)
+        {
+            currentLeaderId = newLeader;
+            leaderLastChangedTime = Time.time;
+
+            Debug.Log("[MultiDevice] New Leader: " + currentLeaderId);
+        }
     }
 
     public void ForceRemoveDevice(string deviceId)
@@ -254,17 +303,20 @@ public class MultiDeviceLicenseManager : MonoBehaviour
         if (devices.Count == 0)
             return localDeviceId;
 
-        // Optional: prioritize IAP devices
-        var iapDevices = devices.Values
+        // Prefer IAP devices first (optional)
+        var iapLeader = devices.Values
             .Where(d => d.hasIAP)
-            .Select(d => d.deviceId)
-            .OrderBy(id => id);
+            .OrderBy(d => d.joinTimestamp)
+            .FirstOrDefault();
 
-        if (iapDevices.Any())
-            return iapDevices.First();
+        if (iapLeader != null)
+            return iapLeader.deviceId;
 
-        // Otherwise pick lowest ID
-        return devices.Keys.OrderBy(id => id).First();
+        // ✅ True "first device wins"
+        return devices.Values
+            .OrderBy(d => d.joinTimestamp)
+            .First()
+            .deviceId;
     }
 
     public bool IsLocalDeviceLeaderStable()
@@ -284,5 +336,10 @@ public class MultiDeviceLicenseManager : MonoBehaviour
             return true;
 
         return localDeviceId == currentLeaderId;
+    }
+
+    public bool IsLocalDeviceLeader()
+    {
+        return localDeviceId == GetCurrentLeaderId();
     }
 }

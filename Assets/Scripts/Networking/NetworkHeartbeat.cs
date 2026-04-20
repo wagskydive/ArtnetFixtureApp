@@ -31,6 +31,8 @@ public class NetworkHeartbeat : MonoBehaviour
 
     private bool isActive = true;
 
+    private long joinTimestamp;
+
     private void OnApplicationPause(bool pause)
     {
         isActive = !pause;
@@ -49,6 +51,8 @@ public class NetworkHeartbeat : MonoBehaviour
     {
         deviceId = SystemInfo.deviceUniqueIdentifier;
 
+        // ✅ Use real-world time, not Time.time
+        joinTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         StartNetworking();
     }
 
@@ -89,7 +93,7 @@ public class NetworkHeartbeat : MonoBehaviour
     {
         try
         {
-            string message = $"HEARTBEAT|{deviceId}|{(hasIAP ? 1 : 0)}";
+            string message = $"HEARTBEAT|{deviceId}|{(hasIAP ? 1 : 0)}|{joinTimestamp}";
             byte[] data = Encoding.UTF8.GetBytes(message);
 
             IPEndPoint endPoint = new IPEndPoint(IPAddress.Broadcast, port);
@@ -109,7 +113,7 @@ public class NetworkHeartbeat : MonoBehaviour
 
             string message = Encoding.UTF8.GetString(data);
             mainThreadQueue.Enqueue(() => { ParseMessage(message); });
-            ParseMessage(message);
+
 
             if (receiver != null)
                 receiver.BeginReceive(OnReceive, null);
@@ -138,8 +142,11 @@ public class NetworkHeartbeat : MonoBehaviour
         {
             string remoteId = parts[1];
             bool remoteHasIAP = parts[2] == "1";
+            long remoteJoinTime = long.Parse(parts[3]);
+
+
             Debug.Log("[MultiDevice] Heartbeat received from: " + remoteId + " Remote has ip is: " + remoteHasIAP);
-            licenseManager?.UpdateDevice(remoteId, remoteHasIAP);
+            licenseManager?.UpdateDevice(remoteId, remoteHasIAP, remoteJoinTime);
         }
     }
 

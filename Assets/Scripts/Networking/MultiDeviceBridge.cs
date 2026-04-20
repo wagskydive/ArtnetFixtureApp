@@ -58,7 +58,13 @@ public class MultiDeviceBridge : MonoBehaviour
         }
 
         RefreshIAPState();
-        EvaluateBlockState(); // initial state
+
+        EvaluateBlockState();
+    }
+
+    private void Update()
+    {
+        EvaluateBlockState();
     }
 
     private void OnDestroy()
@@ -77,15 +83,11 @@ public class MultiDeviceBridge : MonoBehaviour
     private void HandleDeviceJoined(string deviceId)
     {
         OnDeviceJoined?.Invoke(deviceId);
-
-        EvaluateBlockState();
     }
 
     private void HandleDeviceLeft(string deviceId)
     {
         OnDeviceLeft?.Invoke(deviceId);
-
-        EvaluateBlockState();
     }
 
     // =============================
@@ -117,8 +119,6 @@ public class MultiDeviceBridge : MonoBehaviour
         }
 
         Debug.Log($"[MultiDevice] IAP ownership changed: {ownsIAP}");
-
-        EvaluateBlockState();
     }
 
     /// <summary>
@@ -144,8 +144,8 @@ public class MultiDeviceBridge : MonoBehaviour
         bool isBlocked = licenseManager.NeedsBlock();
 
         // Only fire on change
-         if (isBlocked == lastBlockedState)
-           return;
+        if (isBlocked == lastBlockedState)
+            return;
 
         lastBlockedState = isBlocked;
 
