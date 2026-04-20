@@ -2396,6 +2396,14 @@ Behavior notes:
 - Updated WebUI state flow to prevent autosave during programmatic UI hydration and removed event-dispatch side effects that triggered save-on-refresh loops.
 - Added stale/disconnected handling in WebUI polling so the page marks itself stale when the app is offline and blocks POST saves until it has re-synced with a live server session.
 
+T99.27 - Fix IAP validation for the webui. The webui Universe field currently incorrectly shows the locked IAP popup. In my runtime test it shows "Unlimited Universes Locked
+Universe values above 1 require the Unlimited Universes in-app purchase." But my test app instance does own the IAP
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 
 T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode
 - [x] Started
