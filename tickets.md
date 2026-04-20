@@ -2448,6 +2448,13 @@ T99.31 - Modify the webui logic to make sure that the info panel texts for the "
 - [ ] Tests Passed
 - [x] Documentation Written
 
+T99.32 - Fix a bug where the Fixture Amount in Fixture mode Standard/Surface is not working properly. Currently any fixture/surface above number one is not rendered correctly, but the master dimmer and RGB channels of the additional surfaces do influence the first surface. The Surfaces should each act as a seperate fixture and listen to their own dmx channels. Each surface should have their dmx start channel calculated from the start channel of the first channel by adding 16 (because each surface should use their own 16 channels)
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
 Behavior notes:
 - Updated WebUI DMX info rendering to preserve multiline formatting by applying `white-space: pre-line` on the mode text element.
 - Added text normalization/parsing in `updateDmxInfoText` to support both real newline characters and escaped newline sequences (`\\n`/`\\r\\n`) from serialized payloads.
