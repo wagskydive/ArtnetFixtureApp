@@ -2431,11 +2431,15 @@ Behavior notes:
 - Updated `WebUiSettingsStore` pixel-grid load/save + sanitization to use `PixelGridService`/`PixelGridSnapshot` so web and in-app UI stay in sync with consistent row/column orientation.
 
 T99.30 - Change the webui so the section "DMX info" shows the same info as the info panel scriptable object. The info that needs to be shown is the Fixture mode info related to the current mode. (Standard, MovingHead or Pixel)
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+
+Behavior notes:
+- Added mode-specific DMX info payload fields to WebUI settings responses and populated them from the same `InfoTextFixtureMode` source used by the in-app info panel.
+- Updated WebUI `DMX Info` section to render the currently selected fixture mode text (Surface, Moving Head, Pixel Mapping) and refresh immediately when mode selection changes.
 
 
 T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode

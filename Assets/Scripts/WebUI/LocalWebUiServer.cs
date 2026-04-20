@@ -60,6 +60,7 @@ public class LocalWebUiServer : MonoBehaviour
 
     [SerializeField] private TextAsset webUiHtml;
     [SerializeField] private WebUiSettingsBridge settingsBridge;
+    [SerializeField] private InfoTextFixtureMode fixtureModeInfoText;
     [SerializeField] private int port = 8080;
 
     private readonly Queue<MainThreadInvocation> _mainThreadQueue = new Queue<MainThreadInvocation>(8);
@@ -273,6 +274,7 @@ public class LocalWebUiServer : MonoBehaviour
         if (httpMethod == "GET")
         {
             WebUiSettingsData loaded = settingsBridge != null ? settingsBridge.GetSettings() : WebUiSettingsStore.Load();
+            ApplyDmxInfoTexts(loaded);
             loaded.serverSessionId = _serverSessionId;
             loaded.advancedNetworkingUnlocked = IsAdvancedNetworkingUnlocked();
             loaded.ipAddress = GetLocalIpv4Address();
@@ -288,6 +290,7 @@ public class LocalWebUiServer : MonoBehaviour
             {
                 Debug.Log("LocalWebUiServer ignored stale WebUI settings POST due to mismatched serverSessionId.");
                 WebUiSettingsData fresh = settingsBridge != null ? settingsBridge.GetSettings() : WebUiSettingsStore.Load();
+                ApplyDmxInfoTexts(fresh);
                 fresh.serverSessionId = _serverSessionId;
                 fresh.advancedNetworkingUnlocked = IsAdvancedNetworkingUnlocked();
                 fresh.ipAddress = GetLocalIpv4Address();
@@ -305,6 +308,7 @@ public class LocalWebUiServer : MonoBehaviour
                 WebUiSettingsStore.Save(settings);
             }
 
+            ApplyDmxInfoTexts(settings);
             settings.serverSessionId = _serverSessionId;
             settings.advancedNetworkingUnlocked = IsAdvancedNetworkingUnlocked();
             settings.ipAddress = GetLocalIpv4Address();
@@ -314,6 +318,32 @@ public class LocalWebUiServer : MonoBehaviour
         }
 
         return "{}";
+    }
+
+    private void ApplyDmxInfoTexts(WebUiSettingsData settings)
+    {
+        if (settings == null)
+        {
+            return;
+        }
+
+        InfoTextFixtureMode infoSource = fixtureModeInfoText;
+        if (infoSource == null)
+        {
+            infoSource = FindAnyObjectByType<InfoTextFixtureMode>();
+        }
+
+        if (infoSource == null)
+        {
+            settings.dmxInfoSurface = string.Empty;
+            settings.dmxInfoMovingHead = string.Empty;
+            settings.dmxInfoPixelMapping = string.Empty;
+            return;
+        }
+
+        settings.dmxInfoSurface = infoSource.GetInfoTextForMode(FixtureMode.Standard);
+        settings.dmxInfoMovingHead = infoSource.GetInfoTextForMode(FixtureMode.MovingHead);
+        settings.dmxInfoPixelMapping = infoSource.GetInfoTextForMode(FixtureMode.PixelMapping);
     }
 
     internal string HandleLoginApiRequest(string httpMethod, string requestBody)
