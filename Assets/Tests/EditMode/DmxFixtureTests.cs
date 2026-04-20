@@ -17,7 +17,7 @@ public class DmxFixtureTests
         var snapshot = new DmxSettingsSnapshot(1, 1, false, SAcnParameters.Default());
         fixture.ApplyDmxSettings(snapshot);
 
-        var buffer = new DmxBuffer();
+        var buffer = new byte[512];
         buffer[16] = 200; // Absolute channel 17, fixture index 1 with 16 channels per fixture.
         var frame = new DmxFrame(buffer);
 

@@ -85,11 +85,12 @@ public class CornerPinDmxWarp : BaseRawDmxConsumer
 
         for (int corner = 0; corner < 4; corner++)
         {
-            int xChannel = Mathf.Clamp(DmxSettingsService.Instance.CurrentDmxSettings.StartChannel + cornerStartChannel - 1 + (corner * 2), 1, 512);
+
+            int xChannel = Mathf.Clamp(cornerStartChannel + (corner * 2), 1, 512);
             int yChannel = Mathf.Clamp(xChannel + 1, 1, 512);
 
-            float xLerp = frame.Buffer[xChannel - 1] / 255f;
-            float yLerp = frame.Buffer[yChannel - 1] / 255f;
+            float xLerp = _fixture.GetChannelValue(frame, xChannel) / 255f;
+            float yLerp = _fixture.GetChannelValue(frame, yChannel) / 255f;
 
             _warpedCorners[corner] = new Vector3(
                 Mathf.Lerp(_minX, _maxX, xLerp),
