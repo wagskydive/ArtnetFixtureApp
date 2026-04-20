@@ -2459,7 +2459,7 @@ Behavior notes:
 - Fixed `DmxFixture` to resolve `StartChannelOverride` lazily at DMX-read time so fixtures still honor per-fixture channel offsets when the override component is attached after `Awake`.
 - Added EditMode regression test coverage (`DmxFixtureTests.GetChannelValue_UsesStartChannelOverrideAddedAfterAwake`) that reproduces the runtime add-order and verifies fixture index 2 reads from channel offset +16.
 
-T99.33 - Next run: execute Unity EditMode suite on a licensed runner to validate T99.32 fixture-offset behavior in-engine.
+T99.33 - Find and fix a bug where in artnet mode, the Network warning banner shows sometimes briefly and when the network mode is changed from sACN to artnet , the visuals only show when dmx data is changed. It looks like there is something wrong with the network data being received when it is not changed. Also maybe a grace period needs to be used or lengthened
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
