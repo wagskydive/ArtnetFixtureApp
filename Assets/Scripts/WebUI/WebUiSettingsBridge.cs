@@ -6,6 +6,7 @@ public class WebUiSettingsBridge : MonoBehaviour
     [SerializeField] private UI_FixtureModeSelector fixtureModeSelector;
     [SerializeField] private CapabilityDefinition universeLimitCapability;
 
+    private const string UniverseLimitCapabilityId = "capability.universe.max";
 
     public WebUiSettingsData GetSettings()
     {
@@ -49,13 +50,33 @@ public class WebUiSettingsBridge : MonoBehaviour
 
     private static int GetMaxSelectableUniverse(CapabilityDefinition capabilityDefinition)
     {
-        if (CapabilityService.Instance == null || capabilityDefinition == null || string.IsNullOrWhiteSpace(capabilityDefinition.Id))
+        if (CapabilityService.Instance == null)
         {
             return 1;
         }
 
-        int maxUniverse = CapabilityService.Instance.ResolveNumeric(capabilityDefinition.Id, 1);
-        return Mathf.Clamp(maxUniverse, 1, 63999);
+        CapabilityDefinition resolvedDefinition = ResolveUniverseLimitCapability(capabilityDefinition);
+        if (resolvedDefinition == null || CapabilityService.Instance.Entitlements == null || !resolvedDefinition.IsUnlockedBy(CapabilityService.Instance.Entitlements))
+        {
+            return 1;
+        }
+
+        return Mathf.Clamp(resolvedDefinition.UnlockedNumericValue, 1, 63999);
+    }
+
+    private static CapabilityDefinition ResolveUniverseLimitCapability(CapabilityDefinition configuredCapabilityDefinition)
+    {
+        if (configuredCapabilityDefinition != null && !string.IsNullOrWhiteSpace(configuredCapabilityDefinition.Id))
+        {
+            return configuredCapabilityDefinition;
+        }
+
+        if (CapabilityService.Instance.TryGetCapability(UniverseLimitCapabilityId, out CapabilityDefinition capabilityDefinition))
+        {
+            return capabilityDefinition;
+        }
+
+        return null;
     }
 
     private static bool IsAdvancedNetworkingUnlocked()

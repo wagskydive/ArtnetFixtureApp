@@ -2398,18 +2398,25 @@ Behavior notes:
 
 T99.27 - Fix IAP validation for the webui. The webui Universe field currently incorrectly shows the locked IAP popup. In my runtime test it shows "Unlimited Universes Locked
 Universe values above 1 require the Unlimited Universes in-app purchase." But my test app instance does own the IAP
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+
+Behavior notes:
+- Fixed WebUI universe entitlement resolution so max-universe access now comes from the actual unlocked `capability.universe.max` definition (with fallback lookup by capability ID), instead of relying on numeric capability resolution that returned locked values for boolean-type definitions.
+- WebUI max-universe now correctly reflects owned unlimited-universe/advanced-network products, preventing false locked popups for entitled users.
   
 T99.28 - Fix the pixel rows and columns fields up and down buttons in the webui. Currently when the value is 8 and the up button is pressed it changes back to 8, but it should change to 16, so it should increment by 8 and not find the nearest valid amount.
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+
+Behavior notes:
+- Updated WebUI pixel-grid row/column numeric inputs to use `step=8`, so browser spinner up/down controls move through the intended 8/16/24/32 values instead of transient step-1 values that sanitized back to 8.
 
 
 T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode
