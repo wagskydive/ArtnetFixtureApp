@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Globalization;
 using UnityEngine;
 
 public class LocalWebUiServer : MonoBehaviour
@@ -68,12 +69,14 @@ public class LocalWebUiServer : MonoBehaviour
     private Thread _serverThread;
     private volatile bool _isRunning;
     private byte[] _cachedHtmlBytes;
+    private string _serverSessionId;
 
     public int Port => port;
 
     private void Awake()
     {
         WebUiPasswordProtection.MigrateLegacyPasswordIfNeeded();
+        _serverSessionId = DateTime.UtcNow.ToString("yyyyMMddHHmmssfff", CultureInfo.InvariantCulture);
         CacheHtmlPayload();
     }
 
@@ -270,6 +273,7 @@ public class LocalWebUiServer : MonoBehaviour
         if (httpMethod == "GET")
         {
             WebUiSettingsData loaded = settingsBridge != null ? settingsBridge.GetSettings() : WebUiSettingsStore.Load();
+            loaded.serverSessionId = _serverSessionId;
             loaded.advancedNetworkingUnlocked = IsAdvancedNetworkingUnlocked();
             loaded.ipAddress = GetLocalIpv4Address();
             loaded.passwordConfigured = WebUiPasswordProtection.HasConfiguredPassword();
@@ -280,6 +284,18 @@ public class LocalWebUiServer : MonoBehaviour
         if (httpMethod == "POST")
         {
             WebUiSettingsData request = WebUiSettingsStore.FromJson(requestBody);
+            if (!string.Equals(request.serverSessionId, _serverSessionId, StringComparison.Ordinal))
+            {
+                Debug.Log("LocalWebUiServer ignored stale WebUI settings POST due to mismatched serverSessionId.");
+                WebUiSettingsData fresh = settingsBridge != null ? settingsBridge.GetSettings() : WebUiSettingsStore.Load();
+                fresh.serverSessionId = _serverSessionId;
+                fresh.advancedNetworkingUnlocked = IsAdvancedNetworkingUnlocked();
+                fresh.ipAddress = GetLocalIpv4Address();
+                fresh.passwordConfigured = WebUiPasswordProtection.HasConfiguredPassword();
+                fresh.passwordEnabled = WebUiPasswordProtection.IsEnabled();
+                return WebUiSettingsStore.ToJson(fresh);
+            }
+
             WebUiSettingsData settings = settingsBridge != null
                 ? settingsBridge.SaveSettingsFromJson(WebUiSettingsStore.ToJson(request))
                 : request;
@@ -289,6 +305,7 @@ public class LocalWebUiServer : MonoBehaviour
                 WebUiSettingsStore.Save(settings);
             }
 
+            settings.serverSessionId = _serverSessionId;
             settings.advancedNetworkingUnlocked = IsAdvancedNetworkingUnlocked();
             settings.ipAddress = GetLocalIpv4Address();
             settings.passwordConfigured = WebUiPasswordProtection.HasConfiguredPassword();

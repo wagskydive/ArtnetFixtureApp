@@ -2385,11 +2385,16 @@ Behavior notes:
 
 
 T99.26 - The webui seems to overwrite the current DMX settings when it is refreshed. Make sure that the webui doesn't do that. Also when the app is stopped i need the webui to know its stale and either refresh itself or in any other way it needs not to remember the last state of the webui, so it can't resend old settings when the app is started again. In other words, the webui should only display the actual state of the app and update when the app stops or when the app changed settings from within the in-app ui
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+
+Behavior notes:
+- Added a runtime `serverSessionId` to `/api/settings` payloads and made `LocalWebUiServer` reject stale POSTs whose session id does not match the active app instance.
+- Updated WebUI state flow to prevent autosave during programmatic UI hydration and removed event-dispatch side effects that triggered save-on-refresh loops.
+- Added stale/disconnected handling in WebUI polling so the page marks itself stale when the app is offline and blocks POST saves until it has re-synced with a live server session.
 
 
 T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode
