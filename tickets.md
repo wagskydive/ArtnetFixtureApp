@@ -2441,7 +2441,7 @@ Behavior notes:
 - Added mode-specific DMX info payload fields to WebUI settings responses and populated them from the same `InfoTextFixtureMode` source used by the in-app info panel.
 - Updated WebUI `DMX Info` section to render the currently selected fixture mode text (Surface, Moving Head, Pixel Mapping) and refresh immediately when mode selection changes.
   
-T99.31 - Modify the webui logic to make sure that the info panel texts for the "DMX info" section gets parsed correctly so it includes the line endings in the original text. Currently line endings are not in the webui.
+T99.31 - Modify the webui logic to make sure that the info panel texts for the "DMX info" section gets parsed correctly so it includes the line endings in the original text. Currently line endings are not in the webui "DMX info" section.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written
