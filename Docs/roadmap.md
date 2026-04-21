@@ -315,3 +315,5 @@ _Progress note: WebUI settings synchronization now uses a runtime `serverSession
 _Progress note: Pixel-grid sizing now uses a shared `PixelGridSnapshot` + `PixelGridService` singleton as the single source of truth across in-app `UI_FixtureModeSelector` and WebUI settings load/save flows, fixing reversed/stale row/column updates._
 _Progress note: WebUI `DMX Info` now mirrors the same mode-specific text source as the in-app fixture info panel by receiving Surface/Moving Head/Pixel Mapping descriptions from `InfoTextFixtureMode` through `/api/settings` and rendering the active mode text in-browser._
 _Progress note: WebUI `DMX Info` mode text now preserves original line endings by parsing escaped newline sequences and rendering with `white-space: pre-line`, so browser formatting matches in-app info panel text layout._
+
+_Progress note: Art-Net heartbeat tick exchange is now thread-safe via `Interlocked` reads/writes in `NetworkDmxPacketsHeartbeat`, and `ArtNetReceiver` thread-state flags are now `volatile` so stale-frame continuity + warning-banner state remain stable across receive/update threads._
