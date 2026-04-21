@@ -29,14 +29,14 @@ public class ArtNetReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsu
 
     private UdpClient _udpClient;
     private Thread _receiveThread;
-    private bool _running = false;
+    private volatile bool _running = false;
     [SerializeField] private float staleFrameRepublishSeconds = 0.25f;
 
     private byte[] _packetBuffer = new byte[1024]; // reused buffer
     private readonly byte[] _lastReceivedFrame = new byte[512];
     private readonly byte[] _republishFrame = new byte[512];
     private readonly object _frameCacheLock = new object();
-    private bool _hasReceivedFrame;
+    private volatile bool _hasReceivedFrame;
     private float _nextStaleRepublishTime;
 
     private DmxSettingsSnapshot _settings;

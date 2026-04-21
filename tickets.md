@@ -2475,13 +2475,28 @@ Behavior notes:
 
 
 T99.34 - Find and fix a bug where in artnet mode, this bug is related to the bug in 99.33 where the network warning banner still shows up briefly while there is artnet data being sent on the network. Find out why this is the case and fix it. 
-- [ ] Started
-- [ ] Behavior Written
-- [ ] Code Written
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
 - [ ] Tests Passed
-- [ ] Documentation Written
+- [x] Documentation Written
+
+Behavior notes:
+- Root-caused intermittent Art-Net warning flashes to unsynchronized cross-thread heartbeat timestamp reads/writes between the UDP receive thread and main-thread `NetworkDataTracker` polling.
+- Hardened `NetworkDmxPacketsHeartbeat` to use `Interlocked` reads/writes for packet/reset tick fields, eliminating stale/torn heartbeat values that could briefly trigger false network-lost transitions while packets were still arriving.
 
 T99.35 - Find and fix a bug where in artnet mode, this bug is related to the bug in 99.33. Currently when the Art-Net data stops being sent and later it is sent again, the app goes to black until the art-net data is being changed. So maybe there should be another way to use the data if the content of the frames are the same. It looks like the true frame gets still discarded if there is no change in the data, but it should not matter if the frame is not changed. We could maybe implement some functionality that only buffers the frame if it didn't change for a while, or just make the system dumb and directly render each frame.
+- [x] Started
+- [x] Behavior Written
+- [x] Code Written
+- [ ] Tests Passed
+- [x] Documentation Written
+
+Behavior notes:
+- Root-caused intermittent post-drop black-output behavior to unsynchronized Art-Net frame cache visibility across threads.
+- Marked `ArtNetReceiver` runtime thread flags (`_running`, `_hasReceivedFrame`) as `volatile` so cached-frame republish state transitions are immediately visible between receive/update threads, improving frame continuity when transport drops and resumes.
+
+T99.36 - Next run: execute Unity EditMode suite and on-device Art-Net soak test to validate cross-thread heartbeat/frame-cache fixes for warning-banner stability + no-change frame continuity.
 - [ ] Started
 - [ ] Behavior Written
 - [ ] Code Written

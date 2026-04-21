@@ -1,11 +1,12 @@
 using System;
+using System.Threading;
 
 public static class NetworkDmxPacketsHeartbeat
 {
     private static long _lastPacketTicks;
     private static long _lastResetTicks;
-    public static long LastPacketTicks => _lastPacketTicks;
-    public static long LastResetTicks => _lastResetTicks;
+    public static long LastPacketTicks => Interlocked.Read(ref _lastPacketTicks);
+    public static long LastResetTicks => Interlocked.Read(ref _lastResetTicks);
 
     static NetworkDmxPacketsHeartbeat()
     {
@@ -16,13 +17,13 @@ public static class NetworkDmxPacketsHeartbeat
     public static void Initialize()
     {
         long nowTicks = DateTime.UtcNow.Ticks;
-        _lastPacketTicks = nowTicks;
-        _lastResetTicks = nowTicks;
+        Interlocked.Exchange(ref _lastPacketTicks, nowTicks);
+        Interlocked.Exchange(ref _lastResetTicks, nowTicks);
     }
 
     public static void NotifyPacketReceived()
     {
-        _lastPacketTicks = DateTime.UtcNow.Ticks;
+        Interlocked.Exchange(ref _lastPacketTicks, DateTime.UtcNow.Ticks);
     }
 
 }
