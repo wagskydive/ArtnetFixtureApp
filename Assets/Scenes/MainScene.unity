@@ -12710,8 +12710,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5967039d11c647747aafa1a762c64cb6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ArtnetFixture.Core::NetworkDataTracker
-  timeoutSeconds: 2
+  timeoutSeconds: 5
   restoreDelaySeconds: 0.2
+  lostDebounceSeconds: 0.4
+  modeSwitchGraceSeconds: 0.75
 --- !u!1 &1254057261
 GameObject:
   m_ObjectHideFlags: 0

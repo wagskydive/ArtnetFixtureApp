@@ -349,9 +349,7 @@
             </div>
 
             <div class="section">
-                <a href="https://dilarium.es/dmx-projector/feedback" target="_blank" rel="noopener noreferrer">
-                    <button class="secondary" type="button" id="feedbackButton" tabindex="8">Feedback</button>
-                </a>
+                <button class="secondary" type="button" id="feedbackButton" tabindex="8">Feedback</button>
                 <p id="settingsStatus" class="status" aria-live="polite"></p>
             </div>
 
@@ -1145,8 +1143,104 @@
         networkDebugInterval = setInterval(() => {
             refreshNetworkDebug()
         }, 1000)
+        // =========================
+        // FEEDBACK MODAL LOGIC
+        // =========================
 
+        document.addEventListener("DOMContentLoaded", () => {
+            const feedbackModal = document.getElementById("feedbackModal");
+            const feedbackButton = document.getElementById("feedbackButton");
+            const fbCancel = document.getElementById("fbCancel");
+            const fbSend = document.getElementById("fbSend");
+            const fbMsg = document.getElementById("fbMsg");
+
+            feedbackButton.onclick = () => {
+                feedbackModal.classList.remove("hidden");
+            };
+
+            fbCancel.onclick = () => {
+                feedbackModal.classList.add("hidden");
+                fbMsg.textContent = "";
+            };
+
+            fbSend.onclick = sendFeedback;
+        });
+
+        async function sendFeedback() {
+
+            const user = document.getElementById("fbUser").value.trim();
+            const rating = document.getElementById("fbRating").value;
+            const feedback = document.getElementById("fbText").value.trim();
+
+            if (!feedback) {
+                fbMsg.textContent = "Feedback required";
+                return;
+            }
+
+            fbMsg.textContent = "Sending...";
+
+            try {
+                const res = await fetch("https://dilarium.es/api/feedback", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        user: user || "Anonymous",
+                        rating: rating || null,
+                        feedback,
+
+                        device: navigator.userAgent,
+                        appVersion: "1.0.0",
+                        bundle: "android-tv"
+                    })
+                });
+
+                const text = await res.text();
+
+                if (!res.ok) {
+                    fbMsg.textContent = text;
+                    return;
+                }
+
+                fbMsg.textContent = "Thanks! Feedback sent.";
+                document.getElementById("fbText").value = "";
+
+            } catch (e) {
+                fbMsg.textContent = "Network error";
+            }
+        }
+
+        fbSend.onclick = sendFeedback;
     </script>
+    <div id="feedbackModal" class="modal-backdrop hidden">
+        <div class="modal-card">
+            <h2>Send Feedback</h2>
+
+            <label>User name</label>
+            <input type="text" id="fbUser" placeholder="Your name (optional)">
+
+            <label>Rating</label>
+            <select id="fbRating">
+                <option value="">Optional</option>
+                <option value="5">⭐⭐⭐⭐⭐</option>
+                <option value="4">⭐⭐⭐⭐</option>
+                <option value="3">⭐⭐⭐</option>
+                <option value="2">⭐⭐</option>
+                <option value="1">⭐</option>
+            </select>
+
+            <label>Feedback</label>
+            <textarea id="fbText" placeholder="What worked? What didn’t?"></textarea>
+
+            <div class="modal-actions">
+                <button id="fbCancel">Cancel</button>
+                <button id="fbSend">Send</button>
+            </div>
+
+            <p id="fbMsg" class="status"></p>
+        </div>
+    </div>
 
 </body>
 

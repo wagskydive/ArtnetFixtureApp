@@ -120,6 +120,9 @@ public class ArtNetReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsu
         {
             return;
         }
+        _hasReceivedFrame = false; // ❌ BAD currently missing
+                                   // or even better:
+        NetworkDmxPacketsHeartbeat.Initialize();
 
         _udpClient = new UdpClient(6454);
         _running = true;
@@ -179,13 +182,26 @@ public class ArtNetReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsu
 
                 if (IsArtDmxPacket(data))
                 {
+
+
                     int universe = data[14] | (data[15] << 8);
                     if (universe != _settings.Universe0Based) continue;
 
-                    int length = (data[16] << 8) | data[17];
-                    if (length > 512) length = 512;
+                    int declaredLength = (data[16] << 8) | data[17];
 
+                    // Actual available payload in packet
+                    int availableLength = data.Length - 18;
+
+                    // Use the safe minimum
+                    int length = Math.Min(Math.Min(declaredLength, availableLength), 512);
+
+                    if (length <= 0)
+                        return;
+                    UnityEngine.Debug.Log($"Packet size: {data.Length}, Declared DMX length: {declaredLength}");
+                    Array.Clear(_packetBuffer, 0, 512); // 🔥 critical fix
                     System.Buffer.BlockCopy(data, 18, _packetBuffer, 0, length);
+
+
                     Buffer.WriteFrame(_packetBuffer, length);
                     NetworkDmxPacketsHeartbeat.NotifyPacketReceived();
                     CacheLastReceivedFrame(_packetBuffer, length);

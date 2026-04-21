@@ -15,6 +15,7 @@ public class DmxBuffer
         lock (_lock)
         {
             int copyLength = Math.Min(Math.Min(length, source.Length), 512);
+            Array.Clear(_backBuffer, 0, 512); // 🔥 add this
             Buffer.BlockCopy(source, 0, _backBuffer, 0, copyLength);
             _hasNewFrame = true;
         }
