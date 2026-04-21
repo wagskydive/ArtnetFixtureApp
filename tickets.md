@@ -2473,6 +2473,22 @@ Behavior notes:
 - Added Art-Net stale-frame republish fallback in `ArtNetReceiver.Update` that periodically re-emits the last cached DMX frame when no new packet arrives, keeping event-driven DMX consumers synchronized even when senders suppress unchanged frames.
 - Added EditMode regression coverage (`ArtNetReceiverTests.Update_RepublishesLastFrameWhenNoNewPacketArrives`) for the stale-frame republish behavior.
 
+
+T99.34 - Find and fix a bug where in artnet mode, this bug is related to the bug in 99.33 where the network warning banner still shows up briefly while there is artnet data being sent on the network. Find out why this is the case and fix it. 
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+T99.35 - Find and fix a bug where in artnet mode, this bug is related to the bug in 99.33. Currently when the Art-Net data stops being sent and later it is sent again, the app goes to black until the art-net data is being changed. So maybe there should be another way to use the data if the content of the frames are the same. It looks like the true frame gets still discarded if there is no change in the data, but it should not matter if the frame is not changed. We could maybe implement some functionality that only buffers the frame if it didn't change for a while, or just make the system dumb and directly render each frame.
+- [ ] Started
+- [ ] Behavior Written
+- [ ] Code Written
+- [ ] Tests Passed
+- [ ] Documentation Written
+
+
 T11.1 - Modify the UI_FixtureModeSelector.cs to not work with a dropdown object but to simply have public function to increment and decrement the current mode and cycle trough the modes. The ui will have simple + and - buttons connected to those functions and a text object will display the current mode
 - [x] Started
 - [x] Behavior Written
