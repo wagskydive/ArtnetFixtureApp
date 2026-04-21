@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using MobileVersionCode;
 
 [System.Serializable]
 public class WebUiSettingsData
@@ -29,6 +30,9 @@ public class WebUiSettingsData
     public string dmxInfoSurface = string.Empty;
     public string dmxInfoMovingHead = string.Empty;
     public string dmxInfoPixelMapping = string.Empty;
+    public string deviceModel = string.Empty;
+    public string deviceUniqueIdentifier = string.Empty;
+    public string appVersion = string.Empty;
 }
 
 public static class WebUiSettingsStore
@@ -37,6 +41,12 @@ public static class WebUiSettingsStore
     {
         int fixtureMode = Mathf.Clamp(SaveLoadSettings.LoadInt(SaveLoadSettings.FixtureModeKey, 0), 0, 2);
         DmxSettingsSnapshot dmxSettingsSnapshot = DmxSettingsService.Instance.CurrentDmxSettings;
+        string versionString = Application.version + " From Editor";
+#if UNITY_ANDROID && !UNITY_EDITOR
+
+      versionString = VersionCode.GetVersionCode().ToString();
+
+#endif
         return new WebUiSettingsData
         {
             serverSessionId = string.Empty,
@@ -59,7 +69,10 @@ public static class WebUiSettingsStore
             additionalUniverses = new List<int>(dmxSettingsSnapshot.CurrentSAcnParameters.MulticastUniverseSubscriptions),
             showNetworkDebug = dmxSettingsSnapshot.CurrentSAcnParameters.DebugPanelVisible,
             passwordConfigured = WebUiPasswordProtection.HasConfiguredPassword(),
-            passwordEnabled = WebUiPasswordProtection.IsEnabled()
+            passwordEnabled = WebUiPasswordProtection.IsEnabled(),
+            deviceModel = SystemInfo.deviceModel,
+            deviceUniqueIdentifier = SystemInfo.deviceUniqueIdentifier,
+            appVersion = versionString
         };
     }
 
@@ -69,6 +82,12 @@ public static class WebUiSettingsStore
         {
             return Load();
         }
+        string versionString = Application.version + " From Editor";
+#if UNITY_ANDROID && !UNITY_EDITOR
+
+      versionString = VersionCode.GetVersionCode().ToString();
+
+#endif
 
         return new WebUiSettingsData
         {
@@ -96,7 +115,10 @@ public static class WebUiSettingsStore
             passwordEnabled = raw.passwordEnabled,
             dmxInfoSurface = raw.dmxInfoSurface ?? string.Empty,
             dmxInfoMovingHead = raw.dmxInfoMovingHead ?? string.Empty,
-            dmxInfoPixelMapping = raw.dmxInfoPixelMapping ?? string.Empty
+            dmxInfoPixelMapping = raw.dmxInfoPixelMapping ?? string.Empty,
+            deviceModel = SystemInfo.deviceModel,
+            deviceUniqueIdentifier = SystemInfo.deviceUniqueIdentifier,
+            appVersion = versionString
         };
     }
 
@@ -113,7 +135,7 @@ public static class WebUiSettingsStore
         //SaveLoadSettings.SaveInt(SaveLoadSettings.DmxUniverseKey, data.dmxUniverse);
         //SaveLoadSettings.SaveInt(SaveLoadSettings.DmxChannelKey, data.startChannel);
         //SaveLoadSettings.SaveInt(SaveLoadSettings.FixtureCountKey, data.fixtureAmount);
-        SaveLoadSettings.SaveFixtureCount( data.fixtureAmount);
+        SaveLoadSettings.SaveFixtureCount(data.fixtureAmount);
 
         //SaveLoadSettings.SaveInt(SaveLoadSettings.PixelColumnsKey, data.gridX);
 
@@ -130,10 +152,10 @@ public static class WebUiSettingsStore
         //SaveLoadSettings.SaveString(SaveLoadSettings.SAcnMulticastUniversesKey, data.additionalUniverses);
         //SaveLoadSettings.SaveInt(SaveLoadSettings.SAcnDebugVisibleKey, data.showNetworkDebug ? 1 : 0);
 
-        SAcnParameters sAcnParameters = new SAcnParameters(data.useMulticast,data.unicastBindAddress,data.listenPort,data.timeoutSeconds,data.useLtpMerge,data.additionalUniverses,data.showNetworkDebug);
+        SAcnParameters sAcnParameters = new SAcnParameters(data.useMulticast, data.unicastBindAddress, data.listenPort, data.timeoutSeconds, data.useLtpMerge, data.additionalUniverses, data.showNetworkDebug);
 
 
-        DmxSettingsSnapshot dmxSettingsSnapshot = new DmxSettingsSnapshot(data.dmxUniverse,data.startChannel,data.isSAcnMode,sAcnParameters);
+        DmxSettingsSnapshot dmxSettingsSnapshot = new DmxSettingsSnapshot(data.dmxUniverse, data.startChannel, data.isSAcnMode, sAcnParameters);
         SaveLoadSettings.SaveDmxSettings(dmxSettingsSnapshot);
     }
 
@@ -199,11 +221,11 @@ public static class WebUiSettingsStore
 
     private static FixtureMode FixtureModeFromString(string modeString)
     {
-        if(modeString == "moving")
+        if (modeString == "moving")
         {
             return FixtureMode.MovingHead;
         }
-        if(modeString == "pixel")
+        if (modeString == "pixel")
         {
             return FixtureMode.PixelMapping;
         }

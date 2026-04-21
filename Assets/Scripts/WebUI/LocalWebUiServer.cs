@@ -221,6 +221,16 @@ public class LocalWebUiServer : MonoBehaviour
             WriteJson(context.Response, json);
             return;
         }
+        if (path == "/api/open-store")
+        {
+            if (context.Request.HttpMethod != "POST")
+            {
+                return;
+            }
+
+            UpdateChecker.OpenStorePage();
+            return;
+        }
 
         if (path == "/api/network-debug")
         {
@@ -253,6 +263,7 @@ public class LocalWebUiServer : MonoBehaviour
             HandleRemoveRequest(context.Request, context.Response);
             return;
         }
+
 
         context.Response.StatusCode = 404;
         WriteText(context.Response, "Not found", "text/plain");

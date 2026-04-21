@@ -197,7 +197,7 @@ public class ArtNetReceiver : MonoBehaviour, INetworkReceiver, IDmxSettingsConsu
 
                     if (length <= 0)
                         return;
-                    UnityEngine.Debug.Log($"Packet size: {data.Length}, Declared DMX length: {declaredLength}");
+                    //UnityEngine.Debug.Log($"Packet size: {data.Length}, Declared DMX length: {declaredLength}");
                     Array.Clear(_packetBuffer, 0, 512); // 🔥 critical fix
                     System.Buffer.BlockCopy(data, 18, _packetBuffer, 0, length);
 

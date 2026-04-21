@@ -249,7 +249,7 @@ public class MultiDeviceLicenseManager : MonoBehaviour
     public bool NeedsBlock()
     {
         RecalculateLeader();
-        Debug.Log($"[MultiDevice] NeedsBlock? devices={ActiveDeviceCount} leader={currentLeaderId} local={localDeviceId}");
+        //Debug.Log($"[MultiDevice] NeedsBlock? devices={ActiveDeviceCount} leader={currentLeaderId} local={localDeviceId}");
         if (sessionUnlocked)
             return false;
 

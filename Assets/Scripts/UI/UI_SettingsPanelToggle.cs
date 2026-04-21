@@ -1,10 +1,13 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System;
 
 public class UI_SettingsPanelToggle : MonoBehaviour
 {
     [SerializeField] private GameObject targetObject;
     [SerializeField] private InputActionReference showMenuAction;
+
+    public static event Action OnMenuShown;
 
     private void Start()
     {
@@ -42,6 +45,7 @@ public class UI_SettingsPanelToggle : MonoBehaviour
     public void ShowMenu()
     {
         SetVisibility(true);
+
     }
 
     public void HideMenu()
@@ -57,6 +61,10 @@ public class UI_SettingsPanelToggle : MonoBehaviour
         }
 
         targetObject.SetActive(visible);
+        if(visible)
+        {
+            OnMenuShown?.Invoke();
+        }
     }
 
     private static bool WasFallbackShowPressed()
