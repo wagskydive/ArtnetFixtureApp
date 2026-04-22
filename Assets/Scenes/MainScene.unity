@@ -13542,8 +13542,8 @@ MonoBehaviour:
   revocationPopup: {fileID: 952136237}
   revocationTitleText: {fileID: 2039765822}
   revocationMessageText: {fileID: 1206279915}
-  debugValidation: 1
-  allIsValidated: 1
+  debugValidation: 0
+  allIsValidated: 0
 --- !u!1 &1306461971
 GameObject:
   m_ObjectHideFlags: 0

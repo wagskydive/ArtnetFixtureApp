@@ -29,21 +29,7 @@ MonoBehaviour:
     network to control the fixture.'
   fixtureName: The name of this fixture as it appears on the network and in the Web
     UI.
-  ipAddress: 'This fixture receives DMX data over the network.
-
-
-
-    Supported protocols
-    may include Art-Net and sACN,
-
-    depending on the firmware version.
-
-
-
-    The
-    fixture listens for DMX data on the selected
-
-    DMX Universe and Start Channel.'
+  ipAddress: Advanced Network settings.
   webUi: 'You can access the Web UI from another device on the same network to configure
     fixture settings remotely.
 
@@ -251,31 +237,31 @@ MonoBehaviour:
   transportMode: 'sACN (ANSI E1.31) uses UDP as its transport protocol and operates
     in two primary modes:
 
-    
 
-    Multicast (Default): The most common mode,
-    where data is sent to a multicast IP address (e.g., 239.255.0.1) on UDP port
-    5568.  This allows multiple receivers to subscribe to a specific universe efficiently,
+
+    Multicast (Default): The most common mode, where
+    data is sent to a multicast IP address (e.g., 239.255.0.1) on UDP port 5568. 
+    This allows multiple receivers to subscribe to a specific universe efficiently,
     reducing network load through IGMP snooping.
 
-    
 
-    Unicast: Data is sent
-    directly to a specific device''s IP address. This mode also uses UDP, with port
-    5568 as the default, though many implementations allow a configurable port. '
+
+    Unicast: Data is sent directly
+    to a specific device''s IP address. This mode also uses UDP, with port 5568 as
+    the default, though many implementations allow a configurable port. '
   listenPort: 'The listen port for sACN (ANSI E1.31) depends on the transport mode:
 
-    
+
 
     Multicast
     Mode: Receivers must listen on UDP port 5568.  This port is fixed and cannot
     be changed for multicast transmission.
 
-    
 
-    Unicast Mode: The listen port
-    is configurable.  While port 5568 is often used by default, the receiver can
-    be set to listen on any available UDP port as specified by the sender and receiver
+
+    Unicast Mode: The listen port is
+    configurable.  While port 5568 is often used by default, the receiver can be
+    set to listen on any available UDP port as specified by the sender and receiver
     configuration'
   timeoutSeconds: 'The standard timeout for sACN (ANSI E1.31) is 2.5 seconds.  If
     a receiver does not receive any valid sACN packets for a specific universe within
