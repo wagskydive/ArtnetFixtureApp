@@ -14,6 +14,12 @@ public class MovingHeadBeamController : BaseDmxMaterialConsumer
     private float _nextGoboReloadTime;
     private bool _hasLoadedCustomGobos;
 
+
+
+
+
+
+
     protected override bool IsActiveMode()
     {
         return DmxModeManager.Instance != null &&
@@ -162,6 +168,7 @@ public class MovingHeadBeamController : BaseDmxMaterialConsumer
 
         var snapshot = MovingHeadDmxPersonality.Parse(_fixture, frame, Time.time);
 
+
         _material.SetColor("_Color", snapshot.Color);
         _material.SetFloat("_Intensity", snapshot.MasterDimmer);
 
@@ -170,8 +177,8 @@ public class MovingHeadBeamController : BaseDmxMaterialConsumer
         _material.SetFloat("_Size", snapshot.PatternSize);
         _material.SetFloat("_StrobeGate", snapshot.StrobeGate);
 
-        _material.SetFloat("_BeamOffsetX", Mathf.Lerp(-1f, 1f, snapshot.PanNormalized));
-        _material.SetFloat("_BeamOffsetY", Mathf.Lerp(-1f, 1f, snapshot.TiltNormalized));
+        //_material.SetFloat("_BeamOffsetX", Mathf.Lerp(-1f, 1f, snapshot.PanNormalized));
+        //_material.SetFloat("_BeamOffsetY", Mathf.Lerp(-1f, 1f, snapshot.TiltNormalized));
         _material.SetFloat("_BeamSoftness", snapshot.BeamSoftness);
         _material.SetFloat("_BeamRadius", snapshot.IrisScale);
         _material.SetFloat("_BeamRotation", snapshot.RotateRadians);
